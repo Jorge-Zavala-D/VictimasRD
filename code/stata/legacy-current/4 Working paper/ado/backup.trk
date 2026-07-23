@@ -1,0 +1,438 @@
+* 00000010
+*! version 1.0.0
+* Do not erase or edit this file
+* It is used by Stata to track the ado and help
+* files you have installed.
+
+S http://fmwww.bc.edu/repec/bocode/r
+N rdrobust.pkg
+D 17 Nov 2025
+U 1
+d 'RDROBUST': module to provide robust data-driven inference in the regression-discontinuity design
+d 
+d   rdrobust implements local polynomial Regression Discontinuity
+d (RD) point estimators with     robust bias-corrected
+d confidence intervals and inference procedures developed in
+d Calonico,    Cattaneo and Titiunik (Econometrica, 2014),
+d Calonico, Cattaneo and Farrell (Stata Journal, 2017), and
+d Calonico,    Cattaneo, Farrell and Titiunik (JASA, 2018).  It
+d also computes alternative estimation and   inference
+d procedures available in the literature.  Companion commands
+d are: rdbwselect for data-driven bandwidth selection, and rdplot
+d for      data-driven RD plots (see Calonico, Cattaneo and
+d Titiunik (JASA, 2015) for details).
+d 
+d KW: regression discontinuity
+d KW: robust inference
+d 
+d Requires: Stata version 13.1
+d 
+d Distribution-Date: 20220930
+d 
+d Author: Sebastian Calonico, Department of Economics, University of Miami
+d Support: email scalonico@@bus.miami.edu
+d 
+d Author: Matias D. Cattaneo, Department of Operations Research and Financial Engineering, Princeton University
+d Support: email cattaneo@@princeton.edu
+d 
+d Author:  Max H. Farrell, Booth School of Business, University of Chicago
+d Support: email max.farrell@@chicagobooth.edu
+d 
+d Author: Rocio Titiunik, Department of Political Science, University of Michigan
+d Support: email  titiunik@@umich.edu
+d 
+f r\rdrobust.ado
+f r\rdrobust.sthlp
+f r\rdbwselect.ado
+f r\rdbwselect.sthlp
+f r\rdplot.ado
+f r\rdplot.sthlp
+f r\rdbwselect_2014.ado
+f r\rdbwselect_2014.sthlp
+f r\rdbwselect_2014_kconst.ado
+f r\rdrobust_bw.mo
+f r\rdrobust_collapse.mo
+f r\rdrobust_groupid.mo
+f r\rdrobust_kweight.mo
+f r\rdrobust_median.mo
+f r\rdrobust_res.mo
+f r\rdrobust_vce.mo
+e
+S http://fmwww.bc.edu/repec/bocode/c
+N colrspace.pkg
+D 17 Nov 2025
+U 2
+d 'COLRSPACE': module providing a class-based color management system in Mata
+d 
+d   The colrspace module provides a class-based color management
+d system implemented in Mata. It supports a wide variety of color
+d spaces and translations among them, provides color generators and
+d a large collection of named palettes, and features functionality
+d such as color interpolation, grayscale conversion, or color
+d vision deficiency simulation.
+d 
+d KW: graphics
+d KW: color management
+d 
+d Requires: Stata version 14.2
+d 
+d Distribution-Date: 20240705
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f c\colrspace.sthlp
+f c\colrspace_source.sthlp
+f c\colrspace_library_generators.sthlp
+f c\colrspace_library_namedcolors.sthlp
+f c\colrspace_library_palettes.sthlp
+f c\colrspace_library_lsmaps.sthlp
+f c\colrspace_library_rgbmaps.sthlp
+f l\lcolrspace.mlib
+e
+S http://fmwww.bc.edu/repec/bocode/p
+N palettes.pkg
+D 17 Nov 2025
+U 3
+d 'PALETTES': module to provide color palettes, symbol palettes, and line pattern palettes
+d 
+d  The palettes module contains three commands: colorpalette,
+d symbolpalette, and linepalette. The commands provide color,
+d symbol, and line pattern palettes for use in Stata graphs.
+d 
+d KW: graphics
+d KW: colors
+d KW: marker symbols
+d KW: line patterns
+d 
+d Requires: Stata version 14.2 and colrspace from SSC (q.v.); (version 9.2 for colorpalette9)
+d 
+d Distribution-Date: 20240705
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f p\palettes.hlp
+f c\colorpalette.ado
+f c\colorpalette.sthlp
+f c\colorpalette9.ado
+f c\colorpalette9.hlp
+f l\linepalette.ado
+f l\linepalette.hlp
+f s\symbolpalette.ado
+f s\symbolpalette.hlp
+f c\colorcheck.ado
+f c\colorcheck.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/s
+N sumstats.pkg
+D 17 Nov 2025
+U 4
+d 'SUMSTATS': module to produce tables of summary statistics
+d 
+d  sumstats easily generates a table of summary statistics with
+d various if-restrictions and prints them to a specified output
+d file using putexcel.
+d 
+d KW: descriptive statistics
+d KW: summary statistics
+d KW: spreadsheet
+d 
+d Requires: Stata version 15.1
+d 
+d Distribution-Date: 20191221
+d 
+d Author: Benjamin Daniels, World Bank
+d Support: email bbdaniels@@gmail.com
+d 
+f s\sumstats.ado
+f s\sumstats.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/e
+N estout.pkg
+D 17 Nov 2025
+U 5
+d 'ESTOUT': module to make regression tables
+d 
+d  estout produces a table of regression results from one or
+d several models for use with spreadsheets, LaTeX, HTML, or a
+d word-processor table. eststo stores a quick copy of the active
+d estimation results for later tabulation. esttab is a wrapper for
+d estout. It displays a pretty looking publication-style regression
+d table without much typing. estadd adds additional results to the
+d e()-returns for one or several models previously fitted and
+d stored. This package subsumes the previously circulated esto,
+d esta, estadd,  and estadd_plus. An earlier version of estout is
+d available  as estout1.
+d 
+d KW: estimates
+d KW: LaTeX
+d KW: HTML
+d KW: word processor
+d KW: output
+d 
+d Requires: Stata version 8.2
+d 
+d Distribution-Date: 20230212
+d 
+d Author: Ben Jann, University of Bern
+d Support: email jann@@soz.unibe.ch
+d 
+f _\_eststo.ado
+f _\_eststo.hlp
+f e\estadd.ado
+f e\estadd.hlp
+f e\estout.ado
+f e\estout.hlp
+f e\eststo.ado
+f e\eststo.hlp
+f e\estpost.ado
+f e\estpost.hlp
+f e\esttab.ado
+f e\esttab.hlp
+e
+S http://fmwww.bc.edu/repec/bocode/g
+N grc1leg2.pkg
+D 17 Nov 2025
+U 6
+d 'GRC1LEG2': module to combine multiple graphs with a single common legend
+d 
+d    grc1leg2 is an enhanced version of Vince Wiggins' grc1leg.
+d Like grc1leg, grc1leg2 is a wrapper for Stata's graph    combine,
+d invoking its ability to array separate, previously drawn graphs
+d as panels in a single combined graph.    By default, the
+d characteristics of the common legend are inherited from the
+d original version of the legend in the first  component graph,
+d or in the graph specified by the option legendfrom(name).  With
+d grc1leg2's legend options, the user can    precisely control the
+d placement of the common legend within the combined graph.  Other
+d legend options allow the user to    override some of the
+d characteristics of the legend inherited from its original
+d creation as part of one of the component    graphs.
+d 
+d KW: graphics
+d KW: legend
+d 
+d Requires: Stata version 13
+d 
+d Distribution-Date: 20240812
+d 
+d Author:   Mead Over, Center for Global Development
+d Support: email MOver@@cgdev.org
+d 
+f g\grc1leg2.ado
+f g\grc1leg2.sthlp
+f g\grc1leg2_examples.ado
+f g\grc1leg2.dlg
+e
+S http://www.stata-journal.com/software/sj17-3
+N gr0070.pkg
+D 17 Nov 2025
+U 7
+d SJ17-3 gr0070. Provide graph schemes sensitive to color vision deficiency
+d Provide graph schemes sensitive to color vision
+d   deficiency
+d by Daniel Bischof, Department of Political
+d      Science, University of Zurich, Zurich,
+d      Switzerland
+d Support:  bischof@@ipz.uzh.ch
+d After installation, type help ^plotplain^,
+d   ^plotplainblind^, ^plottig^, and
+d   ^plottigblind^
+f style\color-ananas.style
+f style\color-orangebrown.style
+f style\color-plb1.style
+f style\color-plb2.style
+f style\color-plb3.style
+f style\color-plg1.style
+f style\color-plg2.style
+f style\color-plg3.style
+f style\color-pll1.style
+f style\color-pll2.style
+f style\color-pll3.style
+f style\color-plr1.style
+f style\color-plr2.style
+f style\color-ply1.style
+f style\color-ply2.style
+f style\color-ply3.style
+f style\color-reddish.style
+f style\color-sea.style
+f style\color-sky.style
+f style\color-turquoise.style
+f style\color-vermillion.style
+f s\scheme-plotplainblind.scheme
+f s\scheme_plotplainblind.sthlp
+f s\scheme-plotplain.scheme
+f s\scheme_plotplain.sthlp
+f s\scheme-plottigblind.scheme
+f s\scheme_plottigblind.sthlp
+f s\scheme-plottig.scheme
+f s\scheme_plottig.sthlp
+e
+S http://fmwww.bc.edu/repec/bocode/r
+N rddensity.pkg
+D 17 Nov 2025
+U 8
+d 'RDDENSITY': module to perform  Manipulation Testing Using Local Polynomial Density Estimation
+d 
+d   rddensity implements manipulation testing procedures using the
+d local polynomial density estimators proposed       in Cattaneo,
+d Jansson and Ma (2020), and implements graphical procedures with
+d valid confidence bands using       the results in Cattaneo,
+d Jansson and Ma (2021).  In addition, the command provides
+d complementary        manipulation testing based on finite sample
+d exact binomial testing following the results in Cattaneo,
+d Frandsen and Titiunik (2015) and Cattaneo, Frandsen and
+d Vazquez-Bare (2017). For an introduction to       manipulation
+d testing see McCrary (2008).
+d 
+d KW: manipulation
+d KW: local polynomial density
+d 
+d Requires: Stata version 14 and lpdensity from SSC (q.v.)
+d 
+d Distribution-Date: 20220708
+d 
+d Author: Matias D. Cattaneo, Department of Operations Research and Financial Engineering, Princeton University
+d Support: email cattaneo@@princeton.edu
+d 
+d Author: Michael Jansson, Department of Economics, UC-Berkeley
+d Support: email mjansson@@econ.berkeley.edu
+d 
+d Author:  Xinwei Ma, Department of Economics, UCSD
+d Support: email x1ma@@ucsd.edu
+d 
+f r\rdbwdensity.ado
+f r\rdbwdensity.sthlp
+f r\rddensity.ado
+f r\rddensity.sthlp
+f r\rddensity_fv.mo
+f r\rddensity_h.mo
+f r\rddensity_quantile.mo
+f r\rddensity_rep.mo
+f r\rddensity_unique.mo
+e
+S http://fmwww.bc.edu/repec/bocode/l
+N lpdensity.pkg
+D 17 Nov 2025
+U 9
+d 'LPDENSITY': module to perform Local Polynomial Density Estimation and Inference
+d 
+d   lpdensity implements the local polynomial regression based
+d density (and derivatives) estimator proposed in  Cattaneo,
+d Jansson and Ma (2020).  Robust bias-corrected inference, both
+d pointwise (confidence intervals)   and uniform (confidence
+d bands) are also implemented following the results in Cattaneo,
+d Jansson and Ma (2020) and Cattaneo, Jansson and Ma
+d (2022a).  See Cattaneo, Jansson and Ma (2022b) for more
+d implementation details and illustrations.
+d 
+d KW: local polynomial
+d KW: density
+d KW: bias-corrected inference
+d 
+d Requires: Stata version 14
+d 
+d Distribution-Date: 20220708
+d 
+d Author: Matias D. Cattaneo, Department of Operations Research and Financial Engineering, Princeton University
+d Support: email cattaneo@@princeton.edu
+d 
+d Author: Michael Jansson, Department of Economics, UC-Berkeley
+d Support: email mjansson@@econ.berkeley.edu
+d 
+d Author:  Xinwei Ma, Department of Economics, UCSD
+d Support: email x1ma@@ucsd.edu
+d 
+f l\lpbwdensity.ado
+f l\lpbwdensity.sthlp
+f l\lpdensity.ado
+f l\lpdensity.sthlp
+f l\lpdensity_bwimse.mo
+f l\lpdensity_bwirot.mo
+f l\lpdensity_bwmse.mo
+f l\lpdensity_bwrot.mo
+f l\lpdensity_cgen.mo
+f l\lpdensity_fn.mo
+f l\lpdensity_fn.mo
+f l\lpdensity_ggen.mo
+f l\lpdensity_normdgp.mo
+f l\lpdensity_optfunc.mo
+f l\lpdensity_quantile.mo
+f l\lpdensity_rep.mo
+f l\lpdensity_sgen.mo
+f l\lpdensity_tgen.mo
+f l\lpdensity_unique.mo
+f l\lpdensity_whichmin.mo
+e
+S http://fmwww.bc.edu/repec/bocode/i
+N ivreg2.pkg
+D 19 Nov 2025
+U 10
+d 'IVREG2': module for extended instrumental variables/2SLS and GMM estimation
+d 
+d  ivreg2 provides extensions to Stata's official ivregress and
+d newey. Its main capabilities: two-step feasible GMM estimation;
+d continuously updated GMM estimation (CUE); LIML and k-class
+d estimation; automatic output of the Hansen-Sargan or
+d Anderson-Rubin statistic for overidentifying restrictions; C
+d statistic test of exogeneity of subsets of instruments (orthog()
+d option); kernel-based autocorrelation-consistent (AC) and
+d heteroskedastic and autocorrelation-consistent (HAC) estimation,
+d with user-specified choice of kernel; Cragg's "heteroskedastic
+d OLS" (HOLS) estimator; default reporting of large-sample
+d statistics (z and chi-squared rather than t and F); small option
+d to report small-sample statistics; first-stage regression
+d reported with F-test of excluded instruments and R-squared with
+d included instruments "partialled-out"; enhanced Kleibergen-Paap
+d and Cragg-Donald tests for weak instruments, redundancy of
+d instruments, significance of endogenous regressors; two-way
+d clustering of standard errors;  Kiefer and Driscoll-Kraay
+d standard errors. ivreg2 can also be used for ordinary least
+d squares (OLS) estimation using the same command syntax as Stata's
+d official regress and newey. New in this version: ivreg2 now
+d supports factor variables. This is version 4.1.11 of ivreg2,
+d updated from that published in Stata Journal, 5(4), requiring
+d Stata 11.2 or better. Stata 8.2/9.2/10.2 users may use this
+d routine, which will  automatically call ivreg28, ivreg29, or
+d ivreg210, respectively. These versions are now included in the
+d ivreg2 package. Stata 7 users may use the Stata Journal version
+d of ivreg2, accessible via net search ivreg2.
+d 
+d KW: instrumental variables
+d KW: Sargan test
+d KW: robust estimation
+d KW: orthogonality
+d KW: GMM
+d KW: Hansen's J
+d KW: heteroskedastic OLS,
+d 
+d Requires: Stata version 11.2 and ranktest from SSC
+d 
+d Distribution-Date: 20240814
+d 
+d Author: Christopher F Baum, Boston College
+d Support: email baum@@bc.edu
+d 
+d Author: Mark E Schaffer, Heriot-Watt University
+d Support: email m.e.schaffer@@hw.ac.uk
+d 
+d Author: Steven Stillman, Free University of Bozen-Bolzano
+d Support: email  Steven.Stillman@@unibz.it
+d 
+f i\ivreg2.ado
+f i\ivreg2.sthlp
+f i\ivreg2_p.ado
+f l\livreg2.mlib
+f i\ivreg210.ado
+f i\ivreg210.sthlp
+f i\ivreg210_p.ado
+f i\ivreg29.ado
+f i\ivreg29.hlp
+f i\ivreg29_p.ado
+f i\ivreg29_cue.ado
+f i\ivreg28.ado
+f i\ivreg28.hlp
+f i\ivreg28_p.ado
+f i\ivreg28_cue.ado
+e
