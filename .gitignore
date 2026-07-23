@@ -1,0 +1,62 @@
+# Machine-specific paths, environment files, and secrets
+config/paths.local.do
+.env
+.env.*
+*.token
+*.secret
+
+# Restricted, confidential, and large data
+data/
+raw/
+working/
+coded/
+private/
+restricted/
+*.dta
+*.sav
+*.sas7bdat
+*.dbf
+*.shp
+*.shx
+*.tif
+*.tiff
+*.geotiff
+*.accdb
+*.mdb
+
+# Local build and cache directories
+build/
+cache/
+tmp/
+temp/
+
+# Compressed archives
+*.zip
+*.7z
+*.rar
+*.tar
+*.tar.gz
+*.tgz
+
+# Logs and temporary files
+logs/*
+!logs/README.md
+*.log
+*.smcl
+*.tmp
+*.temp
+~$*
+.~lock.*
+
+# Stata, editor, and backup artifacts
+*.stswp
+*.bak
+*.swp
+*.swo
+
+# Dropbox conflicts and operating-system files
+*conflicted copy*
+*Conflicted copy*
+.DS_Store
+Thumbs.db
+Desktop.ini
