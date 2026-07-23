@@ -50,6 +50,55 @@ decision; do not silently choose an answer.
 - For interactive checks, run selections in memory and do not create a `.do`
   file unless the user explicitly requests a durable program.
 
+## Stata presentation standards
+
+Apply these standards to every Stata figure, graph, and formatted table,
+including interactive in-console work.
+
+### Figures and graphs
+
+- Use a polished, professional, academic visual style with a clean white
+  background, restrained grid lines, readable typography, and a
+  colorblind-safe palette.
+- Prefer an installed scientific or publication-quality Stata scheme. Verify
+  that the scheme is available before using it; if it is unavailable, use a
+  clean built-in scheme and explicitly style the graph rather than failing or
+  installing a package without approval.
+- Give every graph a concise, descriptive title and subtitle. Keep each on one
+  line and avoid repeating the axis labels.
+- Replace raw variable names with polished, human-readable labels. State units
+  in axis titles or legends and use sensible number formats and axis ranges.
+- Use clear marker, line, confidence-interval, and legend styles. Avoid
+  decorative effects, unnecessary colors, heavy borders, crowded legends, and
+  chart junk.
+- Make statistical uncertainty visible when relevant, normally with 95%
+  confidence intervals, and identify it in the subtitle, legend, or note.
+- Add a complete note at the bottom of every graph. The note must briefly
+  identify the sample or unit of analysis, outcome and key predictor or
+  treatment, model or calculation, uncertainty or standard-error method, and
+  data source. Define abbreviations or transformations needed to interpret the
+  figure.
+- Keep titles, subtitles, legends, labels, and notes readable at the final
+  output size. Wrap only the bottom note when necessary.
+- Before presenting a graph, inspect the rendered output and revise any
+  clipping, overlap, excessive precision, confusing scale, or poor contrast.
+
+### Tables
+
+- Present tables in a clean academic format with a concise one-line title,
+  polished row and column labels, aligned numeric columns, consistent decimal
+  precision, and units stated where needed.
+- Report the relevant sample size and uncertainty measure. Clearly identify
+  standard errors, confidence intervals, clustering level, weights, fixed
+  effects, controls, and significance notation when they apply.
+- Add a complete table note defining the sample, outcome, treatment or key
+  predictor, model, uncertainty method, abbreviations, transformations, and
+  data source.
+- Do not present raw Stata variable names, unexplained abbreviations, excessive
+  digits, or console output as if it were a finished academic table.
+- Inspect exported or rendered tables for truncation, wrapping, alignment, and
+  readability before presenting them.
+
 ## Reproducible workflow
 
 - Preserve legacy code before refactoring it. A legacy snapshot must retain
