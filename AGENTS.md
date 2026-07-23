@@ -40,6 +40,16 @@ decision; do not silently choose an answer.
 - Do not manually edit generated tables or figures.
 - Keep logs untracked. Logs must not contain row-level or restricted data.
 
+## Stata execution
+
+- Always run Stata commands with the Stata MCP
+  `stata_run_selection` tool.
+- Never use PowerShell, another shell, or a direct Stata executable to run
+  Stata commands.
+- Do not substitute `stata_run_file` for `stata_run_selection`.
+- For interactive checks, run selections in memory and do not create a `.do`
+  file unless the user explicitly requests a durable program.
+
 ## Reproducible workflow
 
 - Preserve legacy code before refactoring it. A legacy snapshot must retain
