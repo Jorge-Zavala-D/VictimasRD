@@ -3,7 +3,8 @@
 ## Status and purpose
 
 This document is the required starting point for work in this repository. It
-distills the Dropbox research-archive handoff inventoried on 2026-07-23.
+distills the Dropbox research-archive handoff inventoried on 2026-07-23 and the
+live Overleaf project audited on 2026-07-26.
 
 The project studies Peru's Collective Reparations Program (`Programa de
 Reparaciones Colectivas`, PRC), asking whether community-level reparations were
@@ -29,6 +30,13 @@ and a staged migration plan.
 The handoff originally proposed a hyphenated clone directory. The active
 repository is named `VictimasRD` without a hyphen. Code must use the local path
 configuration instead of assuming either directory name.
+
+The complete editable paper source has now been located in the Dropbox-synced
+Overleaf project `Collective Reparations`. Its main document is
+`Working Paper.tex`, dated January 30, 2026 inside the manuscript. This removes
+the earlier source-recovery blocker, but it does not resolve the provenance of
+the existing paper results. See `docs/OVERLEAF_WORKFLOW.md` for the audited
+dependency map and publication workflow.
 
 ## Separation of responsibilities
 
@@ -59,6 +67,18 @@ treated as this Git repository.
 
 Raw or restricted data must never enter Git, including Git LFS or repository
 history.
+
+### The synchronized Overleaf project is authoritative for
+
+- the live editable working-paper source and bibliography;
+- presentation source;
+- the exact publication-facing copies of paper tables and figures; and
+- manuscript-only formatting and prose.
+
+Overleaf is a publication layer, not a research-data or build directory. Git
+remains authoritative for the Stata code and reproducible output that produces
+paper inputs. A reviewed paper output is generated in Git first and copied to
+the exact Overleaf destination recorded in the output manifest.
 
 ## Archive inventory and existing pipeline
 
@@ -100,8 +120,10 @@ be resolved by the research team before an authoritative release:
 3. **Treatment timing and event:** the code often uses financing by 2013,
    while paper and presentation language sometimes refers to 2012; approval,
    financing, initiation, and completion are distinct events.
-4. **Manuscript source:** the latest apparent manuscript is a January 30, 2026
-   PDF, but its complete editable source and bibliography have not been found.
+4. **Manuscript-to-analysis provenance:** the January 30, 2026 editable source
+   and bibliography have been recovered, but the existing tables and figures
+   have not yet been mapped to canonical scripts, inputs, software versions,
+   and specifications.
 5. **Canonical datasets:** several base, modified, SAT/PBI, and conflict-copy
    variants coexist without a complete lineage map.
 6. **Community universe and sample flow:** community counts and the linked
@@ -120,6 +142,30 @@ Other important analysis risks include small effective samples, many outcomes
 and specifications, limited cluster counts, a discrete or heaped running
 variable, use of `masspoints(off)`, post-treatment mechanism variables,
 spillovers, and possible sample selection based on first-stage strength.
+
+## Live manuscript audit
+
+The 2026-07-26 read-only audit covered all 76 files in the synchronized
+Overleaf project: 9 TeX sources, 2 BibTeX databases, 49 PNG files, and 16 JPG
+files. `Working Paper.tex` currently resolves 15 graphics, 5 external table
+inputs, and `Bibliography.bib`. All citations and cross-references resolve when
+the five table inputs are included.
+
+Known issues retained for explicit follow-up are:
+
+- the three presentation sources reference
+  `Images/percentage of financed communities.png`, but only the `.jpg` exists;
+- table inputs reuse the label `tab:rd_ccpp_main`;
+- the abstract reports 5,713 registered communities and 2012--2017 matched
+  data, while the body reports 5,461 communities and 2013--2017 linkage;
+- the manuscript uses the `adjustwidth` environment without explicitly loading
+  the package that defines it, and line 323 contains malformed prose;
+- no local TeX compiler was available during the audit, so a successful
+  Overleaf compilation was not independently verified; and
+- many legacy figures and tables do not yet meet the repository's current
+  academic presentation and provenance standards.
+
+No Dropbox file was modified during this audit.
 
 ## Reproducibility target
 
@@ -179,10 +225,11 @@ unless a registry explains them.
 
 1. Obtain research-team decisions on the sample, cutoffs, treatment event, and
    treatment date.
-2. Recover the editable January 2026 manuscript source.
+2. Map all active manuscript tables and figures to canonical Git outputs,
+   producing scripts, logical inputs, and specifications.
 3. Identify canonical data snapshots without copying them into Git.
-4. Preserve the current working-paper Stata code as an exact legacy snapshot
-   with provenance.
+4. Complete provenance documentation for the preserved working-paper Stata
+   legacy snapshot.
 5. Create metadata schemas for data inventory, variable crosswalks, CCPP
    matches, merges, sample flow, software, specifications, and outputs.
 6. Replace absolute paths with the ignored local configuration.

@@ -5,6 +5,7 @@
 
 global project_root "C:/Users/USERNAME/Documents/GitHub/VictimasRD"
 global dropbox_root "C:/Users/USERNAME/Dropbox (Personal)/VictimasRD"
+global overleaf_root "C:/Users/USERNAME/Dropbox (Personal)/Apps/Overleaf/Collective Reparations"
 
 * Dropbox sources are read-only inputs.
 global data_root          "$dropbox_root/2 data"
@@ -13,6 +14,11 @@ global working_input_root "$data_root/2 Working"
 global coded_input_root   "$data_root/3 Coded"
 global literature_root    "$dropbox_root/0 Literature Review"
 global archive_output_root "$dropbox_root/3 output"
+
+* Live Overleaf publication layer. Never use it for data or intermediates.
+global manuscript_tex   "$overleaf_root/Working Paper.tex"
+global overleaf_images  "$overleaf_root/Images"
+global overleaf_tables  "$overleaf_root/Tables"
 
 * Writable reproducible products belong under the Git project.
 * build_root is ignored; output_root is eligible for reviewed Git outputs.

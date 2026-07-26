@@ -21,9 +21,47 @@ decision; do not silently choose an answer.
   documents, credentials, or third-party material lacking redistribution
   permission.
 - Git LFS does not make restricted data acceptable for version control.
-- Read only the minimum Dropbox material needed for the task. Any future write
-  outside this repository requires explicit user authorization and an approved
-  non-raw destination.
+- Read only the minimum Dropbox material needed for the task. Except for the
+  live Overleaf workflow below, any future write outside this repository
+  requires explicit user authorization and an approved non-raw destination.
+
+## Live Overleaf integration
+
+The synchronized Overleaf project named `Collective Reparations` is the
+authoritative editable source for the working paper and its publication-facing
+inputs. Its machine-specific root must come from `config/paths.local.do`; never
+hard-code a username or absolute path in analysis code. Read
+`docs/OVERLEAF_WORKFLOW.md` before changing manuscript inputs or manuscript
+source.
+
+- Git is authoritative for versioned Stata code and every reproducible,
+  appropriately sized, non-sensitive generated table or figure.
+- The Overleaf tree is the live publication layer. A paper-consumed Stata
+  output must be generated and validated in `output/tables` or
+  `output/figures` first, recorded in the output manifest, and then copied to
+  or used to replace the exact path consumed by the relevant Overleaf `.tex`
+  file.
+- When reviewing an existing paper table or figure, verify whether a canonical
+  Git output exists and whether its checksum matches the Overleaf copy. Do not
+  invent provenance or overwrite an artifact when that relationship is
+  unresolved.
+- Preserve the filename and extension referenced by `\input` or
+  `\includegraphics`, unless the same task also updates every affected TeX
+  reference.
+- Never make the Overleaf copy the only reproducible copy of a generated
+  output, and never manually edit a Stata-generated table or figure in
+  Overleaf.
+- Only reviewed, non-sensitive tables, figures, bibliographies, and manuscript
+  source belong in the Overleaf project. Never place data, logs, temporary
+  files, credentials, or row-level results there.
+- The user has authorized the Git-to-Overleaf sync described here for Stata
+  paper outputs. Before replacing a live file, resolve the exact target, verify
+  that it is inside the configured Overleaf root and outside any raw-data
+  directory, and confirm the post-copy checksum. A manuscript-source edit must
+  still be part of the current task's requested scope.
+- Treat manuscript edits as live publication changes: keep them narrow,
+  inspect the diff, preserve UTF-8 encoding, and validate dependencies and
+  compilation when the available environment permits it.
 
 ## Paths and generated files
 
@@ -117,6 +155,7 @@ including interactive in-console work.
 
 ## Scope of this initial repository
 
-The current scaffold contains no migrated analysis code or research data.
-Legacy-code migration and pipeline construction are separate tasks and must
-follow the safeguards above.
+The repository contains a provenance-preserving legacy-code snapshot but no
+approved canonical data snapshot or completed reproducible pipeline. Legacy
+refactoring, pipeline construction, and result regeneration remain separate
+tasks and must follow the safeguards above.
