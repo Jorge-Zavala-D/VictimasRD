@@ -1,6 +1,7 @@
 # Stata code
 
-This directory will contain the clean, versioned Stata pipeline.
+This directory contains the entry point and structure for the clean, versioned
+Stata pipeline.
 
 Before adding or running code:
 
@@ -11,12 +12,36 @@ Before adding or running code:
 5. add explicit input, key, merge, sample, and output checks; and
 6. record final artifacts in the metadata output manifest.
 
-The legacy working-paper code has not been copied here. Its preservation should
-be a separate, exact-snapshot task with file-level source paths, dates,
-checksums, status, known outputs, and warnings. Do not mix legacy preservation
-with refactoring.
+## Entry point
 
-A future clean pipeline may use ordered modules for environment validation,
-cleaning, construction, description, RD validity, estimation, mechanisms, and
-tables/figures. The exact module design should follow research-team decisions
-on the canonical sample, cutoff, treatment event, and treatment date.
+Run the canonical master from the repository root:
+
+```stata
+do code/stata/00_master.do
+```
+
+Each collaborator must first copy `config/paths.example.do` to the ignored
+`config/paths.local.do` and configure that local file. The shared master does
+not contain usernames or machine-specific absolute paths.
+
+The master:
+
+- validates the Git, Dropbox-input, build, output, metadata, and log paths;
+- rejects build or output roots outside the Git repository;
+- creates only ignored Git-local build directories;
+- installs missing anticipated user-written commands into `build/ado`;
+- selects a verified academic graph scheme with a built-in fallback; and
+- calls the ordered modules documented in
+  [`pipeline/README.md`](pipeline/README.md).
+
+All module switches initially remain zero because the corresponding canonical
+programs have not yet been created and substantive design decisions remain
+open.
+
+## Legacy snapshot
+
+`legacy-current/` is a provenance-preserving historical snapshot. It contains
+stale paths, unsafe raw-directory writes, conflicting specifications, and
+incomplete orchestration. Do not edit it or use it as the canonical pipeline.
+New programs belong under `pipeline/` and may consult the legacy code only as a
+documented reference.
