@@ -108,6 +108,15 @@ Do not migrate or refactor this code casually. First preserve an exact,
 auditable legacy snapshot in a dedicated task, with file-level provenance and
 checksums, then build a clean modular pipeline separately.
 
+## Recorded treatment-year decision
+
+On July 27, 2026, the research team directed the pipeline to use the year in
+the CMAN collective-reparation project register as the authoritative treatment
+year. The canonical preparation code therefore creates cumulative indicators
+`treat_07` through `treat_23`: a community is treated in its recorded CMAN year
+and every year thereafter. The working paper must explain the interpretation
+and caveats attached to this administrative year field.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must
@@ -117,26 +126,23 @@ be resolved by the research team before an authoritative release:
    while the current executable rule appears to exclude Ayacucho.
 2. **Victimization cutoffs:** official methodology, current code, and the
    January 2026 manuscript report different category boundaries.
-3. **Treatment timing and event:** the code often uses financing by 2013,
-   while paper and presentation language sometimes refers to 2012; approval,
-   financing, initiation, and completion are distinct events.
-4. **Manuscript-to-analysis provenance:** the January 30, 2026 editable source
+3. **Manuscript-to-analysis provenance:** the January 30, 2026 editable source
    and bibliography have been recovered, but the existing tables and figures
    have not yet been mapped to canonical scripts, inputs, software versions,
    and specifications.
-5. **Canonical datasets:** several base, modified, SAT/PBI, and conflict-copy
+4. **Canonical datasets:** several base, modified, SAT/PBI, and conflict-copy
    variants coexist without a complete lineage map.
-6. **Community universe and sample flow:** community counts and the linked
+5. **Community universe and sample flow:** community counts and the linked
    individual analytical sample differ across code, data, and manuscript.
-7. **Migration measurement:** absence from a later linked record may reflect
+6. **Migration measurement:** absence from a later linked record may reflect
    migration, death, linkage failure, code changes, coverage, or enumeration
    differences.
-8. **Output provenance:** current manuscript claims appear to rely on older,
+7. **Output provenance:** current manuscript claims appear to rely on older,
    multi-specification workbooks that may include manual selection or edits.
-9. **Fuzzy matches:** community-name matching and manual corrections need a
+8. **Fuzzy matches:** community-name matching and manual corrections need a
    versioned accepted/rejected match ledger.
-10. **Governance:** data-use, ethics, retention, licensing, access, and
-    disclosure rules require definitive documentation.
+9. **Governance:** data-use, ethics, retention, licensing, access, and
+   disclosure rules require definitive documentation.
 
 Other important analysis risks include small effective samples, many outcomes
 and specifications, limited cluster counts, a discrete or heaped running
@@ -223,8 +229,7 @@ unless a registry explains them.
 
 ## Immediate repository priorities
 
-1. Obtain research-team decisions on the sample, cutoffs, treatment event, and
-   treatment date.
+1. Obtain research-team decisions on the sample and cutoffs.
 2. Map all active manuscript tables and figures to canonical Git outputs,
    producing scripts, logical inputs, and specifications.
 3. Identify canonical data snapshots without copying them into Git.

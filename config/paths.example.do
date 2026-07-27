@@ -7,6 +7,10 @@ global project_root "C:/Users/USERNAME/Documents/GitHub/VictimasRD"
 global dropbox_root "C:/Users/USERNAME/Dropbox (Personal)/VictimasRD"
 global overleaf_root "C:/Users/USERNAME/Dropbox (Personal)/Apps/Overleaf/Collective Reparations"
 
+* Python used only for non-Stata source extraction orchestrated by Stata.
+* Point this to an environment that provides pdfplumber.
+global python_exec "C:/path/to/python.exe"
+
 * Dropbox sources are read-only inputs.
 global data_root          "$dropbox_root/2 data"
 global raw_root           "$data_root/1 Raw"

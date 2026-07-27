@@ -5,19 +5,23 @@ by [`code/stata/00_master.do`](../00_master.do).
 
 The expected modules are:
 
-1. `01_inventory_sources.do`
-2. `02_build_ccpp_spine.do`
-3. `03_build_treatment_history.do`
-4. `04_clean_sources.do`
-5. `05_link_sources.do`
-6. `06_build_analysis_data.do`
-7. `07_describe_data.do`
-8. `08_validate_rd_design.do`
-9. `09_estimate_main_effects.do`
-10. `10_run_robustness.do`
-11. `11_analyze_migration_mechanisms.do`
-12. `12_build_tables_figures.do`
-13. `13_run_release_checks.do`
+1. `01_data_preparation.do`
+2. `02_describe_data.do`
+3. `03_validate_rd_design.do`
+4. `04_estimate_main_effects.do`
+5. `05_run_robustness.do`
+6. `06_analyze_migration_mechanisms.do`
+7. `07_build_tables_figures.do`
+8. `08_run_release_checks.do`
+
+`01_data_preparation.do` is the single authoritative Stata preparation
+program. It is organized internally by source family and performs source
+validation, cleaning, deterministic linkage, candidate generation, merge
+auditing, and construction of analytical inputs. New data-preparation work
+must extend that program instead of creating additional canonical preparation
+do-files. Its foundational source contract, current linkage results, complete-
+coverage release gate, and final-variable contract are documented in
+[`docs/FOUNDATIONAL_DATA_PREPARATION.md`](../../../docs/FOUNDATIONAL_DATA_PREPARATION.md).
 
 Modules will be added sequentially. They must:
 

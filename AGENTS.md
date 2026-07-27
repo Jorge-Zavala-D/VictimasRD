@@ -87,6 +87,9 @@ source.
 - Do not substitute `stata_run_file` for `stata_run_selection`.
 - For interactive checks, run selections in memory and do not create a `.do`
   file unless the user explicitly requests a durable program.
+- Keep Stata code lean and consistently formatted. Comment each logical block
+  enough to explain its purpose, inputs, key decisions, and checks, but do not
+  narrate obvious commands or repeat documentation better maintained elsewhere.
 
 ## Stata presentation standards
 

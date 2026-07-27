@@ -1,10 +1,10 @@
 /*------------------------------------------------------------------------------*
 | Title:            Master code                                                 |
 | Project:          Victimas RD                                                 |
-| Authors:          Victimas RD research team                                   |
+| Authors:          Jorge Zavala, Matthew Bird, Ana María Dumez                 |
 |                                                                               |
 | Description:      Configure the project environment, validate paths and       |
-|                   dependencies, and optionally run the ordered pipeline.       |
+|                   dependencies, and optionally run the ordered pipeline.      |
 |                                                                               |
 | Date created:     27 July 2026                                                |
 | Last updated:     27 July 2026                                                |
@@ -86,6 +86,7 @@ local required_globals ///
     project_root ///
     dropbox_root ///
     overleaf_root ///
+    python_exec ///
     data_root ///
     raw_root ///
     working_input_root ///
@@ -267,6 +268,7 @@ local ssc_package_command_pairs ///
     lpdensity   lpdensity ///
     rdpower     rdpower ///
     reclink     reclink ///
+    freqindex   freqindex ///
     matchit     matchit ///
     strdist     strdist ///
     geodist     geodist ///
@@ -427,35 +429,25 @@ decisions have been reviewed.
 */
 
 local run_all                         0
-local run_01_inventory_sources        0
-local run_02_build_ccpp_spine         0
-local run_03_build_treatment_history  0
-local run_04_clean_sources            0
-local run_05_link_sources             0
-local run_06_build_analysis_data      0
-local run_07_describe_data            0
-local run_08_validate_rd_design       0
-local run_09_estimate_main_effects    0
-local run_10_run_robustness           0
-local run_11_analyze_mechanisms       0
-local run_12_build_outputs            0
-local run_13_run_release_checks       0
+local run_01_data_preparation         0
+local run_02_describe_data            0
+local run_03_validate_rd_design       0
+local run_04_estimate_main_effects    0
+local run_05_run_robustness           0
+local run_06_analyze_mechanisms       0
+local run_07_build_outputs            0
+local run_08_run_release_checks       0
 
 local pipeline_switches ///
     run_all ///
-    run_01_inventory_sources ///
-    run_02_build_ccpp_spine ///
-    run_03_build_treatment_history ///
-    run_04_clean_sources ///
-    run_05_link_sources ///
-    run_06_build_analysis_data ///
-    run_07_describe_data ///
-    run_08_validate_rd_design ///
-    run_09_estimate_main_effects ///
-    run_10_run_robustness ///
-    run_11_analyze_mechanisms ///
-    run_12_build_outputs ///
-    run_13_run_release_checks
+    run_01_data_preparation ///
+    run_02_describe_data ///
+    run_03_validate_rd_design ///
+    run_04_estimate_main_effects ///
+    run_05_run_robustness ///
+    run_06_analyze_mechanisms ///
+    run_07_build_outputs ///
+    run_08_run_release_checks
 
 foreach pipeline_switch of local pipeline_switches {
     assert inlist(``pipeline_switch'', 0, 1)
@@ -496,81 +488,51 @@ program define victimasrd_run_step
     display as result "Completed pipeline step: `label'"
 end
 
-if `run_all' | `run_01_inventory_sources' {
+if `run_all' | `run_01_data_preparation' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/01_inventory_sources.do") ///
-        label("Source inventory and provenance checks")
+        file("${pipeline_root}/01_data_preparation.do") ///
+        label("Authoritative end-to-end data preparation")
 }
 
-if `run_all' | `run_02_build_ccpp_spine' {
+if `run_all' | `run_02_describe_data' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/02_build_ccpp_spine.do") ///
-        label("Longitudinal centro-poblado spine and match ledger")
-}
-
-if `run_all' | `run_03_build_treatment_history' {
-    victimasrd_run_step, ///
-        file("${pipeline_root}/03_build_treatment_history.do") ///
-        label("Treatment-event history")
-}
-
-if `run_all' | `run_04_clean_sources' {
-    victimasrd_run_step, ///
-        file("${pipeline_root}/04_clean_sources.do") ///
-        label("Source-specific cleaning")
-}
-
-if `run_all' | `run_05_link_sources' {
-    victimasrd_run_step, ///
-        file("${pipeline_root}/05_link_sources.do") ///
-        label("Deterministic and reviewed source linkage")
-}
-
-if `run_all' | `run_06_build_analysis_data' {
-    victimasrd_run_step, ///
-        file("${pipeline_root}/06_build_analysis_data.do") ///
-        label("Analysis-dataset construction and sample flow")
-}
-
-if `run_all' | `run_07_describe_data' {
-    victimasrd_run_step, ///
-        file("${pipeline_root}/07_describe_data.do") ///
+        file("${pipeline_root}/02_describe_data.do") ///
         label("Descriptive analysis")
 }
 
-if `run_all' | `run_08_validate_rd_design' {
+if `run_all' | `run_03_validate_rd_design' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/08_validate_rd_design.do") ///
+        file("${pipeline_root}/03_validate_rd_design.do") ///
         label("RD design and validity diagnostics")
 }
 
-if `run_all' | `run_09_estimate_main_effects' {
+if `run_all' | `run_04_estimate_main_effects' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/09_estimate_main_effects.do") ///
+        file("${pipeline_root}/04_estimate_main_effects.do") ///
         label("Primary treatment-effect estimation")
 }
 
-if `run_all' | `run_10_run_robustness' {
+if `run_all' | `run_05_run_robustness' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/10_run_robustness.do") ///
+        file("${pipeline_root}/05_run_robustness.do") ///
         label("Robustness, placebo, and sensitivity analyses")
 }
 
-if `run_all' | `run_11_analyze_mechanisms' {
+if `run_all' | `run_06_analyze_mechanisms' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/11_analyze_migration_mechanisms.do") ///
+        file("${pipeline_root}/06_analyze_migration_mechanisms.do") ///
         label("Migration and exploratory mechanism analyses")
 }
 
-if `run_all' | `run_12_build_outputs' {
+if `run_all' | `run_07_build_outputs' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/12_build_tables_figures.do") ///
+        file("${pipeline_root}/07_build_tables_figures.do") ///
         label("Reviewed tables, figures, and output manifest")
 }
 
-if `run_all' | `run_13_run_release_checks' {
+if `run_all' | `run_08_run_release_checks' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/13_run_release_checks.do") ///
+        file("${pipeline_root}/08_run_release_checks.do") ///
         label("Disclosure and release checks")
 }
 
@@ -580,19 +542,14 @@ if `run_all' | `run_13_run_release_checks' {
 *-----------------------------------*
 
 if !`run_all' & ///
-   !`run_01_inventory_sources' & ///
-   !`run_02_build_ccpp_spine' & ///
-   !`run_03_build_treatment_history' & ///
-   !`run_04_clean_sources' & ///
-   !`run_05_link_sources' & ///
-   !`run_06_build_analysis_data' & ///
-   !`run_07_describe_data' & ///
-   !`run_08_validate_rd_design' & ///
-   !`run_09_estimate_main_effects' & ///
-   !`run_10_run_robustness' & ///
-   !`run_11_analyze_mechanisms' & ///
-   !`run_12_build_outputs' & ///
-   !`run_13_run_release_checks' {
+   !`run_01_data_preparation' & ///
+   !`run_02_describe_data' & ///
+   !`run_03_validate_rd_design' & ///
+   !`run_04_estimate_main_effects' & ///
+   !`run_05_run_robustness' & ///
+   !`run_06_analyze_mechanisms' & ///
+   !`run_07_build_outputs' & ///
+   !`run_08_run_release_checks' {
 
     display as text "All pipeline switches are 0; no downstream do-files were run."
 }

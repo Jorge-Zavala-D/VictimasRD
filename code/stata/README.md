@@ -34,9 +34,11 @@ The master:
 - calls the ordered modules documented in
   [`pipeline/README.md`](pipeline/README.md).
 
-All module switches initially remain zero because the corresponding canonical
-programs have not yet been created and substantive design decisions remain
-open.
+All module switches initially remain zero. The first module,
+`pipeline/01_data_preparation.do`, is now the single authoritative preparation
+program and currently implements the foundational INEI, RUV, and CMAN source
+workflow. Later source families will be added as sections of that same file.
+Analysis switches remain disabled while substantive design decisions are open.
 
 ## Legacy snapshot
 
