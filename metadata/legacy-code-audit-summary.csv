@@ -1,0 +1,7 @@
+scope,programs,total_lines,active_lines,use_commands,save_commands,merge_commands,reclink_commands,rdrobust_commands,rddensity_commands,rdplot_commands,putexcel_commands,graph_exports,assert_commands,isid_commands,duplicate_validation_commands
+All Git legacy do-files,77,50328,28288,225,127,100,4,554,11,23,1832,62,0,0,0
+Working-paper pipeline,16,16449,9454,120,123,96,4,57,7,7,270,36,0,0,0
+Regional specification archive,37,22222,13672,65,0,0,0,291,0,0,1225,0,0,0,0
+SAT branch,14,8126,3274,16,3,3,0,63,0,0,272,0,0,0,0
+Exploratory and power analysis,6,2669,1398,14,0,0,0,143,4,16,65,22,0,0,0
+Auxiliary or uncategorized,4,862,490,10,1,1,0,0,0,0,4,0,0,0,0

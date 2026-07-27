@@ -1,0 +1,16 @@
+logical_artifact,location_class,size_or_rows,variables_or_files,current_status,key_audit_finding
+Dropbox data tree,archive summary,70.344 GiB,593 files,source and derived materials intermixed,483 files are under Raw and several cleaners write derived files there
+Raw area,archive source area,20.886 GiB,483 files,not immutable in historical workflow,77 active save commands target Raw paths
+Working area,archive derived area,33.330 GiB,44 files,noncanonical,multiple large SISFOH snapshots and one Dropbox conflict copy
+Coded area,archive analytical area,16.069 GiB,23 files,noncanonical,SISFOH and Census 2017 community snapshots disagree
+Working-paper data area,archive analytical area,3.014 GiB,4 files,disconnected branch,contains linked migration bases and variable-construction code
+SISFOH community,coded candidate,5467 rows,742 variables,canonical status unresolved,unique community key but differs from Census 2017 snapshot
+SISFOH household,coded candidate,415587 rows,600 variables,canonical status unresolved,42531 main-sample rows represent 521 communities
+SISFOH person both sexes,coded candidate,539916 rows,1061 variables,canonical status unresolved,141614 main-sample rows represent 516 communities
+Census 2017 community,coded candidate,5467 rows,988 variables,canonical status unresolved,36 community IDs differ on each side versus SISFOH community file
+Census 2017 household,coded candidate,71102 rows,906 variables,canonical status unresolved,structure checked but historical production provenance is incomplete
+Census 2017 person,coded candidate,198036 rows,1079 variables,canonical status unresolved,110992 main-sample rows and 25150 missing migration values
+Linked person base,working-paper candidate,198030 rows,1079 variables,canonical status unresolved,4654 blank linkage keys including 99 main-sample communities
+Linked person plus constructed variables,working-paper candidate,193376 rows,1119 variables,selected linked sample,blank-key drop leaves only 430 main-sample communities in 94 districts
+Tracked PBI workbook,Git legacy snapshot,32.65 MiB,1 workbook,governance review required,data workbook conflicts with code-only repository boundary
+Local DTA copies under Git legacy tree,Git-ignored local files,6 files,not tracked,remove or relocate only in a separately authorized cleanup task
