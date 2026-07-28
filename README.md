@@ -67,6 +67,23 @@ The directory README files describe what may be added to each area. A
 provenance-preserving legacy-code snapshot is present, but no raw research data
 or unreviewed archival outputs belong in Git.
 
+## Current data-preparation milestone
+
+The authoritative pipeline now prepares the RUV victimization registry, CMAN
+collective-reparation treatment history through 2023, and selected 2007 Census
+baseline covariates. Run `code/stata/00_master.do` after configuring
+`config/paths.local.do`.
+
+Data products remain outside Git:
+
+- the validated foundational RUV–CMAN registry is written to Dropbox Coded as
+  `04_foundational_community_registry.dta`; and
+- the all-row registry with 2007 Census covariates is written to Dropbox Coded
+  as `05_community_registry_census2007.dta`.
+
+The Census source audit and linkage rules are documented in
+[`docs/CENSUS_2007_PREPARATION.md`](docs/CENSUS_2007_PREPARATION.md).
+
 ## Current release status
 
 This repository is not yet an authoritative replication package. Before a

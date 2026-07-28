@@ -2,7 +2,7 @@
 Project:       Victimas RD
 Program:       01_data_preparation.do
 Purpose:       Authoritative end-to-end data-preparation program
-Current scope: Foundational community sources
+Current scope: Foundational community sources and 2007 census covariates
 
 This file is the only canonical Stata data-preparation program. New source
 families will be added as clearly delimited sections here so that the master
@@ -13,6 +13,7 @@ Current source families:
     2. RUV Libro Segundo victimization-index registry
     3. CMAN communities attended through 2023
     4. Historical and alternative CCPP directories, 2007--2025
+    5. INEI 2007 CCPP-level census tabulation
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -2607,7 +2608,1170 @@ save ///
 
 
 *===============================================================================
-**# 8. Write aggregate QA metrics and close
+**# 8. Prepare and integrate 2007 census baseline covariates
+*===============================================================================
+
+local census2007_source ///
+    "${raw_root}/9 INEI/CCPP 2007.xlsx"
+
+capture confirm file "`census2007_source'"
+if _rc {
+    display as error "Required 2007 census workbook was not found:"
+    display as error "  `census2007_source'"
+    exit 601
+}
+
+/*
+The workbook is a CCPP-level aggregate tabulation, not person-level
+microdata. Hoja1 contains two header rows, 45,677 keyed records, and two
+trailing source-note rows. Hoja2 contains keyless derivatives and is not used.
+The source covers 22 departments and is not the complete 98,011-record 2007
+national CCPP directory. Its acquisition provenance remains unresolved, so
+all source-scope facts are recorded explicitly in versioned documentation.
+*/
+
+import excel ///
+    "`census2007_source'", ///
+    sheet("Hoja1") allstring clear
+
+assert c(k) == 259
+count
+assert r(N) == 45681
+
+keep if ustrregexm(B, "^[0-9]{10}$")
+count
+assert r(N) == 45677
+local census2007_source_rows = r(N)
+
+keep ///
+    B C D E F G ///
+    H I J ///
+    AL AM AN AO AP AQ AR AS AT ///
+    AU AV AW AX AY AZ BA BB ///
+    BC BD BE BF BG BH BI BJ BK ///
+    BL BM BN ///
+    BO BP BQ BR BS BT BU ///
+    BV BW BX BY ///
+    BZ CA CB CC CD CE CF ///
+    CG CH CI CJ CK CL CM CN CO CP CQ CR ///
+    CS CT CU CV CW CX CY CZ DA ///
+    DC DD DE DF DG DH ///
+    DU DV DW ///
+    DX DY DZ EA EB EC ED ///
+    EE EF EG EH ///
+    EL EM EN EO ///
+    EP EQ ER ///
+    ES ET EU EV ///
+    EW EX EY EZ FA FB FC FD ///
+    FE FF FG ///
+    FH FI FJ FK FL FM FN FO FP ///
+    FY FZ GA ///
+    HH HI HJ HK HL HM HN HO HP HQ HR HS ///
+    IQ IR IS IT ///
+    IU IV ///
+    IW IX IY
+
+rename ///
+    (B C D E F G) ///
+    (census2007_ubigeo_ccpp ///
+     department_2007 ///
+     province_2007 ///
+     district_2007 ///
+     ccpp_name_2007 ///
+     area_2007_raw)
+
+rename ///
+    (H I J BY) ///
+    (dwellings_occupied_2007 ///
+     households_2007 ///
+     population_2007 ///
+     rooms_per_dwelling_2007)
+
+rename ///
+    (AL AM AN AO AP AQ AR AS AT) ///
+    (wall_brick_n_2007 ///
+     wall_adobe_n_2007 ///
+     wall_wood_n_2007 ///
+     wall_quincha_n_2007 ///
+     wall_mat_n_2007 ///
+     wall_stone_mud_n_2007 ///
+     wall_stone_cement_n_2007 ///
+     wall_other_n_2007 ///
+     wall_total_n_2007)
+
+rename ///
+    (AU AV AW AX AY AZ BA BB) ///
+    (floor_earth_n_2007 ///
+     floor_cement_n_2007 ///
+     floor_tile_n_2007 ///
+     floor_parquet_n_2007 ///
+     floor_wood_n_2007 ///
+     floor_asphalt_n_2007 ///
+     floor_other_n_2007 ///
+     floor_total_n_2007)
+
+rename ///
+    (BC BD BE BF BG BH BI BJ BK) ///
+    (water_inside_n_2007 ///
+     water_outside_n_2007 ///
+     water_pylon_n_2007 ///
+     water_truck_n_2007 ///
+     water_well_n_2007 ///
+     water_river_n_2007 ///
+     water_neighbor_n_2007 ///
+     water_other_n_2007 ///
+     water_total_n_2007)
+
+rename ///
+    (BL BM BN) ///
+    (daily_water_yes_n_2007 ///
+     daily_water_no_n_2007 ///
+     daily_water_total_n_2007)
+
+rename ///
+    (BO BP BQ BR BS BT BU) ///
+    (sanitation_inside_n_2007 ///
+     sanitation_outside_n_2007 ///
+     sanitation_septic_n_2007 ///
+     sanitation_latrine_n_2007 ///
+     sanitation_river_n_2007 ///
+     sanitation_none_n_2007 ///
+     sanitation_total_n_2007)
+
+rename ///
+    (BV BW BX) ///
+    (electricity_yes_n_2007 ///
+     electricity_no_n_2007 ///
+     electricity_total_n_2007)
+
+rename ///
+    (BZ CA CB CC CD CE CF) ///
+    (tenure_rented_n_2007 ///
+     tenure_invasion_n_2007 ///
+     tenure_installment_n_2007 ///
+     tenure_owned_n_2007 ///
+     tenure_employer_n_2007 ///
+     tenure_other_n_2007 ///
+     tenure_total_n_2007)
+
+rename ///
+    (CG CH CI CJ CK CL CM CN CO CP CQ CR) ///
+    (asset_radio_n_2007 ///
+     asset_tv_n_2007 ///
+     asset_stereo_n_2007 ///
+     asset_washer_n_2007 ///
+     asset_fridge_n_2007 ///
+     asset_computer_n_2007 ///
+     asset_basic_none_n_2007 ///
+     asset_landline_n_2007 ///
+     asset_mobile_n_2007 ///
+     asset_internet_n_2007 ///
+     asset_cable_n_2007 ///
+     asset_comms_none_n_2007)
+
+rename ///
+    (CS CT CU CV CW CX CY CZ DA) ///
+    (fuel_electricity_n_2007 ///
+     fuel_gas_n_2007 ///
+     fuel_kerosene_n_2007 ///
+     fuel_coal_n_2007 ///
+     fuel_wood_n_2007 ///
+     fuel_dung_n_2007 ///
+     fuel_other_n_2007 ///
+     fuel_no_cooking_n_2007 ///
+     fuel_total_n_2007)
+
+rename ///
+    (DC DD DE DF DG DH) ///
+    (disability_vision_n_2007 ///
+     disability_hearing_n_2007 ///
+     disability_speech_n_2007 ///
+     disability_mobility_n_2007 ///
+     disability_other_n_2007 ///
+     disability_none_n_2007)
+
+rename ///
+    (DU DV DW) ///
+    (male_n_2007 female_n_2007 sex_total_n_2007)
+
+rename ///
+    (DX DY DZ EA EB EC ED) ///
+    (age_u1_n_2007 ///
+     age_1_14_n_2007 ///
+     age_15_29_n_2007 ///
+     age_30_44_n_2007 ///
+     age_45_64_n_2007 ///
+     age_65plus_n_2007 ///
+     age_total_n_2007)
+
+rename ///
+    (EE EF EG EH) ///
+    (birth_registered_n_2007 ///
+     birth_unregistered_n_2007 ///
+     birth_reg_unknown_n_2007 ///
+     birth_registration_total_n_2007)
+
+rename ///
+    (EL EM EN EO) ///
+    (not_born_five_years_ago_n_2007 ///
+     same_district_five_years_n_2007 ///
+     other_district_five_years_n_2007 ///
+     five_year_residence_total_n_2007)
+
+rename ///
+    (EP EQ ER) ///
+    (born_same_district_n_2007 ///
+     born_other_district_n_2007 ///
+     birth_district_total_n_2007)
+
+rename ///
+    (ES ET EU EV) ///
+    (insurance_sis_n_2007 ///
+     insurance_essalud_n_2007 ///
+     insurance_other_n_2007 ///
+     insurance_none_n_2007)
+
+rename ///
+    (EW EX EY EZ FA FB FC FD) ///
+    (language_quechua_n_2007 ///
+     language_aymara_n_2007 ///
+     language_ashaninka_n_2007 ///
+     language_other_native_n_2007 ///
+     language_spanish_n_2007 ///
+     language_foreign_n_2007 ///
+     language_speech_limit_n_2007 ///
+     language_total_n_2007)
+
+rename ///
+    (FE FF FG) ///
+    (literate_n_2007 ///
+     illiterate_n_2007 ///
+     literacy_total_n_2007)
+
+rename ///
+    (FH FI FJ FK FL FM FN FO FP) ///
+    (education_none_n_2007 ///
+     education_initial_n_2007 ///
+     education_primary_n_2007 ///
+     education_secondary_n_2007 ///
+     education_technical_inc_n_2007 ///
+     education_technical_com_n_2007 ///
+     education_university_inc_n_2007 ///
+     education_university_com_n_2007 ///
+     education_total_n_2007)
+
+rename ///
+    (FY FZ GA) ///
+    (attendance_yes_n_2007 ///
+     attendance_no_n_2007 ///
+     attendance_total_n_2007)
+
+rename ///
+    (HH HI HJ HK HL HM HN HO HP HQ HR HS) ///
+    (sector_agriculture_n_2007 ///
+     sector_fishing_n_2007 ///
+     sector_mining_n_2007 ///
+     sector_manufacturing_n_2007 ///
+     sector_construction_n_2007 ///
+     sector_utilities_n_2007 ///
+     sector_trade_n_2007 ///
+     sector_services_n_2007 ///
+     sector_finance_n_2007 ///
+     sector_transport_n_2007 ///
+     sector_unspecified_n_2007 ///
+     sector_total_n_2007)
+
+rename ///
+    (IQ IR IS IT) ///
+    (children_born_avg_2007 ///
+     children_alive_avg_2007 ///
+     mothers_n_2007 ///
+     age_first_birth_avg_2007)
+
+rename ///
+    (IU IV) ///
+    (dni_yes_n_2007 dni_no_n_2007)
+
+rename ///
+    (IW IX IY) ///
+    (employed_n_2007 ///
+     unemployed_n_2007 ///
+     outside_labor_force_n_2007)
+
+recast str10 census2007_ubigeo_ccpp
+generate str6 census2007_ubigeo_dist = ///
+    substr(census2007_ubigeo_ccpp, 1, 6)
+generate str4 census2007_ubigeo_prov = ///
+    substr(census2007_ubigeo_ccpp, 1, 4)
+generate str2 census2007_ubigeo_dpto = ///
+    substr(census2007_ubigeo_ccpp, 1, 2)
+
+assert ustrregexm(census2007_ubigeo_ccpp, "^[0-9]{10}$")
+isid census2007_ubigeo_ccpp
+
+local census2007_numeric ///
+    dwellings_occupied_2007 ///
+    households_2007 ///
+    population_2007 ///
+    rooms_per_dwelling_2007 ///
+    wall_*_n_2007 ///
+    floor_*_n_2007 ///
+    water_*_n_2007 ///
+    daily_water_*_n_2007 ///
+    sanitation_*_n_2007 ///
+    electricity_*_n_2007 ///
+    tenure_*_n_2007 ///
+    asset_*_n_2007 ///
+    fuel_*_n_2007 ///
+    disability_*_n_2007 ///
+    male_n_2007 ///
+    female_n_2007 ///
+    sex_total_n_2007 ///
+    age_*_n_2007 ///
+    birth_*_n_2007 ///
+    born_same_district_n_2007 ///
+    born_other_district_n_2007 ///
+    not_born_five_years_ago_n_2007 ///
+    same_district_five_years_n_2007 ///
+    other_district_five_years_n_2007 ///
+    five_year_residence_total_n_2007 ///
+    birth_district_total_n_2007 ///
+    insurance_*_n_2007 ///
+    language_*_n_2007 ///
+    literate_n_2007 ///
+    illiterate_n_2007 ///
+    literacy_total_n_2007 ///
+    education_*_n_2007 ///
+    attendance_*_n_2007 ///
+    sector_*_n_2007 ///
+    children_born_avg_2007 ///
+    children_alive_avg_2007 ///
+    mothers_n_2007 ///
+    age_first_birth_avg_2007 ///
+    dni_*_n_2007 ///
+    employed_n_2007 ///
+    unemployed_n_2007 ///
+    outside_labor_force_n_2007
+
+foreach variable of varlist `census2007_numeric' {
+    destring `variable', replace
+    assert `variable' >= 0 if !missing(`variable')
+}
+
+/*
+Validate every mutually exclusive source block used below. The source totals
+identify the correct analytical universe, preventing the legacy error of
+dividing categories by undocumented columns or by total population.
+*/
+
+egen double census2007_check = rowtotal( ///
+    wall_brick_n_2007 ///
+    wall_adobe_n_2007 ///
+    wall_wood_n_2007 ///
+    wall_quincha_n_2007 ///
+    wall_mat_n_2007 ///
+    wall_stone_mud_n_2007 ///
+    wall_stone_cement_n_2007 ///
+    wall_other_n_2007)
+assert census2007_check == wall_total_n_2007
+drop census2007_check
+
+egen double census2007_check = rowtotal( ///
+    floor_earth_n_2007 ///
+    floor_cement_n_2007 ///
+    floor_tile_n_2007 ///
+    floor_parquet_n_2007 ///
+    floor_wood_n_2007 ///
+    floor_asphalt_n_2007 ///
+    floor_other_n_2007)
+assert census2007_check == floor_total_n_2007
+drop census2007_check
+
+egen double census2007_check = rowtotal( ///
+    water_inside_n_2007 ///
+    water_outside_n_2007 ///
+    water_pylon_n_2007 ///
+    water_truck_n_2007 ///
+    water_well_n_2007 ///
+    water_river_n_2007 ///
+    water_neighbor_n_2007 ///
+    water_other_n_2007)
+assert census2007_check == water_total_n_2007
+drop census2007_check
+
+assert daily_water_yes_n_2007 + ///
+    daily_water_no_n_2007 == daily_water_total_n_2007
+
+egen double census2007_check = rowtotal( ///
+    sanitation_inside_n_2007 ///
+    sanitation_outside_n_2007 ///
+    sanitation_septic_n_2007 ///
+    sanitation_latrine_n_2007 ///
+    sanitation_river_n_2007 ///
+    sanitation_none_n_2007)
+assert census2007_check == sanitation_total_n_2007
+drop census2007_check
+
+assert electricity_yes_n_2007 + ///
+    electricity_no_n_2007 == electricity_total_n_2007
+
+egen double census2007_check = rowtotal( ///
+    tenure_rented_n_2007 ///
+    tenure_invasion_n_2007 ///
+    tenure_installment_n_2007 ///
+    tenure_owned_n_2007 ///
+    tenure_employer_n_2007 ///
+    tenure_other_n_2007)
+assert census2007_check == tenure_total_n_2007
+drop census2007_check
+
+egen double census2007_check = rowtotal( ///
+    fuel_electricity_n_2007 ///
+    fuel_gas_n_2007 ///
+    fuel_kerosene_n_2007 ///
+    fuel_coal_n_2007 ///
+    fuel_wood_n_2007 ///
+    fuel_dung_n_2007 ///
+    fuel_other_n_2007 ///
+    fuel_no_cooking_n_2007)
+assert census2007_check == fuel_total_n_2007
+drop census2007_check
+
+assert male_n_2007 + female_n_2007 == sex_total_n_2007
+
+egen double census2007_check = rowtotal( ///
+    age_u1_n_2007 ///
+    age_1_14_n_2007 ///
+    age_15_29_n_2007 ///
+    age_30_44_n_2007 ///
+    age_45_64_n_2007 ///
+    age_65plus_n_2007)
+assert census2007_check == age_total_n_2007
+drop census2007_check
+
+egen double census2007_check = rowtotal( ///
+    birth_registered_n_2007 ///
+    birth_unregistered_n_2007 ///
+    birth_reg_unknown_n_2007)
+assert census2007_check == birth_registration_total_n_2007
+drop census2007_check
+
+egen double census2007_check = rowtotal( ///
+    not_born_five_years_ago_n_2007 ///
+    same_district_five_years_n_2007 ///
+    other_district_five_years_n_2007)
+assert census2007_check == five_year_residence_total_n_2007
+drop census2007_check
+
+assert born_same_district_n_2007 + ///
+    born_other_district_n_2007 == birth_district_total_n_2007
+
+egen double census2007_check = rowtotal( ///
+    language_quechua_n_2007 ///
+    language_aymara_n_2007 ///
+    language_ashaninka_n_2007 ///
+    language_other_native_n_2007 ///
+    language_spanish_n_2007 ///
+    language_foreign_n_2007 ///
+    language_speech_limit_n_2007)
+assert census2007_check == language_total_n_2007
+drop census2007_check
+
+assert literate_n_2007 + ///
+    illiterate_n_2007 == literacy_total_n_2007
+
+egen double census2007_check = rowtotal( ///
+    education_none_n_2007 ///
+    education_initial_n_2007 ///
+    education_primary_n_2007 ///
+    education_secondary_n_2007 ///
+    education_technical_inc_n_2007 ///
+    education_technical_com_n_2007 ///
+    education_university_inc_n_2007 ///
+    education_university_com_n_2007)
+assert census2007_check == education_total_n_2007
+drop census2007_check
+
+assert attendance_yes_n_2007 + ///
+    attendance_no_n_2007 == attendance_total_n_2007
+
+egen double census2007_check = rowtotal( ///
+    sector_agriculture_n_2007 ///
+    sector_fishing_n_2007 ///
+    sector_mining_n_2007 ///
+    sector_manufacturing_n_2007 ///
+    sector_construction_n_2007 ///
+    sector_utilities_n_2007 ///
+    sector_trade_n_2007 ///
+    sector_services_n_2007 ///
+    sector_finance_n_2007 ///
+    sector_transport_n_2007 ///
+    sector_unspecified_n_2007)
+assert census2007_check == sector_total_n_2007
+drop census2007_check
+
+assert employed_n_2007 + ///
+    unemployed_n_2007 + ///
+    outside_labor_force_n_2007 == education_total_n_2007
+
+assert dwellings_occupied_2007 == wall_total_n_2007
+assert dwellings_occupied_2007 == floor_total_n_2007
+assert dwellings_occupied_2007 == water_total_n_2007
+assert dwellings_occupied_2007 == sanitation_total_n_2007
+assert dwellings_occupied_2007 == electricity_total_n_2007
+assert dwellings_occupied_2007 == tenure_total_n_2007
+assert households_2007 == fuel_total_n_2007
+assert population_2007 == sex_total_n_2007
+assert population_2007 == age_total_n_2007
+assert population_2007 == birth_registration_total_n_2007
+assert population_2007 == five_year_residence_total_n_2007
+assert language_total_n_2007 == attendance_total_n_2007
+assert literacy_total_n_2007 == education_total_n_2007
+
+levelsof census2007_ubigeo_dpto, local(census2007_departments)
+local census2007_department_count : word count `census2007_departments'
+assert `census2007_department_count' == 22
+
+assert inlist(area_2007_raw, "Urbano", "Rural")
+generate byte urban_2007 = area_2007_raw == "Urbano"
+
+generate double ln_population_2007 = ln(population_2007)
+generate double ln_households_2007 = ln(households_2007) if ///
+    households_2007 > 0
+
+local wall_counts ///
+    wall_brick_n_2007 ///
+    wall_adobe_n_2007 ///
+    wall_wood_n_2007 ///
+    wall_quincha_n_2007 ///
+    wall_mat_n_2007 ///
+    wall_stone_mud_n_2007 ///
+    wall_stone_cement_n_2007 ///
+    wall_other_n_2007
+
+local wall_shares ///
+    share_wall_brick_2007 ///
+    share_wall_adobe_2007 ///
+    share_wall_wood_2007 ///
+    share_wall_quincha_2007 ///
+    share_wall_mat_2007 ///
+    share_wall_stone_mud_2007 ///
+    share_wall_stone_cement_2007 ///
+    share_wall_other_2007
+
+forvalues index = 1/8 {
+    local numerator : word `index' of `wall_counts'
+    local share : word `index' of `wall_shares'
+    generate double `share' = ///
+        `numerator' / wall_total_n_2007 if ///
+        wall_total_n_2007 > 0
+}
+
+local floor_counts ///
+    floor_earth_n_2007 ///
+    floor_cement_n_2007 ///
+    floor_tile_n_2007 ///
+    floor_parquet_n_2007 ///
+    floor_wood_n_2007 ///
+    floor_asphalt_n_2007 ///
+    floor_other_n_2007
+
+local floor_shares ///
+    share_floor_earth_2007 ///
+    share_floor_cement_2007 ///
+    share_floor_tile_2007 ///
+    share_floor_parquet_2007 ///
+    share_floor_wood_2007 ///
+    share_floor_asphalt_2007 ///
+    share_floor_other_2007
+
+forvalues index = 1/7 {
+    local numerator : word `index' of `floor_counts'
+    local share : word `index' of `floor_shares'
+    generate double `share' = ///
+        `numerator' / floor_total_n_2007 if ///
+        floor_total_n_2007 > 0
+}
+
+generate double share_water_inside_2007 = ///
+    water_inside_n_2007 / water_total_n_2007 if ///
+    water_total_n_2007 > 0
+generate double share_water_public_2007 = ///
+    (water_inside_n_2007 + ///
+     water_outside_n_2007 + ///
+     water_pylon_n_2007) / water_total_n_2007 if ///
+    water_total_n_2007 > 0
+generate double share_water_well_2007 = ///
+    water_well_n_2007 / water_total_n_2007 if ///
+    water_total_n_2007 > 0
+generate double share_water_river_2007 = ///
+    water_river_n_2007 / water_total_n_2007 if ///
+    water_total_n_2007 > 0
+generate double share_water_daily_2007 = ///
+    daily_water_yes_n_2007 / daily_water_total_n_2007 if ///
+    daily_water_total_n_2007 > 0
+
+generate double share_sanitation_sewer_2007 = ///
+    (sanitation_inside_n_2007 + ///
+     sanitation_outside_n_2007) / sanitation_total_n_2007 if ///
+    sanitation_total_n_2007 > 0
+generate double share_sanitation_septic_2007 = ///
+    sanitation_septic_n_2007 / sanitation_total_n_2007 if ///
+    sanitation_total_n_2007 > 0
+generate double share_sanitation_latrine_2007 = ///
+    sanitation_latrine_n_2007 / sanitation_total_n_2007 if ///
+    sanitation_total_n_2007 > 0
+generate double share_sanitation_none_2007 = ///
+    sanitation_none_n_2007 / sanitation_total_n_2007 if ///
+    sanitation_total_n_2007 > 0
+generate double share_electricity_2007 = ///
+    electricity_yes_n_2007 / electricity_total_n_2007 if ///
+    electricity_total_n_2007 > 0
+
+generate double share_tenure_rented_2007 = ///
+    tenure_rented_n_2007 / tenure_total_n_2007 if ///
+    tenure_total_n_2007 > 0
+generate double share_tenure_owned_2007 = ///
+    (tenure_invasion_n_2007 + ///
+     tenure_installment_n_2007 + ///
+     tenure_owned_n_2007) / tenure_total_n_2007 if ///
+    tenure_total_n_2007 > 0
+
+local asset_counts ///
+    asset_radio_n_2007 ///
+    asset_tv_n_2007 ///
+    asset_washer_n_2007 ///
+    asset_fridge_n_2007 ///
+    asset_computer_n_2007 ///
+    asset_basic_none_n_2007 ///
+    asset_landline_n_2007 ///
+    asset_mobile_n_2007 ///
+    asset_internet_n_2007 ///
+    asset_cable_n_2007 ///
+    asset_comms_none_n_2007
+
+local asset_shares ///
+    share_asset_radio_2007 ///
+    share_asset_tv_2007 ///
+    share_asset_washer_2007 ///
+    share_asset_fridge_2007 ///
+    share_asset_computer_2007 ///
+    share_asset_basic_none_2007 ///
+    share_asset_landline_2007 ///
+    share_asset_mobile_2007 ///
+    share_asset_internet_2007 ///
+    share_asset_cable_2007 ///
+    share_asset_comms_none_2007
+
+forvalues index = 1/11 {
+    local numerator : word `index' of `asset_counts'
+    local share : word `index' of `asset_shares'
+    generate double `share' = ///
+        `numerator' / households_2007 if ///
+        households_2007 > 0
+}
+
+generate double share_clean_cooking_2007 = ///
+    (fuel_electricity_n_2007 + ///
+     fuel_gas_n_2007) / fuel_total_n_2007 if ///
+    fuel_total_n_2007 > 0
+generate double share_fuel_wood_2007 = ///
+    fuel_wood_n_2007 / fuel_total_n_2007 if ///
+    fuel_total_n_2007 > 0
+generate double share_fuel_dung_2007 = ///
+    fuel_dung_n_2007 / fuel_total_n_2007 if ///
+    fuel_total_n_2007 > 0
+
+generate double share_female_2007 = ///
+    female_n_2007 / sex_total_n_2007 if ///
+    sex_total_n_2007 > 0
+generate double share_age_0_14_2007 = ///
+    (age_u1_n_2007 + age_1_14_n_2007) / age_total_n_2007 if ///
+    age_total_n_2007 > 0
+generate double share_age_15_29_2007 = ///
+    age_15_29_n_2007 / age_total_n_2007 if ///
+    age_total_n_2007 > 0
+generate double share_age_30_44_2007 = ///
+    age_30_44_n_2007 / age_total_n_2007 if ///
+    age_total_n_2007 > 0
+generate double share_age_45_64_2007 = ///
+    age_45_64_n_2007 / age_total_n_2007 if ///
+    age_total_n_2007 > 0
+generate double share_age_65plus_2007 = ///
+    age_65plus_n_2007 / age_total_n_2007 if ///
+    age_total_n_2007 > 0
+generate double share_any_disability_2007 = ///
+    1 - disability_none_n_2007 / population_2007 if ///
+    population_2007 > 0
+generate double share_birth_registered_2007 = ///
+    birth_registered_n_2007 / birth_registration_total_n_2007 if ///
+    birth_registration_total_n_2007 > 0
+generate double share_moved_five_years_2007 = ///
+    other_district_five_years_n_2007 / ///
+    (same_district_five_years_n_2007 + ///
+     other_district_five_years_n_2007) if ///
+    same_district_five_years_n_2007 + ///
+    other_district_five_years_n_2007 > 0
+generate double share_born_other_district_2007 = ///
+    born_other_district_n_2007 / birth_district_total_n_2007 if ///
+    birth_district_total_n_2007 > 0
+
+generate double share_insurance_sis_2007 = ///
+    insurance_sis_n_2007 / population_2007 if ///
+    population_2007 > 0
+generate double share_insurance_essalud_2007 = ///
+    insurance_essalud_n_2007 / population_2007 if ///
+    population_2007 > 0
+generate double share_insurance_none_2007 = ///
+    insurance_none_n_2007 / population_2007 if ///
+    population_2007 > 0
+
+generate double share_indigenous_language_2007 = ///
+    (language_quechua_n_2007 + ///
+     language_aymara_n_2007 + ///
+     language_ashaninka_n_2007 + ///
+     language_other_native_n_2007) / language_total_n_2007 if ///
+    language_total_n_2007 > 0
+generate double share_spanish_language_2007 = ///
+    language_spanish_n_2007 / language_total_n_2007 if ///
+    language_total_n_2007 > 0
+generate double share_literate_2007 = ///
+    literate_n_2007 / literacy_total_n_2007 if ///
+    literacy_total_n_2007 > 0
+generate double share_education_none_2007 = ///
+    education_none_n_2007 / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+generate double share_education_primary_2007 = ///
+    education_primary_n_2007 / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+generate double share_education_secondary_2007 = ///
+    education_secondary_n_2007 / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+generate double share_education_technical_2007 = ///
+    (education_technical_inc_n_2007 + ///
+     education_technical_com_n_2007) / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+generate double share_education_university_2007 = ///
+    (education_university_inc_n_2007 + ///
+     education_university_com_n_2007) / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+
+generate double share_dni_2007 = ///
+    dni_yes_n_2007 / (dni_yes_n_2007 + dni_no_n_2007) if ///
+    dni_yes_n_2007 + dni_no_n_2007 > 0
+generate double labor_force_participation_2007 = ///
+    (employed_n_2007 + unemployed_n_2007) / ///
+    education_total_n_2007 if ///
+    education_total_n_2007 > 0
+generate double employment_rate_2007 = ///
+    employed_n_2007 / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+generate double unemployment_rate_2007 = ///
+    unemployed_n_2007 / ///
+    (employed_n_2007 + unemployed_n_2007) if ///
+    employed_n_2007 + unemployed_n_2007 > 0
+generate double share_sector_agriculture_2007 = ///
+    sector_agriculture_n_2007 / sector_total_n_2007 if ///
+    sector_total_n_2007 > 0
+generate double share_sector_mining_2007 = ///
+    sector_mining_n_2007 / sector_total_n_2007 if ///
+    sector_total_n_2007 > 0
+generate double share_sector_manufacturing_2007 = ///
+    sector_manufacturing_n_2007 / sector_total_n_2007 if ///
+    sector_total_n_2007 > 0
+generate double share_sector_services_2007 = ///
+    (sector_services_n_2007 + ///
+     sector_finance_n_2007 + ///
+     sector_transport_n_2007) / sector_total_n_2007 if ///
+    sector_total_n_2007 > 0
+
+local census2007_shares ///
+    share_wall_*_2007 ///
+    share_floor_*_2007 ///
+    share_water_*_2007 ///
+    share_sanitation_*_2007 ///
+    share_electricity_2007 ///
+    share_tenure_*_2007 ///
+    share_asset_*_2007 ///
+    share_clean_cooking_2007 ///
+    share_fuel_*_2007 ///
+    share_female_2007 ///
+    share_age_*_2007 ///
+    share_any_disability_2007 ///
+    share_birth_registered_2007 ///
+    share_moved_five_years_2007 ///
+    share_born_other_district_2007 ///
+    share_insurance_*_2007 ///
+    share_indigenous_language_2007 ///
+    share_spanish_language_2007 ///
+    share_literate_2007 ///
+    share_education_*_2007 ///
+    share_dni_2007 ///
+    labor_force_participation_2007 ///
+    employment_rate_2007 ///
+    unemployment_rate_2007 ///
+    share_sector_*_2007
+
+foreach variable of varlist `census2007_shares' {
+    assert inrange(`variable', 0, 1) if !missing(`variable')
+}
+
+label variable census2007_ubigeo_ccpp ///
+    "Ten-digit centro-poblado UBIGEO in 2007 census tabulation"
+label variable urban_2007 ///
+    "Urban centro poblado in 2007 census tabulation"
+label variable population_2007 ///
+    "Population in 2007 census tabulation"
+label variable households_2007 ///
+    "Households in 2007 census tabulation"
+label variable dwellings_occupied_2007 ///
+    "Occupied dwellings with persons present in 2007"
+label variable rooms_per_dwelling_2007 ///
+    "Average rooms per dwelling in 2007"
+label variable ln_population_2007 ///
+    "Natural log of 2007 population"
+label variable ln_households_2007 ///
+    "Natural log of 2007 households"
+label variable share_water_public_2007 ///
+    "Share of occupied dwellings using public or pylon water"
+label variable share_sanitation_sewer_2007 ///
+    "Share of occupied dwellings connected to public sewer"
+label variable share_electricity_2007 ///
+    "Share of occupied dwellings with public electricity"
+label variable share_clean_cooking_2007 ///
+    "Share of households cooking with gas or electricity"
+label variable share_any_disability_2007 ///
+    "Share of population with any reported permanent limitation"
+label variable share_indigenous_language_2007 ///
+    "Share age 3+ whose first language was indigenous"
+label variable share_literate_2007 ///
+    "Share age 14+ able to read and write"
+label variable labor_force_participation_2007 ///
+    "Labor-force participation among population age 14+"
+label variable unemployment_rate_2007 ///
+    "Unemployment rate among the 2007 labor force"
+
+quietly summarize population_2007, meanonly
+local census2007_population_sum = r(sum)
+quietly summarize households_2007, meanonly
+local census2007_household_sum = r(sum)
+
+/*
+Create deterministic secondary linkage maps before removing normalized helper
+fields. Exact UBIGEO is authoritative. Exact names are used only when the
+source path is unique; they never overwrite an exact-code link.
+*/
+
+victimasrd_normalize_name ///
+    department_2007, generate(census2007_dpto_norm)
+victimasrd_normalize_name ///
+    province_2007, generate(census2007_prov_norm)
+victimasrd_normalize_name ///
+    district_2007, generate(census2007_dist_norm)
+victimasrd_normalize_name ///
+    ccpp_name_2007, generate(census2007_ccpp_norm)
+
+egen str244 census2007_path_norm = concat( ///
+    census2007_dpto_norm ///
+    census2007_prov_norm ///
+    census2007_dist_norm ///
+    census2007_ccpp_norm), ///
+    punct("|")
+
+tempfile ///
+    census2007_ids ///
+    census2007_paths ///
+    census2007_district_names ///
+    census2007_full
+
+preserve
+keep census2007_ubigeo_ccpp
+rename census2007_ubigeo_ccpp census2007_assigned_code
+isid census2007_assigned_code
+save "`census2007_ids'", replace
+restore
+
+preserve
+keep if ///
+    census2007_dpto_norm != "" & ///
+    census2007_prov_norm != "" & ///
+    census2007_dist_norm != "" & ///
+    census2007_ccpp_norm != ""
+bysort census2007_path_norm: generate int census2007_path_count = _N
+keep if census2007_path_count == 1
+keep census2007_path_norm census2007_ubigeo_ccpp
+rename census2007_ubigeo_ccpp census2007_path_code
+isid census2007_path_norm
+save "`census2007_paths'", replace
+restore
+
+preserve
+keep if ///
+    census2007_ubigeo_dist != "" & ///
+    census2007_ccpp_norm != ""
+bysort census2007_ubigeo_dist census2007_ccpp_norm: ///
+    generate int census2007_pair_count = _N
+keep if census2007_pair_count == 1
+keep ///
+    census2007_ubigeo_dist ///
+    census2007_ccpp_norm ///
+    census2007_ubigeo_ccpp
+rename census2007_ubigeo_dist ubigeo_dist
+rename census2007_ubigeo_ccpp census2007_pair_code
+isid ubigeo_dist census2007_ccpp_norm
+save "`census2007_district_names'", replace
+restore
+
+compress
+sort census2007_ubigeo_ccpp
+save ///
+    "${intermediate_root}/04_census_2007_ccpp.dta", ///
+    replace
+
+generate str10 census2007_assigned_code = ///
+    census2007_ubigeo_ccpp
+drop ///
+    census2007_dpto_norm ///
+    census2007_prov_norm ///
+    census2007_dist_norm ///
+    census2007_ccpp_norm ///
+    census2007_path_norm
+save "`census2007_full'", replace
+
+use ///
+    "${analysis_data_root}/04_foundational_community_registry.dta", ///
+    clear
+
+ds
+local foundational_release_vars `r(varlist)'
+
+generate str10 census2007_assigned_code = ubigeo_ccpp
+merge m:1 census2007_assigned_code using ///
+    "`census2007_ids'", ///
+    keep(master match) ///
+    gen(census2007_code_match)
+
+generate str32 census2007_link_method = cond( ///
+    census2007_code_match == 3, ///
+    "exact_ubigeo", ///
+    "unmatched")
+
+replace census2007_assigned_code = "" if ///
+    census2007_code_match == 1
+
+victimasrd_normalize_name ///
+    dpto_victim_raw, generate(census2007_dpto_norm)
+victimasrd_normalize_name ///
+    prov_victim_raw, generate(census2007_prov_norm)
+victimasrd_normalize_name ///
+    dist_victim_raw, generate(census2007_dist_norm)
+victimasrd_normalize_name ///
+    ccpp_victim_raw, generate(census2007_ccpp_norm)
+
+egen str244 census2007_path_norm = concat( ///
+    census2007_dpto_norm ///
+    census2007_prov_norm ///
+    census2007_dist_norm ///
+    census2007_ccpp_norm), ///
+    punct("|")
+
+merge m:1 census2007_path_norm using ///
+    "`census2007_paths'", ///
+    keep(master match) ///
+    gen(census2007_path_match)
+
+replace census2007_assigned_code = ///
+    census2007_path_code if ///
+    census2007_link_method == "unmatched" & ///
+    census2007_path_match == 3
+
+replace census2007_link_method = ///
+    "unique_exact_full_path" if ///
+    census2007_link_method == "unmatched" & ///
+    census2007_path_match == 3
+
+merge m:1 ubigeo_dist census2007_ccpp_norm using ///
+    "`census2007_district_names'", ///
+    keep(master match) ///
+    gen(census2007_pair_match)
+
+replace census2007_assigned_code = ///
+    census2007_pair_code if ///
+    census2007_link_method == "unmatched" & ///
+    census2007_pair_match == 3
+
+replace census2007_link_method = ///
+    "unique_exact_district_name" if ///
+    census2007_link_method == "unmatched" & ///
+    census2007_pair_match == 3
+
+generate byte census2007_name_code_conflict = ///
+    census2007_code_match == 3 & ( ///
+        (census2007_path_match == 3 & ///
+         ubigeo_ccpp != census2007_path_code) | ///
+        (census2007_pair_match == 3 & ///
+         ubigeo_ccpp != census2007_pair_code))
+
+count if census2007_name_code_conflict
+local census2007_name_code_conflicts = r(N)
+
+preserve
+keep if census2007_name_code_conflict
+keep ///
+    ruv_id ///
+    ubigeo_ccpp ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    census2007_path_code ///
+    census2007_pair_code ///
+    census2007_link_method
+generate str52 linkage_disposition = ///
+    "exact_ubigeo_retained_name_candidate_quarantined"
+save ///
+    "${qa_data_root}/census2007_name_code_conflicts.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/census2007_name_code_conflicts.csv", ///
+    replace
+restore
+
+count if census2007_link_method == "exact_ubigeo"
+local census2007_exact_ubigeo = r(N)
+count if census2007_link_method == "unique_exact_full_path"
+local census2007_exact_path = r(N)
+count if census2007_link_method == "unique_exact_district_name"
+local census2007_exact_district_name = r(N)
+count if census2007_link_method == "unmatched"
+local census2007_unmatched = r(N)
+
+merge m:1 census2007_assigned_code using ///
+    "`census2007_full'", ///
+    keep(master match) ///
+    gen(census2007_data_merge)
+
+generate byte census2007_linked = ///
+    census2007_data_merge == 3
+
+count if census2007_linked
+local census2007_linked = r(N)
+assert `census2007_linked' == ///
+    `census2007_exact_ubigeo' + ///
+    `census2007_exact_path' + ///
+    `census2007_exact_district_name'
+
+count if !census2007_linked
+assert r(N) == `census2007_unmatched'
+
+label variable census2007_linked ///
+    "RUV community linked to 2007 census CCPP tabulation"
+label variable census2007_link_method ///
+    "Method linking RUV community to 2007 census tabulation"
+
+preserve
+keep if !census2007_linked
+keep ///
+    ruv_id ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    victim_inei_code_vintage ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    victimization_level_source ///
+    census2007_link_method
+generate str52 linkage_disposition = ///
+    "retained_without_2007_census_covariates"
+save ///
+    "${qa_data_root}/census2007_unmatched_ruv.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/census2007_unmatched_ruv.csv", ///
+    replace
+restore
+
+local census2007_release_vars ///
+    census2007_linked ///
+    census2007_link_method ///
+    census2007_ubigeo_ccpp ///
+    department_2007 ///
+    province_2007 ///
+    district_2007 ///
+    ccpp_name_2007 ///
+    urban_2007 ///
+    population_2007 ///
+    households_2007 ///
+    dwellings_occupied_2007 ///
+    rooms_per_dwelling_2007 ///
+    ln_population_2007 ///
+    ln_households_2007 ///
+    share_wall_*_2007 ///
+    share_floor_*_2007 ///
+    share_water_*_2007 ///
+    share_sanitation_*_2007 ///
+    share_electricity_2007 ///
+    share_tenure_*_2007 ///
+    share_asset_*_2007 ///
+    share_clean_cooking_2007 ///
+    share_fuel_*_2007 ///
+    share_female_2007 ///
+    share_age_*_2007 ///
+    share_any_disability_2007 ///
+    share_birth_registered_2007 ///
+    share_moved_five_years_2007 ///
+    share_born_other_district_2007 ///
+    share_insurance_*_2007 ///
+    share_indigenous_language_2007 ///
+    share_spanish_language_2007 ///
+    share_literate_2007 ///
+    share_education_*_2007 ///
+    share_dni_2007 ///
+    labor_force_participation_2007 ///
+    employment_rate_2007 ///
+    unemployment_rate_2007 ///
+    share_sector_*_2007 ///
+    children_born_avg_2007 ///
+    children_alive_avg_2007 ///
+    mothers_n_2007 ///
+    age_first_birth_avg_2007
+
+keep ///
+    `foundational_release_vars' ///
+    `census2007_release_vars'
+
+order ///
+    `foundational_release_vars' ///
+    census2007_linked ///
+    census2007_link_method ///
+    census2007_ubigeo_ccpp ///
+    department_2007 ///
+    province_2007 ///
+    district_2007 ///
+    ccpp_name_2007 ///
+    urban_2007 ///
+    population_2007 ///
+    households_2007 ///
+    dwellings_occupied_2007 ///
+    rooms_per_dwelling_2007 ///
+    ln_population_2007 ///
+    ln_households_2007
+
+compress
+sort ruv_id
+isid ruv_id
+count
+local census2007_registry_rows = r(N)
+assert `census2007_registry_rows' == `foundational_rows'
+
+save ///
+    "${analysis_data_root}/05_community_registry_census2007.dta", ///
+    replace
+
+
+*===============================================================================
+**# 9. Write aggregate QA metrics and close
 *===============================================================================
 
 tempname qa_post
@@ -2842,6 +4006,72 @@ post `qa_post' ///
     ("retained_unresolved") ///
     ("RUV rows retained without a verified ten-digit CCPP UBIGEO")
 
+post `qa_post' ///
+    ("census2007_source_rows") ///
+    (`census2007_source_rows') ///
+    ("validated") ///
+    ("Unique keyed rows in the supplied CCPP-level 2007 census tabulation")
+
+post `qa_post' ///
+    ("census2007_departments") ///
+    (`census2007_department_count') ///
+    ("source_scope") ///
+    ("Departments represented in the supplied workbook; not national coverage")
+
+post `qa_post' ///
+    ("census2007_population_sum") ///
+    (`census2007_population_sum') ///
+    ("source_scope") ///
+    ("Population represented in supplied workbook; not the national census total")
+
+post `qa_post' ///
+    ("census2007_household_sum") ///
+    (`census2007_household_sum') ///
+    ("source_scope") ///
+    ("Households represented in supplied workbook; not the national census total")
+
+post `qa_post' ///
+    ("census2007_exact_ubigeo") ///
+    (`census2007_exact_ubigeo') ///
+    ("validated") ///
+    ("RUV records linked by exact ten-digit CCPP UBIGEO")
+
+post `qa_post' ///
+    ("census2007_unique_exact_path") ///
+    (`census2007_exact_path') ///
+    ("validated") ///
+    ("Additional RUV records linked by a unique exact normalized full path")
+
+post `qa_post' ///
+    ("census2007_unique_district_name") ///
+    (`census2007_exact_district_name') ///
+    ("validated") ///
+    ("Additional RUV records linked by unique exact district-code and CCPP name")
+
+post `qa_post' ///
+    ("census2007_name_code_conflicts") ///
+    (`census2007_name_code_conflicts') ///
+    ("quarantined") ///
+    ("Exact UBIGEO retained when an exact-name candidate identified another code")
+
+post `qa_post' ///
+    ("census2007_linked") ///
+    (`census2007_linked') ///
+    ("validated") ///
+    ("RUV records with 2007 census covariates")
+
+post `qa_post' ///
+    ("census2007_unmatched") ///
+    (`census2007_unmatched') ///
+    ("retained_unmatched") ///
+    ("RUV records retained without 2007 census covariates")
+
+post `qa_post' ///
+    ("census2007_registry_rows") ///
+    (`census2007_registry_rows') ///
+    ("validated") ///
+    ("All foundational RUV records retained after the 2007 census merge")
+
 postclose `qa_post'
 
 use `qa_metrics', clear
@@ -2871,7 +4101,14 @@ export delimited ///
     replace
 restore
 
-display as result "Foundational data-preparation staging completed."
+preserve
+keep if strpos(metric, "census2007_") == 1
+export delimited ///
+    "${metadata_root}/census-2007/sample-flow.csv", ///
+    replace
+restore
+
+display as result "Data-preparation staging completed."
 display as text   "INEI CCPP rows:                  `inei_ccpp_rows'"
 display as text   "Historical source rows pooled:  `historical_source_rows'"
 display as text   "RUV victimization rows:          `victimization_rows'"
@@ -2885,6 +4122,12 @@ display as text   "Adjudicated CMAN-to-RUV links:   `cman_adjud_retained'"
 display as text   "CMAN rows outside the RUV universe: `cman_victim_unresolved'"
 display as text   "RUV rows retained without code:  `victimization_inei_unresolved'"
 display as text   "Final victimization-universe rows: `foundational_rows'"
+display as text   "2007 census source rows:         `census2007_source_rows'"
+display as text   "2007 census exact-code links:    `census2007_exact_ubigeo'"
+display as text   "2007 census exact-name links:    " ///
+    `census2007_exact_path' + `census2007_exact_district_name'
+display as text   "RUV rows with 2007 covariates:   `census2007_linked'"
+display as text   "RUV rows without 2007 covariates: `census2007_unmatched'"
 display as text   "All RUV rows retained with complete treatment status."
 
 capture program drop victimasrd_normalize_name

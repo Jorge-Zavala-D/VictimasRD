@@ -154,6 +154,11 @@ aggregate counts, and
 `2 data/3 Coded/1 Current analysis datasets/04_foundational_community_registry.dta`
 is the validated, 5,712-row analysis-stage registry.
 
+The next implemented milestone integrates the 2007 census baseline while
+preserving this foundational registry unchanged. Its source audit, variable
+construction, linkage rules, and outputs are documented in
+[`docs/CENSUS_2007_PREPARATION.md`](CENSUS_2007_PREPARATION.md).
+
 The complete source, matching, conflict, and final-flow record is maintained in
 [`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](CCPP_UBIGEO_RECOVERY_LOG.tex).
 

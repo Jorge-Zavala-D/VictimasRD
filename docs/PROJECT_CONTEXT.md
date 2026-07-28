@@ -183,6 +183,37 @@ registry preserves all 4,433 source rows, while the RUV-master merge excludes
 first treatment year. Full recovery evidence is in
 `docs/CCPP_UBIGEO_RECOVERY_LOG.tex`.
 
+## Recorded 2007 census source and linkage decision
+
+On July 28, 2026, the supplied
+`2 data/1 Raw/9 INEI/CCPP 2007.xlsx` workbook was designated as the current
+CCPP-level baseline-covariate source after a source audit. It contains 45,677
+unique ten-digit CCPP records across 22 departments. The workbook is consistent
+with an INEI aggregate export, but the original 2018 acquisition path is not
+recoverable and its scope is smaller than INEI's reported 98,011-centro-poblado
+2007 national directory. It must therefore not be described as a complete
+national census extract.
+
+The current INEI Microdatos catalog does not expose the 2007 Population and
+Housing Census as a bulk downloadable survey, and the official REDATAM and
+Datawarehouse endpoints did not yield a usable bulk CCPP file during the
+audit. The supplied workbook remains the analytical source until a certified
+bulk extract can be acquired and compared against it. Full source and
+construction details are recorded in `docs/CENSUS_2007_PREPARATION.md`.
+
+The census merge preserves the authoritative RUV identifier and every one of
+the 5,712 foundational rows. It links first by exact ten-digit CCPP UBIGEO,
+then by unique exact normalized full path, and finally by unique exact CCPP
+name within district. Exact-code links take precedence over conflicting name
+candidates, which are quarantined in Dropbox Working QA. No fuzzy census match
+is accepted automatically.
+
+The legacy weighted `poverty2007*` measures are not treated as official poverty
+or NBI indicators and are not reproduced. The canonical preparation retains
+transparent component covariates with explicit source universes. Adding an
+official poverty-map or household-microdata NBI measure remains a separate
+source and methods task.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must

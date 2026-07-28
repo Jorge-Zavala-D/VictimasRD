@@ -1,0 +1,89 @@
+variable,description,universe_or_denominator,source_columns,construction
+census2007_linked,RUV community linked to the 2007 CCPP tabulation,RUV source rows,derived,1 when a validated census link is available
+census2007_link_method,Method linking the RUV row to the census tabulation,RUV source rows,derived,Exact UBIGEO followed by unique exact name rules
+census2007_ubigeo_ccpp,Historical ten-digit code used for census linkage,Linked RUV rows,B,Preserved separately from the authoritative RUV CCPP code
+department_2007,Department name in the 2007 tabulation,Linked RUV rows,C,Source text
+province_2007,Province name in the 2007 tabulation,Linked RUV rows,D,Source text
+district_2007,District name in the 2007 tabulation,Linked RUV rows,E,Source text
+ccpp_name_2007,Centro-poblado name in the 2007 tabulation,Linked RUV rows,F,Source text
+urban_2007,Urban centro poblado,Keyed census rows,G,1 for Urbano and 0 for Rural
+population_2007,Population,Keyed census rows,J,Source count
+households_2007,Households,Keyed census rows,I,Source count
+dwellings_occupied_2007,Occupied dwellings with persons present,Keyed census rows,H,Source count
+rooms_per_dwelling_2007,Average rooms per dwelling,Occupied dwellings,BY,Source average
+ln_population_2007,Natural log of population,Positive population,J,ln(population_2007)
+ln_households_2007,Natural log of households,Positive household count,I,ln(households_2007)
+share_wall_brick_2007,Share with brick or cement-block walls,Occupied dwellings,AL/AT,AL divided by AT
+share_wall_adobe_2007,Share with adobe or rammed-earth walls,Occupied dwellings,AM/AT,AM divided by AT
+share_wall_wood_2007,Share with wood walls,Occupied dwellings,AN/AT,AN divided by AT
+share_wall_quincha_2007,Share with quincha walls,Occupied dwellings,AO/AT,AO divided by AT
+share_wall_mat_2007,Share with woven-mat walls,Occupied dwellings,AP/AT,AP divided by AT
+share_wall_stone_mud_2007,Share with stone-and-mud walls,Occupied dwellings,AQ/AT,AQ divided by AT
+share_wall_stone_cement_2007,Share with stone-and-cement walls,Occupied dwellings,AR/AT,AR divided by AT
+share_wall_other_2007,Share with other wall material,Occupied dwellings,AS/AT,AS divided by AT
+share_floor_earth_2007,Share with earth floors,Occupied dwellings,AU/BB,AU divided by BB
+share_floor_cement_2007,Share with cement floors,Occupied dwellings,AV/BB,AV divided by BB
+share_floor_tile_2007,Share with tile or terrazzo floors,Occupied dwellings,AW/BB,AW divided by BB
+share_floor_parquet_2007,Share with parquet or polished-wood floors,Occupied dwellings,AX/BB,AX divided by BB
+share_floor_wood_2007,Share with plank floors,Occupied dwellings,AY/BB,AY divided by BB
+share_floor_asphalt_2007,Share with asphalt-sheet floors,Occupied dwellings,AZ/BB,AZ divided by BB
+share_floor_other_2007,Share with other floor material,Occupied dwellings,BA/BB,BA divided by BB
+share_water_inside_2007,Share with public water inside the dwelling,Occupied dwellings,BC/BK,BC divided by BK
+share_water_public_2007,Share using public network or public pylon water,Occupied dwellings,BC:BE/BK,Sum of BC through BE divided by BK
+share_water_well_2007,Share using well water,Occupied dwellings,BG/BK,BG divided by BK
+share_water_river_2007,Share using river or irrigation-channel water,Occupied dwellings,BH/BK,BH divided by BK
+share_water_daily_2007,Share with daily water among public-water dwellings,Dwellings using public network or pylon,BL/BN,BL divided by BN
+share_sanitation_sewer_2007,Share connected to public sewer,Occupied dwellings,BO:BP/BU,BO plus BP divided by BU
+share_sanitation_septic_2007,Share using a septic tank,Occupied dwellings,BQ/BU,BQ divided by BU
+share_sanitation_latrine_2007,Share using a pit or latrine,Occupied dwellings,BR/BU,BR divided by BU
+share_sanitation_none_2007,Share without sanitation,Occupied dwellings,BT/BU,BT divided by BU
+share_electricity_2007,Share with public electricity,Occupied dwellings,BV/BX,BV divided by BX
+share_tenure_rented_2007,Share of rented dwellings,Occupied dwellings,BZ/CF,BZ divided by CF
+share_tenure_owned_2007,Share owned through invasion installments or full payment,Occupied dwellings,CA:CC/CF,Sum of CA through CC divided by CF
+share_asset_radio_2007,Share of households with a radio,Households,CG/I,CG divided by I
+share_asset_tv_2007,Share of households with a color television,Households,CH/I,CH divided by I
+share_asset_washer_2007,Share of households with a washing machine,Households,CJ/I,CJ divided by I
+share_asset_fridge_2007,Share of households with a refrigerator,Households,CK/I,CK divided by I
+share_asset_computer_2007,Share of households with a computer,Households,CL/I,CL divided by I
+share_asset_basic_none_2007,Share without any listed basic durable,Households,CM/I,CM divided by I
+share_asset_landline_2007,Share of households with a fixed telephone,Households,CN/I,CN divided by I
+share_asset_mobile_2007,Share of households with a mobile telephone,Households,CO/I,CO divided by I
+share_asset_internet_2007,Share of households with internet,Households,CP/I,CP divided by I
+share_asset_cable_2007,Share of households with cable television,Households,CQ/I,CQ divided by I
+share_asset_comms_none_2007,Share without any listed communication service,Households,CR/I,CR divided by I
+share_clean_cooking_2007,Share cooking with gas or electricity,Households,CS:CT/DA,CS plus CT divided by DA
+share_fuel_wood_2007,Share cooking with wood,Households,CW/DA,CW divided by DA
+share_fuel_dung_2007,Share cooking with dung,Households,CX/DA,CX divided by DA
+share_female_2007,Female share of population,Population,DV/DW,DV divided by DW
+share_age_0_14_2007,Share age 0 to 14,Population,DX:DY/ED,DX plus DY divided by ED
+share_age_15_29_2007,Share age 15 to 29,Population,DZ/ED,DZ divided by ED
+share_age_30_44_2007,Share age 30 to 44,Population,EA/ED,EA divided by ED
+share_age_45_64_2007,Share age 45 to 64,Population,EB/ED,EB divided by ED
+share_age_65plus_2007,Share age 65 or older,Population,EC/ED,EC divided by ED
+share_any_disability_2007,Share with any reported permanent limitation,Population,DH/J,1 minus no-disability count divided by population
+share_birth_registered_2007,Share with a registered birth,Population,EE/EH,EE divided by EH
+share_moved_five_years_2007,Share living in another district five years earlier,Population born five years earlier,EM:EN,EN divided by EM plus EN
+share_born_other_district_2007,Share born outside current district,Applicable population,EQ/ER,EQ divided by ER
+share_insurance_sis_2007,Share affiliated with SIS,Population,ES/J,ES divided by population
+share_insurance_essalud_2007,Share affiliated with ESSALUD,Population,ET/J,ET divided by population
+share_insurance_none_2007,Share without health insurance,Population,EV/J,EV divided by population
+share_indigenous_language_2007,Share whose first language was indigenous,Population age 3+,EW:EZ/FD,Sum of indigenous-language categories divided by FD
+share_spanish_language_2007,Share whose first language was Spanish,Population age 3+,FA/FD,FA divided by FD
+share_literate_2007,Share able to read and write,Population age 14+,FE/FG,FE divided by FG
+share_education_none_2007,Share with no approved education level,Population age 14+,FH/FP,FH divided by FP
+share_education_primary_2007,Share with primary as highest approved level,Population age 14+,FJ/FP,FJ divided by FP
+share_education_secondary_2007,Share with secondary as highest approved level,Population age 14+,FK/FP,FK divided by FP
+share_education_technical_2007,Share with incomplete or complete non-university tertiary education,Population age 14+,FL:FM/FP,FL plus FM divided by FP
+share_education_university_2007,Share with incomplete or complete university education,Population age 14+,FN:FO/FP,FN plus FO divided by FP
+share_dni_2007,Share age 18+ with a DNI,Population age 18+,IU:IV,IU divided by IU plus IV
+labor_force_participation_2007,Labor-force participation rate,Population age 14+,IW:IY,(IW plus IX) divided by FP
+employment_rate_2007,Employment-to-population rate,Population age 14+,IW/FP,IW divided by FP
+unemployment_rate_2007,Unemployment rate,Labor force,IW:IX,IX divided by IW plus IX
+share_sector_agriculture_2007,Share of employed persons in agriculture,Employed persons,HH/HS,HH divided by HS
+share_sector_mining_2007,Share of employed persons in mining,Employed persons,HJ/HS,HJ divided by HS
+share_sector_manufacturing_2007,Share of employed persons in manufacturing,Employed persons,HK/HS,HK divided by HS
+share_sector_services_2007,Share in services finance or transport,Employed persons,HO:HQ/HS,HO plus HP plus HQ divided by HS
+children_born_avg_2007,Average children ever born,Women in source fertility universe,IQ,Source average
+children_alive_avg_2007,Average children alive,Women in source fertility universe,IR,Source average
+mothers_n_2007,Number of mothers,Source fertility universe,IS,Source count
+age_first_birth_avg_2007,Average age at first live birth,Mothers in source fertility universe,IT,Source average

@@ -1,0 +1,12 @@
+metric,value,status,note
+census2007_source_rows,45677,validated,Unique keyed rows in the supplied CCPP-level 2007 census tabulation
+census2007_departments,22,source_scope,Departments represented in the supplied workbook; not national coverage
+census2007_population_sum,7820501,source_scope,Population represented in supplied workbook; not the national census total
+census2007_household_sum,1919129,source_scope,Households represented in supplied workbook; not the national census total
+census2007_exact_ubigeo,4919,validated,RUV records linked by exact ten-digit CCPP UBIGEO
+census2007_unique_exact_path,13,validated,Additional RUV records linked by a unique exact normalized full path
+census2007_unique_district_name,1,validated,Additional RUV records linked by unique exact district-code and CCPP name
+census2007_name_code_conflicts,8,quarantined,Exact UBIGEO retained when an exact-name candidate identified another code
+census2007_linked,4933,validated,RUV records with 2007 census covariates
+census2007_unmatched,779,retained_unmatched,RUV records retained without 2007 census covariates
+census2007_registry_rows,5712,validated,All foundational RUV records retained after the 2007 census merge
