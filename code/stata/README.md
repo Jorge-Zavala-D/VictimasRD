@@ -23,7 +23,12 @@ do code/stata/00_master.do
 
 Each collaborator must first copy `config/paths.example.do` to the ignored
 `config/paths.local.do` and configure that local file. The shared master does
-not contain usernames or machine-specific absolute paths.
+not contain usernames or machine-specific absolute paths. Once the local file
+exists, the master may be opened in Stata's Do-file Editor and executed from
+any working directory. It searches parent directories and standard Windows
+GitHub locations automatically. A collaborator using a nonstandard clone
+location can set the `VICTIMASRD_PROJECT_ROOT` environment variable to the
+repository root.
 
 The master:
 

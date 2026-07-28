@@ -62,21 +62,101 @@ or from code/stata:
 
     do 00_master.do
 
-The shared master intentionally contains no usernames or absolute paths.
+The master also searches standard user-specific clone locations, so opening
+this file in Stata's Do-file Editor and pressing Execute does not depend on the
+current working directory. A nonstandard clone can be exposed through the
+VICTIMASRD_PROJECT_ROOT environment variable.
 */
 
-local paths_file "config/paths.local.do"
-capture confirm file "`paths_file'"
+local paths_file
+local paths_found 0
 
-if _rc {
-    local paths_file "../../config/paths.local.do"
-    capture confirm file "`paths_file'"
+/*
+First search the current directory and its parents. This covers execution from
+any directory inside the repository.
+*/
+
+local relative_candidates ///
+    "config/paths.local.do" ///
+    "../config/paths.local.do" ///
+    "../../config/paths.local.do" ///
+    "../../../config/paths.local.do" ///
+    "../../../../config/paths.local.do" ///
+    "../../../../../config/paths.local.do" ///
+    "../../../../../../config/paths.local.do"
+
+foreach candidate of local relative_candidates {
+    if !`paths_found' {
+        capture confirm file "`candidate'"
+
+        if !_rc {
+            local paths_file "`candidate'"
+            local paths_found 1
+        }
+    }
 }
 
-if _rc {
+/*
+Next honor an optional explicit project-root environment variable.
+*/
+
+if !`paths_found' {
+    local environment_root : environment VICTIMASRD_PROJECT_ROOT
+    local environment_root = ///
+        subinstr("`environment_root'", "\", "/", .)
+
+    if `"`environment_root'"' != "" {
+        local candidate ///
+            "`environment_root'/config/paths.local.do"
+        capture confirm file "`candidate'"
+
+        if !_rc {
+            local paths_file "`candidate'"
+            local paths_found 1
+        }
+    }
+}
+
+/*
+Finally search the standard Windows clone locations without hard-coding a
+username. USERPROFILE covers the repository layout used by this project;
+OneDrive covers collaborators whose Documents directory is redirected.
+*/
+
+if !`paths_found' {
+    local user_profile : environment USERPROFILE
+    local user_profile = subinstr("`user_profile'", "\", "/", .)
+    local candidate ///
+        "`user_profile'/Documents/GitHub/VictimasRD/config/paths.local.do"
+    capture confirm file "`candidate'"
+
+    if !_rc {
+        local paths_file "`candidate'"
+        local paths_found 1
+    }
+}
+
+if !`paths_found' {
+    local one_drive : environment OneDrive
+    local one_drive = subinstr("`one_drive'", "\", "/", .)
+
+    if `"`one_drive'"' != "" {
+        local candidate ///
+            "`one_drive'/Documents/GitHub/VictimasRD/config/paths.local.do"
+        capture confirm file "`candidate'"
+
+        if !_rc {
+            local paths_file "`candidate'"
+            local paths_found 1
+        }
+    }
+}
+
+if !`paths_found' {
     display as error "Machine-specific path configuration was not found."
-    display as error "Expected config/paths.local.do relative to the repository root."
+    display as error "Searched parent directories and standard GitHub clone locations."
     display as error "Copy config/paths.example.do, edit the local copy, and rerun the master."
+    display as error "For a nonstandard clone, set VICTIMASRD_PROJECT_ROOT to the repository root."
     exit 601
 }
 
@@ -116,6 +196,16 @@ foreach global_name of local required_globals {
         exit 198
     }
 }
+
+capture confirm file "${project_root}/config/paths.local.do"
+
+if _rc {
+    display as error "The loaded path file does not agree with project_root."
+    display as error "Expected: ${project_root}/config/paths.local.do"
+    exit 601
+}
+
+cd "${project_root}"
 
 
 *-----------------------------------*

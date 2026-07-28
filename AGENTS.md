@@ -168,6 +168,21 @@ including interactive in-console work.
 - Never weaken a validation check merely to make a pipeline pass.
 - Do not commit or push unless the user explicitly asks.
 
+## Commit handoff
+
+After every completed batch that changes repository files:
+
+- inspect the complete proposed commit scope and distinguish the current batch
+  from any pre-existing uncommitted work;
+- write a copy-ready commit message to the ignored local file
+  `build/COMMIT_MESSAGE.txt`;
+- use a concise imperative title, a blank line, and a detailed body covering
+  the substantive changes, validation performed, data/storage effects, and
+  remaining limitations;
+- reproduce the proposed title and body in the final response so the user can
+  review them before committing; and
+- never stage, commit, or push unless the user explicitly asks.
+
 ## Scope of this initial repository
 
 The repository contains a provenance-preserving legacy-code snapshot but no
