@@ -10,11 +10,15 @@ reconciles three foundational sources:
 2. the RUV Libro Segundo victimization registry; and
 3. the CMAN list of collective-reparation projects recorded through 2023.
 
-All Dropbox inputs are immutable. Row-level staging data, matching candidates,
-and review ledgers are written only to the Git-ignored `build/` tree.
+Dropbox Raw inputs are immutable. Run-specific scratch datasets use Stata
+`tempfile`s. Persistent intermediates, staging data, matching candidates, and
+review ledgers are written under `2 data/2 Working/1 Current pipeline`; the
+final analytical registry is written under
+`2 data/3 Coded/1 Current analysis datasets`.
 
-The adjudication audit also used two public official sources without adding
-their full files to Git:
+The adjudication audit also used two public official sources. Their immutable
+downloads are stored under
+`2 data/1 Raw/13 External administrative sources`:
 
 - the Instituto Geografico Nacional national CCPP layer published 26 May 2025
   at `https://www.datosabiertos.gob.pe/dataset/dataset-centros-poblados`; and
@@ -127,11 +131,11 @@ remain missing rather than being assigned from a different historical
 community. Any analysis requiring those attributes must report the resulting
 sample restriction.
 
-The ignored QA tree contains row-level unresolved-linkage ledgers.
+The Dropbox Working QA tree contains row-level unresolved-linkage ledgers.
 `metadata/ccpp-linkage/foundational-sample-flow.csv` contains the corresponding
 aggregate counts, and
-`build/derived/04_foundational_community_registry.dta` is the validated,
-5,712-row analysis-stage registry.
+`2 data/3 Coded/1 Current analysis datasets/04_foundational_community_registry.dta`
+is the validated, 5,712-row analysis-stage registry.
 
 Historical linked datasets are retained only as candidate evidence. They were
 created through the legacy fuzzy workflow and cannot be treated as certified
@@ -156,5 +160,6 @@ At every major milestone, the polished dataset keeps only:
 
 Temporary normalized strings, parser helpers, raw numeric copies, merge flags,
 row counters, candidate scores, and detailed diagnostics are removed from the
-polished dataset. They remain available in stage-specific ignored QA artifacts
-so that the release dataset stays lean without sacrificing auditability.
+polished dataset. They remain available in stage-specific Dropbox Working QA
+artifacts so that the analysis dataset stays lean without sacrificing
+auditability.

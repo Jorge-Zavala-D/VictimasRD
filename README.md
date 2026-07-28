@@ -23,7 +23,9 @@ Dropbox source materials are inputs, not repository contents. Original Dropbox
 data must be treated as read-only. Do not copy data into Git, including through
 Git LFS. The separately synchronized Overleaf tree is not a data destination;
 see [`docs/OVERLEAF_WORKFLOW.md`](docs/OVERLEAF_WORKFLOW.md) for the controlled
-Git-to-publication workflow.
+Git-to-publication workflow. See
+[`docs/DATA_STORAGE_WORKFLOW.md`](docs/DATA_STORAGE_WORKFLOW.md) for the shared
+Raw/Working/Coded data contract.
 
 ## Getting started
 
@@ -32,8 +34,9 @@ Git-to-publication workflow.
 3. Edit `config/paths.local.do` for the local Git, research Dropbox, and
    synchronized Overleaf roots.
 4. Keep the local path file untracked; `.gitignore` excludes it.
-5. Write derived intermediates only to a designated local build area, never to
-   a Dropbox raw-data directory.
+5. Use Stata `tempfile`s for scratch products, Dropbox Working for persistent
+   intermediates and QA data, and Dropbox Coded for final analysis datasets.
+   Never write derived files to Dropbox Raw or anywhere inside Git.
 6. Track a generated table or figure only after confirming that it is
    reproducible, appropriately sized, and non-sensitive.
 7. For an output used in the paper, validate it in Git and then synchronize it

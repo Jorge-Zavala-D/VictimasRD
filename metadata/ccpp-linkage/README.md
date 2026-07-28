@@ -38,4 +38,4 @@ record's verified UBIGEO. CMAN-only records remain documented in aggregate but
 never enter the RUV analysis registry. The RUV source defines the observation
 universe: records without a verified CCPP UBIGEO remain in the analysis
 registry, are flagged through `ubigeo_ccpp_verified`, and are documented in the
-ignored unresolved-linkage ledger.
+Dropbox Working unresolved-linkage ledger.

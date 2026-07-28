@@ -7,7 +7,7 @@
 |                   dependencies, and optionally run the ordered pipeline.      |
 |                                                                               |
 | Date created:     27 July 2026                                                |
-| Last updated:     27 July 2026                                                |
+| Last updated:     28 July 2026                                                |
 | Stata version:    19                                                          |
 *-------------------------------------------------------------------------------*/
 
@@ -89,8 +89,17 @@ local required_globals ///
     python_exec ///
     data_root ///
     raw_root ///
-    working_input_root ///
-    coded_input_root ///
+    working_root ///
+    coded_root ///
+    external_raw_root ///
+    legacy_working_root ///
+    legacy_coded_root ///
+    pipeline_working_root ///
+    intermediate_root ///
+    staging_root ///
+    qa_data_root ///
+    external_derived_root ///
+    analysis_data_root ///
     build_root ///
     output_root ///
     figures_root ///
@@ -115,21 +124,31 @@ foreach global_name of local required_globals {
 
 global code_root       "${project_root}/code/stata"
 global pipeline_root   "${code_root}/pipeline"
-global derived_root    "${build_root}/derived"
-global temporary_root  "${build_root}/temporary"
-global qa_root         "${build_root}/qa"
 global ado_root        "${build_root}/ado"
 
 /*
-Dropbox is an input/archive layer. Only the Git-local build and output roots
-are writable destinations for this pipeline.
+Dropbox Raw is immutable. Persistent intermediates, staging files, and
+row-level QA products belong under Working; final analytical datasets belong
+under Coded. Git-local build is only a package/cache area, while reviewed
+non-sensitive tables and figures belong under output.
 */
 
-local project_lower = lower(subinstr("${project_root}", "\", "/", .))
-local data_lower    = lower(subinstr("${data_root}", "\", "/", .))
-local raw_lower     = lower(subinstr("${raw_root}", "\", "/", .))
-local build_lower   = lower(subinstr("${build_root}", "\", "/", .))
-local output_lower  = lower(subinstr("${output_root}", "\", "/", .))
+local project_lower          = lower(subinstr("${project_root}", "\", "/", .))
+local data_lower             = lower(subinstr("${data_root}", "\", "/", .))
+local raw_lower              = lower(subinstr("${raw_root}", "\", "/", .))
+local working_lower          = lower(subinstr("${working_root}", "\", "/", .))
+local coded_lower            = lower(subinstr("${coded_root}", "\", "/", .))
+local pipeline_working_lower = lower(subinstr("${pipeline_working_root}", "\", "/", .))
+local intermediate_lower     = lower(subinstr("${intermediate_root}", "\", "/", .))
+local staging_lower          = lower(subinstr("${staging_root}", "\", "/", .))
+local qa_data_lower          = lower(subinstr("${qa_data_root}", "\", "/", .))
+local external_derived_lower = lower(subinstr("${external_derived_root}", "\", "/", .))
+local analysis_data_lower    = lower(subinstr("${analysis_data_root}", "\", "/", .))
+local external_raw_lower     = lower(subinstr("${external_raw_root}", "\", "/", .))
+local legacy_working_lower   = lower(subinstr("${legacy_working_root}", "\", "/", .))
+local legacy_coded_lower     = lower(subinstr("${legacy_coded_root}", "\", "/", .))
+local build_lower            = lower(subinstr("${build_root}", "\", "/", .))
+local output_lower           = lower(subinstr("${output_root}", "\", "/", .))
 
 if strpos("`build_lower'", "`project_lower'/") != 1 {
     display as error "Unsafe build_root: it must be inside project_root."
@@ -145,9 +164,46 @@ if strpos("`output_lower'", "`project_lower'/") != 1 {
     exit 198
 }
 
-if strpos("`build_lower'", "`data_lower'/") == 1 | ///
-   strpos("`build_lower'", "`raw_lower'/")  == 1 {
-    display as error "Unsafe build_root: derived work may not be written under Dropbox data."
+if strpos("`build_lower'", "`data_lower'/") == 1 {
+    display as error "Unsafe build_root: the local dependency cache cannot be under Dropbox data."
+    exit 198
+}
+
+if strpos("`raw_lower'", "`data_lower'/") != 1 | ///
+   strpos("`working_lower'", "`data_lower'/") != 1 | ///
+   strpos("`coded_lower'", "`data_lower'/") != 1 {
+    display as error "Unsafe Dropbox data contract: Raw, Working, and Coded must be under data_root."
+    exit 198
+}
+
+if strpos("`working_lower'", "`raw_lower'/") == 1 | ///
+   strpos("`coded_lower'", "`raw_lower'/") == 1 {
+    display as error "Unsafe Dropbox data contract: Working and Coded cannot be inside Raw."
+    exit 198
+}
+
+if strpos("`pipeline_working_lower'", "`working_lower'/") != 1 | ///
+   strpos("`intermediate_lower'", "`pipeline_working_lower'/") != 1 | ///
+   strpos("`staging_lower'", "`pipeline_working_lower'/") != 1 | ///
+   strpos("`qa_data_lower'", "`pipeline_working_lower'/") != 1 | ///
+   strpos("`external_derived_lower'", "`pipeline_working_lower'/") != 1 {
+    display as error "Unsafe Working path contract: current pipeline products must remain under Working."
+    exit 198
+}
+
+if strpos("`analysis_data_lower'", "`coded_lower'/") != 1 {
+    display as error "Unsafe Coded path contract: analysis datasets must remain under Coded."
+    exit 198
+}
+
+if strpos("`external_raw_lower'", "`raw_lower'/") != 1 {
+    display as error "Unsafe external_raw_root: external sources must remain under Raw."
+    exit 198
+}
+
+if strpos("`legacy_working_lower'", "`working_lower'/") != 1 | ///
+   strpos("`legacy_coded_lower'", "`coded_lower'/") != 1 {
+    display as error "Unsafe archive path contract: legacy data must remain under Working or Coded."
     exit 198
 }
 
@@ -158,8 +214,9 @@ local required_read_globals ///
     dropbox_root ///
     data_root ///
     raw_root ///
-    working_input_root ///
-    coded_input_root
+    working_root ///
+    coded_root ///
+    external_raw_root
 
 foreach global_name of local required_read_globals {
     local required_dir "${`global_name'}"
@@ -168,6 +225,27 @@ foreach global_name of local required_read_globals {
         display as error "Required project/input directory not found:"
         display as error "  `required_dir'"
         exit 601
+    }
+}
+
+/*
+Create only approved current-pipeline destinations under Dropbox Working and
+Coded. The dated archive roots and Raw tree are never modified by the master.
+*/
+
+foreach writable_directory in ///
+    "${pipeline_working_root}" ///
+    "${intermediate_root}" ///
+    "${staging_root}" ///
+    "${qa_data_root}" ///
+    "${external_derived_root}" ///
+    "${analysis_data_root}" {
+
+    capture mkdir "`writable_directory'"
+    if !direxists("`writable_directory'") {
+        display as error "Unable to create approved Dropbox data destination:"
+        display as error "  `writable_directory'"
+        exit 603
     }
 }
 
@@ -189,21 +267,15 @@ foreach global_name of local required_write_globals {
 }
 
 /*
-Create only Git-ignored, repository-local build directories. Never create,
-replace, rename, or delete a Dropbox input directory from this master.
+Create only the Git-ignored dependency/cache directory in the repository.
+No dataset may be written below build_root.
 */
 
 capture mkdir "${build_root}"
-capture mkdir "${derived_root}"
-capture mkdir "${temporary_root}"
-capture mkdir "${qa_root}"
 capture mkdir "${ado_root}"
 
 local build_globals ///
     build_root ///
-    derived_root ///
-    temporary_root ///
-    qa_root ///
     ado_root
 
 foreach global_name of local build_globals {
@@ -224,10 +296,12 @@ log using "${logs_root}/master_`run_id'.smcl", ///
     name(victimasrd_master) replace
 
 display as text "Victimas RD master started: `c(current_date)' `c(current_time)'"
-display as text "Repository root: ${project_root}"
-display as text "Dropbox inputs: ${data_root} (read-only)"
-display as text "Local build:    ${build_root}"
-display as text "Git outputs:    ${output_root}"
+display as text "Repository root:     ${project_root}"
+display as text "Dropbox Raw:         ${raw_root} (read-only)"
+display as text "Dropbox Working:     ${pipeline_working_root}"
+display as text "Dropbox Coded:       ${analysis_data_root}"
+display as text "Local package cache: ${ado_root}"
+display as text "Git outputs:         ${output_root}"
 
 
 *-----------------------------------*
@@ -423,13 +497,13 @@ display as text   "Default graph scheme: ${graph_scheme}"
 *-----------------------------------*
 
 /*
-All switches remain zero while their modules are being designed and audited.
-Set run_all to one only after every selected module and its required research
-decisions have been reviewed.
+The implemented foundational data-preparation module is enabled for push-button
+reproduction. Analysis modules remain disabled until their code and unresolved
+research decisions have been reviewed.
 */
 
 local run_all                         0
-local run_01_data_preparation         0
+local run_01_data_preparation         1
 local run_02_describe_data            0
 local run_03_validate_rd_design       0
 local run_04_estimate_main_effects    0
@@ -462,21 +536,21 @@ capture program drop victimasrd_run_step
 
 program define victimasrd_run_step
     version 19
-    syntax, File(string asis) Label(string asis)
+    syntax, File(string) Label(string)
 
-    capture confirm file `"`file'"'
+    capture confirm file "`file'"
 
     if _rc {
         display as error "Selected pipeline module was not found:"
-        display as error `"  `file'"'
+        display as error "  `file'"
         exit 601
     }
 
     display as text ""
     display as result "Starting pipeline step: `label'"
-    display as text   `"Program: `file'"'
+    display as text   "Program: `file'"
 
-    capture noisily do `"`file'"'
+    capture noisily do "`file'"
     local step_error = _rc
 
     if `step_error' {

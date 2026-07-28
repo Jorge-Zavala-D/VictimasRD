@@ -5,6 +5,7 @@ This directory is for versioned metadata without research observations.
 Planned metadata products include:
 
 - a logical data inventory with provenance and canonical-snapshot status;
+- public external-source checksums and storage locations;
 - variable and identifier crosswalks;
 - a CCPP fuzzy-match review ledger;
 - a merge ledger with declared cardinality and coverage;

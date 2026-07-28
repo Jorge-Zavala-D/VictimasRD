@@ -26,8 +26,12 @@ coverage release gate, and final-variable contract are documented in
 Modules will be added sequentially. They must:
 
 - read machine-specific roots from the master-loaded local path configuration;
-- treat all Dropbox sources as read-only;
-- write intermediates only under the ignored Git-local `build/` tree;
+- treat Dropbox Raw and dated archives as immutable;
+- use Stata `tempfile`s for run-specific scratch products;
+- write persistent intermediates, staging data, and row-level QA under the
+  configured Dropbox Working current-pipeline root;
+- write final analytical datasets under the configured Dropbox Coded root;
+- never write datasets anywhere inside Git, including ignored `build/`;
 - write reviewed final outputs only under `output/`;
 - declare inputs, outputs, units of analysis, and expected merge cardinality;
 - fail on unexpected keys, duplicates, merge results, ranges, or sample flow;

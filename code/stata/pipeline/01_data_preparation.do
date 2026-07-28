@@ -13,8 +13,9 @@ Current source families:
     2. RUV Libro Segundo victimization-index registry
     3. CMAN communities attended through 2023
 
-Dropbox inputs are immutable. All row-level products are written only to the
-Git-ignored build tree. Fuzzy candidates are never accepted silently.
+Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
+products are written under Dropbox Working; final analytical datasets are
+written under Dropbox Coded. Fuzzy candidates are never accepted silently.
 */
 
 version 19
@@ -26,7 +27,16 @@ set more off
 *===============================================================================
 
 local required_globals ///
-    project_root raw_root build_root metadata_root python_exec
+    project_root ///
+    raw_root ///
+    pipeline_working_root ///
+    intermediate_root ///
+    staging_root ///
+    qa_data_root ///
+    analysis_data_root ///
+    metadata_root ///
+    python_exec ///
+    ado_root
 
 foreach global_name of local required_globals {
     local global_value "${`global_name'}"
@@ -49,33 +59,36 @@ if _rc {
     exit 601
 }
 
-global code_root      "${project_root}/code/stata"
-global derived_root   "${build_root}/derived"
-global temporary_root "${build_root}/temporary"
-global qa_root        "${build_root}/qa"
-global staging_root   "${build_root}/staging"
-global ado_root       "${build_root}/ado"
+local raw_lower              = lower(subinstr("${raw_root}", "\", "/", .))
+local pipeline_working_lower = lower(subinstr("${pipeline_working_root}", "\", "/", .))
+local intermediate_lower     = lower(subinstr("${intermediate_root}", "\", "/", .))
+local staging_lower          = lower(subinstr("${staging_root}", "\", "/", .))
+local qa_data_lower          = lower(subinstr("${qa_data_root}", "\", "/", .))
+local analysis_data_lower    = lower(subinstr("${analysis_data_root}", "\", "/", .))
 
-local project_lower = lower(subinstr("${project_root}", "\", "/", .))
-local build_lower   = lower(subinstr("${build_root}", "\", "/", .))
-
-if strpos("`build_lower'", "`project_lower'/") != 1 {
-    display as error "Unsafe build_root: it must be inside project_root."
+if strpos("`intermediate_lower'", "`pipeline_working_lower'/") != 1 | ///
+   strpos("`staging_lower'", "`pipeline_working_lower'/") != 1 | ///
+   strpos("`qa_data_lower'", "`pipeline_working_lower'/") != 1 {
+    display as error "Unsafe path contract: intermediate, staging, and QA data must remain under Dropbox Working."
     exit 198
 }
 
-foreach build_directory in ///
-    "${build_root}" ///
-    "${derived_root}" ///
-    "${temporary_root}" ///
-    "${qa_root}" ///
-    "${staging_root}" ///
-    "${ado_root}" {
+if strpos("`analysis_data_lower'", "`raw_lower'/") == 1 | ///
+   strpos("`pipeline_working_lower'", "`raw_lower'/") == 1 {
+    display as error "Unsafe path contract: no derived dataset may be written under Dropbox Raw."
+    exit 198
+}
 
-    capture mkdir "`build_directory'"
-    if !direxists("`build_directory'") {
-        display as error "Required build directory is unavailable:"
-        display as error "  `build_directory'"
+foreach data_directory in ///
+    "${pipeline_working_root}" ///
+    "${intermediate_root}" ///
+    "${staging_root}" ///
+    "${qa_data_root}" ///
+    "${analysis_data_root}" {
+
+    if !direxists("`data_directory'") {
+        display as error "Required Dropbox pipeline directory is unavailable:"
+        display as error "  `data_directory'"
         exit 603
     }
 }
@@ -90,6 +103,26 @@ foreach command in freqindex matchit strdist {
         exit 499
     }
 }
+
+/*
+Scratch datasets exist only for the life of this Stata run. Only the named
+milestone datasets saved under Working and Coded persist across runs.
+*/
+
+tempfile ///
+    inei_ccpp_unique_exact ///
+    inei_district_exact ///
+    inei_ccpp_candidate_pool ///
+    ruv_unresolved_candidates ///
+    ruv_unique_name_path ///
+    ruv_unique_id ///
+    ruv_unique_ubigeo ///
+    cman_unresolved_districts ///
+    inei_district_candidate_pool ///
+    cman_unresolved_ccpp ///
+    cman_unresolved_ruv ///
+    ruv_candidate_pool ///
+    cman_linked_ruv
 
 capture program drop victimasrd_normalize_name
 program define victimasrd_normalize_name
@@ -146,7 +179,7 @@ local cman_pdf ///
 local cman_csv ///
     "${staging_root}/cman_projects_2023_extracted.csv"
 local cman_manifest ///
-    "${qa_root}/cman_projects_2023_extraction_manifest.json"
+    "${qa_data_root}/cman_projects_2023_extraction_manifest.json"
 local cman_extractor ///
     "${project_root}/code/python/extract_cman_pdf.py"
 
@@ -380,7 +413,7 @@ bysort ubigeo_dist ccpp_name_norm: ///
 
 compress
 sort ubigeo_ccpp
-save "${derived_root}/01_inei_ccpp_2017.dta", replace
+save "${intermediate_root}/01_inei_ccpp_2017.dta", replace
 
 /*
 These workbooks contain natural region, altitude, population, sex composition,
@@ -397,7 +430,7 @@ collapse ///
     by(ubigeo_dpto dpto_inei)
 sort ubigeo_dpto
 export delimited ///
-    "${qa_root}/inei_ccpp_2017_summary_by_department.csv", ///
+    "${qa_data_root}/inei_ccpp_2017_summary_by_department.csv", ///
     replace
 restore
 
@@ -418,7 +451,7 @@ keep ///
     dwellings_occupied_2017 ///
     dwellings_unoccupied_2017
 isid ubigeo_dist community_norm
-save "${temporary_root}/inei_ccpp_unique_exact.dta", replace
+save "`inei_ccpp_unique_exact'", replace
 restore
 
 preserve
@@ -435,7 +468,7 @@ keep ///
     district_norm
 isid ubigeo_dist
 isid region_norm province_norm district_norm
-save "${temporary_root}/inei_district_exact.dta", replace
+save "`inei_district_exact'", replace
 restore
 
 preserve
@@ -455,7 +488,7 @@ keep ///
     dwellings_occupied_2017 ///
     dwellings_unoccupied_2017
 rename ccpp_name_norm inei_name_norm
-save "${temporary_root}/inei_ccpp_candidate_pool.dta", replace
+save "`inei_ccpp_candidate_pool'", replace
 restore
 
 
@@ -587,7 +620,7 @@ assert r(N) == 73
 local victim_level_disagree_n = r(N)
 
 merge m:1 ubigeo_dist community_norm using ///
-    "${temporary_root}/inei_ccpp_unique_exact.dta", ///
+    "`inei_ccpp_unique_exact'", ///
     keep(master match) ///
     gen(victim_inei_exact_merge)
 
@@ -683,7 +716,7 @@ drop ///
     ruv_adjudication_merge
 
 merge m:1 ubigeo_ccpp using ///
-    "${derived_root}/01_inei_ccpp_2017.dta", ///
+    "${intermediate_root}/01_inei_ccpp_2017.dta", ///
     keepusing( ///
         ccpp_name_inei ///
         natural_region_raw ///
@@ -742,10 +775,10 @@ keep ///
 generate str52 linkage_status = ///
     "retained_without_verified_ccpp_ubigeo"
 rename community_norm victim_name_norm
-save "${temporary_root}/victimization_unresolved_for_candidates.dta", replace
-save "${qa_root}/ruv_ubigeo_unresolved.dta", replace
+save "`ruv_unresolved_candidates'", replace
+save "${qa_data_root}/ruv_ubigeo_unresolved.dta", replace
 export delimited ///
-    "${qa_root}/ruv_ubigeo_unresolved.csv", replace
+    "${qa_data_root}/ruv_ubigeo_unresolved.csv", replace
 restore
 
 generate byte ubigeo_ccpp_verified = !missing(ubigeo_ccpp)
@@ -781,7 +814,7 @@ label variable victim_inei_match_method ///
 
 compress
 sort ruv_id
-save "${derived_root}/02_victimization_registry.dta", replace
+save "${intermediate_root}/02_victimization_registry.dta", replace
 
 /*
 Prepare the exact full-name path crosswalk used later for the independent CMAN
@@ -816,7 +849,7 @@ generate byte victim_inei_linked = ///
     !missing(victim_ubigeo_ccpp)
 
 isid region_norm province_norm district_norm community_norm
-save "${temporary_root}/victimization_unique_name_path.dta", replace
+save "`ruv_unique_name_path'", replace
 restore
 
 /*
@@ -824,7 +857,7 @@ Reload the canonical stage explicitly before preparing the unresolved-review
 pool. This avoids relying on Stata's preserved-data state after the crosswalk
 renames above and makes the source of this review extract unambiguous.
 */
-use "${derived_root}/02_victimization_registry.dta", clear
+use "${intermediate_root}/02_victimization_registry.dta", clear
 
 preserve
 keep ruv_id ubigeo_dist ubigeo_ccpp
@@ -833,7 +866,7 @@ rename ubigeo_ccpp victim_ubigeo_ccpp
 generate byte victim_inei_linked = ///
     !missing(victim_ubigeo_ccpp)
 isid ruv_id
-save "${temporary_root}/victimization_unique_id.dta", replace
+save "`ruv_unique_id'", replace
 restore
 
 preserve
@@ -841,7 +874,7 @@ keep ruv_id ubigeo_ccpp
 drop if missing(ubigeo_ccpp)
 rename ruv_id ubigeo_ruv_id
 isid ubigeo_ccpp
-save "${temporary_root}/victimization_unique_ubigeo.dta", replace
+save "`ruv_unique_ubigeo'", replace
 restore
 
 /*
@@ -850,9 +883,9 @@ the RUV-supplied six-digit district code. Candidate scores support review; they
 do not alter ubigeo_ccpp.
 */
 
-use "${temporary_root}/victimization_unresolved_for_candidates.dta", clear
+use "`ruv_unresolved_candidates'", clear
 joinby ubigeo_dist using ///
-    "${temporary_root}/inei_ccpp_candidate_pool.dta"
+    "`inei_ccpp_candidate_pool'"
 
 victimasrd_score_name_pairs victim_name_norm inei_name_norm, ///
     prefix(name)
@@ -888,9 +921,9 @@ replace review_priority = "very_high" if ///
 keep if candidate_rank <= 5
 sort victimization_source_row candidate_rank
 
-save "${qa_root}/victimization_inei_fuzzy_candidates.dta", replace
+save "${qa_data_root}/victimization_inei_fuzzy_candidates.dta", replace
 export delimited ///
-    "${qa_root}/victimization_inei_fuzzy_candidates.csv", ///
+    "${qa_data_root}/victimization_inei_fuzzy_candidates.csv", ///
     replace
 
 
@@ -966,17 +999,12 @@ label variable source_year_format_issue ///
 label variable source_money_format_issue ///
     "Source money required documented punctuation normalization"
 
-compress
-sort record_number
-save "${derived_root}/03_cman_projects_2023_clean.dta", replace
-
-
 *===============================================================================
 **# 5. Link CMAN independently to the INEI directory
 *===============================================================================
 
 merge m:1 region_norm province_norm district_norm using ///
-    "${temporary_root}/inei_district_exact.dta", ///
+    "`inei_district_exact'", ///
     keep(master match) ///
     gen(cman_inei_district_exact_merge)
 
@@ -992,7 +1020,7 @@ assert r(N) == 90
 local cman_inei_district_unresolved = r(N)
 
 merge m:1 ubigeo_dist community_norm using ///
-    "${temporary_root}/inei_ccpp_unique_exact.dta", ///
+    "`inei_ccpp_unique_exact'", ///
     keep(master match) ///
     gen(cman_inei_ccpp_exact_merge)
 
@@ -1012,10 +1040,6 @@ generate str48 cman_inei_match_method = ///
          "exact_hierarchy_and_unique_normalized_name", ///
          "unresolved_review_required")
 
-compress
-sort record_number
-save "${derived_root}/03_cman_projects_2023_inei_link.dta", replace
-
 /*
 District candidates for the 32 distinct unresolved CMAN district name paths.
 Candidate generation is blocked on department and scores province plus district.
@@ -1028,21 +1052,21 @@ bysort region_norm province_norm district_norm: keep if _n == 1
 generate long cman_district_review_id = _n
 rename province_norm cman_province_norm
 rename district_norm cman_district_norm
-save "${temporary_root}/cman_unresolved_districts.dta", replace
+save "`cman_unresolved_districts'", replace
 restore
 
 preserve
-use "${temporary_root}/inei_district_exact.dta", clear
+use "`inei_district_exact'", clear
 generate long inei_district_candidate_id = _n
 rename province_norm inei_province_norm
 rename district_norm inei_district_norm
-save "${temporary_root}/inei_district_candidate_pool.dta", replace
+save "`inei_district_candidate_pool'", replace
 restore
 
 preserve
-use "${temporary_root}/cman_unresolved_districts.dta", clear
+use "`cman_unresolved_districts'", clear
 joinby region_norm using ///
-    "${temporary_root}/inei_district_candidate_pool.dta"
+    "`inei_district_candidate_pool'"
 
 victimasrd_score_name_pairs ///
     cman_province_norm inei_province_norm, prefix(province)
@@ -1077,9 +1101,9 @@ replace review_priority = "high" if ///
 keep if candidate_rank <= 5
 sort cman_district_review_id candidate_rank
 
-save "${qa_root}/cman_inei_district_fuzzy_candidates.dta", replace
+save "${qa_data_root}/cman_inei_district_fuzzy_candidates.dta", replace
 export delimited ///
-    "${qa_root}/cman_inei_district_fuzzy_candidates.csv", ///
+    "${qa_data_root}/cman_inei_district_fuzzy_candidates.csv", ///
     replace
 restore
 
@@ -1101,13 +1125,13 @@ keep ///
     community_raw ///
     community_norm
 rename community_norm cman_name_norm
-save "${temporary_root}/cman_unresolved_ccpp_for_candidates.dta", replace
+save "`cman_unresolved_ccpp'", replace
 restore
 
 preserve
-use "${temporary_root}/cman_unresolved_ccpp_for_candidates.dta", clear
+use "`cman_unresolved_ccpp'", clear
 joinby ubigeo_dist using ///
-    "${temporary_root}/inei_ccpp_candidate_pool.dta"
+    "`inei_ccpp_candidate_pool'"
 
 victimasrd_score_name_pairs cman_name_norm inei_name_norm, ///
     prefix(name)
@@ -1141,9 +1165,9 @@ replace review_priority = "very_high" if ///
 keep if candidate_rank <= 5
 sort record_number candidate_rank
 
-save "${qa_root}/cman_inei_ccpp_fuzzy_candidates.dta", replace
+save "${qa_data_root}/cman_inei_ccpp_fuzzy_candidates.dta", replace
 export delimited ///
-    "${qa_root}/cman_inei_ccpp_fuzzy_candidates.csv", ///
+    "${qa_data_root}/cman_inei_ccpp_fuzzy_candidates.csv", ///
     replace
 restore
 
@@ -1153,7 +1177,7 @@ restore
 *===============================================================================
 
 merge 1:1 region_norm province_norm district_norm community_norm using ///
-    "${temporary_root}/victimization_unique_name_path.dta", ///
+    "`ruv_unique_name_path'", ///
     keep(master match) ///
     gen(cman_victim_exact_merge)
 
@@ -1177,7 +1201,7 @@ candidate. Use it to recover RUV links missed by spelling differences.
 */
 
 merge m:1 ubigeo_ccpp using ///
-    "${temporary_root}/victimization_unique_ubigeo.dta", ///
+    "`ruv_unique_ubigeo'", ///
     keep(master match) ///
     gen(cman_victim_ubigeo_merge)
 
@@ -1252,7 +1276,7 @@ drop ///
     cman_adjudication_merge
 
 merge m:1 ruv_id using ///
-    "${temporary_root}/victimization_unique_id.dta", ///
+    "`ruv_unique_id'", ///
     update ///
     gen(cman_ruv_id_merge)
 
@@ -1320,10 +1344,6 @@ count if ///
 assert r(N) == 0
 local exact_ubigeo_conflicts = r(N)
 
-compress
-sort record_number
-save "${derived_root}/03_cman_projects_2023.dta", replace
-
 /*
 Create direct CMAN-to-RUV candidates for unresolved project records.
 Department is the blocking field. The score emphasizes community name while
@@ -1352,11 +1372,11 @@ keep ///
 rename province_norm cman_province_norm
 rename district_norm cman_district_norm
 rename community_norm cman_community_norm
-save "${temporary_root}/cman_unresolved_for_victim_candidates.dta", replace
+save "`cman_unresolved_ruv'", replace
 restore
 
 preserve
-use "${derived_root}/02_victimization_registry.dta", clear
+use "${intermediate_root}/02_victimization_registry.dta", clear
 keep ///
     victimization_source_row ///
     ruv_id ///
@@ -1375,13 +1395,13 @@ rename district_norm victim_district_norm
 rename community_norm victim_community_norm
 rename ubigeo_dist victim_ubigeo_dist
 rename ubigeo_ccpp victim_ubigeo_ccpp
-save "${temporary_root}/victimization_candidate_pool.dta", replace
+save "`ruv_candidate_pool'", replace
 restore
 
 preserve
-use "${temporary_root}/cman_unresolved_for_victim_candidates.dta", clear
+use "`cman_unresolved_ruv'", clear
 joinby region_norm using ///
-    "${temporary_root}/victimization_candidate_pool.dta"
+    "`ruv_candidate_pool'"
 
 victimasrd_score_name_pairs ///
     cman_province_norm victim_province_norm, prefix(province)
@@ -1426,9 +1446,9 @@ replace review_priority = "very_high" if ///
 keep if candidate_rank <= 5
 sort record_number candidate_rank
 
-save "${qa_root}/cman_victimization_fuzzy_candidates.dta", replace
+save "${qa_data_root}/cman_victimization_fuzzy_candidates.dta", replace
 export delimited ///
-    "${qa_root}/cman_victimization_fuzzy_candidates.csv", ///
+    "${qa_data_root}/cman_victimization_fuzzy_candidates.csv", ///
     replace
 restore
 }
@@ -1450,9 +1470,9 @@ generate str52 linkage_disposition = cond( ///
     "excluded_from_ruv_master_merge")
 count if missing(ruv_id)
 local cman_ubigeo_excluded = r(N)
-save "${qa_root}/cman_ubigeo_unresolved.dta", replace
+save "${qa_data_root}/cman_ubigeo_unresolved.dta", replace
 export delimited ///
-    "${qa_root}/cman_ubigeo_unresolved.csv", replace
+    "${qa_data_root}/cman_ubigeo_unresolved.csv", replace
 restore
 
 count if missing(ruv_id) & !missing(ubigeo_ccpp)
@@ -1463,7 +1483,7 @@ local cman_registry_rows = r(N)
 
 compress
 sort record_number
-save "${derived_root}/03_cman_projects_2023.dta", replace
+save "${intermediate_root}/03_cman_projects_2023.dta", replace
 
 
 *===============================================================================
@@ -1513,13 +1533,13 @@ keep ///
     cman_victim_match_method
 
 isid ruv_id
-save "${temporary_root}/cman_linked_to_victimization.dta", replace
+save "`cman_linked_ruv'", replace
 restore
 
-use "${derived_root}/02_victimization_registry.dta", clear
+use "${intermediate_root}/02_victimization_registry.dta", clear
 
 merge 1:1 ruv_id using ///
-    "${temporary_root}/cman_linked_to_victimization.dta", ///
+    "`cman_linked_ruv'", ///
     keep(master match) ///
     gen(foundational_cman_merge)
 
@@ -1682,7 +1702,7 @@ assert missing_treatment_indicator == 0
 drop missing_treatment_indicator
 
 save ///
-    "${derived_root}/04_foundational_community_registry.dta", ///
+    "${analysis_data_root}/04_foundational_community_registry.dta", ///
     replace
 
 
@@ -1884,7 +1904,7 @@ postclose `qa_post'
 
 use `qa_metrics', clear
 export delimited ///
-    "${qa_root}/foundational_data_preparation_metrics.csv", ///
+    "${qa_data_root}/foundational_data_preparation_metrics.csv", ///
     replace
 
 preserve

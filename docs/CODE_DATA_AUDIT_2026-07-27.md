@@ -414,6 +414,17 @@ silently: preserve its current checksum and history, decide whether to remove
 it from the active tree in a dedicated task, and replace it with provenance
 metadata or a public-source retrieval instruction if possible.
 
+**Resolved 28 July 2026.** The tracked workbook was byte-identical to
+`2 data/1 Raw/4. PBI_CentrosPoblados_1993-2018.xlsx` in the shared Dropbox
+archive (SHA-256
+`DE0FD6FAD85E45AA7286BF75C670124780CAA207DB3059DF1BE68742DBBF0C6B`).
+The redundant Git copy was removed; the Dropbox Raw file remains the immutable
+source used by the legacy program.
+
+The six ignored `.dta` remnants noted above were also moved out of the Git
+checkout and preserved, with post-move checksum verification, under
+`2 data/2 Working/0 Archive - legacy workflow through 2026-07-27/Pre-migration Git-local pipeline 2026-07-27/legacy-snapshot ignored datasets`.
+
 ### 17. Dependencies are not frozen coherently
 
 The legacy snapshot vendors a collection of ado/help/plugin files while the

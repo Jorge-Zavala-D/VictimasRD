@@ -11,12 +11,25 @@ global overleaf_root "C:/Users/USERNAME/Dropbox (Personal)/Apps/Overleaf/Collect
 * Point this to an environment that provides pdfplumber.
 global python_exec "C:/path/to/python.exe"
 
-* Dropbox sources are read-only inputs.
-global data_root          "$dropbox_root/2 data"
-global raw_root           "$data_root/1 Raw"
-global working_input_root "$data_root/2 Working"
-global coded_input_root   "$data_root/3 Coded"
-global literature_root    "$dropbox_root/0 Literature Review"
+* Dropbox data contract.
+* Raw sources are immutable. Persistent data products belong in Working or
+* Coded; code should prefer Stata tempfiles for scratch data within a run.
+global data_root    "$dropbox_root/2 data"
+global raw_root     "$data_root/1 Raw"
+global working_root "$data_root/2 Working"
+global coded_root   "$data_root/3 Coded"
+
+global external_raw_root     "$raw_root/13 External administrative sources"
+global legacy_working_root   "$working_root/0 Archive - legacy workflow through 2026-07-27"
+global legacy_coded_root     "$coded_root/0 Archive - legacy workflow through 2026-07-27"
+global pipeline_working_root "$working_root/1 Current pipeline"
+global intermediate_root     "$pipeline_working_root/01 intermediate"
+global staging_root          "$pipeline_working_root/02 staging"
+global qa_data_root          "$pipeline_working_root/03 qa"
+global external_derived_root "$pipeline_working_root/04 external derived"
+global analysis_data_root    "$coded_root/1 Current analysis datasets"
+
+global literature_root     "$dropbox_root/0 Literature Review"
 global archive_output_root "$dropbox_root/3 output"
 
 * Live Overleaf publication layer. Never use it for data or intermediates.
@@ -24,8 +37,8 @@ global manuscript_tex   "$overleaf_root/Working Paper.tex"
 global overleaf_images  "$overleaf_root/Images"
 global overleaf_tables  "$overleaf_root/Tables"
 
-* Writable reproducible products belong under the Git project.
-* build_root is ignored; output_root is eligible for reviewed Git outputs.
+* Git contains no datasets. build_root is only a local ignored dependency/cache
+* area; reviewed non-sensitive tables and figures belong under output_root.
 global build_root    "$project_root/build"
 global output_root   "$project_root/output"
 global figures_root  "$output_root/figures"

@@ -1,0 +1,4 @@
+file_id,relative_path,storage_class,bytes,sha256,parent_source,status
+ign_ccpp_2025_zip,2 data/1 Raw/13 External administrative sources/01 IGN centros poblados 2025/ign_centros_poblados_2025.zip,immutable_raw,6019493,1B2FC20B5C9B704F4FA645A52D813F2CC626F0D57F2AC7FEA272FF20CB7A6362,IGN open-data portal,verified_after_move
+osiptel_mobile_2023_csv,2 data/1 Raw/13 External administrative sources/02 OSIPTEL mobile coverage 2023/osiptel_cobertura_movil_2023.csv,immutable_raw,7590550,0E2C5336CA94AD9AB2E94DD1AE2D7A7A487FFDA47C54E93267DB9F0DF575F2F0,OSIPTEL open-data portal,verified_after_move
+ign_ccpp_2025_dta,2 data/2 Working/1 Current pipeline/04 external derived/ign_centros_poblados_2025.dta,working_converted_source,33746959,758397C8CF3C2C184A8C2EBC55D5763664857459C506BF4E2E59D2C5EC95012D,ign_ccpp_2025_zip,verified_after_move

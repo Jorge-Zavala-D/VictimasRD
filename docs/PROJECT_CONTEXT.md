@@ -80,6 +80,26 @@ remains authoritative for the Stata code and reproducible output that produces
 paper inputs. A reviewed paper output is generated in Git first and copied to
 the exact Overleaf destination recorded in the output manifest.
 
+## Recorded data-storage decision
+
+On July 28, 2026, the research team confirmed that Git must never be used as a
+dataset store, including its ignored `build/` tree. The shared workflow is:
+
+- immutable project and newly acquired external source files in Dropbox Raw;
+- persistent intermediate, staging, converted-source, and row-level QA data in
+  `2 data/2 Working/1 Current pipeline`;
+- final cleaned and analytical datasets in
+  `2 data/3 Coded/1 Current analysis datasets`;
+- run-specific scratch data in Stata `tempfile`s; and
+- versioned code, non-observation metadata, and reviewed non-sensitive tables
+  and figures in Git.
+
+The prior Working and Coded contents are preserved under dated `0 Archive`
+folders and are evidence from the legacy workflow, not current pipeline
+destinations. The master validates these boundaries from
+`config/paths.local.do`; tracked code must not contain collaborator-specific
+absolute paths.
+
 ## Archive inventory and existing pipeline
 
 At the inventory date, Dropbox held approximately 75.5 GB of data plus
@@ -228,7 +248,7 @@ documented source
 A clean Stata pipeline should eventually cover:
 
 1. environment and dependency validation;
-2. immutable-source cleaning into a non-raw build area;
+2. immutable-source cleaning into the configured Dropbox Working area;
 3. deterministic construction of analysis products;
 4. descriptive analysis;
 5. RD first-stage and validity checks;
