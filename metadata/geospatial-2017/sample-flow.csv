@@ -1,0 +1,22 @@
+metric,value,status,note
+geospatial_source_rows,94922,validated,Unique 2017 CCPP points in the complete urban-rural spatial spine
+geospatial_category_codes,90253,validated,Valid ten-digit CCPP codes in the category point layer
+geospatial_dispersed_points,4669,documented_exclusion,Category-layer dispersed-population points coded zero and not CCPP-linkable
+geospatial_category_linked,90233,validated,Complete-spine CCPPs enriched by exact category-layer code
+geospatial_basic_only,4689,retained,Complete-spine CCPPs retained without category-layer enrichment
+geospatial_category_only_codes,20,quarantined,Valid category-layer codes absent from the complete 94922-record spine
+geospatial_area_disagreements,16,quarantined,GeoGPS-derived TIPO disagrees with underlying INEI AREA_CP classification
+geospatial_district_capitals,1874,validated,One suffix-0001 capital for each 2017 district
+geospatial_province_capitals,196,validated,One district-01 CCPP-0001 capital for each province
+geospatial_department_capitals,25,validated,One province-01 district-01 CCPP-0001 capital for each department
+geospatial_exact_current,4705,validated,RUV records linked by exact current verified CCPP UBIGEO
+geospatial_exact_census2007,2,validated,Additional RUV records linked by exact 2007 Census CCPP UBIGEO
+geospatial_unique_exact_path,0,validated,Additional RUV records linked by unique exact normalized full path
+geospatial_unique_district_name,0,validated,Additional RUV records linked by unique exact district-code and CCPP name
+geospatial_code_conflicts,4,quarantined,Current verified CCPP code retained over a different valid 2007 Census code
+geospatial_name_conflicts,0,quarantined,Current verified CCPP code retained over a different exact-name candidate
+geospatial_linked,4707,validated,RUV records linked to the 2017 geospatial spine
+geospatial_altitude_available,4019,validated,Linked RUV records with category-layer altitude
+geospatial_population_available,4019,validated,Linked RUV records with category-layer 2017 population
+geospatial_unmatched,1005,retained_unmatched,RUV records retained without 2017 geospatial attributes
+geospatial_registry_rows,5712,validated,All RUV records retained after the geospatial merge

@@ -2,7 +2,7 @@
 Project:       Victimas RD
 Program:       01_data_preparation.do
 Purpose:       Authoritative end-to-end data-preparation program
-Current scope: Foundational community sources and 2007 census covariates
+Current scope: Foundational community, Census 2007, and spatial covariates
 
 This file is the only canonical Stata data-preparation program. New source
 families will be added as clearly delimited sections here so that the master
@@ -14,6 +14,7 @@ Current source families:
     3. CMAN communities attended through 2023
     4. Historical and alternative CCPP directories, 2007--2025
     5. INEI 2007 CCPP-level census tabulation
+    6. INEI-derived 2017 CCPP point and category shapefiles
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -85,7 +86,13 @@ foreach data_directory in ///
 sysdir set PLUS "${ado_root}"
 discard
 
-foreach command in freqindex matchit strdist {
+foreach command in ///
+    freqindex ///
+    matchit ///
+    strdist ///
+    geodist ///
+    geonear ///
+    spshape2dta {
     capture which `command'
     if _rc {
         display as error "Required matching command is unavailable: `command'"
@@ -3771,7 +3778,988 @@ save ///
 
 
 *===============================================================================
-**# 9. Write aggregate QA metrics and close
+**# 9. Prepare and integrate 2017 CCPP geospatial attributes
+*===============================================================================
+
+local geospatial_basic_shape ///
+    "${raw_root}/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia"
+local geospatial_category_shape ///
+    "${raw_root}/11 Centros Poblados/Centros_Poblados_Categoria_INEI_geogpsperu_SuyoPomalia/Centros_Poblados_Categoria_INEI_geogpsperu_SuyoPomalia"
+
+/*
+The two GeoGPS Peru downloads redistribute distinct INEI 2017 point layers.
+The urban/rural layer is the 94,922-record CCPP spine with unique ten-digit
+codes. The category layer contains 90,253 valid CCPP codes plus 4,669
+dispersed-population points coded "0". The complete urban/rural layer is
+therefore authoritative for geometry and identifiers; category attributes are
+merged only by valid exact CCPP code.
+*/
+
+foreach shape_stub in ///
+    "`geospatial_basic_shape'" ///
+    "`geospatial_category_shape'" {
+
+    foreach extension in shp shx dbf prj {
+        capture confirm file "`shape_stub'.`extension'"
+        if _rc {
+            display as error "Required geospatial source component was not found:"
+            display as error "  `shape_stub'.`extension'"
+            exit 601
+        }
+    }
+}
+
+local geospatial_basic_map ///
+    "${intermediate_root}/05_geospatial_ccpp_2017_basic_map.dta"
+local geospatial_basic_coordinates ///
+    "${intermediate_root}/05_geospatial_ccpp_2017_basic_map_shp.dta"
+local geospatial_category_map ///
+    "${intermediate_root}/06_geospatial_ccpp_2017_category_map.dta"
+local geospatial_category_coordinates ///
+    "${intermediate_root}/06_geospatial_ccpp_2017_category_map_shp.dta"
+local geospatial_source ///
+    "${intermediate_root}/07_geospatial_ccpp_2017.dta"
+local district_capitals ///
+    "${intermediate_root}/08_district_capitals_2017.dta"
+local province_capitals ///
+    "${intermediate_root}/09_province_capitals_2017.dta"
+local department_capitals ///
+    "${intermediate_root}/10_department_capitals_2017.dta"
+local cities_2017 ///
+    "${intermediate_root}/11_cities_2017.dta"
+
+/*
+Use Stata's official spatial translator rather than the retired user-written
+shp2dta command. spshape2dta must write to the current directory, so the
+pipeline changes directory only for the conversion and immediately returns.
+The two map-ready database/shapefile pairs remain in Dropbox Working.
+*/
+
+local geospatial_prior_directory "`c(pwd)'"
+cd "${intermediate_root}"
+
+spshape2dta ///
+    "`geospatial_basic_shape'", ///
+    saving("05_geospatial_ccpp_2017_basic_map") ///
+    replace
+
+spshape2dta ///
+    "`geospatial_category_shape'", ///
+    saving("06_geospatial_ccpp_2017_category_map") ///
+    replace
+
+foreach spatial_database in ///
+    "05_geospatial_ccpp_2017_basic_map" ///
+    "06_geospatial_ccpp_2017_category_map" {
+
+    use "`spatial_database'.dta", clear
+    spset, modify coordsys(latlong, kilometers)
+    save "`spatial_database'.dta", replace
+}
+
+cd "`geospatial_prior_directory'"
+
+foreach converted_file in ///
+    "`geospatial_basic_map'" ///
+    "`geospatial_basic_coordinates'" ///
+    "`geospatial_category_map'" ///
+    "`geospatial_category_coordinates'" {
+
+    capture confirm file "`converted_file'"
+    if _rc {
+        display as error "Expected Stata spatial output was not created:"
+        display as error "  `converted_file'"
+        exit 603
+    }
+}
+
+/*
+Validate and clean the complete CCPP point layer. Coordinates are WGS 1984
+longitude and latitude in signed decimal degrees. Capital status follows the
+ten-digit code structure recorded by the research team:
+
+    DDPPDDCCCC
+    CCCC == 0001       district capital
+    DDCCCC == 010001   province capital
+    PPDDCCCC == 01010001 department capital
+*/
+
+cd "${intermediate_root}"
+use "05_geospatial_ccpp_2017_basic_map.dta", clear
+
+count
+assert r(N) == 94922
+assert c(k) == 25
+assert ustrregexm(IDCCPP, "^[0-9]{10}$")
+isid IDCCPP
+assert UBIGEO == substr(IDCCPP, 1, 6)
+assert inrange(_CX, -82, -68)
+assert inrange(_CY, -19, 1)
+assert !missing(_CX, _CY)
+
+generate long geospatial_source_id = _ID
+generate double longitude_2017 = _CX
+generate double latitude_2017 = _CY
+spset, modify noshpfile
+spset, clear
+
+rename ///
+    (IDCCPP ///
+     NOMB_CCPP ///
+     NOMB_DISTR ///
+     NOMB_PROVI ///
+     NOMB_DEPAR) ///
+    (geospatial_ubigeo_ccpp ///
+     ccpp_name_spatial_2017 ///
+     district_spatial_2017 ///
+     province_spatial_2017 ///
+     department_spatial_2017)
+
+generate str6 geospatial_ubigeo_dist = ///
+    substr(geospatial_ubigeo_ccpp, 1, 6)
+generate str4 geospatial_ubigeo_prov = ///
+    substr(geospatial_ubigeo_ccpp, 1, 4)
+generate str2 geospatial_ubigeo_dpto = ///
+    substr(geospatial_ubigeo_ccpp, 1, 2)
+
+assert inlist(TIPO, "Urbano", "Rural")
+generate byte geospatial_area_disagreement = ///
+    (AREA_CP == 1 & TIPO != "Urbano") | ///
+    (AREA_CP == 2 & TIPO != "Rural")
+count if geospatial_area_disagreement
+local geospatial_area_disagreements = r(N)
+assert `geospatial_area_disagreements' == 16
+
+preserve
+keep if geospatial_area_disagreement
+keep ///
+    geospatial_ubigeo_ccpp ///
+    department_spatial_2017 ///
+    province_spatial_2017 ///
+    district_spatial_2017 ///
+    ccpp_name_spatial_2017 ///
+    AREA_CP ///
+    TIPO
+save ///
+    "${qa_data_root}/geospatial2017_area_classification_disagreements.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/geospatial2017_area_classification_disagreements.csv", ///
+    replace
+restore
+
+/*
+The embedded XML lineage shows that GeoGPS calculated TIPO in ArcGIS in July
+2023. AREA_CP is the underlying numeric INEI field and therefore governs the
+analytical indicator. The 16 disagreements remain quarantined above.
+*/
+generate byte urban_2017 = AREA_CP == 1
+drop geospatial_area_disagreement
+
+generate byte is_dist_capital_2017 = ///
+    substr(geospatial_ubigeo_ccpp, 7, 4) == "0001"
+generate byte is_prov_capital_2017 = ///
+    substr(geospatial_ubigeo_ccpp, 5, 6) == "010001"
+generate byte is_dept_capital_2017 = ///
+    substr(geospatial_ubigeo_ccpp, 3, 8) == "01010001"
+
+count if is_dist_capital_2017
+local geospatial_district_capitals = r(N)
+assert `geospatial_district_capitals' == 1874
+
+count if is_prov_capital_2017
+local geospatial_province_capitals = r(N)
+assert `geospatial_province_capitals' == 196
+
+count if is_dept_capital_2017
+local geospatial_department_capitals = r(N)
+assert `geospatial_department_capitals' == 25
+
+preserve
+keep if is_dist_capital_2017
+isid geospatial_ubigeo_dist
+restore
+
+preserve
+keep if is_prov_capital_2017
+isid geospatial_ubigeo_prov
+restore
+
+preserve
+keep if is_dept_capital_2017
+isid geospatial_ubigeo_dpto
+restore
+
+tempfile ///
+    geospatial_basic ///
+    geospatial_category_attributes ///
+    geospatial_category_ids ///
+    geospatial_ids ///
+    geospatial_census_ids ///
+    geospatial_paths ///
+    geospatial_district_names ///
+    geospatial_full
+
+save "`geospatial_basic'", replace
+
+/*
+Validate the category layer separately. The 4,669 code-zero rows represent
+dispersed-population locations, not uniquely identified CCPPs, and cannot be
+merged to the analytical registry. The 20 valid codes absent from the complete
+CCPP spine are retained in Dropbox QA; none match an RUV row.
+*/
+
+use "06_geospatial_ccpp_2017_category_map.dta", clear
+
+count
+assert r(N) == 94922
+assert c(k) == 25
+assert inrange(_CX, -82, -68)
+assert inrange(_CY, -19, 1)
+assert abs(_CX - LONGITUD) < 1e-6
+assert abs(_CY - LATITUD) < 1e-6
+
+count if CODIGO == "0"
+local geospatial_dispersed_points = r(N)
+assert `geospatial_dispersed_points' == 4669
+
+count if ustrregexm(CODIGO, "^[0-9]{10}$")
+local geospatial_category_codes = r(N)
+assert `geospatial_category_codes' == 90253
+
+preserve
+keep if ustrregexm(CODIGO, "^[0-9]{10}$")
+rename CODIGO geospatial_ubigeo_ccpp
+keep geospatial_ubigeo_ccpp
+isid geospatial_ubigeo_ccpp
+save "`geospatial_category_ids'", replace
+restore
+
+keep if ustrregexm(CODIGO, "^[0-9]{10}$")
+rename ///
+    (CODIGO ///
+     LONGITUD ///
+     LATITUD ///
+     ALTITUD ///
+     REGION_NAT ///
+     CATEGORIA ///
+     POBLACION ///
+     CPV2017_GI) ///
+    (geospatial_ubigeo_ccpp ///
+     longitude_category_2017 ///
+     latitude_category_2017 ///
+     altitude_m_2017 ///
+     natural_region_2017 ///
+     ccpp_category_2017 ///
+     population_2017_directory ///
+     census_status_2017)
+
+keep ///
+    geospatial_ubigeo_ccpp ///
+    longitude_category_2017 ///
+    latitude_category_2017 ///
+    altitude_m_2017 ///
+    natural_region_2017 ///
+    ccpp_category_2017 ///
+    population_2017_directory ///
+    census_status_2017
+
+isid geospatial_ubigeo_ccpp
+save "`geospatial_category_attributes'", replace
+
+use "`geospatial_category_attributes'", clear
+merge 1:1 geospatial_ubigeo_ccpp using ///
+    "`geospatial_basic'", ///
+    keep(master match) ///
+    gen(geospatial_category_basic_merge)
+
+count if geospatial_category_basic_merge == 1
+local geospatial_category_only_codes = r(N)
+assert `geospatial_category_only_codes' == 20
+
+keep if geospatial_category_basic_merge == 1
+keep ///
+    geospatial_ubigeo_ccpp ///
+    longitude_category_2017 ///
+    latitude_category_2017 ///
+    altitude_m_2017 ///
+    natural_region_2017 ///
+    ccpp_category_2017 ///
+    population_2017_directory
+
+save ///
+    "${qa_data_root}/geospatial2017_category_only_codes.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/geospatial2017_category_only_codes.csv", ///
+    replace
+
+use "`geospatial_basic'", clear
+merge 1:1 geospatial_ubigeo_ccpp using ///
+    "`geospatial_category_attributes'", ///
+    keep(master match) ///
+    gen(geospatial_category_merge)
+
+count if geospatial_category_merge == 3
+local geospatial_category_linked = r(N)
+assert `geospatial_category_linked' == 90233
+
+count if geospatial_category_merge == 1
+local geospatial_basic_only = r(N)
+assert `geospatial_basic_only' == 4689
+
+assert abs(longitude_2017 - longitude_category_2017) < 1e-6 if ///
+    geospatial_category_merge == 3
+assert abs(latitude_2017 - latitude_category_2017) < 1e-6 if ///
+    geospatial_category_merge == 3
+
+preserve
+keep if geospatial_category_merge == 1
+keep ///
+    geospatial_ubigeo_ccpp ///
+    department_spatial_2017 ///
+    province_spatial_2017 ///
+    district_spatial_2017 ///
+    ccpp_name_spatial_2017 ///
+    longitude_2017 ///
+    latitude_2017
+save ///
+    "${qa_data_root}/geospatial2017_basic_without_category.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/geospatial2017_basic_without_category.csv", ///
+    replace
+restore
+
+drop ///
+    geospatial_category_merge ///
+    longitude_category_2017 ///
+    latitude_category_2017
+
+/*
+Create the capital and city point files once and calculate straight-line
+geodesic distances on the WGS 1984 ellipsoid. "Corresponding" capitals are
+defined by the CCPP code hierarchy; "nearest" capitals may lie outside the
+observation's own district, province, or department. City status comes from
+the category layer's CIUDAD classification.
+*/
+
+preserve
+keep if is_dist_capital_2017
+keep ///
+    geospatial_ubigeo_dist ///
+    geospatial_ubigeo_ccpp ///
+    ccpp_name_spatial_2017 ///
+    latitude_2017 ///
+    longitude_2017
+rename ///
+    (geospatial_ubigeo_ccpp ///
+     ccpp_name_spatial_2017 ///
+     latitude_2017 ///
+     longitude_2017) ///
+    (dist_capital_code ///
+     dist_capital_name ///
+     dist_capital_latitude ///
+     dist_capital_longitude)
+generate long dist_capital_id = _n
+isid geospatial_ubigeo_dist
+save "`district_capitals'", replace
+restore
+
+preserve
+keep if is_prov_capital_2017
+keep ///
+    geospatial_ubigeo_prov ///
+    geospatial_ubigeo_ccpp ///
+    ccpp_name_spatial_2017 ///
+    latitude_2017 ///
+    longitude_2017
+rename ///
+    (geospatial_ubigeo_ccpp ///
+     ccpp_name_spatial_2017 ///
+     latitude_2017 ///
+     longitude_2017) ///
+    (prov_capital_code ///
+     prov_capital_name ///
+     prov_capital_latitude ///
+     prov_capital_longitude)
+generate long prov_capital_id = _n
+isid geospatial_ubigeo_prov
+save "`province_capitals'", replace
+restore
+
+preserve
+keep if is_dept_capital_2017
+keep ///
+    geospatial_ubigeo_dpto ///
+    geospatial_ubigeo_ccpp ///
+    ccpp_name_spatial_2017 ///
+    latitude_2017 ///
+    longitude_2017
+rename ///
+    (geospatial_ubigeo_ccpp ///
+     ccpp_name_spatial_2017 ///
+     latitude_2017 ///
+     longitude_2017) ///
+    (dept_capital_code ///
+     dept_capital_name ///
+     dept_capital_latitude ///
+     dept_capital_longitude)
+generate long dept_capital_id = _n
+isid geospatial_ubigeo_dpto
+save "`department_capitals'", replace
+restore
+
+preserve
+keep if ccpp_category_2017 == "CIUDAD"
+keep ///
+    geospatial_ubigeo_ccpp ///
+    ccpp_name_spatial_2017 ///
+    latitude_2017 ///
+    longitude_2017
+rename ///
+    (geospatial_ubigeo_ccpp ///
+     ccpp_name_spatial_2017 ///
+     latitude_2017 ///
+     longitude_2017) ///
+    (city_code ///
+     city_name ///
+     city_latitude ///
+     city_longitude)
+generate long city_id = _n
+isid city_id
+count
+assert r(N) == 235
+save "`cities_2017'", replace
+restore
+
+merge m:1 geospatial_ubigeo_dist using ///
+    "`district_capitals'", ///
+    assert(match) ///
+    nogen
+merge m:1 geospatial_ubigeo_prov using ///
+    "`province_capitals'", ///
+    assert(match) ///
+    nogen
+merge m:1 geospatial_ubigeo_dpto using ///
+    "`department_capitals'", ///
+    assert(match) ///
+    nogen
+
+geodist ///
+    latitude_2017 ///
+    longitude_2017 ///
+    dist_capital_latitude ///
+    dist_capital_longitude, ///
+    generate(dist_dist_capital_km)
+
+geodist ///
+    latitude_2017 ///
+    longitude_2017 ///
+    prov_capital_latitude ///
+    prov_capital_longitude, ///
+    generate(dist_prov_capital_km)
+
+geodist ///
+    latitude_2017 ///
+    longitude_2017 ///
+    dept_capital_latitude ///
+    dept_capital_longitude, ///
+    generate(dist_dept_capital_km)
+
+geonear ///
+    geospatial_source_id ///
+    latitude_2017 ///
+    longitude_2017 ///
+    using "`district_capitals'", ///
+    neighbors( ///
+        dist_capital_id ///
+        dist_capital_latitude ///
+        dist_capital_longitude) ///
+    genstub(nearest_dist_capital) ///
+    ellipsoid ///
+    report(60)
+
+rename ///
+    km_to_nearest_dist_capital ///
+    dist_near_dist_cap_km
+
+geonear ///
+    geospatial_source_id ///
+    latitude_2017 ///
+    longitude_2017 ///
+    using "`province_capitals'", ///
+    neighbors( ///
+        prov_capital_id ///
+        prov_capital_latitude ///
+        prov_capital_longitude) ///
+    genstub(nearest_prov_capital) ///
+    ellipsoid ///
+    report(60)
+
+rename ///
+    km_to_nearest_prov_capital ///
+    dist_near_prov_cap_km
+
+geonear ///
+    geospatial_source_id ///
+    latitude_2017 ///
+    longitude_2017 ///
+    using "`department_capitals'", ///
+    neighbors( ///
+        dept_capital_id ///
+        dept_capital_latitude ///
+        dept_capital_longitude) ///
+    genstub(nearest_dept_capital) ///
+    ellipsoid ///
+    report(60)
+
+rename ///
+    km_to_nearest_dept_capital ///
+    dist_near_dept_cap_km
+
+geonear ///
+    geospatial_source_id ///
+    latitude_2017 ///
+    longitude_2017 ///
+    using "`cities_2017'", ///
+    neighbors( ///
+        city_id ///
+        city_latitude ///
+        city_longitude) ///
+    genstub(nearest_city) ///
+    ellipsoid ///
+    report(60)
+
+rename km_to_nearest_city dist_nearest_city_km
+
+local geospatial_distances ///
+    dist_dist_capital_km ///
+    dist_near_dist_cap_km ///
+    dist_prov_capital_km ///
+    dist_near_prov_cap_km ///
+    dist_dept_capital_km ///
+    dist_near_dept_cap_km ///
+    dist_nearest_city_km
+
+foreach variable of varlist `geospatial_distances' {
+    assert `variable' >= 0 & !missing(`variable')
+}
+
+assert dist_near_dist_cap_km <= ///
+    dist_dist_capital_km + 1e-6
+assert dist_near_prov_cap_km <= ///
+    dist_prov_capital_km + 1e-6
+assert dist_near_dept_cap_km <= ///
+    dist_dept_capital_km + 1e-6
+
+generate double ln1p_dist_dist_capital = ///
+    ln(1 + dist_dist_capital_km)
+generate double ln1p_dist_near_dist_cap = ///
+    ln(1 + dist_near_dist_cap_km)
+generate double ln1p_dist_prov_capital = ///
+    ln(1 + dist_prov_capital_km)
+generate double ln1p_dist_near_prov_cap = ///
+    ln(1 + dist_near_prov_cap_km)
+generate double ln1p_dist_dept_capital = ///
+    ln(1 + dist_dept_capital_km)
+generate double ln1p_dist_near_dept_cap = ///
+    ln(1 + dist_near_dept_cap_km)
+generate double ln1p_dist_nearest_city = ///
+    ln(1 + dist_nearest_city_km)
+
+label variable longitude_2017 ///
+    "Longitude of 2017 CCPP point (WGS 84 decimal degrees)"
+label variable latitude_2017 ///
+    "Latitude of 2017 CCPP point (WGS 84 decimal degrees)"
+label variable altitude_m_2017 ///
+    "Altitude of 2017 CCPP point in meters above sea level"
+label variable natural_region_2017 ///
+    "Natural region in the 2017 CCPP category layer"
+label variable ccpp_category_2017 ///
+    "Centro-poblado category in the 2017 category layer"
+label variable population_2017_directory ///
+    "Population reported in the 2017 CCPP directory"
+label variable urban_2017 ///
+    "Urban CCPP in underlying INEI AREA_CP field"
+label variable is_dist_capital_2017 ///
+    "CCPP is the corresponding 2017 district capital"
+label variable is_prov_capital_2017 ///
+    "CCPP is the corresponding 2017 province capital"
+label variable is_dept_capital_2017 ///
+    "CCPP is the corresponding 2017 department capital"
+label variable dist_dist_capital_km ///
+    "Geodesic distance to corresponding district capital (km)"
+label variable dist_near_dist_cap_km ///
+    "Geodesic distance to nearest district capital (km)"
+label variable dist_prov_capital_km ///
+    "Geodesic distance to corresponding province capital (km)"
+label variable dist_near_prov_cap_km ///
+    "Geodesic distance to nearest province capital (km)"
+label variable dist_dept_capital_km ///
+    "Geodesic distance to corresponding department capital (km)"
+label variable dist_near_dept_cap_km ///
+    "Geodesic distance to nearest department capital (km)"
+label variable dist_nearest_city_km ///
+    "Geodesic distance to nearest CCPP categorized as city (km)"
+label variable ln1p_dist_dist_capital ///
+    "ln(1 + km to corresponding district capital)"
+label variable ln1p_dist_near_dist_cap ///
+    "ln(1 + km to nearest district capital)"
+label variable ln1p_dist_prov_capital ///
+    "ln(1 + km to corresponding province capital)"
+label variable ln1p_dist_near_prov_cap ///
+    "ln(1 + km to nearest province capital)"
+label variable ln1p_dist_dept_capital ///
+    "ln(1 + km to corresponding department capital)"
+label variable ln1p_dist_near_dept_cap ///
+    "ln(1 + km to nearest department capital)"
+label variable ln1p_dist_nearest_city ///
+    "ln(1 + km to nearest CCPP categorized as city)"
+
+victimasrd_normalize_name ///
+    department_spatial_2017, generate(geospatial_dpto_norm)
+victimasrd_normalize_name ///
+    province_spatial_2017, generate(geospatial_prov_norm)
+victimasrd_normalize_name ///
+    district_spatial_2017, generate(geospatial_dist_norm)
+victimasrd_normalize_name ///
+    ccpp_name_spatial_2017, generate(geospatial_ccpp_norm)
+
+egen str244 geospatial_path_norm = concat( ///
+    geospatial_dpto_norm ///
+    geospatial_prov_norm ///
+    geospatial_dist_norm ///
+    geospatial_ccpp_norm), ///
+    punct("|")
+
+preserve
+keep geospatial_ubigeo_ccpp
+rename geospatial_ubigeo_ccpp geospatial_assigned_code
+isid geospatial_assigned_code
+save "`geospatial_ids'", replace
+restore
+
+preserve
+keep geospatial_ubigeo_ccpp
+rename geospatial_ubigeo_ccpp geospatial_census_code
+isid geospatial_census_code
+save "`geospatial_census_ids'", replace
+restore
+
+preserve
+keep if ///
+    geospatial_dpto_norm != "" & ///
+    geospatial_prov_norm != "" & ///
+    geospatial_dist_norm != "" & ///
+    geospatial_ccpp_norm != ""
+bysort geospatial_path_norm: generate int geospatial_path_count = _N
+keep if geospatial_path_count == 1
+keep geospatial_path_norm geospatial_ubigeo_ccpp
+rename geospatial_ubigeo_ccpp geospatial_path_code
+isid geospatial_path_norm
+save "`geospatial_paths'", replace
+restore
+
+preserve
+keep if ///
+    geospatial_ubigeo_dist != "" & ///
+    geospatial_ccpp_norm != ""
+bysort geospatial_ubigeo_dist geospatial_ccpp_norm: ///
+    generate int geospatial_pair_count = _N
+keep if geospatial_pair_count == 1
+keep ///
+    geospatial_ubigeo_dist ///
+    geospatial_ccpp_norm ///
+    geospatial_ubigeo_ccpp
+rename geospatial_ubigeo_dist geospatial_district
+rename geospatial_ubigeo_ccpp geospatial_pair_code
+isid geospatial_district geospatial_ccpp_norm
+save "`geospatial_district_names'", replace
+restore
+
+compress
+sort geospatial_ubigeo_ccpp
+count
+local geospatial_source_rows = r(N)
+assert `geospatial_source_rows' == 94922
+save "`geospatial_source'", replace
+
+generate str10 geospatial_assigned_code = ///
+    geospatial_ubigeo_ccpp
+drop ///
+    geospatial_dpto_norm ///
+    geospatial_prov_norm ///
+    geospatial_dist_norm ///
+    geospatial_ccpp_norm ///
+    geospatial_path_norm
+save "`geospatial_full'", replace
+
+/*
+Link the spatial spine to the complete RUV registry. Current verified UBIGEO is
+authoritative. A valid exact 2007 Census code is a secondary historical bridge.
+Unique exact names are allowed only after both code rules fail. All RUV rows
+remain in the final registry.
+*/
+
+use ///
+    "${analysis_data_root}/05_community_registry_census2007.dta", ///
+    clear
+
+ds
+local census_registry_vars `r(varlist)'
+
+generate str10 geospatial_assigned_code = ubigeo_ccpp
+merge m:1 geospatial_assigned_code using ///
+    "`geospatial_ids'", ///
+    keep(master match) ///
+    gen(geospatial_current_match)
+
+generate str32 geospatial_link_method = cond( ///
+    geospatial_current_match == 3, ///
+    "exact_current_ubigeo", ///
+    "unmatched")
+
+replace geospatial_assigned_code = "" if ///
+    geospatial_current_match == 1
+
+generate str10 geospatial_census_code = ///
+    census2007_ubigeo_ccpp
+merge m:1 geospatial_census_code using ///
+    "`geospatial_census_ids'", ///
+    keep(master match) ///
+    gen(geospatial_census_match)
+
+replace geospatial_assigned_code = ///
+    geospatial_census_code if ///
+    geospatial_link_method == "unmatched" & ///
+    geospatial_census_match == 3
+
+replace geospatial_link_method = ///
+    "exact_census2007_ubigeo" if ///
+    geospatial_link_method == "unmatched" & ///
+    geospatial_census_match == 3
+
+victimasrd_normalize_name ///
+    dpto_victim_raw, generate(geospatial_dpto_norm)
+victimasrd_normalize_name ///
+    prov_victim_raw, generate(geospatial_prov_norm)
+victimasrd_normalize_name ///
+    dist_victim_raw, generate(geospatial_dist_norm)
+victimasrd_normalize_name ///
+    ccpp_victim_raw, generate(geospatial_ccpp_norm)
+
+egen str244 geospatial_path_norm = concat( ///
+    geospatial_dpto_norm ///
+    geospatial_prov_norm ///
+    geospatial_dist_norm ///
+    geospatial_ccpp_norm), ///
+    punct("|")
+
+merge m:1 geospatial_path_norm using ///
+    "`geospatial_paths'", ///
+    keep(master match) ///
+    gen(geospatial_path_match)
+
+replace geospatial_assigned_code = ///
+    geospatial_path_code if ///
+    geospatial_link_method == "unmatched" & ///
+    geospatial_path_match == 3
+
+replace geospatial_link_method = ///
+    "unique_exact_full_path" if ///
+    geospatial_link_method == "unmatched" & ///
+    geospatial_path_match == 3
+
+generate str6 geospatial_district = ubigeo_dist
+merge m:1 geospatial_district geospatial_ccpp_norm using ///
+    "`geospatial_district_names'", ///
+    keep(master match) ///
+    gen(geospatial_pair_match)
+
+replace geospatial_assigned_code = ///
+    geospatial_pair_code if ///
+    geospatial_link_method == "unmatched" & ///
+    geospatial_pair_match == 3
+
+replace geospatial_link_method = ///
+    "unique_exact_district_name" if ///
+    geospatial_link_method == "unmatched" & ///
+    geospatial_pair_match == 3
+
+generate byte geospatial_code_conflict = ///
+    geospatial_current_match == 3 & ///
+    geospatial_census_match == 3 & ///
+    ubigeo_ccpp != geospatial_census_code
+
+generate byte geospatial_name_conflict = ///
+    geospatial_current_match == 3 & ( ///
+        (geospatial_path_match == 3 & ///
+         ubigeo_ccpp != geospatial_path_code) | ///
+        (geospatial_pair_match == 3 & ///
+         ubigeo_ccpp != geospatial_pair_code))
+
+count if geospatial_code_conflict
+local geospatial_code_conflicts = r(N)
+assert `geospatial_code_conflicts' == 4
+
+count if geospatial_name_conflict
+local geospatial_name_conflicts = r(N)
+
+preserve
+keep if geospatial_code_conflict | geospatial_name_conflict
+keep ///
+    ruv_id ///
+    ubigeo_ccpp ///
+    census2007_ubigeo_ccpp ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    geospatial_census_code ///
+    geospatial_path_code ///
+    geospatial_pair_code ///
+    geospatial_link_method ///
+    geospatial_code_conflict ///
+    geospatial_name_conflict
+generate str52 linkage_disposition = ///
+    "current_ubigeo_retained_alternative_quarantined"
+save ///
+    "${qa_data_root}/geospatial2017_linkage_conflicts.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/geospatial2017_linkage_conflicts.csv", ///
+    replace
+restore
+
+count if geospatial_link_method == "exact_current_ubigeo"
+local geospatial_exact_current = r(N)
+count if geospatial_link_method == "exact_census2007_ubigeo"
+local geospatial_exact_census = r(N)
+count if geospatial_link_method == "unique_exact_full_path"
+local geospatial_exact_path = r(N)
+count if geospatial_link_method == "unique_exact_district_name"
+local geospatial_exact_district_name = r(N)
+count if geospatial_link_method == "unmatched"
+local geospatial_unmatched = r(N)
+
+merge m:1 geospatial_assigned_code using ///
+    "`geospatial_full'", ///
+    keep(master match) ///
+    gen(geospatial_data_merge)
+
+generate byte geospatial_linked = ///
+    geospatial_data_merge == 3
+
+count if geospatial_linked
+local geospatial_linked = r(N)
+assert `geospatial_linked' == ///
+    `geospatial_exact_current' + ///
+    `geospatial_exact_census' + ///
+    `geospatial_exact_path' + ///
+    `geospatial_exact_district_name'
+
+count if !geospatial_linked
+assert r(N) == `geospatial_unmatched'
+
+count if geospatial_linked & !missing(altitude_m_2017)
+local geospatial_altitude_available = r(N)
+count if geospatial_linked & !missing(population_2017_directory)
+local geospatial_population_available = r(N)
+
+label variable geospatial_linked ///
+    "RUV community linked to the 2017 CCPP spatial spine"
+label variable geospatial_link_method ///
+    "Method linking RUV community to the 2017 spatial spine"
+label variable geospatial_ubigeo_ccpp ///
+    "Ten-digit code used for the 2017 geospatial link"
+
+preserve
+keep if !geospatial_linked
+keep ///
+    ruv_id ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    census2007_ubigeo_ccpp ///
+    victim_inei_code_vintage ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    victimization_level_source ///
+    geospatial_link_method
+generate str52 linkage_disposition = ///
+    "retained_without_2017_geospatial_attributes"
+save ///
+    "${qa_data_root}/geospatial2017_unmatched_ruv.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/geospatial2017_unmatched_ruv.csv", ///
+    replace
+restore
+
+local geospatial_release_vars ///
+    geospatial_linked ///
+    geospatial_link_method ///
+    geospatial_ubigeo_ccpp ///
+    longitude_2017 ///
+    latitude_2017 ///
+    altitude_m_2017 ///
+    natural_region_2017 ///
+    ccpp_category_2017 ///
+    urban_2017 ///
+    population_2017_directory ///
+    is_dist_capital_2017 ///
+    is_prov_capital_2017 ///
+    is_dept_capital_2017 ///
+    dist_dist_capital_km ///
+    dist_near_dist_cap_km ///
+    dist_prov_capital_km ///
+    dist_near_prov_cap_km ///
+    dist_dept_capital_km ///
+    dist_near_dept_cap_km ///
+    dist_nearest_city_km ///
+    ln1p_dist_dist_capital ///
+    ln1p_dist_near_dist_cap ///
+    ln1p_dist_prov_capital ///
+    ln1p_dist_near_prov_cap ///
+    ln1p_dist_dept_capital ///
+    ln1p_dist_near_dept_cap ///
+    ln1p_dist_nearest_city
+
+keep ///
+    `census_registry_vars' ///
+    `geospatial_release_vars'
+
+order ///
+    `census_registry_vars' ///
+    geospatial_linked ///
+    geospatial_link_method ///
+    geospatial_ubigeo_ccpp ///
+    longitude_2017 ///
+    latitude_2017 ///
+    altitude_m_2017 ///
+    natural_region_2017 ///
+    ccpp_category_2017 ///
+    urban_2017 ///
+    population_2017_directory
+
+compress
+sort ruv_id
+isid ruv_id
+count
+local geospatial_registry_rows = r(N)
+assert `geospatial_registry_rows' == `census2007_registry_rows'
+
+save ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    replace
+
+cd "`geospatial_prior_directory'"
+
+
+*===============================================================================
+**# 10. Write aggregate QA metrics and close
 *===============================================================================
 
 tempname qa_post
@@ -4072,6 +5060,132 @@ post `qa_post' ///
     ("validated") ///
     ("All foundational RUV records retained after the 2007 census merge")
 
+post `qa_post' ///
+    ("geospatial_source_rows") ///
+    (`geospatial_source_rows') ///
+    ("validated") ///
+    ("Unique 2017 CCPP points in the complete urban-rural spatial spine")
+
+post `qa_post' ///
+    ("geospatial_category_codes") ///
+    (`geospatial_category_codes') ///
+    ("validated") ///
+    ("Valid ten-digit CCPP codes in the category point layer")
+
+post `qa_post' ///
+    ("geospatial_dispersed_points") ///
+    (`geospatial_dispersed_points') ///
+    ("documented_exclusion") ///
+    ("Category-layer dispersed-population points coded zero and not CCPP-linkable")
+
+post `qa_post' ///
+    ("geospatial_category_linked") ///
+    (`geospatial_category_linked') ///
+    ("validated") ///
+    ("Complete-spine CCPPs enriched by exact category-layer code")
+
+post `qa_post' ///
+    ("geospatial_basic_only") ///
+    (`geospatial_basic_only') ///
+    ("retained") ///
+    ("Complete-spine CCPPs retained without category-layer enrichment")
+
+post `qa_post' ///
+    ("geospatial_category_only_codes") ///
+    (`geospatial_category_only_codes') ///
+    ("quarantined") ///
+    ("Valid category-layer codes absent from the complete 94922-record spine")
+
+post `qa_post' ///
+    ("geospatial_area_disagreements") ///
+    (`geospatial_area_disagreements') ///
+    ("quarantined") ///
+    ("GeoGPS-derived TIPO disagrees with underlying INEI AREA_CP classification")
+
+post `qa_post' ///
+    ("geospatial_district_capitals") ///
+    (`geospatial_district_capitals') ///
+    ("validated") ///
+    ("One suffix-0001 capital for each 2017 district")
+
+post `qa_post' ///
+    ("geospatial_province_capitals") ///
+    (`geospatial_province_capitals') ///
+    ("validated") ///
+    ("One district-01 CCPP-0001 capital for each province")
+
+post `qa_post' ///
+    ("geospatial_department_capitals") ///
+    (`geospatial_department_capitals') ///
+    ("validated") ///
+    ("One province-01 district-01 CCPP-0001 capital for each department")
+
+post `qa_post' ///
+    ("geospatial_exact_current") ///
+    (`geospatial_exact_current') ///
+    ("validated") ///
+    ("RUV records linked by exact current verified CCPP UBIGEO")
+
+post `qa_post' ///
+    ("geospatial_exact_census2007") ///
+    (`geospatial_exact_census') ///
+    ("validated") ///
+    ("Additional RUV records linked by exact 2007 Census CCPP UBIGEO")
+
+post `qa_post' ///
+    ("geospatial_unique_exact_path") ///
+    (`geospatial_exact_path') ///
+    ("validated") ///
+    ("Additional RUV records linked by unique exact normalized full path")
+
+post `qa_post' ///
+    ("geospatial_unique_district_name") ///
+    (`geospatial_exact_district_name') ///
+    ("validated") ///
+    ("Additional RUV records linked by unique exact district-code and CCPP name")
+
+post `qa_post' ///
+    ("geospatial_code_conflicts") ///
+    (`geospatial_code_conflicts') ///
+    ("quarantined") ///
+    ("Current verified CCPP code retained over a different valid 2007 Census code")
+
+post `qa_post' ///
+    ("geospatial_name_conflicts") ///
+    (`geospatial_name_conflicts') ///
+    ("quarantined") ///
+    ("Current verified CCPP code retained over a different exact-name candidate")
+
+post `qa_post' ///
+    ("geospatial_linked") ///
+    (`geospatial_linked') ///
+    ("validated") ///
+    ("RUV records linked to the 2017 geospatial spine")
+
+post `qa_post' ///
+    ("geospatial_altitude_available") ///
+    (`geospatial_altitude_available') ///
+    ("validated") ///
+    ("Linked RUV records with category-layer altitude")
+
+post `qa_post' ///
+    ("geospatial_population_available") ///
+    (`geospatial_population_available') ///
+    ("validated") ///
+    ("Linked RUV records with category-layer 2017 population")
+
+post `qa_post' ///
+    ("geospatial_unmatched") ///
+    (`geospatial_unmatched') ///
+    ("retained_unmatched") ///
+    ("RUV records retained without 2017 geospatial attributes")
+
+post `qa_post' ///
+    ("geospatial_registry_rows") ///
+    (`geospatial_registry_rows') ///
+    ("validated") ///
+    ("All RUV records retained after the geospatial merge")
+
 postclose `qa_post'
 
 use `qa_metrics', clear
@@ -4108,6 +5222,13 @@ export delimited ///
     replace
 restore
 
+preserve
+keep if strpos(metric, "geospatial_") == 1
+export delimited ///
+    "${metadata_root}/geospatial-2017/sample-flow.csv", ///
+    replace
+restore
+
 display as result "Data-preparation staging completed."
 display as text   "INEI CCPP rows:                  `inei_ccpp_rows'"
 display as text   "Historical source rows pooled:  `historical_source_rows'"
@@ -4128,6 +5249,10 @@ display as text   "2007 census exact-name links:    " ///
     `census2007_exact_path' + `census2007_exact_district_name'
 display as text   "RUV rows with 2007 covariates:   `census2007_linked'"
 display as text   "RUV rows without 2007 covariates: `census2007_unmatched'"
+display as text   "2017 geospatial source rows:     `geospatial_source_rows'"
+display as text   "RUV rows with spatial attributes: `geospatial_linked'"
+display as text   "RUV rows without spatial attributes: `geospatial_unmatched'"
+display as text   "RUV rows with altitude:          `geospatial_altitude_available'"
 display as text   "All RUV rows retained with complete treatment status."
 
 capture program drop victimasrd_normalize_name

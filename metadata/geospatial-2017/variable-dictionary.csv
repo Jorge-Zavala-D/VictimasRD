@@ -1,0 +1,28 @@
+variable,storage_concept,definition,source_or_construction,interpretation_limit
+geospatial_linked,indicator,RUV row linked to the 2017 spatial spine,Derived from the final exact-link merge,Unlinked RUV rows are retained
+geospatial_link_method,category,Highest-priority accepted spatial-link method,Current UBIGEO then 2007 Census UBIGEO then unique exact names,No fuzzy matches accepted
+geospatial_ubigeo_ccpp,identifier,Ten-digit CCPP code used for the spatial link,2017 spatial spine,Does not replace authoritative RUV ubigeo_ccpp
+longitude_2017,decimal degrees,WGS 84 longitude of the CCPP point,Complete urban-rural point layer,2017 code and point vintage
+latitude_2017,decimal degrees,WGS 84 latitude of the CCPP point,Complete urban-rural point layer,2017 code and point vintage
+altitude_m_2017,meters,Altitude above mean sea level,Exact category-layer code merge,Unavailable for spine records without category enrichment
+natural_region_2017,category,Natural region,Exact category-layer code merge,2017-vintage classification
+ccpp_category_2017,category,Centro-poblado category,Exact category-layer code merge,2017-vintage classification
+urban_2017,indicator,One when underlying INEI AREA_CP equals 1,Complete urban-rural point layer,2017-vintage and 16 TIPO disagreements quarantined
+population_2017_directory,persons,Population reported in the CCPP directory,Exact category-layer code merge,Post-treatment for some project years
+is_dist_capital_2017,indicator,CCPP code ends in 0001,Ten-digit code hierarchy,Administrative code rule
+is_prov_capital_2017,indicator,District is 01 and CCPP is 0001,Ten-digit code hierarchy,Administrative code rule
+is_dept_capital_2017,indicator,Province and district are 01 and CCPP is 0001,Ten-digit code hierarchy,Administrative code rule
+dist_dist_capital_km,kilometers,Geodesic distance to corresponding district capital,WGS 84 ellipsoid via geodist,Straight-line rather than road distance
+dist_near_dist_cap_km,kilometers,Geodesic distance to nearest district capital,WGS 84 ellipsoid via geonear,Nearest capital may cross administrative boundaries
+dist_prov_capital_km,kilometers,Geodesic distance to corresponding province capital,WGS 84 ellipsoid via geodist,Straight-line rather than road distance
+dist_near_prov_cap_km,kilometers,Geodesic distance to nearest province capital,WGS 84 ellipsoid via geonear,Nearest capital may cross administrative boundaries
+dist_dept_capital_km,kilometers,Geodesic distance to corresponding department capital,WGS 84 ellipsoid via geodist,Straight-line rather than road distance
+dist_near_dept_cap_km,kilometers,Geodesic distance to nearest department capital,WGS 84 ellipsoid via geonear,Nearest capital may cross administrative boundaries
+dist_nearest_city_km,kilometers,Geodesic distance to nearest CCPP categorized CIUDAD,WGS 84 ellipsoid via geonear,Depends on 2017 category classification
+ln1p_dist_dist_capital,log kilometers,ln of one plus distance to corresponding district capital,Derived from dist_dist_capital_km,Defined at zero distance
+ln1p_dist_near_dist_cap,log kilometers,ln of one plus distance to nearest district capital,Derived from dist_near_dist_cap_km,Defined at zero distance
+ln1p_dist_prov_capital,log kilometers,ln of one plus distance to corresponding province capital,Derived from dist_prov_capital_km,Defined at zero distance
+ln1p_dist_near_prov_cap,log kilometers,ln of one plus distance to nearest province capital,Derived from dist_near_prov_cap_km,Defined at zero distance
+ln1p_dist_dept_capital,log kilometers,ln of one plus distance to corresponding department capital,Derived from dist_dept_capital_km,Defined at zero distance
+ln1p_dist_near_dept_cap,log kilometers,ln of one plus distance to nearest department capital,Derived from dist_near_dept_cap_km,Defined at zero distance
+ln1p_dist_nearest_city,log kilometers,ln of one plus distance to nearest CCPP categorized CIUDAD,Derived from dist_nearest_city_km,Defined at zero distance

@@ -214,6 +214,42 @@ transparent component covariates with explicit source universes. Adding an
 official poverty-map or household-microdata NBI measure remains a separate
 source and methods task.
 
+## Recorded 2017 CCPP geospatial decision
+
+On July 28, 2026, the two GeoGPS Peru CCPP point bundles supplied under
+Dropbox Raw were designated as the current spatial source. They redistribute
+INEI 2017 CCPP information in WGS 84 coordinates but are not direct downloads
+from an official INEI server. The 94,922-record urban-rural layer is the
+complete keyed spatial spine. The category layer enriches 90,233 of those
+codes with altitude, natural region, CCPP category, and population. Its 4,669
+code-zero dispersed-population points cannot be linked as individual CCPPs,
+and 20 valid category-layer codes absent from the spatial spine are
+quarantined.
+
+The source metadata records that GeoGPS generated the text field `TIPO` in
+2023. The canonical `urban_2017` indicator therefore uses the underlying
+numeric INEI `AREA_CP` field. The 16 records in which `TIPO` and `AREA_CP`
+disagree remain in row-level Dropbox QA rather than being silently changed.
+
+The pipeline converts both point layers with Stata's official
+`spshape2dta`, retains the map-ready database-coordinate pairs in Dropbox
+Working, and calculates straight-line geodesic distances on the WGS 84
+ellipsoid. Corresponding district, province, and department capitals are
+identified from the ten-digit CCPP code hierarchy; nearest-capital distances
+are calculated independently and may cross the observation's administrative
+boundary. The nearest-city measure uses the category layer's `CIUDAD`
+classification. These measures are geographic distances, not road-network
+travel distances.
+
+Spatial linkage preserves all 5,712 RUV rows. It prioritizes the current
+verified CCPP UBIGEO, then a valid exact 2007 Census code, and only then unique
+exact geographic-name keys. Current verified codes govern any conflict.
+Physical coordinates and altitude may be used as geographic covariates with
+appropriate caution; the 2017 population, category, and urban classification
+are post-treatment for some project years and must not be relabeled as
+pre-treatment covariates. Full details are in
+`docs/GEOSPATIAL_2017_PREPARATION.md`.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must

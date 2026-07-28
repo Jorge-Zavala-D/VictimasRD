@@ -159,6 +159,11 @@ preserving this foundational registry unchanged. Its source audit, variable
 construction, linkage rules, and outputs are documented in
 [`docs/CENSUS_2007_PREPARATION.md`](CENSUS_2007_PREPARATION.md).
 
+The subsequent milestone converts and integrates the 2017 CCPP point layers,
+constructs map-ready spatial files and geodesic capital-distance measures, and
+again preserves all RUV rows. See
+[`docs/GEOSPATIAL_2017_PREPARATION.md`](GEOSPATIAL_2017_PREPARATION.md).
+
 The complete source, matching, conflict, and final-flow record is maintained in
 [`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](CCPP_UBIGEO_RECOVERY_LOG.tex).
 
