@@ -73,12 +73,12 @@ pipeline contribute 463,266 candidate rows. File-level SHA-256 checksums are
 recorded in
 \code{metadata/ccpp-linkage/historical-ccpp-source-checksums.csv}. The complete
 ReporteCCPP extraction manifest, including each source file, duplicate status,
-reported row count, and output checksum, is regenerated in Dropbox Working QA.
+reported row count, and output checksum, is stored in Dropbox Working QA.
 
 \section{Reproducible extraction and standardization}
 
 The files named \code{ReporteCCPP*.xls} are HTML administrative tables rather
-than binary Excel workbooks. The versioned parser
+than binary Excel workbooks. The versioned one-time ingestion utility
 \code{code/python/extract_reporte_ccpp_html.py}:
 
 \begin{enumerate}
@@ -91,6 +91,11 @@ than binary Excel workbooks. The versioned parser
   \item requires complete coverage of department codes 01 through 25 and
         uniqueness of the combined 94,922 CCPP codes.
 \end{enumerate}
+
+This utility is not invoked by the Stata master. Its CSV and manifest are
+shared through Dropbox Working as frozen source-ingestion prerequisites. The
+routine Stata pipeline validates and reads them without launching an external
+process.
 
 For every source, names are standardized by Unicode decomposition, removal of
 diacritics, conversion to upper case, replacement of non-alphanumeric

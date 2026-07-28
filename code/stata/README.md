@@ -33,6 +33,8 @@ repository root.
 The master:
 
 - validates the Git, Dropbox Raw/Working/Coded, output, metadata, and log paths;
+- validates and reads synchronized extracted source tables from Dropbox
+  Working without launching Python, PowerShell, or an external console;
 - rejects any derived-data destination inside Dropbox Raw or Git;
 - creates approved current-pipeline destinations in Dropbox Working/Coded;
 - installs missing anticipated user-written commands into `build/ado`;
@@ -45,6 +47,11 @@ push-button reproduction. It is the single authoritative preparation program
 and currently implements the foundational INEI, RUV, and CMAN workflow. Later
 source families will be added as sections of that same file. Analysis switches
 remain disabled while substantive design decisions are open.
+
+The CMAN PDF table and ReporteCCPP HTML tables are one-time source-ingestion
+products shared through Dropbox Working. Their CSVs and extraction manifests
+must already be synchronized before the master is run. The routine Stata
+pipeline does not regenerate, erase, or overwrite them.
 
 ## Legacy snapshot
 

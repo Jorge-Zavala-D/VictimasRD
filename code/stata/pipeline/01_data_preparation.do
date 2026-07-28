@@ -37,7 +37,6 @@ local required_globals ///
     external_derived_root ///
     analysis_data_root ///
     metadata_root ///
-    python_exec ///
     ado_root
 
 foreach global_name of local required_globals {
@@ -46,26 +45,6 @@ foreach global_name of local required_globals {
         display as error "Required global is missing: `global_name'"
         exit 198
     }
-}
-
-capture confirm file "${python_exec}"
-if _rc {
-    display as error "Configured Python executable was not found:"
-    display as error "  ${python_exec}"
-    exit 601
-}
-
-capture confirm file "${project_root}/code/python/extract_cman_pdf.py"
-if _rc {
-    display as error "CMAN PDF extractor was not found."
-    exit 601
-}
-
-capture confirm file ///
-    "${project_root}/code/python/extract_reporte_ccpp_html.py"
-if _rc {
-    display as error "ReporteCCPP HTML extractor was not found."
-    exit 601
 }
 
 local raw_lower              = lower(subinstr("${raw_root}", "\", "/", .))
@@ -187,7 +166,7 @@ end
 
 
 *===============================================================================
-**# 1. Extract the complete CMAN 2023 PDF table
+**# 1. Validate the frozen CMAN 2023 extracted table
 *===============================================================================
 
 local cman_pdf ///
@@ -196,38 +175,25 @@ local cman_csv ///
     "${staging_root}/cman_projects_2023_extracted.csv"
 local cman_manifest ///
     "${qa_data_root}/cman_projects_2023_extraction_manifest.json"
-local cman_extractor ///
-    "${project_root}/code/python/extract_cman_pdf.py"
-
-foreach required_file in "`cman_pdf'" "`cman_extractor'" {
-    capture confirm file "`required_file'"
-    if _rc {
-        display as error "Required CMAN source/extractor was not found:"
-        display as error "  `required_file'"
-        exit 601
-    }
-}
 
 /*
-Remove prior ignored staging outputs so a failed extraction cannot be mistaken
-for a current successful run. No Dropbox file is changed.
+PDF extraction is a one-time source-ingestion task, not part of the routine
+Stata replication. The shared Dropbox Working CSV and manifest are frozen
+prerequisites. The Stata code below independently validates the complete 4,433
+rows and all analytical fields before using them.
 */
 
-capture erase "`cman_csv'"
-capture erase "`cman_manifest'"
+foreach required_file in ///
+    "`cman_pdf'" ///
+    "`cman_csv'" ///
+    "`cman_manifest'" {
 
-local extraction_command ///
-    `""${python_exec}" "`cman_extractor'" --input "`cman_pdf'" --output "`cman_csv'" --manifest "`cman_manifest'" --expected-pages 283 --expected-rows 4433"'
-
-display as text "Extracting the CMAN project table from 283 PDF pages."
-shell `extraction_command'
-
-foreach extracted_file in "`cman_csv'" "`cman_manifest'" {
-    capture confirm file "`extracted_file'"
+    capture confirm file "`required_file'"
     if _rc {
-        display as error "Expected CMAN extraction output was not created:"
-        display as error "  `extracted_file'"
-        exit 603
+        display as error "Required CMAN source or extracted input was not found:"
+        display as error "  `required_file'"
+        display as error "Synchronize Dropbox Working before running the master."
+        exit 601
     }
 }
 
@@ -527,8 +493,6 @@ local reporte_ccpp_csv ///
     "${staging_root}/reporte_ccpp_2016_extracted.csv"
 local reporte_ccpp_manifest ///
     "${qa_data_root}/reporte_ccpp_2016_extraction_manifest.json"
-local reporte_ccpp_extractor ///
-    "${project_root}/code/python/extract_reporte_ccpp_html.py"
 
 foreach required_file in ///
     "`ccpp_source_root'/20161027_CodCentPobRegFormActColectivasFAC.xlsx" ///
@@ -536,35 +500,15 @@ foreach required_file in ///
     "`ccpp_source_root'/4. PBI_CentrosPoblados_1993-2018.xlsx" ///
     "`ccpp_source_root'/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.dbf" ///
     "${external_derived_root}/ign_centros_poblados_2025.dta" ///
-    "`reporte_ccpp_extractor'" {
-
-    capture confirm file "`required_file'"
-    if _rc {
-        display as error "Required historical CCPP source was not found:"
-        display as error "  `required_file'"
-        exit 601
-    }
-}
-
-capture erase "`reporte_ccpp_csv'"
-capture erase "`reporte_ccpp_manifest'"
-
-local reporte_command ///
-    `""${python_exec}" "`reporte_ccpp_extractor'" --input-dir "`ccpp_source_root'" --output "`reporte_ccpp_csv'" --manifest "`reporte_ccpp_manifest'" --expected-departments 25"'
-
-display as text ///
-    "Extracting the 25 department ReporteCCPP HTML tables."
-shell `reporte_command'
-
-foreach extracted_file in ///
     "`reporte_ccpp_csv'" ///
     "`reporte_ccpp_manifest'" {
 
-    capture confirm file "`extracted_file'"
+    capture confirm file "`required_file'"
     if _rc {
-        display as error "Expected ReporteCCPP extraction output was not created:"
-        display as error "  `extracted_file'"
-        exit 603
+        display as error "Required historical CCPP source or extracted input was not found:"
+        display as error "  `required_file'"
+        display as error "Synchronize Dropbox Working before running the master."
+        exit 601
     }
 }
 
@@ -758,8 +702,9 @@ save "`hist_ccpp_sources'", replace
 
 /*
 The department ReporteCCPP files are HTML tables carrying a 2016-5 UBIGEO
-criterion despite their .xls extensions. The extractor validates all 25
-departments and removes one byte-identical duplicate download.
+criterion despite their .xls extensions. The frozen ingestion output was
+validated across all 25 departments after removing one byte-identical duplicate
+download.
 */
 
 import delimited using "`reporte_ccpp_csv'", ///

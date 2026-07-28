@@ -166,7 +166,6 @@ local required_globals ///
     project_root ///
     dropbox_root ///
     overleaf_root ///
-    python_exec ///
     data_root ///
     raw_root ///
     working_root ///

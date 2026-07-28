@@ -97,6 +97,10 @@ source.
 - Never use PowerShell, another shell, or a direct Stata executable to run
   Stata commands.
 - Do not substitute `stata_run_file` for `stata_run_selection`.
+- The routine Stata master and pipeline must not invoke `shell`, PowerShell,
+  Python, PDF extractors, or other external conversion processes. Extracted
+  source tables are synchronized Dropbox Working prerequisites and must be
+  validated in Stata before use.
 - For interactive checks, run selections in memory and do not create a `.do`
   file unless the user explicitly requests a durable program.
 - Keep Stata code lean and consistently formatted. Comment each logical block

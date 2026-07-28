@@ -7,10 +7,6 @@ global project_root "C:/Users/USERNAME/Documents/GitHub/VictimasRD"
 global dropbox_root "C:/Users/USERNAME/Dropbox (Personal)/VictimasRD"
 global overleaf_root "C:/Users/USERNAME/Dropbox (Personal)/Apps/Overleaf/Collective Reparations"
 
-* Python used only for non-Stata source extraction orchestrated by Stata.
-* Point this to an environment that provides pdfplumber.
-global python_exec "C:/path/to/python.exe"
-
 * Dropbox data contract.
 * Raw sources are immutable. Persistent data products belong in Working or
 * Coded; code should prefer Stata tempfiles for scratch data within a run.

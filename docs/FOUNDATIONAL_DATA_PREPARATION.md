@@ -16,6 +16,11 @@ review ledgers are written under `2 data/2 Working/1 Current pipeline`; the
 final analytical registry is written under
 `2 data/3 Coded/1 Current analysis datasets`.
 
+The routine Stata master never launches Python, PowerShell, PDF conversion, or
+another external process. The CMAN PDF and ReporteCCPP tables were extracted
+once during source ingestion. Their shared CSVs and manifests are synchronized
+Dropbox Working prerequisites that Stata validates before use.
+
 The adjudication audit also uses dated and alternative CCPP directories. The
 newly supplied sources under `2 data/1 Raw/11 Centros Poblados` are:
 
