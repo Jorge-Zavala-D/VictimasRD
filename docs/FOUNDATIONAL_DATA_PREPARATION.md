@@ -13,6 +13,15 @@ reconciles three foundational sources:
 All Dropbox inputs are immutable. Row-level staging data, matching candidates,
 and review ledgers are written only to the Git-ignored `build/` tree.
 
+The adjudication audit also used two public official sources without adding
+their full files to Git:
+
+- the Instituto Geografico Nacional national CCPP layer published 26 May 2025
+  at `https://www.datosabiertos.gob.pe/dataset/dataset-centros-poblados`; and
+- the OSIPTEL mobile-coverage register, whose June 2023 rows carry ten-digit
+  INEI CCPP codes, at
+  `https://www.datosabiertos.gob.pe/dataset/cobertura-de-servicio-m%C3%B3vil-por-empresa-operadora`.
+
 ## Source and identifier findings
 
 - The RUV workbook contains 5,712 data rows and 25 source columns. `CodRUV` and
@@ -37,18 +46,26 @@ authoritative collective-reparation treatment year. The program creates
 cumulative indicators `treat_07` through `treat_23`: a linked community equals
 one in its recorded year and every year thereafter.
 
-Until every CMAN row is reconciled to the RUV universe, non-linked RUV rows
-remain missing on these indicators instead of being mislabeled as untreated.
-Once linkage is complete, communities absent from CMAN receive zero and the
-release checks verify complete treatment-status coverage. The paper will state
-the interpretation and caveats attached to the CMAN year field.
+After exhaustive reconciliation, RUV communities without a CMAN match
+receive zero in every annual indicator. CMAN-only records are retained in QA
+and sample-flow metadata but excluded from the RUV analysis dataset because the
+2018-vintage RUV extract has no victimization measures for them. When more than
+one CMAN project is linked to one RUV community, the first recorded project
+year defines treatment onset and `cman_project_count` records the number of
+projects.
 
 ## Linkage standard
 
-The release standard is complete coverage with documented provenance:
+The release standard is complete RUV retention with documented linkage status:
 
-- every RUV row must have an adjudicated ten-digit CCPP UBIGEO;
-- every CMAN project row must be reconciled to one RUV community;
+- every one of the 5,712 RUV source rows must remain in the foundational
+  registry;
+- a missing verified ten-digit CCPP UBIGEO must be flagged and reported but
+  must never cause an RUV row to be dropped;
+- CMAN records should receive a verified UBIGEO whenever the available evidence
+  permits, whether or not they appear in the RUV extract;
+- CMAN-only records and any residual unresolved CMAN records must be counted
+  and retained outside the analysis dataset for audit;
 - all accepted identifiers must satisfy the relevant key and district checks;
   and
 - every non-exact-name resolution must retain its evidence, method, reviewer
@@ -73,28 +90,48 @@ If a community has a historical code but no 2017 successor, the ledger must
 distinguish the historical identifier from any current-code crosswalk. A
 historical code must not be relabeled as a verified 2017 CCPP code.
 
-## Current staging results
+## Validated foundational results
 
-The first deterministic pass produces:
+The complete run now produces:
 
-- 3,986 exact RUV-to-INEI links and 1,726 rows requiring adjudication;
-- 4,343 exact CMAN district paths and 90 district paths requiring
-  adjudication;
-- 3,110 exact CMAN-to-INEI CCPP links and 1,323 rows requiring adjudication;
-- 4,153 exact CMAN-to-RUV full-name links and 280 rows requiring adjudication;
-  and
-- zero UBIGEO conflicts where the two independent exact linkages coexist.
+- 3,986 deterministic exact RUV links and 841 accepted, versioned
+  adjudications;
+- 4,827 RUV communities with unique, verified ten-digit CCPP UBIGEO codes;
+- 885 RUV communities retained without a verified CCPP UBIGEO after the
+  official 2017 and 2025 directories,
+  legacy administrative crosswalks, OSIPTEL corroboration, geographic
+  blocking, and manual review did not support a defensible code;
+- 4,614 retained RUV codes with a 2017 vintage and 213 with a documented 2025
+  vintage;
+- 4,153 exact full-name CMAN-to-RUV links, 29 additional exact-UBIGEO links,
+  and 42 accepted manual adjudications;
+- 647 CMAN rows whose CCPP code is inherited from their already verified RUV
+  link;
+- 562 CMAN project rows linked by RUV ID to RUV communities without an
+  RUV-side verified community UBIGEO;
+- all 4,433 CMAN source rows preserved in the canonical CMAN registry, with
+  115 code-less and 106 coded CMAN-only rows excluded from the RUV-master
+  merge;
+- 4,211 treated RUV communities and 1,501 RUV communities with no recorded
+  CMAN project through 2023;
+- complete treatment indicators for all 5,712 RUV communities;
+- one community with two CMAN project records, for which the 2010 project
+  establishes treatment onset and the 2021 project remains reflected in
+  `cman_project_count`; and
+- zero exact-link UBIGEO conflicts and zero missing treatment indicators in
+  the 5,712-row foundational registry.
 
-These are starting points, not acceptable final coverage rates. Until the
-adjudication ledgers reach complete coverage, the program writes
-`04_foundational_community_registry_draft.dta` under `build/derived`, removes
-any stale release-named file, records release-blocking metrics, and exits with
-an error.
+The 213 current-vintage CCPP codes do not exist in the reconstructed 2017
+spine, so their 2017 population, altitude, natural-region, and dwelling fields
+remain missing rather than being assigned from a different historical
+community. Any analysis requiring those attributes must report the resulting
+sample restriction.
 
-The first reviewed adjudication batch adds 75 RUV-to-INEI CCPP links and 42
-CMAN-to-RUV links. The current draft therefore has 4,061 RUV communities with
-an INEI CCPP code and 4,195 CMAN projects reconciled to the RUV universe. The
-remaining 1,651 RUV codes and 238 CMAN links continue to block release.
+The ignored QA tree contains row-level unresolved-linkage ledgers.
+`metadata/ccpp-linkage/foundational-sample-flow.csv` contains the corresponding
+aggregate counts, and
+`build/derived/04_foundational_community_registry.dta` is the validated,
+5,712-row analysis-stage registry.
 
 Historical linked datasets are retained only as candidate evidence. They were
 created through the legacy fuzzy workflow and cannot be treated as certified

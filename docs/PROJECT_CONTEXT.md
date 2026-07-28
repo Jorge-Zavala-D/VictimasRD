@@ -117,6 +117,43 @@ year. The canonical preparation code therefore creates cumulative indicators
 and every year thereafter. The working paper must explain the interpretation
 and caveats attached to this administrative year field.
 
+## Recorded foundational linkage and sample decisions
+
+On July 27, 2026, the research team directed the foundational pipeline to:
+
+1. exhaust official INEI directories, legacy administrative evidence, and
+   authoritative administrative or legislative sources when resolving CCPP
+   UBIGEO codes;
+2. retain every community in the RUV source as part of the foundational
+   victimization universe, including rows without a verified ten-digit CCPP
+   UBIGEO, and flag their linkage status explicitly;
+3. allow CMAN records that do not appear in the 2018-vintage RUV extract to
+   remain CMAN-only, because later victim registration is plausible;
+4. exclude CMAN-only records from the RUV analysis dataset after recording
+   their count and linkage status; and
+5. after the exhaustive CMAN reconciliation, code every RUV community
+   not linked to a CMAN project as untreated in `treat_07` through `treat_23`.
+
+These rules govern the foundational community dataset only. They do not resolve
+later sample restrictions, census linkage, geographic RD sampling, or the
+interpretation of missing downstream outcomes.
+
+This retention rule supersedes the earlier instruction to remove RUV rows
+without a verified community UBIGEO. The 5,712-row RUV source is the master for
+the foundational RUV-CMAN merge and for descriptive analysis. Missing or
+unverified CCPP codes may restrict later linkage-dependent analyses, but they
+must never remove the source RUV observation from this registry. CMAN-only
+records remain outside the RUV-master dataset, and every RUV row receives
+complete annual treatment indicators.
+
+The validated run retains all 5,712 RUV communities. Of these, 4,827 have a
+verified community UBIGEO and 885 remain without one; the latter are explicitly
+flagged rather than dropped. The RUV-CMAN merge identifies 4,211 communities
+with a recorded project through 2023 and 1,501 without one. The canonical CMAN
+registry preserves all 4,433 source rows, while the RUV-master merge excludes
+221 CMAN-only rows and collapses one later project record when assigning the
+first treatment year.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must
@@ -132,8 +169,9 @@ be resolved by the research team before an authoritative release:
    and specifications.
 4. **Canonical datasets:** several base, modified, SAT/PBI, and conflict-copy
    variants coexist without a complete lineage map.
-5. **Community universe and sample flow:** community counts and the linked
-   individual analytical sample differ across code, data, and manuscript.
+5. **Downstream sample flow:** the foundational RUV universe rule is now
+   recorded, but community counts after later census linkages and the linked
+   individual analytical sample still differ across code, data, and manuscript.
 6. **Migration measurement:** absence from a later linked record may reflect
    migration, death, linkage failure, code changes, coverage, or enumeration
    differences.

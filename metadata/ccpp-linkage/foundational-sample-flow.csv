@@ -1,0 +1,12 @@
+metric,value,status,note
+victimization_rows,5712,validated,RUV Libro Segundo victimization universe
+victimization_inei_unresolved,885,retained_unresolved,Retained in RUV universe without a verified CCPP UBIGEO
+victimization_analysis_rows,5712,validated,All RUV source rows retained regardless of UBIGEO linkage status
+cman_project_rows,4433,validated,Consecutive PDF records 1 through 4433
+cman_victimization_unresolved,221,documented_exclusion,CMAN rows not linked to the retained RUV analysis universe
+cman_links_to_ruv_missing_ubigeo,562,retained,CMAN rows linked to retained RUV communities without verified CCPP UBIGEO
+cman_ubigeo_excluded,115,documented_exclusion,Code-less CMAN-only rows excluded from the RUV-master merge
+cman_only_with_ubigeo,106,documented_exclusion,Verified CMAN communities absent from the retained RUV universe
+cman_registry_rows,4433,validated,All CMAN source rows retained in the canonical CMAN registry
+foundational_registry_rows,5712,validated,All RUV source rows retained; CMAN-only rows excluded
+foundational_missing_ubigeo,885,retained_unresolved,RUV rows retained without a verified ten-digit CCPP UBIGEO

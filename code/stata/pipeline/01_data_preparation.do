@@ -606,11 +606,14 @@ generate str48 victim_inei_match_method = ///
          "exact_district_and_unique_normalized_name", ///
          "unresolved_review_required")
 
+generate str4 victim_inei_code_vintage = ///
+    cond(victim_inei_exact_merge == 3, "2017", "")
+
 /*
 Apply only disclosure-reviewed adjudications. The crosswalk is identifier
 metadata: it cannot contain outcomes, treatment values, or restricted text.
-Every accepted code must exist in the official 2017 INEI spine and remain
-inside the RUV-supplied district.
+Accepted codes may use the 2017 INEI spine or a later official administrative
+vintage. Every code must remain inside the RUV-supplied district.
 */
 
 tempfile ruv_ubigeo_adjudication
@@ -621,14 +624,17 @@ import delimited using ///
     varnames(1) stringcols(_all) clear
 
 isid ruv_id
+isid ubigeo_ccpp
 assert ustrregexm(ubigeo_ccpp, "^[0-9]{10}$")
-assert code_vintage == "2017"
+assert inlist(code_vintage, "2017", "2025")
 assert lower(ustrtrim(review_status)) == "accepted"
 assert !missing( ///
     match_method, evidence_source, evidence_locator, ///
     reviewer, review_date)
 
 rename ubigeo_ccpp adjudicated_ubigeo_ccpp
+rename code_vintage adjudicated_code_vintage
+rename match_method adjudicated_match_method
 save `ruv_ubigeo_adjudication'
 local victimization_inei_adjudicated = _N
 restore
@@ -648,8 +654,17 @@ replace ubigeo_ccpp = adjudicated_ubigeo_ccpp if ///
     ruv_adjudication_merge == 3 & ///
     missing(ubigeo_ccpp)
 
+assert ///
+    victim_inei_code_vintage == adjudicated_code_vintage if ///
+    ruv_adjudication_merge == 3 & ///
+    !missing(victim_inei_code_vintage)
+
+replace victim_inei_code_vintage = ///
+    adjudicated_code_vintage if ///
+    ruv_adjudication_merge == 3
+
 replace victim_inei_match_method = ///
-    "accepted_manual_adjudication" if ///
+    adjudicated_match_method if ///
     ruv_adjudication_merge == 3
 
 generate byte victim_inei_adjudicated = ///
@@ -657,8 +672,8 @@ generate byte victim_inei_adjudicated = ///
 
 drop ///
     adjudicated_ubigeo_ccpp ///
-    code_vintage ///
-    match_method ///
+    adjudicated_code_vintage ///
+    adjudicated_match_method ///
     evidence_source ///
     evidence_locator ///
     review_status ///
@@ -685,7 +700,12 @@ merge m:1 ubigeo_ccpp using ///
 drop if victim_inei_code_merge == 2
 
 count if victim_inei_adjudicated & ///
+    victim_inei_code_vintage == "2017" & ///
     victim_inei_code_merge == 1
+assert r(N) == 0
+
+count if victim_inei_code_vintage == "2025" & ///
+    victim_inei_code_merge == 3
 assert r(N) == 0
 
 count if victim_inei_code_merge == 5
@@ -699,10 +719,59 @@ drop victim_inei_code_merge
 count if missing(ubigeo_ccpp)
 local victimization_inei_unresolved = r(N)
 
+/*
+Keep the exhaustive unresolved ledger in the ignored QA area. The RUV workbook
+defines the observation universe, so a missing verified CCPP code is a linkage
+limitation rather than a reason to remove a community.
+*/
+
+preserve
+keep if missing(ubigeo_ccpp)
+keep ///
+    victimization_source_row ///
+    ruv_id ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm ///
+    ubigeo_dist ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw
+generate str52 linkage_status = ///
+    "retained_without_verified_ccpp_ubigeo"
+rename community_norm victim_name_norm
+save "${temporary_root}/victimization_unresolved_for_candidates.dta", replace
+save "${qa_root}/ruv_ubigeo_unresolved.dta", replace
+export delimited ///
+    "${qa_root}/ruv_ubigeo_unresolved.csv", replace
+restore
+
+generate byte ubigeo_ccpp_verified = !missing(ubigeo_ccpp)
+
+count
+local victimization_analysis_rows = r(N)
+assert `victimization_analysis_rows' == `victimization_rows'
+
+count if !ubigeo_ccpp_verified
+assert r(N) == `victimization_inei_unresolved'
+
+isid ruv_id
+
+preserve
+keep if ubigeo_ccpp_verified
+isid ubigeo_ccpp
+restore
+
 label variable ubigeo_dist ///
     "Six-digit district UBIGEO supplied by RUV"
 label variable ubigeo_ccpp ///
-    "Ten-digit CCPP UBIGEO from INEI linkage"
+    "Ten-digit CCPP UBIGEO from official linkage"
+label variable ubigeo_ccpp_verified ///
+    "Verified ten-digit community UBIGEO is available"
+label variable victim_inei_code_vintage ///
+    "Administrative vintage of linked CCPP UBIGEO"
 label variable victimization_index ///
     "Victimization index as observed in RUV workbook"
 label variable victimization_level_source ///
@@ -716,7 +785,8 @@ save "${derived_root}/02_victimization_registry.dta", replace
 
 /*
 Prepare the exact full-name path crosswalk used later for the independent CMAN
-link. The RUV full geographic name is unique for all 5,712 rows.
+link. Only paths unique in the complete RUV universe are admissible for this
+deterministic linkage; duplicate paths remain in the RUV registry.
 */
 
 preserve
@@ -731,6 +801,13 @@ keep ///
     ubigeo_ccpp ///
     victim_inei_exact_merge ///
     victim_inei_adjudicated
+
+bysort region_norm province_norm district_norm community_norm: ///
+    generate int victim_name_path_n = _N
+count if victim_name_path_n > 1
+local victim_name_path_dupe_rows = r(N)
+keep if victim_name_path_n == 1
+drop victim_name_path_n
 
 rename ubigeo_dist victim_ubigeo_dist
 rename ubigeo_ccpp victim_ubigeo_ccpp
@@ -760,20 +837,11 @@ save "${temporary_root}/victimization_unique_id.dta", replace
 restore
 
 preserve
-keep ///
-    victimization_source_row ///
-    ruv_id ///
-    region_norm ///
-    province_norm ///
-    district_norm ///
-    community_norm ///
-    ubigeo_dist ///
-    ccpp_victim_raw ///
-    ubigeo_ccpp
-keep if missing(ubigeo_ccpp)
-drop ubigeo_ccpp
-rename community_norm victim_name_norm
-save "${temporary_root}/victimization_unresolved_for_candidates.dta", replace
+keep ruv_id ubigeo_ccpp
+drop if missing(ubigeo_ccpp)
+rename ruv_id ubigeo_ruv_id
+isid ubigeo_ccpp
+save "${temporary_root}/victimization_unique_ubigeo.dta", replace
 restore
 
 /*
@@ -1093,16 +1161,43 @@ count
 assert r(N) == 4433
 
 count if cman_victim_exact_merge == 3
-assert r(N) == 4153
 local cman_victim_exact = r(N)
 
 count if cman_victim_exact_merge == 1
-assert r(N) == 280
+assert r(N) == 4433 - `cman_victim_exact'
 
 generate str48 cman_victim_match_method = ///
     cond(cman_victim_exact_merge == 3, ///
          "exact_normalized_full_geographic_name", ///
          "unresolved_review_required")
+
+/*
+An independently verified CMAN CCPP code is stronger than a name-only
+candidate. Use it to recover RUV links missed by spelling differences.
+*/
+
+merge m:1 ubigeo_ccpp using ///
+    "${temporary_root}/victimization_unique_ubigeo.dta", ///
+    keep(master match) ///
+    gen(cman_victim_ubigeo_merge)
+
+assert ruv_id == ubigeo_ruv_id if ///
+    !missing(ruv_id, ubigeo_ruv_id)
+
+generate byte cman_victim_linked_by_ubigeo = ///
+    missing(ruv_id) & !missing(ubigeo_ruv_id)
+
+replace ruv_id = ubigeo_ruv_id if ///
+    cman_victim_linked_by_ubigeo
+
+replace cman_victim_match_method = ///
+    "exact_verified_ubigeo" if ///
+    cman_victim_linked_by_ubigeo
+
+count if cman_victim_linked_by_ubigeo
+local cman_victim_exact_ubigeo = r(N)
+
+drop ubigeo_ruv_id cman_victim_ubigeo_merge
 
 tempfile cman_ruv_adjudication
 
@@ -1163,22 +1258,59 @@ merge m:1 ruv_id using ///
 
 drop if cman_ruv_id_merge == 2
 
-count if cman_victim_adjudicated & ///
-    cman_ruv_id_merge == 1
+count if cman_ruv_id_merge == 1 & !missing(ruv_id)
 assert r(N) == 0
+
+generate byte cman_link_to_ruv_missing_ubigeo = ///
+    !missing(ruv_id) & missing(victim_ubigeo_ccpp)
+
+count if cman_link_to_ruv_missing_ubigeo
+local cman_missing_ubigeo_link_n = r(N)
 
 count if cman_ruv_id_merge == 5
 assert r(N) == 0
 
 drop cman_ruv_id_merge
 
+/*
+When CMAN and RUV are linked but CMAN lacked an independent exact-name code,
+inherit the RUV code when one was verified. A CMAN project linked to an RUV
+community remains admissible even when neither source has a verified CCPP code.
+*/
+
+generate byte cman_ubigeo_inherited_from_ruv = ///
+    !missing(ruv_id) & ///
+    missing(ubigeo_ccpp) & ///
+    !missing(victim_ubigeo_ccpp)
+
+replace ubigeo_ccpp = victim_ubigeo_ccpp if ///
+    cman_ubigeo_inherited_from_ruv
+
+replace cman_inei_match_method = ///
+    "inherited_from_verified_ruv_link" if ///
+    cman_ubigeo_inherited_from_ruv
+
+count if cman_ubigeo_inherited_from_ruv
+local cman_ubigeo_inherited = r(N)
+
 preserve
 keep if !missing(ruv_id)
-isid ruv_id
+bysort ruv_id (ubigeo_ccpp): assert ///
+    ubigeo_ccpp == ubigeo_ccpp[1]
+bysort ruv_id: generate int cman_rows_per_ruv = _N
+count if cman_rows_per_ruv > 1
+local cman_repeated_project_rows = r(N)
+drop cman_rows_per_ruv
 restore
 
 count if missing(ruv_id)
 local cman_victim_unresolved = r(N)
+
+count if cman_victim_adjudicated
+local cman_adjud_retained = r(N)
+
+count if missing(ubigeo_ccpp)
+local cman_ubigeo_unresolved = r(N)
 
 count if ///
     !missing(ruv_id) & ///
@@ -1193,10 +1325,17 @@ sort record_number
 save "${derived_root}/03_cman_projects_2023.dta", replace
 
 /*
-Create direct CMAN-to-RUV candidates for all 280 unresolved project records.
+Create direct CMAN-to-RUV candidates for unresolved project records.
 Department is the blocking field. The score emphasizes community name while
-retaining district and province agreement.
+retaining district and province agreement. This expensive review artifact is
+optional after adjudication and is not required to rebuild the canonical
+registry.
 */
+
+local rebuild_cman_name_candidates = 0
+assert inlist(`rebuild_cman_name_candidates', 0, 1)
+
+if `rebuild_cman_name_candidates' {
 
 preserve
 keep if missing(ruv_id)
@@ -1292,6 +1431,39 @@ export delimited ///
     "${qa_root}/cman_victimization_fuzzy_candidates.csv", ///
     replace
 restore
+}
+
+/*
+Preserve every CMAN source row in its canonical registry. Code-less CMAN rows
+remain in the audit dataset; those linked by RUV ID can enter the RUV merge,
+whereas CMAN-only rows cannot enter because the RUV file is the master.
+*/
+
+count if missing(ubigeo_ccpp) & !missing(ruv_id)
+local cman_linked_missing_ubigeo = r(N)
+
+preserve
+keep if missing(ubigeo_ccpp)
+generate str52 linkage_disposition = cond( ///
+    !missing(ruv_id), ///
+    "retained_via_ruv_id", ///
+    "excluded_from_ruv_master_merge")
+count if missing(ruv_id)
+local cman_ubigeo_excluded = r(N)
+save "${qa_root}/cman_ubigeo_unresolved.dta", replace
+export delimited ///
+    "${qa_root}/cman_ubigeo_unresolved.csv", replace
+restore
+
+count if missing(ruv_id) & !missing(ubigeo_ccpp)
+local cman_only_with_ubigeo = r(N)
+
+count
+local cman_registry_rows = r(N)
+
+compress
+sort record_number
+save "${derived_root}/03_cman_projects_2023.dta", replace
 
 
 *===============================================================================
@@ -1301,11 +1473,24 @@ restore
 preserve
 keep if !missing(ruv_id)
 
+bysort ruv_id: generate int cman_project_count = _N
+count
+local cman_linked_project_rows = r(N)
+
+sort ruv_id recorded_project_year record_number
+by ruv_id: keep if _n == 1
+
+count
+local cman_victim_linked = r(N)
+local cman_repeat_collapsed = ///
+    `cman_linked_project_rows' - `cman_victim_linked'
+
 rename ubigeo_ccpp cman_ubigeo_ccpp_exact
 rename ccpp_name_inei cman_ccpp_name_inei_exact
 
 keep ///
     ruv_id ///
+    cman_project_count ///
     record_number ///
     recorded_project_year ///
     recorded_year_raw ///
@@ -1339,30 +1524,26 @@ merge 1:1 ruv_id using ///
     gen(foundational_cman_merge)
 
 count
-assert r(N) == 5712
+assert r(N) == `victimization_analysis_rows'
 local foundational_rows = r(N)
-
-local cman_victim_linked = 4433 - `cman_victim_unresolved'
 
 count if foundational_cman_merge == 3
 assert r(N) == `cman_victim_linked'
 
 count if foundational_cman_merge == 1
-assert r(N) == 5712 - `cman_victim_linked'
+assert r(N) == ///
+    `victimization_analysis_rows' - `cman_victim_linked'
 
 generate byte prc_project_observed = ///
     foundational_cman_merge == 3
 
+replace cman_project_count = 0 if ///
+    !prc_project_observed
+
 generate str52 prc_project_link_status = ///
     cond(prc_project_observed, ///
          "linked_project", ///
-         "treatment_status_pending_linkage")
-
-if `cman_victim_unresolved' == 0 {
-    replace prc_project_link_status = ///
-        "not_recorded_in_cman_by_2023" if ///
-        !prc_project_observed
-}
+         "not_recorded_in_cman_by_2023")
 
 label variable prc_project_observed ///
     "CMAN collective-reparation project linked to RUV community"
@@ -1370,12 +1551,14 @@ label variable prc_project_link_status ///
     "Status of CMAN project linkage to victimization universe"
 label variable recorded_project_year ///
     "Authoritative collective-reparation treatment year from CMAN"
+label variable cman_project_count ///
+    "CMAN project records linked to the RUV community"
 
 /*
 Research-team decision: use the CMAN PDF year as the authoritative treatment
 year. Annual indicators are cumulative: a community equals one in the recorded
-year and every year thereafter. While unresolved CMAN-to-RUV links remain,
-unlinked RUV rows stay missing rather than being mislabeled untreated.
+year and every year thereafter. After exhaustive CMAN reconciliation, every
+retained RUV record without a linked CMAN project is coded untreated.
 */
 
 assert inrange(recorded_project_year, 2007, 2023) if ///
@@ -1388,10 +1571,8 @@ forvalues year = 2007/2023 {
         recorded_project_year <= `year' if ///
         prc_project_observed
 
-    if `cman_victim_unresolved' == 0 {
-        replace treat_`yy' = 0 if ///
-            !prc_project_observed
-    }
+    replace treat_`yy' = 0 if ///
+        !prc_project_observed
 
     label variable treat_`yy' ///
         "Collective reparations received by `year'"
@@ -1418,6 +1599,8 @@ keep ///
     expediente_id ///
     ubigeo_dist ///
     ubigeo_ccpp ///
+    ubigeo_ccpp_verified ///
+    victim_inei_code_vintage ///
     victim_inei_match_method ///
     dpto_victim_raw ///
     prov_victim_raw ///
@@ -1453,6 +1636,7 @@ keep ///
     prc_project_observed ///
     prc_project_link_status ///
     cman_victim_match_method ///
+    cman_project_count ///
     recorded_project_year ///
     treat_* ///
     record_number ///
@@ -1467,6 +1651,8 @@ order ///
     expediente_id ///
     ubigeo_dist ///
     ubigeo_ccpp ///
+    ubigeo_ccpp_verified ///
+    victim_inei_code_vintage ///
     victim_inei_match_method ///
     dpto_victim_raw ///
     prov_victim_raw ///
@@ -1476,6 +1662,7 @@ order ///
     victimization_index ///
     prc_project_observed ///
     prc_project_link_status ///
+    cman_project_count ///
     recorded_project_year ///
     treat_07-treat_23 ///
     record_number
@@ -1486,30 +1673,17 @@ isid ruv_id
 
 count if missing(ubigeo_ccpp)
 local foundational_missing_ubigeo = r(N)
+assert `foundational_missing_ubigeo' == ///
+    `victimization_inei_unresolved'
+assert `foundational_rows' == `victimization_rows'
 
-/*
-Never leave a stale partial file under the release filename. Until every RUV
-row has an adjudicated CCPP UBIGEO and every CMAN project has been reconciled
-to the RUV universe, retain this stage explicitly as a draft inside the ignored
-build tree.
-*/
+egen byte missing_treatment_indicator = rowmiss(treat_07-treat_23)
+assert missing_treatment_indicator == 0
+drop missing_treatment_indicator
 
-capture erase ///
-    "${derived_root}/04_foundational_community_registry.dta"
-
-if ///
-    `foundational_missing_ubigeo' == 0 & ///
-    `cman_victim_unresolved' == 0 {
-
-    save ///
-        "${derived_root}/04_foundational_community_registry.dta", ///
-        replace
-}
-else {
-    save ///
-        "${derived_root}/04_foundational_community_registry_draft.dta", ///
-        replace
-}
+save ///
+    "${derived_root}/04_foundational_community_registry.dta", ///
+    replace
 
 
 *===============================================================================
@@ -1559,14 +1733,20 @@ post `qa_post' ///
 post `qa_post' ///
     ("victimization_inei_unresolved") ///
     (`victimization_inei_unresolved') ///
-    ("review_required") ///
-    ("Remaining after exact linkage and accepted adjudications")
+    ("retained_unresolved") ///
+    ("Retained in RUV universe without a verified CCPP UBIGEO")
 
 post `qa_post' ///
     ("victimization_inei_adjudicated") ///
     (`victimization_inei_adjudicated') ///
     ("validated") ///
     ("Accepted versioned RUV-to-UBIGEO adjudications")
+
+post `qa_post' ///
+    ("victimization_analysis_rows") ///
+    (`victimization_analysis_rows') ///
+    ("validated") ///
+    ("All RUV source rows retained regardless of UBIGEO linkage status")
 
 post `qa_post' ///
     ("victimization_score_outside_documented_range") ///
@@ -1631,14 +1811,56 @@ post `qa_post' ///
 post `qa_post' ///
     ("cman_victimization_unresolved") ///
     (`cman_victim_unresolved') ///
-    ("review_required") ///
-    ("Five direct RUV candidates written per unresolved CMAN record")
+    ("documented_exclusion") ///
+    ("CMAN rows not linked to the complete RUV source universe")
 
 post `qa_post' ///
     ("cman_victimization_adjudicated") ///
-    (`cman_victim_adjudicated') ///
+    (`cman_adjud_retained') ///
     ("validated") ///
-    ("Accepted versioned CMAN-to-RUV adjudications")
+    ("Accepted CMAN-to-RUV adjudications retained in the coded RUV universe")
+
+post `qa_post' ///
+    ("cman_links_to_ruv_missing_ubigeo") ///
+    (`cman_missing_ubigeo_link_n') ///
+    ("retained") ///
+    ("CMAN rows linked to retained RUV communities without verified CCPP UBIGEO")
+
+post `qa_post' ///
+    ("cman_victimization_exact_ubigeo") ///
+    (`cman_victim_exact_ubigeo') ///
+    ("validated") ///
+    ("Additional CMAN-to-RUV links recovered by exact verified CCPP UBIGEO")
+
+post `qa_post' ///
+    ("cman_ubigeo_inherited_from_ruv") ///
+    (`cman_ubigeo_inherited') ///
+    ("validated") ///
+    ("CMAN codes inherited through a verified direct RUV link")
+
+post `qa_post' ///
+    ("cman_ubigeo_excluded") ///
+    (`cman_ubigeo_excluded') ///
+    ("documented_exclusion") ///
+    ("Code-less CMAN-only rows excluded from the RUV-master merge")
+
+post `qa_post' ///
+    ("cman_only_with_ubigeo") ///
+    (`cman_only_with_ubigeo') ///
+    ("documented_exclusion") ///
+    ("Verified CMAN communities absent from the retained RUV universe")
+
+post `qa_post' ///
+    ("cman_registry_rows") ///
+    (`cman_registry_rows') ///
+    ("validated") ///
+    ("All CMAN source rows retained in the canonical CMAN registry")
+
+post `qa_post' ///
+    ("cman_repeated_projects_collapsed") ///
+    (`cman_repeat_collapsed') ///
+    ("validated") ///
+    ("Later CMAN project rows collapsed after retaining the earliest treatment year")
 
 post `qa_post' ///
     ("exact_ubigeo_conflicts") ///
@@ -1650,14 +1872,13 @@ post `qa_post' ///
     ("foundational_registry_rows") ///
     (`foundational_rows') ///
     ("validated") ///
-    ("Final rows equal the complete RUV victimization universe")
+    ("All RUV source rows retained; CMAN-only rows excluded")
 
 post `qa_post' ///
     ("foundational_missing_ubigeo") ///
     (`foundational_missing_ubigeo') ///
-    (cond(`foundational_missing_ubigeo' == 0, ///
-          "validated", "release_blocked")) ///
-    ("Every RUV row must have an adjudicated ten-digit CCPP UBIGEO")
+    ("retained_unresolved") ///
+    ("RUV rows retained without a verified ten-digit CCPP UBIGEO")
 
 postclose `qa_post'
 
@@ -1666,28 +1887,39 @@ export delimited ///
     "${qa_root}/foundational_data_preparation_metrics.csv", ///
     replace
 
+preserve
+generate byte include_sample_flow = inlist( ///
+    metric, ///
+    "victimization_rows", ///
+    "victimization_analysis_rows", ///
+    "victimization_inei_unresolved", ///
+    "cman_project_rows", ///
+    "cman_registry_rows", ///
+    "cman_ubigeo_excluded", ///
+    "cman_only_with_ubigeo") | inlist( ///
+    metric, ///
+    "cman_links_to_ruv_missing_ubigeo", ///
+    "cman_victimization_unresolved", ///
+    "foundational_registry_rows", ///
+    "foundational_missing_ubigeo")
+keep if include_sample_flow
+drop include_sample_flow
+export delimited ///
+    "${metadata_root}/ccpp-linkage/foundational-sample-flow.csv", ///
+    replace
+restore
+
 display as result "Foundational data-preparation staging completed."
 display as text   "INEI CCPP rows:                  `inei_ccpp_rows'"
 display as text   "RUV victimization rows:          `victimization_rows'"
 display as text   "CMAN project rows:               `cman_project_rows'"
 display as text   "Exact CMAN-to-RUV links:         `cman_victim_exact'"
-display as text   "Adjudicated CMAN-to-RUV links:   `cman_victim_adjudicated'"
-display as text   "CMAN-to-RUV links for review:    `cman_victim_unresolved'"
+display as text   "Exact UBIGEO CMAN-to-RUV links:  `cman_victim_exact_ubigeo'"
+display as text   "Adjudicated CMAN-to-RUV links:   `cman_adjud_retained'"
+display as text   "CMAN rows outside the RUV universe: `cman_victim_unresolved'"
+display as text   "RUV rows retained without code:  `victimization_inei_unresolved'"
 display as text   "Final victimization-universe rows: `foundational_rows'"
-display as text   "No fuzzy candidate was accepted automatically."
+display as text   "All RUV rows retained with complete treatment status."
 
 capture program drop victimasrd_normalize_name
 capture program drop victimasrd_score_name_pairs
-
-if ///
-    `foundational_missing_ubigeo' > 0 | ///
-    `cman_victim_unresolved' > 0 {
-
-    display as error ///
-        "Release blocked: complete the documented row-level adjudication."
-    display as error ///
-        "RUV rows missing CCPP UBIGEO: `foundational_missing_ubigeo'"
-    display as error ///
-        "CMAN rows not reconciled to RUV: `cman_victim_unresolved'"
-    exit 459
-}
