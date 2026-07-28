@@ -158,6 +158,14 @@ These rules govern the foundational community dataset only. They do not resolve
 later sample restrictions, census linkage, geographic RD sampling, or the
 interpretation of missing downstream outcomes.
 
+On July 28, 2026, the team supplied additional 2007, 2016, 1993--2018, and
+GeoGPS/INEI CCPP directories for the final identifier-recovery pass. The
+pipeline may accept a historical exact-name code only when it is unique within
+the resolved district and does not conflict with another retained RUV
+assignment. Fuzzy scores remain review aids, not automatic evidence.
+Historical CMAN codes that contradict a direct or verified RUV relationship
+must be quarantined and recorded rather than forced into the merge.
+
 This retention rule supersedes the earlier instruction to remove RUV rows
 without a verified community UBIGEO. The 5,712-row RUV source is the master for
 the foundational RUV-CMAN merge and for descriptive analysis. Missing or
@@ -166,13 +174,14 @@ must never remove the source RUV observation from this registry. CMAN-only
 records remain outside the RUV-master dataset, and every RUV row receives
 complete annual treatment indicators.
 
-The validated run retains all 5,712 RUV communities. Of these, 4,827 have a
-verified community UBIGEO and 885 remain without one; the latter are explicitly
-flagged rather than dropped. The RUV-CMAN merge identifies 4,211 communities
-with a recorded project through 2023 and 1,501 without one. The canonical CMAN
+The validated run retains all 5,712 RUV communities. Of these, 5,120 have a
+verified community UBIGEO and 592 remain without one; the latter are explicitly
+flagged rather than dropped. The RUV-CMAN merge identifies 4,221 communities
+with a recorded project through 2023 and 1,491 without one. The canonical CMAN
 registry preserves all 4,433 source rows, while the RUV-master merge excludes
-221 CMAN-only rows and collapses one later project record when assigning the
-first treatment year.
+210 CMAN-only rows and collapses two later project records when assigning the
+first treatment year. Full recovery evidence is in
+`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`.
 
 ## Critical research decisions
 

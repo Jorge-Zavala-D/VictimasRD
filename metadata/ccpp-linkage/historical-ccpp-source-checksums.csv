@@ -1,0 +1,38 @@
+file_id,relative_path,bytes,sha256,logical_source,duplicate_of,status
+fac_2016,2 data/1 Raw/11 Centros Poblados/20161027_CodCentPobRegFormActColectivasFAC.xlsx,1795963,a840edc29ff8c1f4f01ddcbdec61f810e7fa5a339d608d909332dcb6fcecbdd1,fac_2016,,verified_read_only
+ccpp_2007,2 data/1 Raw/11 Centros Poblados/CCPP 2007.xlsx,51561099,c5121c8f5c9994437feacd9d028d4188592340b4b8d3cfb62809ae2af5f660a0,census_2007,,verified_read_only
+pbi_1993_2018,2 data/1 Raw/11 Centros Poblados/4. PBI_CentrosPoblados_1993-2018.xlsx,34238871,de0fd6fad85e45aa7286bf75c670124780caa207db3059df1be68742dbbf0c6b,pbi_1993_2018,,verified_read_only
+geogps_cpg,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.cpg,5,3ad3031f5503a4404af825262ee8232cc04d4ea6683d42c5dd0a2f2a27ac9824,geogps_inei_2023,,verified_read_only
+geogps_dbf,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.dbf,55150420,c9747f278544397ad17dbb652ec8d0fa21ecc628a9a3549ef9cbd9a197384518,geogps_inei_2023,,verified_read_only
+geogps_prj,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.prj,145,a02a27b1d1982c8516d83398e85a3c8b1aef1713c13ef4d84d7bde17430c07c4,geogps_inei_2023,,verified_read_only
+geogps_sbn,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.sbn,916932,d8227c7a2559e101b5a5a020f28387eae6eb32203cf362b8e29f7c81d83e9669,geogps_inei_2023,,verified_read_only
+geogps_sbx,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.sbx,34596,e0f346fa1548543c97384c812adfd939293ad654dac5a4cabac53f8ea215e840,geogps_inei_2023,,verified_read_only
+geogps_shp,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.shp,2657916,fb8c6b008ce862cc7c7596fb7d4dc584ab98c6a984e5f381751aad23c3eab42b,geogps_inei_2023,,verified_read_only
+geogps_shp_xml,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.shp.xml,1177,e078144e8c468fca08102d7bf8aceb2030579b058f23cb5b1065005ff2eefd77,geogps_inei_2023,,verified_read_only
+geogps_shx,2 data/1 Raw/11 Centros Poblados/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.shx,759476,65d708fe15db1009d09fad7c1b1b64783591b7bfca9380c9a45e6d552e802de2,geogps_inei_2023,,verified_read_only
+reporte_01,2 data/1 Raw/11 Centros Poblados/ReporteCCPP.xls,892369,c29306046ca4fbd3e65867de5c80909fbf3a6c69a7db34d3f0dc80e3ca0014cd,reporte_ccpp_2016,,verified_read_only
+reporte_02,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (1).xls,2048467,9625285ea118fdf891782f813c22ced8bddeb77182839b14f33c81a400b0d98b,reporte_ccpp_2016,,verified_read_only
+reporte_03,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (2).xls,1166318,6c6be72c3368b057e2efb2628683ce2e8fe9c58b4b39b0e51586d73c62231140,reporte_ccpp_2016,,verified_read_only
+reporte_04,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (3).xls,1320086,7dbf8142bd353f709c8ac11a885517f00556fa06f11456a67aa6f66e4a5e7f5a,reporte_ccpp_2016,,verified_read_only
+reporte_05,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (4).xls,2088196,4cda1d701c7af57a201b604517fba8e6ed571e96bf7abdcc282dfdbee3eba3eb,reporte_ccpp_2016,,verified_read_only
+reporte_06,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (5).xls,1838039,b89cd8b47775a9904ce455f4eae192a2fe69f21cc8def44fa4e3fe404d6c0b7d,reporte_ccpp_2016,,verified_read_only
+reporte_07,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (6).xls,4948,51fa89453dbf4fc17e279649818cec8e198a76d4dfab2a60b377c7af55c212ab,reporte_ccpp_2016,,verified_read_only
+reporte_08,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (7).xls,2494189,4d8e9a7759741dee771f635498473989ebc16d17ff87ccff060c7462e5ee2355,reporte_ccpp_2016,,verified_read_only
+reporte_09,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (8).xls,1926037,990645473035e8a1dc556844d33bbd55dba4605cf7a575f4307d150dd3d4d1df,reporte_ccpp_2016,,verified_read_only
+reporte_10,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (9).xls,1795328,696a83ac1c3f89bbc819a00819f1ed5ee4677260fc7e53d6622b56c9fa209b95,reporte_ccpp_2016,,verified_read_only
+reporte_11,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (10).xls,358181,0a26878530a77f990cc6150c57188607580d0e21c5587292ec82918f4f951ec6,reporte_ccpp_2016,,verified_read_only
+reporte_12,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (11).xls,1263730,2fd3683d4baf52b490fc6ed0beb0281260e4f33217ab114427a93607da55392f,reporte_ccpp_2016,,verified_read_only
+reporte_13,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (12).xls,996981,c2bf744258a0eb069d087a068db5eb8f9b63c6bbcfb3cf9186ce74c6fd60ea2f,reporte_ccpp_2016,,verified_read_only
+reporte_14,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (13).xls,418798,4be27ec7fea15fb3c853a1a9d3c2f85067c1c7864028f57c8634a5fddd49f02d,reporte_ccpp_2016,,verified_read_only
+reporte_15,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (14).xls,1444548,31a3df81d735cbbb27b32c0e183a9051aa14721a58dac0908e102ded500de538,reporte_ccpp_2016,,verified_read_only
+reporte_16,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (15).xls,677380,a74eedb80b45459126ab41affc449cdb77229aa2136347cce80b77262582fcb8,reporte_ccpp_2016,,verified_read_only
+reporte_17,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (16).xls,90745,46366523f78c5b614ffc93e4e98d667f27dc46ec05d16fd6efc763be56d07aa1,reporte_ccpp_2016,,verified_read_only
+reporte_18,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (17).xls,359265,8776963227036a6ead4d51355483041a59e03d94611e7c53f6f2981dc24ad030,reporte_ccpp_2016,,verified_read_only
+reporte_19,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (18).xls,767077,fb4580041c069b50bc25d58c87b686a5f2353fd5f651d01cdef36eb7b34e317e,reporte_ccpp_2016,,verified_read_only
+reporte_20,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (19).xls,785376,0094cc3f3b77ec75e96f9b8a8d59e6d60efd8001251961bdab3d4b711535c78c,reporte_ccpp_2016,,verified_read_only
+reporte_21,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (20).xls,2582609,aba29f2b3641ffb38dde531a40e73deb07d2ca1fc6fb48a1680835b341f73973,reporte_ccpp_2016,,verified_read_only
+reporte_22,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (21).xls,718110,d9041c7f40f540796a85d4916c028b0ce3909b7af9ebdd7f9af768c7473ad333,reporte_ccpp_2016,,verified_read_only
+reporte_23,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (22).xls,263790,c0d5f1c263c90d37c8365b900eec7f6a8eda64321cf2f3e687bcbb0d496becae,reporte_ccpp_2016,,verified_read_only
+reporte_24,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (23).xls,57022,4522ae989b95adccd9d63c36e54da307feb163a84fce3969a012e54b484db70b,reporte_ccpp_2016,,verified_read_only
+reporte_24_duplicate,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (24).xls,57022,4522ae989b95adccd9d63c36e54da307feb163a84fce3969a012e54b484db70b,reporte_ccpp_2016,ReporteCCPP (23).xls,excluded_byte_identical_duplicate
+reporte_25,2 data/1 Raw/11 Centros Poblados/ReporteCCPP (25).xls,294340,b9eb25a3e6184b90a67ab3590ace12e60688e35a89b0d621bb5d4f69fc617414,reporte_ccpp_2016,,verified_read_only

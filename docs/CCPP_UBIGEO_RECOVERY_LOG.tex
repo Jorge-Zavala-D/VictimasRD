@@ -1,0 +1,240 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+
+\title{Victimas RD: Centro Poblado UBIGEO Recovery Log}
+\author{Research data-preparation record}
+\date{28 July 2026}
+
+\begin{document}
+\maketitle
+
+\section{Purpose and governing rules}
+
+This log records the final multi-source effort to recover ten-digit centro
+poblado (CCPP) UBIGEO codes for the RUV victimization registry and the CMAN
+collective-reparation register. The RUV file defines the analytical universe.
+Every one of its 5,712 source rows is retained, whether or not a CCPP code can
+be verified. CMAN-only rows remain in the canonical CMAN registry but do not
+enter the RUV-master analytical merge.
+
+All original files under \code{2 data/1 Raw} were treated as immutable,
+read-only inputs. No raw workbook, report, PDF, or shapefile component was
+modified. Intermediate data and row-level QA ledgers are written to Dropbox
+Working; the polished foundational registry is written to Dropbox Coded.
+Versioned code, aggregate metadata, and non-sensitive adjudication records are
+kept in Git.
+
+Matching never uses the victimization score, treatment year, project value, or
+any outcome. It uses only identifiers, administrative hierarchy, names,
+source vintage, and documented linkage evidence.
+
+\section{Source directories processed}
+
+\begin{longtable}{p{0.22\textwidth}p{0.16\textwidth}r p{0.43\textwidth}}
+\toprule
+Source & Vintage & Usable rows & Role in recovery \\
+\midrule
+\endhead
+INEI departmental CCPP workbooks & 2017 & 94,922 &
+Primary current directory and source of retained 2017 attributes. \\
+CCPP Census workbook & 2007 & 45,677 &
+Historical code and name evidence close to the RUV period. \\
+FAC national workbook & 2016 & 65,535 &
+Alternative national code and name directory. \\
+ReporteCCPP departmental reports & 2016 & 94,922 &
+Twenty-five unique department tables extracted from 26 downloads; one
+byte-identical duplicate was excluded. \\
+GeoGPS/INEI shapefile DBF & 2023-era copy & 94,922 &
+Corroborating copy of the same INEI spine as ReporteCCPP; not counted as an
+independent source family. Geometry was inventoried but not needed for
+name-code linkage. \\
+PBI CCPP panel & 1993--2018 & 98,011 &
+Long-horizon CCPP code and name evidence; economic measures were not carried
+into this linkage stage. \\
+IGN CCPP directory & 2025 & 64,199 coded rows &
+Later-vintage candidate evidence. Rows without a ten-digit code were not used
+to assign a code. Leading zeros were restored deterministically for 680
+Ancash codes before validation. \\
+\bottomrule
+\end{longtable}
+
+The six historical or alternative source families pooled by the Stata
+pipeline contribute 463,266 candidate rows. File-level SHA-256 checksums are
+recorded in
+\code{metadata/ccpp-linkage/historical-ccpp-source-checksums.csv}. The complete
+ReporteCCPP extraction manifest, including each source file, duplicate status,
+reported row count, and output checksum, is regenerated in Dropbox Working QA.
+
+\section{Reproducible extraction and standardization}
+
+The files named \code{ReporteCCPP*.xls} are HTML administrative tables rather
+than binary Excel workbooks. The versioned parser
+\code{code/python/extract_reporte_ccpp_html.py}:
+
+\begin{enumerate}
+  \item fingerprints every input file;
+  \item excludes byte-identical duplicates;
+  \item extracts one six-column administrative table per unique report;
+  \item checks the printed row count against the extracted count;
+  \item reconstructs and validates department, province, district, and
+        ten-digit CCPP codes; and
+  \item requires complete coverage of department codes 01 through 25 and
+        uniqueness of the combined 94,922 CCPP codes.
+\end{enumerate}
+
+For every source, names are standardized by Unicode decomposition, removal of
+diacritics, conversion to upper case, replacement of non-alphanumeric
+characters with spaces, whitespace compression, and trimming. A comparison is
+blocked on the six-digit district code whenever that code is available.
+Ten-digit CCPP codes must contain digits only and their first six digits must
+equal the district UBIGEO.
+
+\section{RUV recovery rules}
+
+The RUV workflow applies evidence in this order:
+
+\begin{enumerate}
+  \item unique exact normalized name within the supplied RUV district in the
+        primary 2017 INEI directory;
+  \item accepted rows in the versioned
+        \code{ruv-ubigeo-adjudication.csv};
+  \item unique exact normalized name within the pooled historical directories,
+        accepted only when all occurrences point to one code and that code is
+        not already assigned to another retained RUV record; and
+  \item individually reviewed fuzzy candidates, where an accepted decision
+        requires a clear spelling or naming explanation and cited evidence.
+\end{enumerate}
+
+Fuzzy scores rank candidates but never assign a code automatically. The
+composite score uses normalized Levenshtein, character bigram, token, and
+Soundex agreement within district. Ninety-five additional high-confidence
+rows were added to the accepted adjudication ledger during this pass. The
+historical exact-name rule automatically recovered another 198 codes.
+
+The final RUV accounting is:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+RUV status & Communities \\
+\midrule
+Primary 2017 exact match & 3,986 \\
+Accepted versioned adjudication & 936 \\
+Automatic unique historical exact match & 198 \\
+Verified ten-digit CCPP UBIGEO & 5,120 \\
+Retained without a verified CCPP UBIGEO & 592 \\
+\midrule
+Complete RUV source universe & 5,712 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Two RUV names have multiple exact historical codes, and seven exact historical
+candidates point to a code already assigned to another RUV record. These
+cases remain unresolved. Seven additional high-scoring fuzzy candidates were
+explicitly rejected because qualifiers, ordinal suffixes, or distinct name
+stems could identify different communities. The row-level decisions are in
+\code{metadata/ccpp-linkage/ruv-ubigeo-review-decisions.csv}.
+
+\section{CMAN recovery and conflict quarantine}
+
+CMAN is linked independently to administrative directories before it is linked
+to RUV. The current directory resolves 4,343 of 4,433 district paths. The
+historical exact pass recovers 22 more unique district codes, leaving 68
+district paths unresolved. With those district codes available, 3,123 CMAN
+rows match a unique current-directory CCPP name. A further 421 rows have one
+unique historical exact CCPP candidate.
+
+Historical code evidence is not allowed to contradict the RUV relationship.
+Nine of the 421 historical CMAN candidates were quarantined:
+
+\begin{itemize}
+  \item five codes belong to a different verified RUV record than the direct,
+        unique full-name CMAN-to-RUV link; and
+  \item four codes differ from the verified code of the direct RUV record.
+\end{itemize}
+
+The first class remains code-unresolved on the CMAN row. In the second class,
+the conflicting historical code is cleared and the verified RUV code is
+inherited. The nine decisions are documented in
+\code{metadata/ccpp-linkage/cman-historical-conflict-decisions.csv} and in two
+regenerated Dropbox QA ledgers.
+
+After current exact matches, accepted historical evidence, and inheritance
+from verified RUV links, 3,946 of 4,433 CMAN project rows have a verified CCPP
+code and 487 do not. Of the 487, 385 are linked to retained RUV records and
+102 are CMAN-only. Another 108 CMAN-only rows have verified codes. The complete
+4,433-row CMAN registry is preserved regardless of linkage outcome.
+
+\section{Final RUV--CMAN merge}
+
+CMAN links to RUV first by a unique exact normalized full geographic path,
+then by verified CCPP UBIGEO, and finally through accepted versioned
+adjudications. The final accounting is:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+Merge result & Rows \\
+\midrule
+CMAN project rows linked to an RUV record & 4,223 \\
+CMAN rows outside the RUV universe & 210 \\
+Repeated later CMAN project rows collapsed & 2 \\
+Unique RUV communities with a linked project & 4,221 \\
+RUV communities with no linked CMAN project by 2023 & 1,491 \\
+\midrule
+Final RUV-master analytical rows & 5,712 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The recorded CMAN year is used as the authoritative treatment year. Variables
+\code{treat_07} through \code{treat_23} are cumulative: a community equals one
+in its recorded year and every later year. All 5,712 final observations have
+complete annual treatment indicators.
+
+\section{Remaining limitations and use}
+
+The 592 unresolved RUV codes and 487 unresolved CMAN codes are not casual QA
+omissions. The new directories, exact normalized paths, high-confidence fuzzy
+tiers, code occupancy checks, and conflict review were exhausted without a
+defensible unique assignment. A missing code is preferable to a fabricated
+link. These records remain visible in Dropbox Working QA and, for RUV, remain
+in the analytical universe for descriptions and analyses that do not require
+a verified CCPP UBIGEO.
+
+Historical codes establish source-specific identifier evidence, not proof that
+administrative boundaries or community identity were unchanged across time.
+Any analysis requiring stable spatial units across 1993, 2007, 2017, 2023, or
+2025 must separately assess splits, mergers, renaming, and boundary changes.
+
+\section{Authoritative outputs}
+
+\begin{itemize}
+  \item Stata pipeline:
+        \code{code/stata/pipeline/01_data_preparation.do}
+  \item Report parser:
+        \code{code/python/extract_reporte_ccpp_html.py}
+  \item Historical directory milestone:
+        Dropbox Working \code{01 intermediate/01_auxiliary_historical_ccpp_directories.dta}
+  \item RUV registry milestone:
+        Dropbox Working \code{01 intermediate/02_victimization_registry.dta}
+  \item CMAN registry milestone:
+        Dropbox Working \code{01 intermediate/03_cman_projects_2023.dta}
+  \item Final analytical registry:
+        Dropbox Coded \code{1 Current analysis datasets/04_foundational_community_registry.dta}
+  \item Aggregate metrics:
+        Dropbox Working \code{03 qa/foundational_data_preparation_metrics.csv}
+\end{itemize}
+
+\end{document}

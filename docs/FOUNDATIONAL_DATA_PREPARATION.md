@@ -16,8 +16,18 @@ review ledgers are written under `2 data/2 Working/1 Current pipeline`; the
 final analytical registry is written under
 `2 data/3 Coded/1 Current analysis datasets`.
 
-The adjudication audit also used two public official sources. Their immutable
-downloads are stored under
+The adjudication audit also uses dated and alternative CCPP directories. The
+newly supplied sources under `2 data/1 Raw/11 Centros Poblados` are:
+
+- the 2007 CCPP census workbook;
+- the 2016 FAC national code workbook;
+- 26 ReporteCCPP department downloads, of which one is a byte-identical
+  duplicate;
+- the GeoGPS/INEI shapefile and DBF;
+- the 1993–2018 PBI CCPP panel; and
+- the existing 2017 INEI department workbooks.
+
+Two additional public official downloads remain under
 `2 data/1 Raw/13 External administrative sources`:
 
 - the Instituto Geografico Nacional national CCPP layer published 26 May 2025
@@ -80,6 +90,13 @@ hierarchy. Candidate scores use multiple name metrics and geographic blocking,
 but no score is accepted automatically. Candidate ledgers are evidence for
 row-level adjudication, not substitutes for it.
 
+The historical exact pass pools six source families and accepts a code only
+when the normalized name is exact within district, every occurrence identifies
+one code, and the code is not already assigned to another retained RUV record.
+ReporteCCPP and the GeoGPS DBF are treated as one source family because they
+reproduce the same 94,922-row INEI spine. Historical CMAN codes that contradict
+a direct or verified RUV relationship are quarantined and documented.
+
 Where names or administrative boundaries changed, adjudication should consult,
 in order:
 
@@ -98,44 +115,42 @@ historical code must not be relabeled as a verified 2017 CCPP code.
 
 The complete run now produces:
 
-- 3,986 deterministic exact RUV links and 841 accepted, versioned
-  adjudications;
-- 4,827 RUV communities with unique, verified ten-digit CCPP UBIGEO codes;
-- 885 RUV communities retained without a verified CCPP UBIGEO after the
-  official 2017 and 2025 directories,
-  legacy administrative crosswalks, OSIPTEL corroboration, geographic
-  blocking, and manual review did not support a defensible code;
-- 4,614 retained RUV codes with a 2017 vintage and 213 with a documented 2025
-  vintage;
-- 4,153 exact full-name CMAN-to-RUV links, 29 additional exact-UBIGEO links,
+- 3,986 deterministic exact RUV links in the 2017 directory;
+- 936 accepted, versioned RUV adjudications, including 95 added through the
+  new review pass;
+- 198 automatic unique historical exact-name recoveries;
+- 5,120 RUV communities with a unique, verified ten-digit CCPP UBIGEO and 592
+  RUV communities retained without one;
+- 4,343 current exact CMAN district paths plus 22 unique historical district
+  recoveries, leaving 68 unresolved district paths;
+- 3,123 CMAN CCPP matches in the current directory and 412 retained historical
+  exact CCPP codes after nine contradictions were quarantined;
+- 4,153 exact full-name CMAN-to-RUV links, 42 additional exact-UBIGEO links,
   and 42 accepted manual adjudications;
-- 647 CMAN rows whose CCPP code is inherited from their already verified RUV
-  link;
-- 562 CMAN project rows linked by RUV ID to RUV communities without an
-  RUV-side verified community UBIGEO;
-- all 4,433 CMAN source rows preserved in the canonical CMAN registry, with
-  115 code-less and 106 coded CMAN-only rows excluded from the RUV-master
-  merge;
-- 4,211 treated RUV communities and 1,501 RUV communities with no recorded
+- 411 CMAN codes inherited from an already verified RUV link;
+- all 4,433 CMAN source rows preserved, including 4,223 linked to RUV and 210
+  CMAN-only rows;
+- 3,946 CMAN rows with a verified CCPP code and 487 without one;
+- 4,221 treated RUV communities and 1,491 RUV communities with no recorded
   CMAN project through 2023;
-- complete treatment indicators for all 5,712 RUV communities;
-- one community with two CMAN project records, for which the 2010 project
-  establishes treatment onset and the 2021 project remains reflected in
-  `cman_project_count`; and
-- zero exact-link UBIGEO conflicts and zero missing treatment indicators in
-  the 5,712-row foundational registry.
+- two later repeated CMAN project rows collapsed after the earliest treatment
+  year is retained; and
+- complete treatment indicators and zero remaining accepted exact-link code
+  conflicts in the 5,712-row foundational registry.
 
-The 213 current-vintage CCPP codes do not exist in the reconstructed 2017
-spine, so their 2017 population, altitude, natural-region, and dwelling fields
-remain missing rather than being assigned from a different historical
-community. Any analysis requiring those attributes must report the resulting
-sample restriction.
+Historical or later-vintage codes that do not exist in the reconstructed 2017
+spine do not receive 2017 population, altitude, natural-region, or dwelling
+attributes from another community. Any analysis requiring those attributes
+must report the resulting sample restriction.
 
 The Dropbox Working QA tree contains row-level unresolved-linkage ledgers.
 `metadata/ccpp-linkage/foundational-sample-flow.csv` contains the corresponding
 aggregate counts, and
 `2 data/3 Coded/1 Current analysis datasets/04_foundational_community_registry.dta`
 is the validated, 5,712-row analysis-stage registry.
+
+The complete source, matching, conflict, and final-flow record is maintained in
+[`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](CCPP_UBIGEO_RECOVERY_LOG.tex).
 
 Historical linked datasets are retained only as candidate evidence. They were
 created through the legacy fuzzy workflow and cannot be treated as certified

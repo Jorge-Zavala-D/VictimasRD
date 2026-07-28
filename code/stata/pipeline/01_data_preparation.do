@@ -12,6 +12,7 @@ Current source families:
     1. INEI 2017 national centro-poblado directory
     2. RUV Libro Segundo victimization-index registry
     3. CMAN communities attended through 2023
+    4. Historical and alternative CCPP directories, 2007--2025
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -33,6 +34,7 @@ local required_globals ///
     intermediate_root ///
     staging_root ///
     qa_data_root ///
+    external_derived_root ///
     analysis_data_root ///
     metadata_root ///
     python_exec ///
@@ -56,6 +58,13 @@ if _rc {
 capture confirm file "${project_root}/code/python/extract_cman_pdf.py"
 if _rc {
     display as error "CMAN PDF extractor was not found."
+    exit 601
+}
+
+capture confirm file ///
+    "${project_root}/code/python/extract_reporte_ccpp_html.py"
+if _rc {
+    display as error "ReporteCCPP HTML extractor was not found."
     exit 601
 }
 
@@ -113,11 +122,18 @@ tempfile ///
     inei_ccpp_unique_exact ///
     inei_district_exact ///
     inei_ccpp_candidate_pool ///
+    hist_ccpp_sources ///
+    hist_ccpp_name_code_pool ///
+    hist_dist_name_code_pool ///
+    ruv_assigned_codes ///
+    ruv_historical_exact ///
     ruv_unresolved_candidates ///
     ruv_unique_name_path ///
     ruv_unique_id ///
     ruv_unique_ubigeo ///
     cman_unresolved_districts ///
+    cman_hist_dist ///
+    cman_hist_ccpp ///
     inei_district_candidate_pool ///
     cman_unresolved_ccpp ///
     cman_unresolved_ruv ///
@@ -493,7 +509,568 @@ restore
 
 
 *===============================================================================
-**# 3. Clean the RUV Libro Segundo victimization-index registry
+**# 3. Build the historical and alternative CCPP evidence directory
+*===============================================================================
+
+/*
+The RUV registry predates the 2017 INEI spine. A community can therefore have
+a verifiable historical code even when its name or code disappeared from the
+current directory. Build one row-preserving evidence file from every supplied
+CCPP source. These sources never overwrite each other; exact matching below is
+accepted only when all exact within-district evidence points to one unused
+ten-digit code.
+*/
+
+local ccpp_source_root ///
+    "${raw_root}/11 Centros Poblados"
+local reporte_ccpp_csv ///
+    "${staging_root}/reporte_ccpp_2016_extracted.csv"
+local reporte_ccpp_manifest ///
+    "${qa_data_root}/reporte_ccpp_2016_extraction_manifest.json"
+local reporte_ccpp_extractor ///
+    "${project_root}/code/python/extract_reporte_ccpp_html.py"
+
+foreach required_file in ///
+    "`ccpp_source_root'/20161027_CodCentPobRegFormActColectivasFAC.xlsx" ///
+    "`ccpp_source_root'/CCPP 2007.xlsx" ///
+    "`ccpp_source_root'/4. PBI_CentrosPoblados_1993-2018.xlsx" ///
+    "`ccpp_source_root'/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.dbf" ///
+    "${external_derived_root}/ign_centros_poblados_2025.dta" ///
+    "`reporte_ccpp_extractor'" {
+
+    capture confirm file "`required_file'"
+    if _rc {
+        display as error "Required historical CCPP source was not found:"
+        display as error "  `required_file'"
+        exit 601
+    }
+}
+
+capture erase "`reporte_ccpp_csv'"
+capture erase "`reporte_ccpp_manifest'"
+
+local reporte_command ///
+    `""${python_exec}" "`reporte_ccpp_extractor'" --input-dir "`ccpp_source_root'" --output "`reporte_ccpp_csv'" --manifest "`reporte_ccpp_manifest'" --expected-departments 25"'
+
+display as text ///
+    "Extracting the 25 department ReporteCCPP HTML tables."
+shell `reporte_command'
+
+foreach extracted_file in ///
+    "`reporte_ccpp_csv'" ///
+    "`reporte_ccpp_manifest'" {
+
+    capture confirm file "`extracted_file'"
+    if _rc {
+        display as error "Expected ReporteCCPP extraction output was not created:"
+        display as error "  `extracted_file'"
+        exit 603
+    }
+}
+
+/*
+INEI FAC national directory. The workbook embeds the administrative code at
+the beginning of each geography string.
+*/
+
+import excel ///
+    "`ccpp_source_root'/20161027_CodCentPobRegFormActColectivasFAC.xlsx", ///
+    sheet("Hoja1") firstrow allstring clear
+
+count
+assert r(N) == 65535
+
+generate long source_row = _n
+generate str10 ubigeo_ccpp = substr(CENTROPOBLADO, 1, 10)
+generate str6 ubigeo_dist = substr(ubigeo_ccpp, 1, 6)
+generate str4 ubigeo_prov = substr(ubigeo_ccpp, 1, 4)
+generate str2 ubigeo_dpto = substr(ubigeo_ccpp, 1, 2)
+generate str244 region_raw = ///
+    ustrtrim(substr(DEPARTAMENTO, 4, strlen(DEPARTAMENTO)))
+generate str244 province_raw = ///
+    ustrtrim(substr(PROVINCIA, 6, strlen(PROVINCIA)))
+generate str244 district_raw = ///
+    ustrtrim(substr(DISTRITO, 8, strlen(DISTRITO)))
+generate str244 source_name_raw = ///
+    ustrtrim(substr(CENTROPOBLADO, 12, strlen(CENTROPOBLADO)))
+generate str16 rurality_raw = ""
+generate str32 source_id = "fac_2016"
+generate str32 source_family = "inei_fac_2016"
+generate str12 source_vintage = "2016"
+generate str80 source_file = ///
+    "20161027_CodCentPobRegFormActColectivasFAC.xlsx"
+generate byte source_priority = 2
+
+victimasrd_normalize_name region_raw, generate(region_norm)
+victimasrd_normalize_name province_raw, generate(province_norm)
+victimasrd_normalize_name district_raw, generate(district_norm)
+victimasrd_normalize_name source_name_raw, generate(community_norm)
+
+assert ustrregexm(ubigeo_ccpp, "^[0-9]{10}$")
+assert substr(ubigeo_ccpp, 1, 6) == ubigeo_dist
+isid source_id source_row
+
+keep ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_priority ///
+    source_row ///
+    ubigeo_dpto ///
+    ubigeo_prov ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    source_name_raw ///
+    rurality_raw ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm
+
+save "`hist_ccpp_sources'", replace
+
+/*
+The 2007 census workbook has a two-row header. With firstrow, its first
+observation contains the field labels and its final observations contain a
+source note. A ten-digit code identifies the 45,677 valid community rows.
+*/
+
+import excel ///
+    "`ccpp_source_root'/CCPP 2007.xlsx", ///
+    sheet("Hoja1") firstrow allstring clear
+
+generate long source_row = _n
+keep if ustrregexm(A, "^[0-9]{10}$")
+count
+assert r(N) == 45677
+
+generate str10 ubigeo_ccpp = A
+generate str6 ubigeo_dist = substr(ubigeo_ccpp, 1, 6)
+generate str4 ubigeo_prov = substr(ubigeo_ccpp, 1, 4)
+generate str2 ubigeo_dpto = substr(ubigeo_ccpp, 1, 2)
+generate str244 region_raw = C
+generate str244 province_raw = D
+generate str244 district_raw = E
+generate str244 source_name_raw = F
+generate str16 rurality_raw = G
+generate str32 source_id = "census_2007"
+generate str32 source_family = "census_2007"
+generate str12 source_vintage = "2007"
+generate str80 source_file = "CCPP 2007.xlsx"
+generate byte source_priority = 1
+
+victimasrd_normalize_name region_raw, generate(region_norm)
+victimasrd_normalize_name province_raw, generate(province_norm)
+victimasrd_normalize_name district_raw, generate(district_norm)
+victimasrd_normalize_name source_name_raw, generate(community_norm)
+
+isid source_id source_row
+
+keep ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_priority ///
+    source_row ///
+    ubigeo_dpto ///
+    ubigeo_prov ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    source_name_raw ///
+    rurality_raw ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm
+
+append using "`hist_ccpp_sources'"
+save "`hist_ccpp_sources'", replace
+
+/*
+The PBI/night-lights panel supplies a broad historical CCPP code-name spine
+covering economic activity from 1993 through 2018. Economic measures are not
+carried into this identifier-only auxiliary directory.
+*/
+
+import excel ///
+    "`ccpp_source_root'/4. PBI_CentrosPoblados_1993-2018.xlsx", ///
+    sheet("PBI_CP") firstrow allstring clear
+
+generate long source_row = _n
+keep if ustrregexm(IDCARTOGR, "^[0-9]{10}$")
+count
+assert r(N) == 98011
+
+generate str10 ubigeo_ccpp = IDCARTOGR
+generate str6 ubigeo_dist = substr(ubigeo_ccpp, 1, 6)
+generate str4 ubigeo_prov = substr(ubigeo_ccpp, 1, 4)
+generate str2 ubigeo_dpto = substr(ubigeo_ccpp, 1, 2)
+generate str244 region_raw = NOMB_DEP
+generate str244 province_raw = NOMB_PRO
+generate str244 district_raw = NOMB_DIST
+generate str244 source_name_raw = NOMCCPP
+generate str16 rurality_raw = ""
+generate str32 source_id = "pbi_1993_2018"
+generate str32 source_family = "pbi_1993_2018"
+generate str12 source_vintage = "1993-2018"
+generate str80 source_file = ///
+    "4. PBI_CentrosPoblados_1993-2018.xlsx"
+generate byte source_priority = 4
+
+victimasrd_normalize_name region_raw, generate(region_norm)
+victimasrd_normalize_name province_raw, generate(province_norm)
+victimasrd_normalize_name district_raw, generate(district_norm)
+victimasrd_normalize_name source_name_raw, generate(community_norm)
+
+isid source_id ubigeo_ccpp
+
+keep ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_priority ///
+    source_row ///
+    ubigeo_dpto ///
+    ubigeo_prov ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    source_name_raw ///
+    rurality_raw ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm
+
+append using "`hist_ccpp_sources'"
+save "`hist_ccpp_sources'", replace
+
+/*
+The department ReporteCCPP files are HTML tables carrying a 2016-5 UBIGEO
+criterion despite their .xls extensions. The extractor validates all 25
+departments and removes one byte-identical duplicate download.
+*/
+
+import delimited using "`reporte_ccpp_csv'", ///
+    varnames(1) stringcols(_all) clear
+
+count
+assert r(N) == 94922
+
+destring source_row_number, generate(source_row)
+generate str244 source_name_raw = community_raw
+generate str32 source_id = "reporte_ccpp_2016"
+generate str32 source_family = "inei_spine_derivative"
+generate str12 source_vintage = "2016"
+generate str80 source_file_clean = source_file
+drop source_file
+rename source_file_clean source_file
+generate byte source_priority = 3
+generate str16 rurality_raw = area_raw
+
+victimasrd_normalize_name region_raw, generate(region_norm)
+victimasrd_normalize_name province_raw, generate(province_norm)
+victimasrd_normalize_name district_raw, generate(district_norm)
+victimasrd_normalize_name source_name_raw, generate(community_norm)
+
+isid source_id ubigeo_ccpp
+
+keep ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_priority ///
+    source_row ///
+    ubigeo_dpto ///
+    ubigeo_prov ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    source_name_raw ///
+    rurality_raw ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm
+
+append using "`hist_ccpp_sources'"
+save "`hist_ccpp_sources'", replace
+
+/*
+The GeoGPS layer reproduces the 94,922-row INEI code spine and adds a spatial
+representation. Treat it as corroboration from the same directory family,
+not as an independent historical source.
+*/
+
+import dbase using ///
+    "`ccpp_source_root'/Centros_Poblados_INEI_geogpsperu_SuyoPomalia (1)/Centros_Poblados_INEI_geogpsperu_SuyoPomalia.dbf", ///
+    clear
+
+count
+assert r(N) == 94922
+
+generate long source_row = _n
+generate str10 ubigeo_ccpp = IDCCPP
+generate str6 ubigeo_dist = substr(ubigeo_ccpp, 1, 6)
+generate str4 ubigeo_prov = substr(ubigeo_ccpp, 1, 4)
+generate str2 ubigeo_dpto = substr(ubigeo_ccpp, 1, 2)
+generate str244 region_raw = NOMB_DEPAR
+generate str244 province_raw = NOMB_PROVI
+generate str244 district_raw = NOMB_DISTR
+generate str244 source_name_raw = NOMB_CCPP
+generate str16 rurality_raw = TIPO
+generate str32 source_id = "geogps_inei_2023"
+generate str32 source_family = "inei_spine_derivative"
+generate str12 source_vintage = "2023"
+generate str80 source_file = ///
+    "Centros_Poblados_INEI_geogpsperu_SuyoPomalia.dbf"
+generate byte source_priority = 5
+
+victimasrd_normalize_name region_raw, generate(region_norm)
+victimasrd_normalize_name province_raw, generate(province_norm)
+victimasrd_normalize_name district_raw, generate(district_norm)
+victimasrd_normalize_name source_name_raw, generate(community_norm)
+
+isid source_id ubigeo_ccpp
+
+keep ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_priority ///
+    source_row ///
+    ubigeo_dpto ///
+    ubigeo_prov ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    source_name_raw ///
+    rurality_raw ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm
+
+append using "`hist_ccpp_sources'"
+save "`hist_ccpp_sources'", replace
+
+/*
+The converted IGN 2025 layer remains in Dropbox Working. Its immutable raw ZIP
+and shapefile are recorded under Dropbox Raw external administrative sources.
+*/
+
+use ///
+    "${external_derived_root}/ign_centros_poblados_2025.dta", ///
+    clear
+
+count
+assert r(N) == 136587
+
+generate long source_row = _n
+generate str10 ubigeo_ccpp = CÓDIGO
+
+/*
+The converted IGN file lost the leading zero on 680 Áncash codes. The
+department, province, district, and four-digit CCPP components remain present;
+restore that formatting loss before validating the ten-digit identifier.
+*/
+
+replace ubigeo_ccpp = "0" + ubigeo_ccpp if ///
+    DEP == "ANCASH" & ///
+    ustrregexm(ubigeo_ccpp, "^[0-9]{9}$")
+
+keep if ustrregexm(ubigeo_ccpp, "^[0-9]{10}$")
+count
+assert r(N) == 64199
+
+generate str6 ubigeo_dist = substr(ubigeo_ccpp, 1, 6)
+generate str4 ubigeo_prov = substr(ubigeo_ccpp, 1, 4)
+generate str2 ubigeo_dpto = substr(ubigeo_ccpp, 1, 2)
+generate str244 region_raw = DEP
+generate str244 province_raw = PROV
+generate str244 district_raw = DIST
+generate str244 source_name_raw = NOM_POBLAD
+generate str16 rurality_raw = ""
+generate str32 source_id = "ign_2025"
+generate str32 source_family = "ign_2025"
+generate str12 source_vintage = "2025"
+generate str80 source_file = "ign_centros_poblados_2025"
+generate byte source_priority = 6
+
+victimasrd_normalize_name region_raw, generate(region_norm)
+victimasrd_normalize_name province_raw, generate(province_norm)
+victimasrd_normalize_name district_raw, generate(district_norm)
+victimasrd_normalize_name source_name_raw, generate(community_norm)
+
+isid source_id source_row
+
+keep ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_priority ///
+    source_row ///
+    ubigeo_dpto ///
+    ubigeo_prov ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    source_name_raw ///
+    rurality_raw ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    community_norm
+
+append using "`hist_ccpp_sources'"
+
+count
+assert r(N) == 463266
+local historical_source_rows = r(N)
+assert substr(ubigeo_ccpp, 1, 6) == ubigeo_dist
+
+compress
+sort source_priority source_id ubigeo_ccpp
+save "`hist_ccpp_sources'", replace
+save ///
+    "${intermediate_root}/01_auxiliary_historical_ccpp_directories.dta", ///
+    replace
+
+preserve
+contract source_id source_family source_vintage
+rename _freq source_rows
+sort source_id
+export delimited ///
+    "${qa_data_root}/historical_ccpp_source_counts.csv", ///
+    replace
+restore
+
+/*
+Create one candidate row for each distinct district-name-code combination.
+Source-family counts do not double-count the ReporteCCPP and GeoGPS copies of
+the same INEI spine.
+*/
+
+preserve
+drop if missing(ubigeo_dist, community_norm)
+
+bysort ///
+    source_family ///
+    ubigeo_dist ///
+    community_norm ///
+    ubigeo_ccpp: ///
+    generate byte tag_source_family = _n == 1
+
+bysort ///
+    ubigeo_dist ///
+    community_norm ///
+    ubigeo_ccpp: ///
+    egen byte source_family_n = total(tag_source_family)
+
+bysort ///
+    ubigeo_dist ///
+    community_norm ///
+    ubigeo_ccpp ///
+    (source_priority source_id): ///
+    keep if _n == 1
+
+merge m:1 ubigeo_ccpp using ///
+    "${intermediate_root}/01_inei_ccpp_2017.dta", ///
+    keep(master match) ///
+    gen(historical_code_inei_merge)
+
+generate byte candidate_in_inei_2017 = ///
+    historical_code_inei_merge == 3
+drop historical_code_inei_merge
+
+generate str12 candidate_code_vintage = source_vintage
+replace candidate_code_vintage = "2017" if ///
+    candidate_in_inei_2017
+
+keep ///
+    ubigeo_dist ///
+    community_norm ///
+    ubigeo_ccpp ///
+    source_family_n ///
+    source_id ///
+    source_family ///
+    source_vintage ///
+    source_file ///
+    source_name_raw ///
+    candidate_in_inei_2017 ///
+    candidate_code_vintage
+
+isid ubigeo_dist community_norm ubigeo_ccpp
+save "`hist_ccpp_name_code_pool'", replace
+restore
+
+preserve
+drop if missing( ///
+    region_norm, province_norm, district_norm, ubigeo_dist)
+
+bysort ///
+    source_family ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    ubigeo_dist: ///
+    generate byte tag_source_family = _n == 1
+
+bysort ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    ubigeo_dist: ///
+    egen byte source_family_n = total(tag_source_family)
+
+bysort ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    ubigeo_dist ///
+    (source_priority source_id): ///
+    keep if _n == 1
+
+keep ///
+    region_norm ///
+    province_norm ///
+    district_norm ///
+    ubigeo_dist ///
+    source_family_n ///
+    source_id ///
+    source_vintage ///
+    source_file ///
+    region_raw ///
+    province_raw ///
+    district_raw
+
+isid region_norm province_norm district_norm ubigeo_dist
+save "`hist_dist_name_code_pool'", replace
+restore
+
+
+*===============================================================================
+**# 4. Clean the RUV Libro Segundo victimization-index registry
 *===============================================================================
 
 local victimization_source ///
@@ -639,7 +1216,7 @@ generate str48 victim_inei_match_method = ///
          "exact_district_and_unique_normalized_name", ///
          "unresolved_review_required")
 
-generate str4 victim_inei_code_vintage = ///
+generate str12 victim_inei_code_vintage = ///
     cond(victim_inei_exact_merge == 3, "2017", "")
 
 /*
@@ -659,7 +1236,9 @@ import delimited using ///
 isid ruv_id
 isid ubigeo_ccpp
 assert ustrregexm(ubigeo_ccpp, "^[0-9]{10}$")
-assert inlist(code_vintage, "2017", "2025")
+assert inlist( ///
+    code_vintage, ///
+    "2007", "2016", "2017", "2025", "1993-2018")
 assert lower(ustrtrim(review_status)) == "accepted"
 assert !missing( ///
     match_method, evidence_source, evidence_locator, ///
@@ -714,6 +1293,131 @@ drop ///
     review_date ///
     notes ///
     ruv_adjudication_merge
+
+/*
+Search the supplied historical directories only for RUV rows still lacking a
+code after the reviewed adjudication ledger. An exact normalized name within
+the RUV-supplied district is accepted automatically only when every exact
+source occurrence points to one code and that code is not already assigned to
+another RUV record. Ambiguous and duplicate-identity cases remain in QA.
+*/
+
+preserve
+keep if !missing(ubigeo_ccpp)
+keep ruv_id ubigeo_ccpp
+rename ruv_id assigned_ruv_id
+isid ubigeo_ccpp
+save "`ruv_assigned_codes'", replace
+restore
+
+preserve
+keep if missing(ubigeo_ccpp)
+keep ///
+    ruv_id ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    ubigeo_dist ///
+    community_norm
+
+joinby ubigeo_dist community_norm using ///
+    "`hist_ccpp_name_code_pool'"
+
+bysort ruv_id ubigeo_ccpp: ///
+    generate byte tag_candidate_code = _n == 1
+bysort ruv_id: ///
+    egen int candidate_code_n = total(tag_candidate_code)
+
+merge m:1 ubigeo_ccpp using ///
+    "`ruv_assigned_codes'", ///
+    keep(master match) ///
+    gen(candidate_code_occupancy_merge)
+
+generate byte candidate_code_already_assigned = ///
+    candidate_code_occupancy_merge == 3
+drop candidate_code_occupancy_merge
+
+generate str48 candidate_disposition = ///
+    "accepted_exact_unique_unused"
+replace candidate_disposition = ///
+    "review_multiple_exact_codes" if ///
+    candidate_code_n > 1
+replace candidate_disposition = ///
+    "review_code_assigned_to_other_ruv" if ///
+    candidate_code_already_assigned
+
+bysort ruv_id: generate byte tag_candidate_ruv = _n == 1
+count if tag_candidate_ruv
+local victim_hist_candidate_n = r(N)
+
+sort ruv_id ubigeo_ccpp source_id
+save ///
+    "${qa_data_root}/ruv_multisource_exact_candidates.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/ruv_multisource_exact_candidates.csv", ///
+    replace
+
+keep if ///
+    candidate_code_n == 1 & ///
+    !candidate_code_already_assigned
+bysort ruv_id ubigeo_ccpp: keep if _n == 1
+
+keep ///
+    ruv_id ///
+    ubigeo_ccpp ///
+    candidate_code_vintage ///
+    source_id ///
+    source_family ///
+    source_file ///
+    source_name_raw ///
+    source_family_n
+
+rename ubigeo_ccpp historical_ubigeo_ccpp
+rename candidate_code_vintage historical_code_vintage
+
+generate str48 historical_match_method = ///
+    "exact_multisource_historical_name"
+
+isid ruv_id
+isid historical_ubigeo_ccpp
+local victim_hist_exact_n = _N
+save "`ruv_historical_exact'", replace
+restore
+
+merge 1:1 ruv_id using ///
+    "`ruv_historical_exact'", ///
+    gen(ruv_historical_exact_merge)
+
+count if ruv_historical_exact_merge == 2
+assert r(N) == 0
+
+assert missing(ubigeo_ccpp) if ///
+    ruv_historical_exact_merge == 3
+
+replace ubigeo_ccpp = historical_ubigeo_ccpp if ///
+    ruv_historical_exact_merge == 3
+replace victim_inei_code_vintage = ///
+    historical_code_vintage if ///
+    ruv_historical_exact_merge == 3
+replace victim_inei_match_method = ///
+    historical_match_method if ///
+    ruv_historical_exact_merge == 3
+
+generate byte victim_historical_exact = ///
+    ruv_historical_exact_merge == 3
+
+drop ///
+    historical_ubigeo_ccpp ///
+    historical_code_vintage ///
+    historical_match_method ///
+    source_id ///
+    source_family ///
+    source_file ///
+    source_name_raw ///
+    source_family_n ///
+    ruv_historical_exact_merge
 
 merge m:1 ubigeo_ccpp using ///
     "${intermediate_root}/01_inei_ccpp_2017.dta", ///
@@ -1019,6 +1723,70 @@ count if cman_inei_district_exact_merge == 1
 assert r(N) == 90
 local cman_inei_district_unresolved = r(N)
 
+/*
+Recover historical district codes only when every exact normalized occurrence
+across the dated directories points to the same six-digit code.
+*/
+
+preserve
+keep if cman_inei_district_exact_merge == 1
+keep ///
+    record_number ///
+    region_norm ///
+    province_norm ///
+    district_norm
+
+joinby ///
+    region_norm ///
+    province_norm ///
+    district_norm using ///
+    "`hist_dist_name_code_pool'", unmatched(master)
+
+drop if missing(ubigeo_dist)
+bysort record_number ubigeo_dist: keep if _n == 1
+bysort record_number: generate int candidate_code_n = _N
+
+sort record_number ubigeo_dist
+save ///
+    "${qa_data_root}/cman_multisource_district_exact_candidates.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/cman_multisource_district_exact_candidates.csv", ///
+    replace
+
+keep if candidate_code_n == 1
+rename ubigeo_dist historical_ubigeo_dist
+rename source_id historical_district_source_id
+rename source_vintage historical_district_vintage
+keep ///
+    record_number ///
+    historical_ubigeo_dist ///
+    historical_district_source_id ///
+    historical_district_vintage
+isid record_number
+save "`cman_hist_dist'", replace
+local cman_historical_district_exact = _N
+restore
+
+merge 1:1 record_number using "`cman_hist_dist'", ///
+    keep(master match) ///
+    gen(cman_historical_district_merge)
+
+generate byte cman_historical_district_exact = ///
+    cman_historical_district_merge == 3
+
+replace ubigeo_dist = historical_ubigeo_dist if ///
+    cman_historical_district_exact
+
+drop ///
+    historical_ubigeo_dist ///
+    historical_district_source_id ///
+    historical_district_vintage ///
+    cman_historical_district_merge
+
+count if missing(ubigeo_dist)
+local cman_district_still_unresolved = r(N)
+
 merge m:1 ubigeo_dist community_norm using ///
     "`inei_ccpp_unique_exact'", ///
     keep(master match) ///
@@ -1028,12 +1796,13 @@ count
 assert r(N) == 4433
 
 count if cman_inei_ccpp_exact_merge == 3
-assert r(N) == 3110
 local cman_inei_ccpp_exact = r(N)
 
 count if cman_inei_ccpp_exact_merge == 1
-assert r(N) == 1323
 local cman_inei_ccpp_unresolved = r(N)
+assert ///
+    `cman_inei_ccpp_exact' + ///
+    `cman_inei_ccpp_unresolved' == 4433
 
 generate str48 cman_inei_match_method = ///
     cond(cman_inei_ccpp_exact_merge == 3, ///
@@ -1041,12 +1810,93 @@ generate str48 cman_inei_match_method = ///
          "unresolved_review_required")
 
 /*
-District candidates for the 32 distinct unresolved CMAN district name paths.
-Candidate generation is blocked on department and scores province plus district.
+Apply the same conservative exact-name rule to the historical CCPP pool.
+Candidates are retained for audit, but a code is assigned only when every
+source occurrence for the exact district-name pair identifies one code.
 */
 
 preserve
-keep if cman_inei_district_exact_merge == 1
+keep if ///
+    missing(ubigeo_ccpp) & ///
+    !missing(ubigeo_dist)
+keep ///
+    record_number ///
+    ubigeo_dist ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    community_raw ///
+    community_norm
+
+joinby ubigeo_dist community_norm using ///
+    "`hist_ccpp_name_code_pool'", unmatched(master)
+
+drop if missing(ubigeo_ccpp)
+bysort record_number ubigeo_ccpp: keep if _n == 1
+bysort record_number: generate int candidate_code_n = _N
+
+sort record_number ubigeo_ccpp
+save ///
+    "${qa_data_root}/cman_multisource_ccpp_exact_candidates.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/cman_multisource_ccpp_exact_candidates.csv", ///
+    replace
+
+keep if candidate_code_n == 1
+rename ubigeo_ccpp historical_ubigeo_ccpp
+rename source_name_raw historical_ccpp_name
+rename source_id historical_ccpp_source_id
+rename candidate_code_vintage historical_ccpp_vintage
+keep ///
+    record_number ///
+    historical_ubigeo_ccpp ///
+    historical_ccpp_name ///
+    historical_ccpp_source_id ///
+    historical_ccpp_vintage
+isid record_number
+save "`cman_hist_ccpp'", replace
+local cman_historical_ccpp_exact = _N
+restore
+
+merge 1:1 record_number using "`cman_hist_ccpp'", ///
+    keep(master match) ///
+    gen(cman_historical_ccpp_merge)
+
+generate byte cman_historical_ccpp_exact = ///
+    cman_historical_ccpp_merge == 3
+
+replace ubigeo_ccpp = historical_ubigeo_ccpp if ///
+    cman_historical_ccpp_exact
+replace ccpp_name_inei = historical_ccpp_name if ///
+    cman_historical_ccpp_exact & ///
+    missing(ccpp_name_inei)
+replace cman_inei_match_method = ///
+    "exact_multisource_historical_name" if ///
+    cman_historical_ccpp_exact
+
+generate byte cman_independent_exact_ubigeo = ///
+    cman_inei_ccpp_exact_merge == 3 | ///
+    cman_historical_ccpp_exact
+
+drop ///
+    historical_ubigeo_ccpp ///
+    historical_ccpp_name ///
+    historical_ccpp_source_id ///
+    historical_ccpp_vintage ///
+    cman_historical_ccpp_merge
+
+count if missing(ubigeo_ccpp)
+local cman_ccpp_still_unresolved = r(N)
+
+/*
+District candidates for the distinct CMAN paths that remain unresolved after
+the current and historical exact-name passes. Candidate generation is blocked
+on department and scores province plus district.
+*/
+
+preserve
+keep if missing(ubigeo_dist)
 keep region_norm province_norm district_norm
 bysort region_norm province_norm district_norm: keep if _n == 1
 generate long cman_district_review_id = _n
@@ -1114,8 +1964,8 @@ community name did not have a unique exact INEI match.
 
 preserve
 keep if ///
-    cman_inei_district_exact_merge == 3 & ///
-    cman_inei_ccpp_exact_merge == 1
+    missing(ubigeo_ccpp) & ///
+    !missing(ubigeo_dist)
 keep ///
     record_number ///
     ubigeo_dist ///
@@ -1205,8 +2055,60 @@ merge m:1 ubigeo_ccpp using ///
     keep(master match) ///
     gen(cman_victim_ubigeo_merge)
 
+/*
+Historical directories occasionally reuse a name that is attached to a
+different RUV record's verified code. Preserve those contradictions in QA and
+quarantine the historical CMAN code; do not let it override the direct,
+unique full-name CMAN-to-RUV link.
+*/
+
+generate byte cman_historical_ubigeo_conflict = ///
+    cman_historical_ccpp_exact & ///
+    !missing(ruv_id, ubigeo_ruv_id) & ///
+    ruv_id != ubigeo_ruv_id
+
+count if cman_historical_ubigeo_conflict
+local cman_hist_code_conflicts = r(N)
+
+preserve
+keep if cman_historical_ubigeo_conflict
+keep ///
+    record_number ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    community_raw ///
+    ubigeo_ccpp ///
+    cman_inei_match_method ///
+    ruv_id ///
+    ubigeo_ruv_id
+sort record_number
+save ///
+    "${qa_data_root}/cman_historical_ubigeo_conflicts.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/cman_historical_ubigeo_conflicts.csv", ///
+    replace
+restore
+
 assert ruv_id == ubigeo_ruv_id if ///
-    !missing(ruv_id, ubigeo_ruv_id)
+    !missing(ruv_id, ubigeo_ruv_id) & ///
+    !cman_historical_ubigeo_conflict
+
+replace ubigeo_ccpp = "" if ///
+    cman_historical_ubigeo_conflict
+replace ccpp_name_inei = "" if ///
+    cman_historical_ubigeo_conflict
+replace cman_inei_match_method = ///
+    "quarantined_historical_code_conflict" if ///
+    cman_historical_ubigeo_conflict
+replace cman_historical_ccpp_exact = 0 if ///
+    cman_historical_ubigeo_conflict
+replace cman_independent_exact_ubigeo = 0 if ///
+    cman_historical_ubigeo_conflict
+
+count if cman_historical_ccpp_exact
+local cman_historical_ccpp_exact = r(N)
 
 generate byte cman_victim_linked_by_ubigeo = ///
     missing(ruv_id) & !missing(ubigeo_ruv_id)
@@ -1297,6 +2199,59 @@ assert r(N) == 0
 drop cman_ruv_id_merge
 
 /*
+The direct RUV-ID merge can reveal a second conflict class: a historical CMAN
+code differs from the verified code of the same exact-name RUV record. Keep a
+separate ledger, quarantine the historical code, and let the verified RUV code
+be inherited below.
+*/
+
+generate byte cman_hist_ruv_conflict = ///
+    cman_historical_ccpp_exact & ///
+    !missing(ruv_id) & ///
+    victim_inei_linked & ///
+    ubigeo_ccpp != victim_ubigeo_ccpp
+
+count if cman_hist_ruv_conflict
+local cman_hist_code_conflicts = ///
+    `cman_hist_code_conflicts' + r(N)
+
+preserve
+keep if cman_hist_ruv_conflict
+keep ///
+    record_number ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    community_raw ///
+    ubigeo_ccpp ///
+    cman_inei_match_method ///
+    ruv_id ///
+    victim_ubigeo_ccpp
+sort record_number
+save ///
+    "${qa_data_root}/cman_historical_ruv_code_conflicts.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/cman_historical_ruv_code_conflicts.csv", ///
+    replace
+restore
+
+replace ubigeo_ccpp = "" if ///
+    cman_hist_ruv_conflict
+replace ccpp_name_inei = "" if ///
+    cman_hist_ruv_conflict
+replace cman_inei_match_method = ///
+    "quarantined_historical_code_conflict" if ///
+    cman_hist_ruv_conflict
+replace cman_historical_ccpp_exact = 0 if ///
+    cman_hist_ruv_conflict
+replace cman_independent_exact_ubigeo = 0 if ///
+    cman_hist_ruv_conflict
+
+count if cman_historical_ccpp_exact
+local cman_historical_ccpp_exact = r(N)
+
+/*
 When CMAN and RUV are linked but CMAN lacked an independent exact-name code,
 inherit the RUV code when one was verified. A CMAN project linked to an RUV
 community remains admissible even when neither source has a verified CCPP code.
@@ -1338,7 +2293,7 @@ local cman_ubigeo_unresolved = r(N)
 
 count if ///
     !missing(ruv_id) & ///
-    cman_inei_ccpp_exact_merge == 3 & ///
+    cman_independent_exact_ubigeo & ///
     victim_inei_linked & ///
     ubigeo_ccpp != victim_ubigeo_ccpp
 assert r(N) == 0
@@ -1751,6 +2706,24 @@ post `qa_post' ///
     ("Unique exact name within RUV district")
 
 post `qa_post' ///
+    ("historical_ccpp_source_rows") ///
+    (`historical_source_rows') ///
+    ("validated") ///
+    ("Rows pooled from six dated or alternative CCPP source families")
+
+post `qa_post' ///
+    ("victimization_historical_exact") ///
+    (`victim_hist_exact_n') ///
+    ("validated") ///
+    ("RUV codes recovered by exact unique unused historical name")
+
+post `qa_post' ///
+    ("victimization_historical_candidates") ///
+    (`victim_hist_candidate_n') ///
+    ("reviewed") ///
+    ("RUV rows with at least one exact historical name-code candidate")
+
+post `qa_post' ///
     ("victimization_inei_unresolved") ///
     (`victimization_inei_unresolved') ///
     ("retained_unresolved") ///
@@ -1808,19 +2781,43 @@ post `qa_post' ///
     ("cman_inei_district_unresolved") ///
     (`cman_inei_district_unresolved') ///
     ("review_required") ///
-    ("District candidate ledger written")
+    ("Unresolved after current 2017 directory; historical pass follows")
+
+post `qa_post' ///
+    ("cman_historical_district_exact") ///
+    (`cman_historical_district_exact') ///
+    ("validated") ///
+    ("District codes recovered by exact unique multisource name")
+
+post `qa_post' ///
+    ("cman_district_still_unresolved") ///
+    (`cman_district_still_unresolved') ///
+    ("review_required") ///
+    ("Unresolved after current and historical exact district passes")
 
 post `qa_post' ///
     ("cman_inei_ccpp_exact") ///
     (`cman_inei_ccpp_exact') ///
     ("partial") ///
-    ("Unique exact CCPP name within exact INEI district")
+    ("Unique exact CCPP name within a resolved current district")
 
 post `qa_post' ///
     ("cman_inei_ccpp_unresolved") ///
     (`cman_inei_ccpp_unresolved') ///
     ("review_required") ///
-    ("CCPP candidate ledger written where district is exact")
+    ("Unresolved after current CCPP exact-name pass")
+
+post `qa_post' ///
+    ("cman_historical_ccpp_exact") ///
+    (`cman_historical_ccpp_exact') ///
+    ("validated") ///
+    ("Historical exact CCPP codes retained after conflict quarantine")
+
+post `qa_post' ///
+    ("cman_historical_code_conflicts") ///
+    (`cman_hist_code_conflicts') ///
+    ("quarantined") ///
+    ("Historical CMAN codes contradicting a direct or verified RUV link")
 
 post `qa_post' ///
     ("cman_victimization_exact") ///
@@ -1931,8 +2928,12 @@ restore
 
 display as result "Foundational data-preparation staging completed."
 display as text   "INEI CCPP rows:                  `inei_ccpp_rows'"
+display as text   "Historical source rows pooled:  `historical_source_rows'"
 display as text   "RUV victimization rows:          `victimization_rows'"
+display as text   "Historical exact RUV recoveries: `victim_hist_exact_n'"
 display as text   "CMAN project rows:               `cman_project_rows'"
+display as text   "Historical exact CMAN codes:     `cman_historical_ccpp_exact'"
+display as text   "Historical codes quarantined:    `cman_hist_code_conflicts'"
 display as text   "Exact CMAN-to-RUV links:         `cman_victim_exact'"
 display as text   "Exact UBIGEO CMAN-to-RUV links:  `cman_victim_exact_ubigeo'"
 display as text   "Adjudicated CMAN-to-RUV links:   `cman_adjud_retained'"

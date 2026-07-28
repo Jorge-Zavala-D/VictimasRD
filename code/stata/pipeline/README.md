@@ -22,6 +22,9 @@ must extend that program instead of creating additional canonical preparation
 do-files. Its foundational source contract, current linkage results, complete-
 coverage release gate, and final-variable contract are documented in
 [`docs/FOUNDATIONAL_DATA_PREPARATION.md`](../../../docs/FOUNDATIONAL_DATA_PREPARATION.md).
+The dated multi-source UBIGEO recovery, rejected candidates, quarantined
+conflicts, and final RUV--CMAN accounting are documented in
+[`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](../../../docs/CCPP_UBIGEO_RECOVERY_LOG.tex).
 
 Modules will be added sequentially. They must:
 

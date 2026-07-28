@@ -1,0 +1,19 @@
+ruv_id,ruv_name,candidate_ubigeo,candidate_name,decision,reason,evidence_source,review_date
+S08000105,COLLPA,0807060004,COLLPA,unresolved,multiple exact historical codes for the same normalized name,IGN 2025 candidate pool,2026-07-28
+S08000105,COLLPA,0807060040,COLLPA,unresolved,multiple exact historical codes for the same normalized name,IGN 2025 candidate pool,2026-07-28
+S19000268,ALTO UNION,1903060223,ALTO UNION,unresolved,multiple exact historical codes for the same normalized name,ReporteCCPP 2016,2026-07-28
+S19000268,ALTO UNION,1903060247,ALTO UNION,unresolved,multiple exact historical codes for the same normalized name,ReporteCCPP 2016,2026-07-28
+S05000170,ORCCOHUASI (TINCOY),0504010036,ORCCOHUASI (TINCOY),unresolved,candidate code is already assigned to another retained RUV record,FAC 2016,2026-07-28
+S05000202,CULLUCHACA,0504010040,CULLUCHACA,unresolved,candidate code is already assigned to another retained RUV record,IGN 2025,2026-07-28
+S12000111,SAN PASCUAL,1206010036,SAN PASCUAL,unresolved,candidate code is already assigned to another retained RUV record,IGN 2025,2026-07-28
+S12000505,SANTA ROSA DE TOLDOPAMPA,1206050036,SANTA ROSA DE TOLDOPAMPA,unresolved,candidate code is already assigned to another retained RUV record,Census 2007,2026-07-28
+S19000041,LORENCILLO I,1903060040,LORENCILLO I,unresolved,candidate code is already assigned to another retained RUV record,PBI 1993-2018,2026-07-28
+S19000209,SAN ANTONIO DE SUNEC,1901100007,SAN ANTONIO DE SUNEC,unresolved,candidate code is already assigned to another retained RUV record,FAC 2016,2026-07-28
+S21000148,CARLOS GUTIERREZ,2102090003,CARLOS GUTIERREZ,unresolved,candidate code is already assigned to another retained RUV record,IGN 2025,2026-07-28
+S19000041,LORENCILLO I,1903060148,LORENCILLO II,rejected,ordinal suffix changes the community identity,PBI 1993-2018 fuzzy candidate,2026-07-28
+S15000050,SAN MIGUEL DE HUACA PUNA,1509050004,SAN MIGUEL DE HUASA,rejected,name difference is substantively larger than a defensible typographic correction,FAC 2016 fuzzy candidate,2026-07-28
+S12000442,SANTA ROSA DE YANAC,1205040002,SANTA ROSA DE LLAUPI,rejected,distinct locality stem despite a moderate score,Census 2007 fuzzy candidate,2026-07-28
+S05000094,PAMPAMARCA,0501020018,PAMPAMARCA ALTA,rejected,directional qualifier may identify a distinct locality,Census 2007 fuzzy candidate,2026-07-28
+S12000717,PUEBLO NUEVO,1206060135,PUERTO NUEVO,rejected,different lexical identity despite character similarity,Census 2007 fuzzy candidate,2026-07-28
+S21000162,AYMAÑA CHIMBOYA,2103050002,MINA CHIMBOYA,rejected,different locality stem despite shared token,Census 2007 fuzzy candidate,2026-07-28
+S05000150,SAN JOSE DE MAYOBAMBA II,0501140070,SAN JOSE DE MAYOBAMBA I,rejected,ordinal suffix identifies a potentially distinct locality and score margin is small,Census 2007 fuzzy candidate,2026-07-28

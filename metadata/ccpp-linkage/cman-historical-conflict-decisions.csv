@@ -1,0 +1,10 @@
+cman_record_number,community_name,historical_candidate_ubigeo,direct_ruv_id,conflicting_ruv_id_or_code,conflict_class,decision,review_date
+955,CULLUCHACA,0504010040,S05000202,S05001302,historical code belongs to another RUV ID,quarantine historical CMAN code,2026-07-28
+3271,SANTA ROSA DE TOLDOPAMPA,1206050036,S12000505,S12000498,historical code belongs to another RUV ID,quarantine historical CMAN code,2026-07-28
+3737,SAN ANTONIO DE SUNEC,1901100007,S19000209,S19000359,historical code belongs to another RUV ID,quarantine historical CMAN code,2026-07-28
+3819,CARLOS GUTIERREZ,2102090003,S21000148,S21000083,historical code belongs to another RUV ID,quarantine historical CMAN code,2026-07-28
+4283,PUSHURUMBO,2210010045,S22000394,S22000497,historical code belongs to another RUV ID,quarantine historical CMAN code,2026-07-28
+44,CONCACHA I,0301040017,S03000124,0301040029,historical code differs from verified code of direct RUV ID,quarantine historical CMAN code and inherit RUV code,2026-07-28
+2841,YURAGMARCA,1008010045,S10000329,1008010097,historical code differs from verified code of direct RUV ID,quarantine historical CMAN code and inherit RUV code,2026-07-28
+3729,SAN PEDRO DE RACCO,1901090279,S19000201,1901090127,historical code differs from verified code of direct RUV ID,quarantine historical CMAN code and inherit RUV code,2026-07-28
+3837,CASO,2102120021,S21000035,2102120055,historical code differs from verified code of direct RUV ID,quarantine historical CMAN code and inherit RUV code,2026-07-28
