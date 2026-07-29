@@ -586,14 +586,14 @@ display as text   "Default graph scheme: ${graph_scheme}"
 *-----------------------------------*
 
 /*
-The implemented foundational data-preparation module is enabled for push-button
-reproduction. Analysis modules remain disabled until their code and unresolved
-research decisions have been reviewed.
+The implemented data-preparation and full-universe descriptive modules are
+enabled for push-button reproduction. RD-design and outcome modules remain
+disabled until the unresolved research decisions have been reviewed.
 */
 
 local run_all                         0
 local run_01_data_preparation         1
-local run_02_describe_data            0
+local run_02_describe_data            1
 local run_03_validate_rd_design       0
 local run_04_estimate_main_effects    0
 local run_05_run_robustness           0

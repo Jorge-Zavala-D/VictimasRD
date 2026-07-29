@@ -282,6 +282,24 @@ are post-treatment for some project years and must not be relabeled as
 pre-treatment covariates. Full details are in
 `docs/GEOSPATIAL_2017_PREPARATION.md`.
 
+## Recorded descriptive-analysis boundary
+
+On July 28, 2026, the canonical full-universe descriptive module was separated
+from RD-design validation and outcome analysis. It uses all 5,712 RUV
+communities for national counts and distributions, while linkage-dependent
+exhibits report their exact nonmissing sample. It may describe treatment
+coverage across source categories, score bins, years, and departments, but it
+must not select an RD geography, optimize a first stage, run cutoff validity
+tests, or estimate treatment effects.
+
+The later RD-design module must distinguish theory-grounded geographic
+heterogeneity from significance-based sample selection. Any exhaustive
+exploration must report the complete predeclared candidate set and cannot make
+the preferred sample a mechanical function of the largest discontinuity or
+smallest p-value. The final geography remains an unresolved research-team
+decision. The descriptive output contract and legacy-code boundary are
+documented in `docs/DESCRIPTIVE_ANALYSIS.md`.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must

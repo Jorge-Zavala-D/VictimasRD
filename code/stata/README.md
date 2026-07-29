@@ -42,11 +42,13 @@ The master:
 - calls the ordered modules documented in
   [`pipeline/README.md`](pipeline/README.md).
 
-The implemented `pipeline/01_data_preparation.do` module is enabled for
-push-button reproduction. It is the single authoritative preparation program
-and currently implements the foundational INEI, RUV, and CMAN workflow. Later
-source families will be added as sections of that same file. Analysis switches
-remain disabled while substantive design decisions are open.
+The implemented `pipeline/01_data_preparation.do` and
+`pipeline/02_describe_data.do` modules are enabled for push-button
+reproduction. The first is the single authoritative preparation program; the
+second produces full-RUV descriptive tables and figures without defining or
+testing an RD sample. RD validation, outcome estimation, robustness, and
+mechanism switches remain disabled while substantive design decisions are
+open.
 
 The CMAN PDF table and ReporteCCPP HTML tables are one-time source-ingestion
 products shared through Dropbox Working. Their CSVs and extraction manifests

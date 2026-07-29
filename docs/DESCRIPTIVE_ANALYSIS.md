@@ -1,0 +1,99 @@
+# Full-universe descriptive analysis
+
+## Purpose
+
+`code/stata/pipeline/02_describe_data.do` is the canonical descriptive module
+for the Victimas RD project. It reads the final prepared community registry
+from Dropbox Coded and describes the complete 5,712-row RUV universe.
+
+The module is intentionally separate from RD-design validation and outcome
+estimation. It does not:
+
+- choose or encode a geographic RD sample;
+- search for a sample that maximizes a first-stage coefficient or minimizes a
+  p-value;
+- infer cutoff side from the rounded numerical score;
+- run `rdrobust`, `rdplot`, density, balance, local-randomization, or placebo
+  tests; or
+- estimate treatment effects or mechanism models.
+
+Those tasks belong in later modules after the research team resolves the
+geographic sample, treatment timing, rounded-score ties, clustering, and
+estimand.
+
+## Input and sample
+
+The sole analytical input is:
+
+`2 data/3 Coded/1 Current analysis datasets/06_community_registry_geospatial.dta`
+
+The module validates the 5,712-row RUV master, the unique `ruv_id`, the
+official centered running variables, and cumulative treatment coding through
+2023. Downstream linkage gaps never remove an RUV row from national counts.
+Exhibits that require the 2007 Census or 2017 spatial source report their
+nonmissing sample explicitly.
+
+## Outputs
+
+The module writes fifteen figures to `output/figures/descriptive`:
+
+1. complete and threshold-detail victimization-index distributions;
+2. prevalence of positive RUV victimization components;
+3. annual and cumulative collective-reparation rollout;
+4. cumulative treatment coverage by RUV category;
+5. a raw equal-frequency-bin treatment profile over the score;
+6. department composition and treatment coverage;
+7. foundational-source linkage coverage;
+8. baseline wellbeing-domain means;
+9. baseline wellbeing distributions by RUV category;
+10. altitude and geodesic-distance context;
+11. a 2017 CCPP point-location display;
+12. victimized-community counts by department;
+13. treated-community counts by department;
+14. treatment coverage by department; and
+15. department mean and median victimization-index maps.
+
+It writes five academic TeX tables to `output/tables/descriptive`:
+
+1. foundational-registry coverage;
+2. summary statistics;
+3. category profiles;
+4. annual treatment rollout; and
+5. department profiles.
+
+Every output is regenerated from versioned code and recorded in
+`metadata/output-manifest.csv` with its logical input, input data signature,
+Stata version, generation date, checksum, size, disclosure status, and current
+manuscript destination.
+
+The coordinate point display is not a boundary map and is marked
+`point_map_review_required`. The four department map products use
+checksum-locked geometry from the preserved 2018 legacy map files. Their
+original acquisition provenance is unresolved, so they are marked
+`boundary_source_review_required` and cannot be publication outputs until an
+official versioned boundary source verifies or replaces that geometry.
+
+No descriptive output is synchronized to Overleaf until it has been reviewed,
+assigned a manuscript destination, and processed under
+`docs/OVERLEAF_WORKFLOW.md`.
+
+## Legacy boundary
+
+The legacy Descriptives program mixed national summaries with a preselected RD
+geography, adjacent-category t-tests, RD outcome models, and migration
+regressions. The canonical split is:
+
+- `02_describe_data.do`: unconditional full-universe descriptions;
+- `03_validate_rd_design.do`: first stages, score density, mass points,
+  predetermined-covariate continuity, local-randomization diagnostics, and
+  transparent geographic heterogeneity;
+- `04_estimate_main_effects.do`: approved primary estimands at each outcome
+  level;
+- `05_run_robustness.do`: placebo cutoffs and outcomes, donut-hole,
+  bandwidth, specification, clustering, and multiplicity checks; and
+- `06_analyze_migration_mechanisms.do`: migration and explicitly exploratory
+  mechanism work.
+
+Any future geographic exploration must report a predeclared, theory-grounded
+candidate set and all resulting first stages. It must not choose the final
+analysis sample solely from statistical significance or first-stage strength.

@@ -26,6 +26,13 @@ The dated multi-source UBIGEO recovery, rejected candidates, quarantined
 conflicts, and final RUV--CMAN accounting are documented in
 [`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](../../../docs/CCPP_UBIGEO_RECOVERY_LOG.tex).
 
+`02_describe_data.do` is the canonical full-universe descriptive module. It
+reads the final prepared community registry, preserves all 5,712 RUV rows in
+the descriptive denominator, and generates aggregate tables and figures under
+`output/`. It never defines an RD geography, estimates a discontinuity, tests
+adjacent categories, or analyzes outcomes. The point-location exhibit is
+explicitly marked for disclosure review before public release.
+
 Modules will be added sequentially. They must:
 
 - read machine-specific roots from the master-loaded local path configuration;
