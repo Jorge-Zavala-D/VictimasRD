@@ -7,7 +7,7 @@
 |                   dependencies, and optionally run the ordered pipeline.      |
 |                                                                               |
 | Date created:     27 July 2026                                                |
-| Last updated:     28 July 2026                                                |
+| Last updated:     29 July 2026                                                |
 | Stata version:    19                                                          |
 *-------------------------------------------------------------------------------*/
 
@@ -426,7 +426,6 @@ Each adjacent pair is:
 */
 
 local ssc_package_command_pairs ///
-    rdrobust    rdrobust ///
     rddensity   rddensity ///
     lpdensity   lpdensity ///
     rdpower     rdpower ///
@@ -490,6 +489,7 @@ their authors' repositories rather than SSC.
 */
 
 local net_specs ///
+    rdrobust rdrobust     https://raw.githubusercontent.com/rdpackages/rdrobust/main/stata ///
     rdmulti   rdmc        https://raw.githubusercontent.com/rdpackages/rdmulti/main/stata ///
     rdlocrand rdwinselect https://raw.githubusercontent.com/rdpackages/rdlocrand/main/stata ///
     binsreg   binsreg     https://raw.githubusercontent.com/nppackages/binsreg/main/stata
@@ -577,6 +577,40 @@ if `"`missing_commands'"' != "" {
     exit 499
 }
 
+/*
+Confirm that the project-local rdrobust ado and Mata files are mutually
+compatible in a cold session. A command-level check alone cannot detect a
+partially updated package.
+*/
+
+clear
+set obs 400
+generate double smoke_x = (_n - 200.5) / 200
+generate int smoke_cluster = ceil(_n / 2)
+generate double smoke_y = ///
+    0.4 * (smoke_x >= 0) + ///
+    0.2 * smoke_x + ///
+    mod(_n, 7) / 50
+
+capture quietly rdrobust ///
+    smoke_y ///
+    smoke_x, ///
+    p(1) q(2) ///
+    h(0.4) b(0.6) ///
+    kernel(triangular) ///
+    vce(cluster smoke_cluster) ///
+    masspoints(off)
+local rdrobust_smoke_rc = _rc
+clear
+
+if `rdrobust_smoke_rc' {
+    display as error "Project-local rdrobust failed its cold-session smoke test."
+    display as error "Reinstall from the official rdpackages source and rerun."
+    display as error "Stata return code: `rdrobust_smoke_rc'"
+    log close victimasrd_master
+    exit `rdrobust_smoke_rc'
+}
+
 display as result "Project paths and user-written dependencies verified."
 display as text   "Default graph scheme: ${graph_scheme}"
 
@@ -587,7 +621,9 @@ display as text   "Default graph scheme: ${graph_scheme}"
 
 /*
 The implemented data-preparation and full-universe descriptive modules are
-enabled for push-button reproduction. RD-design and outcome modules remain
+enabled for push-button reproduction. The RD-design audit is implemented but
+remains disabled by default because it is computationally intensive and does
+not resolve the pending research-team sample decision. Outcome modules remain
 disabled until the unresolved research decisions have been reviewed.
 */
 

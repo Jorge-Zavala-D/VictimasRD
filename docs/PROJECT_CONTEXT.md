@@ -322,6 +322,51 @@ smallest p-value. The final geography remains an unresolved research-team
 decision. The descriptive output contract and legacy-code boundary are
 documented in `docs/DESCRIPTIVE_ANALYSIS.md`.
 
+## Provisional RD design-audit protocol
+
+On July 29, 2026, the project added a diagnostic RD first-stage module covering
+all four official cutoffs, the principal sample-review horizons `treat_12` and
+`treat_16`, and the `treat_23` rollout-catch-up diagnostic. It also reports the
+complete `treat_07`--`treat_23` trajectory. `treat_23` is retained as a
+diagnostic and for interpreting the planned Census 2025 migration extension,
+not as a requirement for choosing geography. The exact timing of the SISFOH
+2013, Census 2017, and Census 2025 sources remains to be confirmed.
+
+The module does not optimize or select a geographic sample. It reports the
+national baseline; the exact legacy restriction and its two-department core;
+additional VRAEM and CVR candidates; and a broad atlas of department samples,
+leave-one-department-out samples, department pairs, and normalized
+department-province cells. It additionally reports every nonempty subset of
+the independently defined seven-department conflict/VRAEM belt (127 subsets)
+and every nonempty subset of INEI's ten-province VRAEM study envelope (1,023
+subsets). These bounded power sets include groups of three, four, five, and
+larger cells. Atlas results remain ineligible for automatic sample selection.
+The unrestricted national department and province power sets are not searched
+because that would make the sample a function of the observed first stage and
+invalidate conventional inference.
+
+The expanded audit finds no candidate with a strong 2023 first stage. It
+conditionally recommends retaining the exact legacy geography as one common
+sample, using B--C priority assignment as the primary ITT estimand, and using
+an early-receipt definition fixed before the first outcome wave as a secondary
+fuzzy-RD exposure. The smaller Apurímac--Huancavelica core has a stronger
+early first stage but less local support and a significant baseline altitude
+discontinuity. Adding San Martín produces a larger and statistically stronger
+post-search frontier but an even larger altitude discontinuity; it remains a
+diagnostic rather than an eligible sample. The exact legacy rule retains 1,162
+RUV communities and nearly the same effective early/mid support as that
+three-department frontier. This remains a recommendation for explicit
+research-team approval; no `sample_main_rd` flag has been created. Details are
+in `docs/RD_DESIGN_RECOMMENDATION.md`.
+
+The four-decimal RUV score creates numerical-side conflicts at the six-decimal
+official thresholds, especially D--E. The named-candidate grid therefore
+reports the score as recorded, exclusion of category-sign conflicts, and
+exclusion of the half-rounding-unit band. No rule is designated primary until
+the research team reviews the resulting sensitivity. The protocol, decision
+gate, specification grid, and output contract are documented in
+`docs/RD_DESIGN_AUDIT_PROTOCOL.md`.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must

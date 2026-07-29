@@ -1,0 +1,15 @@
+grid_id,scope,tie_rule,polynomial_order,bias_order,bandwidth_selector,kernel,vce,role
+named_p1_mserd_score,named_candidates,score_as_recorded,1,2,mserd,triangular,district_clustered,rounding sensitivity
+named_p1_cerrd_score,named_candidates,score_as_recorded,1,2,cerrd,triangular,district_clustered,bandwidth sensitivity
+named_p2_mserd_score,named_candidates,score_as_recorded,2,3,mserd,triangular,district_clustered,polynomial sensitivity
+named_p1_mserd_conflict,named_candidates,drop_sign_conflicts,1,2,mserd,triangular,district_clustered,rounding sensitivity
+named_p1_cerrd_conflict,named_candidates,drop_sign_conflicts,1,2,cerrd,triangular,district_clustered,bandwidth sensitivity
+named_p2_mserd_conflict,named_candidates,drop_sign_conflicts,2,3,mserd,triangular,district_clustered,polynomial sensitivity
+named_p1_mserd_band,named_candidates,drop_rounding_band,1,2,mserd,triangular,district_clustered,rounding sensitivity
+named_p1_cerrd_band,named_candidates,drop_rounding_band,1,2,cerrd,triangular,district_clustered,bandwidth sensitivity
+named_p2_mserd_band,named_candidates,drop_rounding_band,2,3,mserd,triangular,district_clustered,polynomial sensitivity
+dynamic_p1_mserd,dynamic_treatment_years,score_as_recorded,1,2,mserd,triangular,district_clustered,complete treatment trajectory
+atlas_p1_mserd,geographic_heterogeneity_atlas,drop_rounding_band,1,2,mserd,triangular,district_clustered,descriptive heterogeneity only
+department_subset_p1_mserd,bounded_department_subsets,drop_rounding_band,1,2,mserd,triangular,district_clustered,"all cutoffs and three horizons; diagnostic only"
+province_subset_bc_p1_mserd,bounded_province_subsets,drop_rounding_band,1,2,mserd,triangular,district_clustered,"B-C and three horizons; diagnostic only"
+covariate_continuity_p1_mserd,covariate_continuity,drop_rounding_band,1,2,mserd,triangular,district_clustered,"pre-treatment covariate falsification across named candidates and cutoffs"

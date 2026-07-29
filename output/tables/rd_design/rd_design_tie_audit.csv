@@ -1,0 +1,5 @@
+cutoff,candidate_n,analysis_n,sign_conflicts,rounding_band_n
+ab,5712,2553,0,10
+bc,5712,2579,1,6
+cd,5712,2437,4,3
+de,5712,1849,68,68

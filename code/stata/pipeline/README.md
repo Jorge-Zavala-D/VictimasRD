@@ -38,6 +38,25 @@ estimates a discontinuity, tests adjacent categories, or analyzes outcomes.
 The point-location exhibit is explicitly marked for disclosure review before
 public release.
 
+`03_validate_rd_design.do` is the first-stage and design-diagnostic module. It
+reports all four official cutoffs, the 2012 and 2016 sample-review treatment
+horizons, the 2023 rollout-catch-up diagnostic, the full annual treatment
+trajectory, rounded-score sensitivities,
+11 declared national, historical, VRAEM, and CVR geographies, and a bounded
+geographic heterogeneity atlas. The atlas includes every nonempty subset of
+the seven-department conflict/VRAEM belt and every nonempty subset of INEI's
+ten-province VRAEM study envelope, so groups of three, four, five, and larger
+cells are fully reported inside independently defined universes. The 2012 and
+2016 horizons guide sample review; 2023 remains a rollout-catch-up diagnostic.
+It also exports candidate scorecards and 384 pre-treatment
+covariate-continuity cells, including the post-search three-department
+statistical frontier. It never automatically selects a sample and does not
+write `sample_main_rd`. Its
+protocol and conditional team recommendation are documented in
+[`docs/RD_DESIGN_AUDIT_PROTOCOL.md`](../../../docs/RD_DESIGN_AUDIT_PROTOCOL.md)
+and
+[`docs/RD_DESIGN_RECOMMENDATION.md`](../../../docs/RD_DESIGN_RECOMMENDATION.md).
+
 Modules will be added sequentially. They must:
 
 - read machine-specific roots from the master-loaded local path configuration;
