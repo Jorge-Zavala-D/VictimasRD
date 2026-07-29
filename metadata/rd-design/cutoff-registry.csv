@@ -1,0 +1,5 @@
+boundary,category_above,category_below,threshold,source_id,decision_status,decision_date,assignment_rule
+A-B,A,B,0.153750,ruv_index_method,approved,2026-07-28,Use RUV source category for side assignment when rounded score is ambiguous
+B-C,B,C,0.062320,ruv_index_method,approved,2026-07-28,Use RUV source category for side assignment when rounded score is ambiguous
+C-D,C,D,0.026930,ruv_index_method,approved,2026-07-28,Use RUV source category for side assignment when rounded score is ambiguous
+D-E,D,E,0.015220,ruv_index_method,approved,2026-07-28,Use RUV source category for side assignment when rounded score is ambiguous

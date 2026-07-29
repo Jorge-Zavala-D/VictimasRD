@@ -1,0 +1,12 @@
+metric,value,status,note
+victimization_rows,5712,validated,RUV Libro Segundo victimization universe
+victimization_score_distinct_values,2072,validated,Distinct supplied values on the four-decimal score grid
+victimization_score_rounded_minimum,189,explained,Stored 0.0077 is the four-decimal representation of 0.007740
+victimization_score_above_one,7,source_review,Supplied score exceeds the government's nominal maximum of one
+victimization_level_rounding_disagreements,72,explained,Four-decimal score cannot recover six-decimal category assignment
+victimization_level_true_conflicts,1,source_review,Source category conflicts with score away from rounded boundaries
+victimization_formula_matches_uncapped,4857,diagnostic,Inferred uncapped four-pillar formula matches to four decimals
+victimization_formula_matches_capped,4925,diagnostic,Inferred four-pillar formula matches supplied score to four decimals
+victimization_score_equal_one,72,validated,Supplied scores exactly equal to one
+victimization_score_cap_consistent,71,diagnostic,Score equals one and inferred uncapped formula exceeds one
+victimization_inferred_common_scale,.01018123,diagnostic,Empirically inferred scale; not an official normalization constant

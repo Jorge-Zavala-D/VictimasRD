@@ -137,6 +137,35 @@ year. The canonical preparation code therefore creates cumulative indicators
 and every year thereafter. The working paper must explain the interpretation
 and caveats attached to this administrative year field.
 
+## Recorded victimization-index cutoff decision
+
+On July 28, 2026, the research team designated the government methodology note
+`2 data/0 Support documents/Indice_Nivel_Afectacion.pdf` as the authoritative
+source for the victimization-index category boundaries:
+
+| Boundary | Official threshold |
+|---|---:|
+| A--B | 0.153750 |
+| B--C | 0.062320 |
+| C--D | 0.026930 |
+| D--E | 0.015220 |
+
+The canonical preparation code retains the RUV score exactly as supplied and
+creates double-precision variables centered on these four thresholds. The RUV
+workbook stores the score to four decimal places, however, so the numerical
+score alone cannot always recover the six-decimal administrative assignment.
+For example, communities classified as both B and C have a stored score of
+0.0623. The RUV-supplied category is therefore authoritative for category and
+side-of-boundary assignment; the centered score is a running variable, not a
+replacement assignment indicator.
+
+A reconstruction audit supports the four-pillar geometric-mean structure in
+the government note, but the available workbook does not include the
+historical normalization maxima or the disaggregated family and communal
+asset inputs. The inferred reconstruction is used only for QA and never
+overwrites the supplied score or category. Full evidence and limitations are
+recorded in `docs/VICTIMIZATION_INDEX_FORMULA_AUDIT_2026-07-28.md`.
+
 ## Recorded foundational linkage and sample decisions
 
 On July 27, 2026, the research team directed the foundational pipeline to:
@@ -257,8 +286,11 @@ be resolved by the research team before an authoritative release:
 
 1. **Geographic sample:** the manuscript narrative includes Ayacucho areas,
    while the current executable rule appears to exclude Ayacucho.
-2. **Victimization cutoffs:** official methodology, current code, and the
-   January 2026 manuscript report different category boundaries.
+2. **Score integrity and tied assignment:** the official cutoffs are now
+   resolved, but the four-decimal score is coarser than the six-decimal
+   assignment rule. RD analysis must explicitly address tied mass points,
+   preserve the source category for side assignment, and report sensitivity
+   to observations at rounded threshold values.
 3. **Manuscript-to-analysis provenance:** the January 30, 2026 editable source
    and bibliography have been recovered, but the existing tables and figures
    have not yet been mapped to canonical scripts, inputs, software versions,
@@ -363,7 +395,9 @@ unless a registry explains them.
 
 ## Immediate repository priorities
 
-1. Obtain research-team decisions on the sample and cutoffs.
+1. Obtain the research-team decision on the geographic analysis sample and
+   predeclare how tied score values at the official cutoffs will enter RD
+   estimation.
 2. Map all active manuscript tables and figures to canonical Git outputs,
    producing scripts, logical inputs, and specifications.
 3. Identify canonical data snapshots without copying them into Git.

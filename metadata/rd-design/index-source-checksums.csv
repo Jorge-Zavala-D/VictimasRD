@@ -1,0 +1,3 @@
+file_id,logical_path,storage_class,bytes,sha256,audit_role
+ruv_index_method,2 data/0 Support documents/Indice_Nivel_Afectacion.pdf,immutable_support_document,105786,335f08c1d356d6aca24016381735ce6e0fa628498bb860e3babd8586c1ccf170,Authoritative formula description and category thresholds
+ruv_libro_segundo,2 data/1 Raw/12 CMAN/Community_index_inscritas.xlsx,immutable_raw,776913,011022445a4235595766523ddcaa1d05835bf7b345659a1b0875f5b8fe29f80c,Source inputs supplied score and supplied category

@@ -1079,6 +1079,30 @@ assert !missing( ///
 
 destring victimization_index_raw, generate(victimization_index)
 
+local cutoff_ab = .153750
+local cutoff_bc = .062320
+local cutoff_cd = .026930
+local cutoff_de = .015220
+
+generate double running_ab = victimization_index - `cutoff_ab'
+generate double running_bc = victimization_index - `cutoff_bc'
+generate double running_cd = victimization_index - `cutoff_cd'
+generate double running_de = victimization_index - `cutoff_de'
+
+assert abs(running_ab - (victimization_index - `cutoff_ab')) < 1e-12
+assert abs(running_bc - (victimization_index - `cutoff_bc')) < 1e-12
+assert abs(running_cd - (victimization_index - `cutoff_cd')) < 1e-12
+assert abs(running_de - (victimization_index - `cutoff_de')) < 1e-12
+assert abs(victimization_index - round(victimization_index, .0001)) < 1e-10
+
+preserve
+keep victimization_index
+duplicates drop
+count
+assert r(N) == 2072
+local victim_score_distinct_n = r(N)
+restore
+
 foreach numeric_pair in ///
     deaths_raw:deaths ///
     disappearances_raw:disappearances ///
@@ -1115,39 +1139,139 @@ victimasrd_normalize_name ccpp_victim_raw, generate(community_norm)
 isid region_norm province_norm district_norm community_norm
 
 /*
-The methodology note documents six-decimal ranges, while this workbook exposes
-rounded scores and source-supplied categories. Preserve the source category and
-record, but do not overwrite it with a category reconstructed from rounded
-scores.
+The official thresholds have six decimals, but the workbook stores scores to
+four. Preserve the RUV category as the authoritative assignment field. The
+score-based reconstruction below distinguishes rounding artifacts from genuine
+source conflicts and never overwrites a supplied value.
 */
 
-generate str1 victim_level_documented = ""
-replace victim_level_documented = "A" if ///
-    inrange(victimization_index, .153750, 1)
-replace victim_level_documented = "B" if ///
-    inrange(victimization_index, .062320, .153749)
-replace victim_level_documented = "C" if ///
-    inrange(victimization_index, .026930, .062319)
-replace victim_level_documented = "D" if ///
-    inrange(victimization_index, .015220, .026929)
-replace victim_level_documented = "E" if ///
-    inrange(victimization_index, .007740, .015219)
+generate str1 victim_level_from_score = "A" if ///
+    victimization_index >= `cutoff_ab' & victimization_index <= 1
+replace victim_level_from_score = "B" if ///
+    inrange(victimization_index, `cutoff_bc', `cutoff_ab')
+replace victim_level_from_score = "C" if ///
+    inrange(victimization_index, `cutoff_cd', `cutoff_bc')
+replace victim_level_from_score = "D" if ///
+    inrange(victimization_index, `cutoff_de', `cutoff_cd')
+replace victim_level_from_score = "E" if ///
+    victimization_index >= .007740 & ///
+    victimization_index < `cutoff_de'
 
-generate byte victim_score_outside_doc_range = ///
-    missing(victim_level_documented)
+generate byte victim_level_score_disagree = ///
+    victimization_level_source != victim_level_from_score & ///
+    !missing(victim_level_from_score)
 
-generate byte victim_level_range_disagree = ///
-    victimization_level_source != ///
-        victim_level_documented & ///
-    !missing(victim_level_documented)
+generate byte victim_score_at_rounded_boundary = ///
+    abs(victimization_index - `cutoff_ab') <= .00005 + 1e-10 | ///
+    abs(victimization_index - `cutoff_bc') <= .00005 + 1e-10 | ///
+    abs(victimization_index - `cutoff_cd') <= .00005 + 1e-10 | ///
+    abs(victimization_index - `cutoff_de') <= .00005 + 1e-10
 
-count if victim_score_outside_doc_range
-assert r(N) == 196
-local victim_outside_doc = r(N)
+generate byte victim_level_rounding_disagree = ///
+    victim_level_score_disagree & victim_score_at_rounded_boundary
+generate byte victim_level_true_conflict = ///
+    victim_level_score_disagree & !victim_score_at_rounded_boundary
+generate byte victim_score_rounded_minimum = ///
+    victimization_index < .007740 & ///
+    abs(victimization_index - .007740) <= .00005 + 1e-10
+generate byte victim_score_above_one = victimization_index > 1
 
-count if victim_level_range_disagree
-assert r(N) == 73
-local victim_level_disagree_n = r(N)
+count if victim_level_rounding_disagree
+assert r(N) == 72
+local victim_rounding_disagree_n = r(N)
+
+count if victim_level_true_conflict
+assert r(N) == 1
+local victim_true_conflict_n = r(N)
+
+count if victim_score_rounded_minimum
+assert r(N) == 189
+local victim_rounded_min_n = r(N)
+
+count if victim_score_above_one
+assert r(N) == 7
+local victim_above_one_n = r(N)
+
+/*
+Audit the four-pillar geometric-mean structure documented by the government.
+The scale is inferred from this workbook and is not an official normalizer.
+The reconstruction is a QA diagnostic only.
+*/
+
+generate double audit_victims = ///
+    deaths + disappearances + torture + widowed + orphaned
+generate double audit_institutional = ///
+    authorities_killed + authorities_disappeared + authorities_displaced
+generate double audit_geometric_mean = ///
+    (max(audit_victims, 1) * ///
+     max(audit_institutional, 1) * ///
+     max(family_assets_destroyed, 1) * ///
+     max(community_assets_destroyed, 1)) ^ .25
+generate double audit_score_uncapped = ///
+    .01018123 * audit_geometric_mean
+generate double audit_score_capped = min(1, audit_score_uncapped)
+generate byte audit_formula_uncapped_match = ///
+    abs(victimization_index - audit_score_uncapped) <= .00005 + 1e-10
+generate byte audit_formula_match = ///
+    abs(victimization_index - audit_score_capped) <= .00005 + 1e-10
+
+count if audit_formula_uncapped_match
+assert r(N) == 4857
+local victim_formula_uncapped_n = r(N)
+
+count if audit_formula_match
+assert r(N) == 4925
+local victim_formula_capped_n = r(N)
+
+count if victimization_index == 1
+assert r(N) == 72
+local victim_score_one_n = r(N)
+
+count if victimization_index == 1 & audit_score_uncapped > 1
+assert r(N) == 71
+local victim_cap_consistent_n = r(N)
+
+preserve
+keep if !audit_formula_match | ///
+    victim_level_true_conflict | victim_score_above_one
+keep ///
+    ruv_id ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    victimization_level_source ///
+    victimization_index ///
+    audit_victims ///
+    audit_institutional ///
+    family_assets_destroyed ///
+    community_assets_destroyed ///
+    audit_score_uncapped ///
+    audit_score_capped ///
+    audit_formula_match ///
+    victim_level_true_conflict ///
+    victim_score_above_one
+sort ruv_id
+save ///
+    "${qa_data_root}/victimization_index_formula_review.dta", ///
+    replace
+restore
+
+drop ///
+    victim_level_from_score ///
+    victim_level_score_disagree ///
+    victim_score_at_rounded_boundary ///
+    victim_level_rounding_disagree ///
+    victim_level_true_conflict ///
+    victim_score_rounded_minimum ///
+    victim_score_above_one ///
+    audit_victims ///
+    audit_institutional ///
+    audit_geometric_mean ///
+    audit_score_uncapped ///
+    audit_score_capped ///
+    audit_formula_uncapped_match ///
+    audit_formula_match
 
 merge m:1 ubigeo_dist community_norm using ///
     "`inei_ccpp_unique_exact'", ///
@@ -1464,6 +1588,14 @@ label variable victim_inei_code_vintage ///
     "Administrative vintage of linked CCPP UBIGEO"
 label variable victimization_index ///
     "Victimization index as observed in RUV workbook"
+label variable running_ab ///
+    "Victimization index centered at official A-B cutoff 0.153750"
+label variable running_bc ///
+    "Victimization index centered at official B-C cutoff 0.062320"
+label variable running_cd ///
+    "Victimization index centered at official C-D cutoff 0.026930"
+label variable running_de ///
+    "Victimization index centered at official D-E cutoff 0.015220"
 label variable victimization_level_source ///
     "Victimization category supplied by RUV"
 label variable victim_inei_match_method ///
@@ -2536,6 +2668,10 @@ keep ///
     ccpp_victim_raw ///
     victimization_level_source ///
     victimization_index ///
+    running_ab ///
+    running_bc ///
+    running_cd ///
+    running_de ///
     deaths ///
     disappearances ///
     torture ///
@@ -2588,6 +2724,10 @@ order ///
     ccpp_victim_raw ///
     victimization_level_source ///
     victimization_index ///
+    running_ab ///
+    running_bc ///
+    running_cd ///
+    running_de ///
     prc_project_observed ///
     prc_project_link_status ///
     cman_project_count ///
@@ -4839,16 +4979,64 @@ post `qa_post' ///
     ("All RUV source rows retained regardless of UBIGEO linkage status")
 
 post `qa_post' ///
-    ("victimization_score_outside_documented_range") ///
-    (`victim_outside_doc') ///
-    ("research_decision") ///
-    ("Observed score falls outside documented 0.007740 to 1.000000 range")
+    ("victimization_score_distinct_values") ///
+    (`victim_score_distinct_n') ///
+    ("validated") ///
+    ("Distinct supplied values on the four-decimal score grid")
 
 post `qa_post' ///
-    ("victimization_level_range_disagreements") ///
-    (`victim_level_disagree_n') ///
-    ("research_decision") ///
-    ("Source category differs from category reconstructed from rounded score")
+    ("victimization_score_rounded_minimum") ///
+    (`victim_rounded_min_n') ///
+    ("explained") ///
+    ("Stored 0.0077 is the four-decimal representation of 0.007740")
+
+post `qa_post' ///
+    ("victimization_score_above_one") ///
+    (`victim_above_one_n') ///
+    ("source_review") ///
+    ("Supplied score exceeds the government's nominal maximum of one")
+
+post `qa_post' ///
+    ("victimization_level_rounding_disagreements") ///
+    (`victim_rounding_disagree_n') ///
+    ("explained") ///
+    ("Four-decimal score cannot recover six-decimal category assignment")
+
+post `qa_post' ///
+    ("victimization_level_true_conflicts") ///
+    (`victim_true_conflict_n') ///
+    ("source_review") ///
+    ("Source category conflicts with score away from rounded boundaries")
+
+post `qa_post' ///
+    ("victimization_formula_matches_uncapped") ///
+    (`victim_formula_uncapped_n') ///
+    ("diagnostic") ///
+    ("Inferred uncapped four-pillar formula matches to four decimals")
+
+post `qa_post' ///
+    ("victimization_formula_matches_capped") ///
+    (`victim_formula_capped_n') ///
+    ("diagnostic") ///
+    ("Inferred four-pillar formula matches supplied score to four decimals")
+
+post `qa_post' ///
+    ("victimization_score_equal_one") ///
+    (`victim_score_one_n') ///
+    ("validated") ///
+    ("Supplied scores exactly equal to one")
+
+post `qa_post' ///
+    ("victimization_score_cap_consistent") ///
+    (`victim_cap_consistent_n') ///
+    ("diagnostic") ///
+    ("Score equals one and inferred uncapped formula exceeds one")
+
+post `qa_post' ///
+    ("victimization_inferred_common_scale") ///
+    (.01018123) ///
+    ("diagnostic") ///
+    ("Empirically inferred scale; not an official normalization constant")
 
 post `qa_post' ///
     ("cman_project_rows") ///
@@ -5226,6 +5414,27 @@ preserve
 keep if strpos(metric, "geospatial_") == 1
 export delimited ///
     "${metadata_root}/geospatial-2017/sample-flow.csv", ///
+    replace
+restore
+
+preserve
+keep if inlist( ///
+    metric, ///
+    "victimization_rows", ///
+    "victimization_score_distinct_values", ///
+    "victimization_score_rounded_minimum", ///
+    "victimization_score_above_one", ///
+    "victimization_level_rounding_disagreements") | ///
+    inlist( ///
+    metric, ///
+    "victimization_level_true_conflicts", ///
+    "victimization_formula_matches_uncapped", ///
+    "victimization_formula_matches_capped", ///
+    "victimization_score_equal_one", ///
+    "victimization_score_cap_consistent") | ///
+    metric == "victimization_inferred_common_scale"
+export delimited ///
+    "${metadata_root}/rd-design/index-formula-audit.csv", ///
     replace
 restore
 
