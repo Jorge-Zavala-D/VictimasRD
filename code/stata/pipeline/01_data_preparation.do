@@ -3148,6 +3148,10 @@ drop census2007_check
 
 assert daily_water_yes_n_2007 + ///
     daily_water_no_n_2007 == daily_water_total_n_2007
+assert daily_water_total_n_2007 == ///
+    water_inside_n_2007 + ///
+    water_outside_n_2007 + ///
+    water_pylon_n_2007
 
 egen double census2007_check = rowtotal( ///
     sanitation_inside_n_2007 ///
@@ -3357,6 +3361,9 @@ generate double share_water_river_2007 = ///
 generate double share_water_daily_2007 = ///
     daily_water_yes_n_2007 / daily_water_total_n_2007 if ///
     daily_water_total_n_2007 > 0
+generate double share_water_pubdaily_2007 = ///
+    daily_water_yes_n_2007 / water_total_n_2007 if ///
+    water_total_n_2007 > 0
 
 generate double share_sanitation_sewer_2007 = ///
     (sanitation_inside_n_2007 + ///
@@ -3370,6 +3377,12 @@ generate double share_sanitation_latrine_2007 = ///
     sanitation_total_n_2007 > 0
 generate double share_sanitation_none_2007 = ///
     sanitation_none_n_2007 / sanitation_total_n_2007 if ///
+    sanitation_total_n_2007 > 0
+generate double share_sanitation_facility_2007 = ///
+    (sanitation_inside_n_2007 + ///
+     sanitation_outside_n_2007 + ///
+     sanitation_septic_n_2007 + ///
+     sanitation_latrine_n_2007) / sanitation_total_n_2007 if ///
     sanitation_total_n_2007 > 0
 generate double share_electricity_2007 = ///
     electricity_yes_n_2007 / electricity_total_n_2007 if ///
@@ -3502,6 +3515,112 @@ generate double share_education_university_2007 = ///
     (education_university_inc_n_2007 + ///
      education_university_com_n_2007) / education_total_n_2007 if ///
     education_total_n_2007 > 0
+generate double share_educ_secondaryplus_2007 = ///
+    (education_secondary_n_2007 + ///
+     education_technical_inc_n_2007 + ///
+     education_technical_com_n_2007 + ///
+     education_university_inc_n_2007 + ///
+     education_university_com_n_2007) / education_total_n_2007 if ///
+    education_total_n_2007 > 0
+
+/*
+Summarize structural wellbeing without claiming an official poverty rate.
+The CCPP workbook contains separate marginal totals, so it cannot identify
+simultaneous household deprivations required by official NBI or MPI methods.
+Indicators receive equal weight within domains and the four core domains
+receive equal weight. Scores require every component; missing components never
+trigger implicit reweighting.
+*/
+
+generate double wellbeing_housing_2007 = ///
+    1 - share_floor_earth_2007 if ///
+    !missing(share_floor_earth_2007)
+generate double wellbeing_services_2007 = ///
+    (share_water_pubdaily_2007 + ///
+     share_sanitation_facility_2007) / 2 if ///
+    !missing(share_water_pubdaily_2007, ///
+             share_sanitation_facility_2007)
+generate double wellbeing_energy_2007 = ///
+    (share_electricity_2007 + ///
+     share_clean_cooking_2007) / 2 if ///
+    !missing(share_electricity_2007, ///
+             share_clean_cooking_2007)
+generate double wellbeing_human_capital_2007 = ///
+    (share_literate_2007 + ///
+     share_educ_secondaryplus_2007) / 2 if ///
+    !missing(share_literate_2007, ///
+             share_educ_secondaryplus_2007)
+
+generate double wellbeing_assets_2007 = ///
+    (share_asset_tv_2007 + ///
+     share_asset_washer_2007 + ///
+     share_asset_fridge_2007 + ///
+     share_asset_computer_2007) / 4 if ///
+    !missing(share_asset_tv_2007, ///
+             share_asset_washer_2007, ///
+             share_asset_fridge_2007, ///
+             share_asset_computer_2007)
+generate double wellbeing_connectivity_2007 = ///
+    (share_asset_mobile_2007 + ///
+     share_asset_internet_2007 + ///
+     share_asset_cable_2007) / 3 if ///
+    !missing(share_asset_mobile_2007, ///
+             share_asset_internet_2007, ///
+             share_asset_cable_2007)
+
+generate double wellbeing_core_2007 = ///
+    (wellbeing_housing_2007 + ///
+     wellbeing_services_2007 + ///
+     wellbeing_energy_2007 + ///
+     wellbeing_human_capital_2007) / 4 if ///
+    !missing(wellbeing_housing_2007, ///
+             wellbeing_services_2007, ///
+             wellbeing_energy_2007, ///
+             wellbeing_human_capital_2007)
+generate double deprivation_core_2007 = ///
+    1 - wellbeing_core_2007 if ///
+    !missing(wellbeing_core_2007)
+
+/*
+The marginal wall and floor distributions identify bounds, not the exact
+joint NBI housing rate. These bounds cover the wall-floor condition only and
+exclude the separately defined improvised-dwelling condition.
+*/
+
+generate double nbi_wallfloor_lb_2007 = ///
+    min(1, ///
+        share_wall_mat_2007 + ///
+        max(0, ///
+            share_floor_earth_2007 + ///
+            share_wall_quincha_2007 + ///
+            share_wall_stone_mud_2007 + ///
+            share_wall_wood_2007 + ///
+            share_wall_other_2007 - 1)) if ///
+    !missing(share_wall_mat_2007, ///
+             share_floor_earth_2007, ///
+             share_wall_quincha_2007, ///
+             share_wall_stone_mud_2007, ///
+             share_wall_wood_2007, ///
+             share_wall_other_2007)
+generate double nbi_wallfloor_ub_2007 = ///
+    min(1, ///
+        share_wall_mat_2007 + ///
+        min(share_floor_earth_2007, ///
+            share_wall_quincha_2007 + ///
+            share_wall_stone_mud_2007 + ///
+            share_wall_wood_2007 + ///
+            share_wall_other_2007)) if ///
+    !missing(share_wall_mat_2007, ///
+             share_floor_earth_2007, ///
+             share_wall_quincha_2007, ///
+             share_wall_stone_mud_2007, ///
+             share_wall_wood_2007, ///
+             share_wall_other_2007)
+
+replace nbi_wallfloor_lb_2007 = ///
+    nbi_wallfloor_ub_2007 if ///
+    nbi_wallfloor_lb_2007 > nbi_wallfloor_ub_2007 & ///
+    nbi_wallfloor_lb_2007 <= nbi_wallfloor_ub_2007 + 1e-12
 
 generate double share_dni_2007 = ///
     dni_yes_n_2007 / (dni_yes_n_2007 + dni_no_n_2007) if ///
@@ -3553,6 +3672,7 @@ local census2007_shares ///
     share_spanish_language_2007 ///
     share_literate_2007 ///
     share_education_*_2007 ///
+    share_educ_secondaryplus_2007 ///
     share_dni_2007 ///
     labor_force_participation_2007 ///
     employment_rate_2007 ///
@@ -3562,6 +3682,35 @@ local census2007_shares ///
 foreach variable of varlist `census2007_shares' {
     assert inrange(`variable', 0, 1) if !missing(`variable')
 }
+
+local census2007_wellbeing ///
+    wellbeing_housing_2007 ///
+    wellbeing_services_2007 ///
+    wellbeing_energy_2007 ///
+    wellbeing_human_capital_2007 ///
+    wellbeing_assets_2007 ///
+    wellbeing_connectivity_2007 ///
+    wellbeing_core_2007 ///
+    deprivation_core_2007 ///
+    nbi_wallfloor_lb_2007 ///
+    nbi_wallfloor_ub_2007
+
+foreach variable of varlist `census2007_wellbeing' {
+    assert inrange(`variable', 0, 1) if !missing(`variable')
+}
+
+assert nbi_wallfloor_lb_2007 <= ///
+    nbi_wallfloor_ub_2007 if ///
+    !missing(nbi_wallfloor_lb_2007, nbi_wallfloor_ub_2007)
+
+egen byte census2007_wellbeing_missing = rowmiss( ///
+    wellbeing_housing_2007 ///
+    wellbeing_services_2007 ///
+    wellbeing_energy_2007 ///
+    wellbeing_human_capital_2007)
+assert missing(wellbeing_core_2007) == ///
+    (census2007_wellbeing_missing > 0)
+drop census2007_wellbeing_missing
 
 label variable census2007_ubigeo_ccpp ///
     "Ten-digit centro-poblado UBIGEO in 2007 census tabulation"
@@ -3581,8 +3730,12 @@ label variable ln_households_2007 ///
     "Natural log of 2007 households"
 label variable share_water_public_2007 ///
     "Share of occupied dwellings using public or pylon water"
+label variable share_water_pubdaily_2007 ///
+    "Share with public or pylon water available every day"
 label variable share_sanitation_sewer_2007 ///
     "Share of occupied dwellings connected to public sewer"
+label variable share_sanitation_facility_2007 ///
+    "Share using sewer, septic tank, or latrine"
 label variable share_electricity_2007 ///
     "Share of occupied dwellings with public electricity"
 label variable share_clean_cooking_2007 ///
@@ -3593,6 +3746,28 @@ label variable share_indigenous_language_2007 ///
     "Share age 3+ whose first language was indigenous"
 label variable share_literate_2007 ///
     "Share age 14+ able to read and write"
+label variable share_educ_secondaryplus_2007 ///
+    "Share age 14+ with secondary or higher education"
+label variable wellbeing_housing_2007 ///
+    "Housing wellbeing domain (higher is better)"
+label variable wellbeing_services_2007 ///
+    "Basic-services wellbeing domain (higher is better)"
+label variable wellbeing_energy_2007 ///
+    "Energy wellbeing domain (higher is better)"
+label variable wellbeing_human_capital_2007 ///
+    "Human-capital wellbeing domain (higher is better)"
+label variable wellbeing_assets_2007 ///
+    "Durable-assets coverage score (higher is better)"
+label variable wellbeing_connectivity_2007 ///
+    "Household-connectivity coverage score (higher is better)"
+label variable wellbeing_core_2007 ///
+    "Equal-domain ecological wellbeing score (higher is better)"
+label variable deprivation_core_2007 ///
+    "Equal-domain ecological deprivation score (higher is worse)"
+label variable nbi_wallfloor_lb_2007 ///
+    "Lower bound for wall-floor part of inadequate-housing NBI"
+label variable nbi_wallfloor_ub_2007 ///
+    "Upper bound for wall-floor part of inadequate-housing NBI"
 label variable labor_force_participation_2007 ///
     "Labor-force participation among population age 14+"
 label variable unemployment_rate_2007 ///
@@ -3874,6 +4049,10 @@ local census2007_release_vars ///
     share_spanish_language_2007 ///
     share_literate_2007 ///
     share_education_*_2007 ///
+    share_educ_secondaryplus_2007 ///
+    wellbeing_*_2007 ///
+    deprivation_core_2007 ///
+    nbi_wallfloor_*_2007 ///
     share_dni_2007 ///
     labor_force_participation_2007 ///
     employment_rate_2007 ///

@@ -80,10 +80,19 @@ not zero.
 
 The legacy weighted `poverty2007*` variables are not reproduced. They assigned
 subjective ordinal weights to marginal census shares, were not an official
-INEI poverty or NBI measure, and in several cases were mislabeled. The new
-dataset instead retains interpretable component measures. An official
-district-level poverty map or a household-microdata NBI measure can be added
-later as a separately documented source.
+INEI poverty or NBI measure, and in several cases were mislabeled.
+
+The pipeline now constructs a transparent equal-domain ecological wellbeing
+score, its reverse-coded deprivation score, housing/services/energy/human
+capital domains, supplementary asset and connectivity scores, and
+NBI-compatible diagnostics. These are community coverage summaries, not
+official poverty headcounts. Their formulas, missing-value rules, limits, and
+cross-round harmonization contract are recorded in
+`docs/CENSUS_WELLBEING_MEASURES.md`.
+
+An official poverty-map or household-microdata NBI measure can be added later
+as a separately documented source. It must not be conflated with the
+census-based ecological score.
 
 ## Linkage rules
 

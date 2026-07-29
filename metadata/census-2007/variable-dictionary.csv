@@ -33,10 +33,12 @@ share_water_public_2007,Share using public network or public pylon water,Occupie
 share_water_well_2007,Share using well water,Occupied dwellings,BG/BK,BG divided by BK
 share_water_river_2007,Share using river or irrigation-channel water,Occupied dwellings,BH/BK,BH divided by BK
 share_water_daily_2007,Share with daily water among public-water dwellings,Dwellings using public network or pylon,BL/BN,BL divided by BN
+share_water_pubdaily_2007,Share with public or pylon water available every day,Occupied dwellings,BL/BK,BL divided by BK
 share_sanitation_sewer_2007,Share connected to public sewer,Occupied dwellings,BO:BP/BU,BO plus BP divided by BU
 share_sanitation_septic_2007,Share using a septic tank,Occupied dwellings,BQ/BU,BQ divided by BU
 share_sanitation_latrine_2007,Share using a pit or latrine,Occupied dwellings,BR/BU,BR divided by BU
 share_sanitation_none_2007,Share without sanitation,Occupied dwellings,BT/BU,BT divided by BU
+share_sanitation_facility_2007,Share using sewer septic tank or latrine,Occupied dwellings,BO:BR/BU,Sum of BO through BR divided by BU
 share_electricity_2007,Share with public electricity,Occupied dwellings,BV/BX,BV divided by BX
 share_tenure_rented_2007,Share of rented dwellings,Occupied dwellings,BZ/CF,BZ divided by CF
 share_tenure_owned_2007,Share owned through invasion installments or full payment,Occupied dwellings,CA:CC/CF,Sum of CA through CC divided by CF
@@ -75,6 +77,17 @@ share_education_primary_2007,Share with primary as highest approved level,Popula
 share_education_secondary_2007,Share with secondary as highest approved level,Population age 14+,FK/FP,FK divided by FP
 share_education_technical_2007,Share with incomplete or complete non-university tertiary education,Population age 14+,FL:FM/FP,FL plus FM divided by FP
 share_education_university_2007,Share with incomplete or complete university education,Population age 14+,FN:FO/FP,FN plus FO divided by FP
+share_educ_secondaryplus_2007,Share with secondary or higher education,Population age 14+,FK:FO/FP,Sum of FK through FO divided by FP
+wellbeing_housing_2007,Housing wellbeing domain,CCPP aggregate,derived,One minus earth-floor share
+wellbeing_services_2007,Basic-services wellbeing domain,CCPP aggregate,derived,Equal mean of public water available daily and sanitation-facility shares
+wellbeing_energy_2007,Energy wellbeing domain,CCPP aggregate,derived,Equal mean of electricity and clean-cooking shares
+wellbeing_human_capital_2007,Human-capital wellbeing domain,CCPP aggregate,derived,Equal mean of literacy and secondary-or-higher shares
+wellbeing_assets_2007,Durable-assets coverage score,CCPP aggregate,derived,Equal mean of television washer refrigerator and computer shares
+wellbeing_connectivity_2007,Household-connectivity coverage score,CCPP aggregate,derived,Equal mean of mobile internet and cable-television shares
+wellbeing_core_2007,Equal-domain ecological wellbeing score,CCPP aggregate,derived,Equal mean of housing services energy and human-capital domains
+deprivation_core_2007,Equal-domain ecological deprivation score,CCPP aggregate,derived,One minus wellbeing_core_2007
+nbi_wallfloor_lb_2007,Lower bound for wall-floor part of inadequate-housing NBI,Occupied dwellings,AN:AP AQ AS AU,Frechet lower bound from separate wall and floor marginals
+nbi_wallfloor_ub_2007,Upper bound for wall-floor part of inadequate-housing NBI,Occupied dwellings,AN:AP AQ AS AU,Frechet upper bound from separate wall and floor marginals
 share_dni_2007,Share age 18+ with a DNI,Population age 18+,IU:IV,IU divided by IU plus IV
 labor_force_participation_2007,Labor-force participation rate,Population age 14+,IW:IY,(IW plus IX) divided by FP
 employment_rate_2007,Employment-to-population rate,Population age 14+,IW/FP,IW divided by FP

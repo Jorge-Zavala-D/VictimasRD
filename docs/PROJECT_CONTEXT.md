@@ -239,9 +239,12 @@ is accepted automatically.
 
 The legacy weighted `poverty2007*` measures are not treated as official poverty
 or NBI indicators and are not reproduced. The canonical preparation retains
-transparent component covariates with explicit source universes. Adding an
-official poverty-map or household-microdata NBI measure remains a separate
-source and methods task.
+transparent component covariates and constructs an equal-domain ecological
+wellbeing score with explicit source universes and complete-component rules.
+The score is a CCPP coverage summary, not a household poverty headcount or
+MPI. Definitions and the 2007/2013/2017 harmonization contract are recorded in
+`docs/CENSUS_WELLBEING_MEASURES.md`. Adding an official poverty-map or
+household-microdata NBI measure remains a separate source and methods task.
 
 ## Recorded 2017 CCPP geospatial decision
 
