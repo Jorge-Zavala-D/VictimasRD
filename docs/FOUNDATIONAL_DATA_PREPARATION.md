@@ -73,6 +73,25 @@ one CMAN project is linked to one RUV community, the first recorded project
 year defines treatment onset and `cman_project_count` records the number of
 projects.
 
+## CMAN project types and financing
+
+Every one of the 4,433 CMAN project titles is normalized and classified into a
+versioned fourteen-category taxonomy in Stata. Titles may match several sector
+themes, but one primary type is assigned using a fixed hierarchy that gives
+specific services and productive activities priority over generic community
+or management language. Multisector status is retained separately.
+
+The code also constructs positive-cofinancing status, combined recorded
+financing, the cofinancing share of the total, and the ratio of cofinancing to
+CMAN financing. Amounts remain nominal soles and are not interpreted as
+inflation-adjusted costs or disbursements. Full definitions, the single
+record-specific primary-category decision, and the historical benchmark are
+documented in `docs/CMAN_PROJECT_CLASSIFICATION.md`.
+
+The full row-level classification evidence is regenerated in Dropbox Working
+QA. Normalized text and theme flags do not enter the polished community
+registry.
+
 ## Linkage standard
 
 The release standard is complete RUV retention with documented linkage status:
@@ -135,6 +154,9 @@ The complete run now produces:
 - 411 CMAN codes inherited from an already verified RUV link;
 - all 4,433 CMAN source rows preserved, including 4,223 linked to RUV and 210
   CMAN-only rows;
+- all 4,433 project titles assigned one primary project type, with multisector
+  status and classification method retained;
+- 2,989 CMAN project rows with positive recorded cofinancing;
 - 3,946 CMAN rows with a verified CCPP code and 487 without one;
 - 4,221 treated RUV communities and 1,491 RUV communities with no recorded
   CMAN project through 2023;

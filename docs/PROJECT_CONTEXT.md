@@ -137,6 +137,28 @@ year. The canonical preparation code therefore creates cumulative indicators
 and every year thereafter. The working paper must explain the interpretation
 and caveats attached to this administrative year field.
 
+## Recorded CMAN project-classification decision
+
+On July 28, 2026, the project adopted a versioned Stata text-classification
+workflow for all 4,433 CMAN project titles. The fourteen primary categories
+preserve the working paper's historical structure while clarifying community
+facilities, commerce and processing, fishing and aquaculture, and the combined
+tourism, culture, and prevention category. Every title must match at least one
+documented theme and receive exactly one primary category through a fixed
+priority hierarchy. Multisector titles retain a separate flag.
+
+The old manually coded `tipo_proyecto` field is a historical benchmark, not
+the assignment source. Exact normalized geography links permit a comparison
+for 2,223 records, on which the new title classifier agrees with the collapsed
+legacy category in 94.3 percent of cases. Review found substantively
+inconsistent historical labels, so disagreements are not mechanically changed
+to reproduce the old field.
+
+The same CMAN block constructs positive-cofinancing status, total recorded
+financing, cofinancing share, and the cofinancing-to-CMAN ratio. Monetary
+amounts remain nominal soles. Definitions and review evidence are documented
+in `docs/CMAN_PROJECT_CLASSIFICATION.md`.
+
 ## Recorded victimization-index cutoff decision
 
 On July 28, 2026, the research team designated the government methodology note

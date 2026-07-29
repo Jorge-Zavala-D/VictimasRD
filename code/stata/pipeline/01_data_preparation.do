@@ -1770,6 +1770,260 @@ assert !missing(cman_financing_soles, cofinancing_soles)
 assert cman_financing_soles >= 0
 assert cofinancing_soles >= 0
 
+/*
+Classify every CMAN project from its normalized Spanish title. The dictionaries
+encode the categories used in the working paper, with clearer labels for the
+combined rare category. Because some titles mention more than one sector, the
+order below is the documented primary-project hierarchy. Record 1120 explicitly
+combines potable water with sprinkler irrigation; review of the full title
+assigns irrigation as its primary type while retaining its multisector flag.
+*/
+
+generate strL prc_project_text_norm = ///
+    ustrlower(ustrtrim(project_raw))
+replace prc_project_text_norm = ustrregexra( ///
+    ustrnormalize(prc_project_text_norm, "nfd"), "\p{M}", "")
+replace prc_project_text_norm = ustrregexra( ///
+    prc_project_text_norm, "[^a-z0-9]+", " ")
+replace prc_project_text_norm = ///
+    ustrtrim(itrim(prc_project_text_norm))
+
+generate byte prc_theme_fishing = ustrregexm( ///
+    prc_project_text_norm, ///
+    "pisci|trucha|tilapia|alevin|acuic|pesca|crianza de peces|produccion de peces")
+
+generate byte prc_theme_livestock = ustrregexm( ///
+    prc_project_text_norm, ///
+    "ganad|vacun|bovin|(^| )ovin[oa]s?( |$)|alpaca|llama|caprin|porcin|cuy|avic|gallina|pollo|establo|corral|pastos|forraje|lechero|produccion de leche|queso|inseminacion|crianza|cobertiz|lechera|vaquer|galpon|vaquill|vicu|pradera|pecuari|animal|queser|lacteo|banadero|(^| )leche( |$)") & ///
+    !prc_theme_fishing
+
+generate byte prc_theme_irrigation = ustrregexm( ///
+    prc_project_text_norm, ///
+    "riego|irrig|regadio|reservorio|represa|bocatoma|aspersion|canal de riego|canal de irrigacion|(^| )canal(es)?( |$)|canal entubado|revestimiento del canal|presa de tierra|cosecha de agua") & ///
+    !ustrregexm( ///
+        prc_project_text_norm, ///
+        "agua potable|saneamiento|alcantarillado|desague")
+
+generate byte prc_theme_community = ustrregexm( ///
+    prc_project_text_norm, ///
+    "local comunal|casa comunal|salon comunal|centro comunal|local multiuso|local de uso|usos multiples|multiuso|multifuncional|infraestructura comunal|servicios comunales|equipamiento comunal|comedor|centro civico|plaza|parque|losa deportiva|campo deportivo|complejo deportivo|coliseo|cementerio|iglesia|templo|capilla|auditorium|auditorio|casa de la paz|infraestructura de la comunidad|servicio comunitario|coordinacion comunal|anfiteatro|losa multideportiva|casa de la cultura|casa de la juventud|servicio de esparcimiento|local del adulto mayor|desarrollo comunal|servicios institucionales|servicio administrativo y operativo|sistemas comunales multiples|uso multiple|servicios multiples|servicio recreativo|uro comunal|instalaciones exteriores de servicios basicos")
+
+generate byte prc_theme_agriculture = ustrregexm( ///
+    prc_project_text_norm, ///
+    "agric|agropec|cultiv|semilla|quinua|papa |cacao|cafe |cafetal|frut|hortal|invernadero|vivero|biohuerto|fitotoldo|maiz|arroz|trigo|cebada|habas|palto|granadilla|citric|plantones|chacra|forestal|sementera|forestacion|especies maderables|seguridad alimentaria|agroproduct|cereal|grano|menestra|(^| )tuna( |$)|durazno|azucar|agroindustrial|centro de acopio")
+
+generate byte prc_theme_education = ustrregexm( ///
+    prc_project_text_norm, ///
+    "educa|escuela|colegio|aula|pronoei|biblioteca|institucion educativa|centro educativo|escolar|pedagog|(^| )cei( |$)|(^| )ie(p)?( |$)|(^| )i e( |$)|cetpro")
+
+generate byte prc_theme_water = ustrregexm( ///
+    prc_project_text_norm, ///
+    "agua potable|abastecimiento de agua|servicio de agua|sistema de agua|captacion de agua|red de agua|agua segura") & ///
+    !ustrregexm(prc_project_text_norm, "riego|irrig")
+
+generate byte prc_theme_management = ustrregexm( ///
+    prc_project_text_norm, ///
+    "fortalecimiento|capacidades|gestion|asistencia tecnica|capacitacion|equipamiento institucional|implementacion comunal|desarrollo productivo|cadena productiva|apoyo productivo|formacion de recursos humanos|infraestructura productiva")
+
+generate byte prc_theme_roads = ustrregexm( ///
+    prc_project_text_norm, ///
+    "camino|carretera|trocha|puente|transitabilidad|vial|pista|vereda|pont.n|alcantarilla|acceso vial|vias |calle|paviment|escalinata|(^| )via( |$)|acceso peatonal|empedrado|afirmado|zona urbana")
+
+generate byte prc_theme_health = ustrregexm( ///
+    prc_project_text_norm, ///
+    "salud|posta|botiquin|ambulancia|centro medico|casa materna|materno|perinatal|gestante|madre y el nino|madre y nino|estimulacion temprana|promocion y vigilancia comunal")
+
+generate byte prc_theme_sanitation = ustrregexm( ///
+    prc_project_text_norm, ///
+    "saneamiento|alcantarillado|desague|letrina|servicios higienicos|bano|residuos solidos|relleno sanitario|pozo de oxidacion|letrinizacion|servicio higien|duchas|lavaderos|tratamiento de excretas|unidades basicas sanitarias")
+
+generate byte prc_theme_energy = ustrregexm( ///
+    prc_project_text_norm, ///
+    "electr|energia|alumbrado|panel solar|fotovolta|red electrica|sistema electrico|luz electrica|paneles solares|red primaria|red secundaria|acometidas domiciliarias|cocinas mejoradas")
+
+generate byte prc_theme_commerce = ustrregexm( ///
+    prc_project_text_norm, ///
+    "comerc|mercado|feria|tienda|panaderia|centro de acopio|transformacion|procesamiento|planta procesadora|procesadora|molino|acopio|mercadillo|centro de abastos|expendio de alimentos")
+
+generate byte prc_theme_culture = ustrregexm( ///
+    prc_project_text_norm, ///
+    "turis|artesan|textil|tejido|patrimonio|cultural|museo|prevencion|defensa ribere|defensa civil|seguridad ciudadana|muro de contencion|casa de la cultura|casa de la juventud|defensa river|condiciones ambientales")
+
+/*
+The source title for record 1120 names both potable water and sprinkler
+irrigation. Mark both themes before selecting irrigation as the reviewed
+primary category.
+*/
+
+replace prc_theme_water = 1 if record_number == 1120
+replace prc_theme_irrigation = 1 if record_number == 1120
+
+egen byte prc_project_theme_count = rowtotal( ///
+    prc_theme_fishing ///
+    prc_theme_livestock ///
+    prc_theme_irrigation ///
+    prc_theme_community ///
+    prc_theme_agriculture ///
+    prc_theme_education ///
+    prc_theme_water ///
+    prc_theme_management ///
+    prc_theme_roads ///
+    prc_theme_health ///
+    prc_theme_sanitation ///
+    prc_theme_energy ///
+    prc_theme_commerce ///
+    prc_theme_culture)
+
+assert prc_project_theme_count >= 1
+generate byte prc_project_multisector = ///
+    prc_project_theme_count > 1
+
+capture label drop prc_project_type_label
+label define prc_project_type_label ///
+    1  "Livestock" ///
+    2  "Irrigation" ///
+    3  "Community facilities" ///
+    4  "Agriculture" ///
+    5  "Education" ///
+    6  "Water supply" ///
+    7  "Management and other support" ///
+    8  "Road infrastructure" ///
+    9  "Health" ///
+    10 "Fishing and aquaculture" ///
+    11 "Sanitation" ///
+    12 "Energy" ///
+    13 "Commerce and processing" ///
+    14 "Tourism, culture, and prevention"
+
+generate byte prc_project_type = .
+replace prc_project_type = 10 if prc_theme_fishing
+replace prc_project_type = 6 if ///
+    missing(prc_project_type) & prc_theme_water
+replace prc_project_type = 11 if ///
+    missing(prc_project_type) & prc_theme_sanitation
+replace prc_project_type = 2 if ///
+    missing(prc_project_type) & prc_theme_irrigation
+replace prc_project_type = 9 if ///
+    missing(prc_project_type) & prc_theme_health
+replace prc_project_type = 5 if ///
+    missing(prc_project_type) & prc_theme_education
+replace prc_project_type = 12 if ///
+    missing(prc_project_type) & prc_theme_energy
+replace prc_project_type = 8 if ///
+    missing(prc_project_type) & prc_theme_roads
+replace prc_project_type = 1 if ///
+    missing(prc_project_type) & prc_theme_livestock
+replace prc_project_type = 4 if ///
+    missing(prc_project_type) & prc_theme_agriculture
+replace prc_project_type = 13 if ///
+    missing(prc_project_type) & prc_theme_commerce
+replace prc_project_type = 14 if ///
+    missing(prc_project_type) & prc_theme_culture
+replace prc_project_type = 3 if ///
+    missing(prc_project_type) & prc_theme_community
+replace prc_project_type = 7 if ///
+    missing(prc_project_type) & prc_theme_management
+replace prc_project_type = 2 if record_number == 1120
+
+assert !missing(prc_project_type)
+label values prc_project_type prc_project_type_label
+
+capture label drop prc_project_group_label
+label define prc_project_group_label ///
+    1 "Productive and livelihood" ///
+    2 "Social and basic services" ///
+    3 "Community and civic infrastructure" ///
+    4 "Management and capacity support"
+
+generate byte prc_project_group = .
+replace prc_project_group = 1 if ///
+    inlist(prc_project_type, 1, 2, 4, 10, 13)
+replace prc_project_group = 2 if ///
+    inlist(prc_project_type, 5, 6, 9, 11, 12)
+replace prc_project_group = 3 if ///
+    inlist(prc_project_type, 3, 8, 14)
+replace prc_project_group = 4 if ///
+    prc_project_type == 7
+assert !missing(prc_project_group)
+label values prc_project_group prc_project_group_label
+
+capture label drop prc_project_class_method_label
+label define prc_project_class_method_label ///
+    1 "Dictionary and priority hierarchy" ///
+    2 "Reviewed record-specific override"
+
+generate byte prc_project_class_method = 1
+replace prc_project_class_method = 2 if ///
+    record_number == 1120
+label values ///
+    prc_project_class_method ///
+    prc_project_class_method_label
+
+generate byte prc_cofinanced = cofinancing_soles > 0
+generate double prc_total_financing_soles = ///
+    cman_financing_soles + cofinancing_soles
+generate double prc_cofinancing_share = ///
+    cofinancing_soles / prc_total_financing_soles
+generate double prc_cofinancing_ratio = ///
+    cofinancing_soles / cman_financing_soles
+
+assert inlist(prc_cofinanced, 0, 1)
+assert prc_total_financing_soles > 0
+assert inrange(prc_cofinancing_share, 0, 1)
+assert prc_cofinancing_ratio >= 0
+
+count if prc_project_multisector
+local cman_multisector_projects = r(N)
+
+count if prc_project_class_method == 2
+assert r(N) == 1
+local cman_project_manual_overrides = r(N)
+
+count if prc_cofinanced
+local cman_cofinanced_projects = r(N)
+
+/*
+Keep the row-level classification evidence in Dropbox Working QA. Only the
+substantive classification, provenance, and financing measures continue into
+the canonical project registry.
+*/
+
+preserve
+keep ///
+    record_number ///
+    recorded_project_year ///
+    region_raw ///
+    province_raw ///
+    district_raw ///
+    community_raw ///
+    project_raw ///
+    prc_project_text_norm ///
+    prc_theme_* ///
+    prc_project_theme_count ///
+    prc_project_multisector ///
+    prc_project_type ///
+    prc_project_group ///
+    prc_project_class_method ///
+    cman_financing_soles ///
+    cofinancing_soles ///
+    prc_cofinanced ///
+    prc_total_financing_soles ///
+    prc_cofinancing_share ///
+    prc_cofinancing_ratio
+sort record_number
+save ///
+    "${qa_data_root}/cman_project_classification_review.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/cman_project_classification_review.csv", ///
+    replace
+restore
+
+drop ///
+    prc_project_text_norm ///
+    prc_theme_* ///
+    prc_project_theme_count
+
 victimasrd_normalize_name region_raw, generate(region_norm)
 victimasrd_normalize_name province_raw, generate(province_norm)
 victimasrd_normalize_name district_raw, generate(district_norm)
@@ -1783,6 +2037,22 @@ label variable cman_financing_soles ///
     "CMAN financing in soles; parsed from source text"
 label variable cofinancing_soles ///
     "Cofinancing in soles; parsed from source text"
+label variable prc_project_type ///
+    "Primary CMAN project type classified from project title"
+label variable prc_project_group ///
+    "Broad CMAN project group classified from project title"
+label variable prc_project_multisector ///
+    "Project title contains more than one sector theme"
+label variable prc_project_class_method ///
+    "Method used to assign primary CMAN project type"
+label variable prc_cofinanced ///
+    "Positive cofinancing recorded in CMAN register"
+label variable prc_total_financing_soles ///
+    "CMAN financing plus cofinancing; nominal soles"
+label variable prc_cofinancing_share ///
+    "Cofinancing share of total recorded project financing"
+label variable prc_cofinancing_ratio ///
+    "Recorded cofinancing divided by CMAN financing"
 label variable source_year_format_issue ///
     "Source year required whitespace or hyphen normalization"
 label variable source_money_format_issue ///
@@ -2560,6 +2830,14 @@ keep ///
     cofinancing_raw ///
     cman_financing_soles ///
     cofinancing_soles ///
+    prc_project_type ///
+    prc_project_group ///
+    prc_project_multisector ///
+    prc_project_class_method ///
+    prc_cofinanced ///
+    prc_total_financing_soles ///
+    prc_cofinancing_share ///
+    prc_cofinancing_ratio ///
     executing_unit_raw ///
     source_page ///
     source_row_on_page ///
@@ -2708,6 +2986,14 @@ keep ///
     legal_instrument_raw ///
     cman_financing_soles ///
     cofinancing_soles ///
+    prc_project_type ///
+    prc_project_group ///
+    prc_project_multisector ///
+    prc_project_class_method ///
+    prc_cofinanced ///
+    prc_total_financing_soles ///
+    prc_cofinancing_share ///
+    prc_cofinancing_ratio ///
     executing_unit_raw
 
 order ///
@@ -2732,6 +3018,10 @@ order ///
     prc_project_link_status ///
     cman_project_count ///
     recorded_project_year ///
+    prc_project_type ///
+    prc_project_group ///
+    prc_project_multisector ///
+    prc_cofinanced ///
     treat_07-treat_23 ///
     record_number
 
@@ -5224,6 +5514,24 @@ post `qa_post' ///
     ("Consecutive PDF records 1 through 4433")
 
 post `qa_post' ///
+    ("cman_multisector_projects") ///
+    (`cman_multisector_projects') ///
+    ("descriptive") ///
+    ("Project title contains terms from more than one documented sector")
+
+post `qa_post' ///
+    ("cman_project_manual_overrides") ///
+    (`cman_project_manual_overrides') ///
+    ("validated") ///
+    ("Reviewed primary category for the single water-irrigation title")
+
+post `qa_post' ///
+    ("cman_cofinanced_projects") ///
+    (`cman_cofinanced_projects') ///
+    ("descriptive") ///
+    ("CMAN project rows with positive recorded cofinancing")
+
+post `qa_post' ///
     ("cman_year_format_issues") ///
     (`cman_year_format_issues') ///
     ("source_issue") ///
@@ -5623,6 +5931,9 @@ display as text   "Historical source rows pooled:  `historical_source_rows'"
 display as text   "RUV victimization rows:          `victimization_rows'"
 display as text   "Historical exact RUV recoveries: `victim_hist_exact_n'"
 display as text   "CMAN project rows:               `cman_project_rows'"
+display as text   "CMAN multisector project titles: `cman_multisector_projects'"
+display as text   "CMAN projects with cofinancing:  `cman_cofinanced_projects'"
+display as text   "CMAN taxonomy manual overrides:  `cman_project_manual_overrides'"
 display as text   "Historical exact CMAN codes:     `cman_historical_ccpp_exact'"
 display as text   "Historical codes quarantined:    `cman_hist_code_conflicts'"
 display as text   "Exact CMAN-to-RUV links:         `cman_victim_exact'"

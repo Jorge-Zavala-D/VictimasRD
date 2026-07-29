@@ -21,9 +21,9 @@ Those tasks belong in later modules after the research team resolves the
 geographic sample, treatment timing, rounded-score ties, clustering, and
 estimand.
 
-## Input and sample
+## Inputs and samples
 
-The sole analytical input is:
+The community-level input is:
 
 `2 data/3 Coded/1 Current analysis datasets/06_community_registry_geospatial.dta`
 
@@ -33,9 +33,17 @@ official centered running variables, and cumulative treatment coding through
 Exhibits that require the 2007 Census or 2017 spatial source report their
 nonmissing sample explicitly.
 
+Project-content and financing exhibits use:
+
+`2 data/2 Working/1 Current pipeline/01 intermediate/03_cman_projects_2023.dta`
+
+Those outputs include all 4,433 CMAN project records, including 210 CMAN-only
+rows that cannot enter the RUV-master analytical dataset. They therefore
+describe the program register rather than the RUV analysis sample.
+
 ## Outputs
 
-The module writes fifteen figures to `output/figures/descriptive`:
+The module writes nineteen figures to `output/figures/descriptive`:
 
 1. complete and threshold-detail victimization-index distributions;
 2. prevalence of positive RUV victimization components;
@@ -50,16 +58,23 @@ The module writes fifteen figures to `output/figures/descriptive`:
 11. a 2017 CCPP point-location display;
 12. victimized-community counts by department;
 13. treated-community counts by department;
-14. treatment coverage by department; and
-15. department mean and median victimization-index maps.
+14. treatment coverage by department;
+15. department mean and median victimization-index maps;
+16. the distribution of primary CMAN project types;
+17. cofinancing incidence and conditional amounts by project type;
+18. cofinancing incidence and combined financing over the rollout; and
+19. annual project composition across four broad project groups.
 
-It writes five academic TeX tables to `output/tables/descriptive`:
+It writes eight academic TeX tables to `output/tables/descriptive`:
 
 1. foundational-registry coverage;
 2. summary statistics;
 3. category profiles;
-4. annual treatment rollout; and
-5. department profiles.
+4. annual treatment rollout;
+5. department profiles;
+6. project-type and financing profiles;
+7. project financing by recorded year; and
+8. primary-category composition in 2007--2018 versus 2019--2023.
 
 Every output is regenerated from versioned code and recorded in
 `metadata/output-manifest.csv` with its logical input, input data signature,

@@ -20,6 +20,7 @@ set more off
 foreach required_global in ///
     project_root ///
     data_root ///
+    intermediate_root ///
     analysis_data_root ///
     figures_root ///
     tables_root ///
@@ -34,6 +35,8 @@ foreach required_global in ///
 
 local input_file ///
     "${analysis_data_root}/06_community_registry_geospatial.dta"
+local project_input_file ///
+    "${intermediate_root}/03_cman_projects_2023.dta"
 local figure_dir "${figures_root}/descriptive"
 local table_dir  "${tables_root}/descriptive"
 local manifest  "${metadata_root}/output-manifest.csv"
@@ -45,6 +48,14 @@ capture confirm file "`input_file'"
 if _rc {
     display as error "Canonical descriptive input was not found:"
     display as error "  `input_file'"
+    exit 601
+}
+
+capture confirm file "`project_input_file'"
+
+if _rc {
+    display as error "Canonical CMAN project registry was not found:"
+    display as error "  `project_input_file'"
     exit 601
 }
 
@@ -74,11 +85,18 @@ local output_paths ///
     output/figures/descriptive/fig_desc_13_map_treated_communities.png ///
     output/figures/descriptive/fig_desc_14_map_treatment_share.png ///
     output/figures/descriptive/fig_desc_15_map_victimization_index.png ///
+    output/figures/descriptive/fig_desc_16_project_types.png ///
+    output/figures/descriptive/fig_desc_17_project_cofinancing.png ///
+    output/figures/descriptive/fig_desc_18_project_financing_over_time.png ///
+    output/figures/descriptive/fig_desc_19_project_composition_over_time.png ///
     output/tables/descriptive/tab_desc_01_sample_coverage.tex ///
     output/tables/descriptive/tab_desc_02_summary_statistics.tex ///
     output/tables/descriptive/tab_desc_03_victimization_categories.tex ///
     output/tables/descriptive/tab_desc_04_treatment_rollout.tex ///
-    output/tables/descriptive/tab_desc_05_department_profile.tex
+    output/tables/descriptive/tab_desc_05_department_profile.tex ///
+    output/tables/descriptive/tab_desc_06_project_types_financing.tex ///
+    output/tables/descriptive/tab_desc_07_project_financing_by_year.tex ///
+    output/tables/descriptive/tab_desc_08_project_composition_periods.tex
 
 /*
 Remove only this module's exact generated products. This prevents an interrupted
@@ -137,6 +155,14 @@ forvalues year = 2007/2023 {
 assert treat_23 == !missing(recorded_project_year)
 assert inrange(recorded_project_year, 2007, 2023) ///
     if !missing(recorded_project_year)
+assert !missing(prc_project_type, prc_project_group) if ///
+    prc_project_observed
+assert missing(prc_project_type) & ///
+    missing(prc_project_group) if !prc_project_observed
+assert inlist(prc_project_multisector, 0, 1) if ///
+    prc_project_observed
+assert inlist(prc_cofinanced, 0, 1) if ///
+    prc_project_observed
 
 foreach cutoff_check in ///
     "running_ab victimization_index 0.153750" ///
@@ -913,7 +939,501 @@ restore
 
 
 *-----------------------------------*
-**# 7. Academic descriptive tables
+**# 7. CMAN project types and financing
+*-----------------------------------*
+
+/*
+These exhibits use all 4,433 rows in the canonical CMAN project register,
+including projects outside the 2018-vintage RUV universe. They describe
+implementation content and recorded nominal financing, not treatment effects.
+*/
+
+preserve
+use "`project_input_file'", clear
+
+isid record_number
+assert _N == 4433
+assert inrange(recorded_project_year, 2007, 2023)
+assert !missing(prc_project_type, prc_project_group)
+assert inlist(prc_project_multisector, 0, 1)
+assert inlist(prc_project_class_method, 1, 2)
+assert inlist(prc_cofinanced, 0, 1)
+assert prc_total_financing_soles == ///
+    cman_financing_soles + cofinancing_soles
+assert abs(prc_cofinancing_share - ///
+    cofinancing_soles / prc_total_financing_soles) < 1e-12
+
+quietly count if prc_project_class_method == 2
+assert r(N) == 1
+quietly count if prc_cofinanced
+local n_cman_cofinanced = r(N)
+local n_cman_projects = _N
+
+quietly datasignature
+local project_input_datasignature "`r(datasignature)'"
+
+tempfile project_registry
+save "`project_registry'", replace
+
+collapse ///
+    (count) project_count=record_number, ///
+    by(prc_project_type)
+
+egen int total_projects = total(project_count)
+assert total_projects == `n_cman_projects'
+generate double project_share = ///
+    100 * project_count / total_projects
+
+graph hbar (asis) project_share, ///
+    over(prc_project_type, ///
+        sort(1) descending label(labsize(small))) ///
+    bar(1, color(navy%78) lcolor(navy)) ///
+    blabel(bar, ///
+        format(%4.1f) position(outside) size(small) color(gs4)) ///
+    yscale(range(0 30)) ///
+    ylabel(0(5)30, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    ytitle("Share of CMAN project records (%)", size(small)) ///
+    title("Collective-reparation projects by primary type", ///
+        size(medium) color(black)) ///
+    subtitle("Transparent text classification of all projects recorded through 2023", ///
+        size(small) color(gs5)) ///
+    note( ///
+        "Notes: Unit of analysis is the CMAN project record (N = 4,433). Each normalized Spanish title receives one primary type using the documented" ///
+        "dictionary and priority hierarchy; multisector titles retain a separate flag. Percentages sum to 100. No model or statistical uncertainty is used." ///
+        "Source: CMAN communities-attended register through 2023.", ///
+        size(vsmall) color(gs5) span) ///
+    graphregion(color(white)) ///
+    plotregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_desc_16_project_types.png", ///
+    width(2400) replace
+
+use "`project_registry'", clear
+generate double positive_cofinancing_thousands = ///
+    cofinancing_soles / 1000 if prc_cofinanced
+
+collapse ///
+    (mean) cofinanced_percent=prc_cofinanced ///
+    (p50) median_positive_cofinancing=positive_cofinancing_thousands, ///
+    by(prc_project_type)
+
+replace cofinanced_percent = 100 * cofinanced_percent
+
+graph hbar (asis) cofinanced_percent, ///
+    over(prc_project_type, ///
+        sort(cofinanced_percent) descending label(labsize(vsmall))) ///
+    bar(1, color(navy%78) lcolor(navy)) ///
+    blabel(bar, ///
+        format(%4.1f) position(outside) size(vsmall) color(gs4)) ///
+    yscale(range(0 100)) ///
+    ylabel(0(20)100, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    ytitle("Projects with positive cofinancing (%)", size(small)) ///
+    title("Incidence of cofinancing", size(medsmall) color(black)) ///
+    graphregion(color(white)) ///
+    plotregion(color(white)) ///
+    name(desc_project_cofinance_rate, replace)
+
+graph hbar (asis) median_positive_cofinancing, ///
+    over(prc_project_type, ///
+        sort(cofinanced_percent) descending label(labsize(vsmall))) ///
+    bar(1, color(eltblue%85) lcolor(navy)) ///
+    blabel(bar, ///
+        format(%5.1f) position(outside) size(vsmall) color(gs4)) ///
+    yscale(range(0 80)) ///
+    ylabel(0(20)80, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    ytitle("Median cofinancing among positive records (S/ thousands)", ///
+        size(small)) ///
+    title("Conditional cofinancing amount", ///
+        size(medsmall) color(black)) ///
+    graphregion(color(white)) ///
+    plotregion(color(white)) ///
+    name(desc_project_cofinance_amount, replace)
+
+graph combine ///
+    desc_project_cofinance_rate ///
+    desc_project_cofinance_amount, ///
+    cols(2) xsize(13) ysize(7.5) ///
+    title("Cofinancing of collective-reparation projects", ///
+        size(medium) color(black)) ///
+    subtitle("Incidence and conditional median amount by primary project type", ///
+        size(small) color(gs5)) ///
+    note( ///
+        "Notes: Unit of analysis is the CMAN project record (N = 4,433). Positive cofinancing is recorded for `n_cman_cofinanced' projects." ///
+        "Panel B excludes zero-cofinancing records and reports nominal soles divided by 1,000; amounts are not inflation-adjusted." ///
+        "Project types come from the documented title-based classification. Source: CMAN communities-attended register through 2023.", ///
+        size(vsmall) color(gs5) span) ///
+    graphregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_desc_17_project_cofinancing.png", ///
+    width(3000) replace
+graph drop ///
+    desc_project_cofinance_rate ///
+    desc_project_cofinance_amount
+
+use "`project_registry'", clear
+generate double total_financing_thousands = ///
+    prc_total_financing_soles / 1000
+
+collapse ///
+    (count) project_count=record_number ///
+    (mean) cofinanced_percent=prc_cofinanced ///
+    (p50) median_total_financing=total_financing_thousands, ///
+    by(recorded_project_year)
+
+replace cofinanced_percent = 100 * cofinanced_percent
+
+twoway ///
+    (connected cofinanced_percent recorded_project_year, ///
+        lcolor(navy) lwidth(medthick) ///
+        mcolor(navy) msymbol(O) msize(small)), ///
+    xlabel(2007(2)2023, labsize(small)) ///
+    ylabel(0(20)100, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    xtitle("Recorded project year", size(small)) ///
+    ytitle("Projects with positive cofinancing (%)", size(small)) ///
+    title("Cofinancing incidence", size(medsmall) color(black)) ///
+    legend(off) ///
+    graphregion(color(white)) ///
+    plotregion(color(white)) ///
+    name(desc_project_cofinance_year, replace)
+
+twoway ///
+    (connected median_total_financing recorded_project_year, ///
+        lcolor(forest_green) lwidth(medthick) ///
+        mcolor(forest_green) msymbol(D) msize(small)), ///
+    xlabel(2007(2)2023, labsize(small)) ///
+    ylabel(, ///
+        grid glcolor(gs14) glwidth(vthin) ///
+        format(%5.0f) labsize(small)) ///
+    xtitle("Recorded project year", size(small)) ///
+    ytitle("Median total recorded financing (S/ thousands)", size(small)) ///
+    title("Combined CMAN and cofinancing amount", ///
+        size(medsmall) color(black)) ///
+    legend(off) ///
+    graphregion(color(white)) ///
+    plotregion(color(white)) ///
+    name(desc_project_total_year, replace)
+
+graph combine ///
+    desc_project_cofinance_year ///
+    desc_project_total_year, ///
+    cols(2) xsize(12) ysize(6.5) ///
+    title("Project financing over the program rollout", ///
+        size(medium) color(black)) ///
+    subtitle("Recorded cofinancing incidence and median combined financing, 2007-2023", ///
+        size(small) color(gs5)) ///
+    note( ///
+        "Notes: Unit of analysis is the CMAN project record. Annual project counts vary and are reported in the companion table." ///
+        "Total financing is CMAN financing plus cofinancing in nominal soles divided by 1,000; no inflation adjustment or causal comparison is applied." ///
+        "Source: CMAN communities-attended register through 2023.", ///
+        size(vsmall) color(gs5) span) ///
+    graphregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_desc_18_project_financing_over_time.png", ///
+    width(2800) replace
+graph drop ///
+    desc_project_cofinance_year ///
+    desc_project_total_year
+
+/*
+Annual composition is shown with four broad groups so every year remains
+readable. The companion period table retains all fourteen primary types.
+*/
+
+use "`project_registry'", clear
+collapse ///
+    (count) project_count=record_number, ///
+    by(recorded_project_year prc_project_group)
+
+bysort recorded_project_year: egen int annual_projects = ///
+    total(project_count)
+generate double project_group_share = ///
+    100 * project_count / annual_projects
+keep recorded_project_year prc_project_group project_group_share
+reshape wide project_group_share, ///
+    i(recorded_project_year) j(prc_project_group)
+
+forvalues project_group = 1/4 {
+    replace project_group_share`project_group' = 0 if ///
+        missing(project_group_share`project_group')
+}
+
+egen double annual_share_check = ///
+    rowtotal(project_group_share1-project_group_share4)
+assert abs(annual_share_check - 100) < 1e-8
+
+graph bar (asis) ///
+    project_group_share1 ///
+    project_group_share2 ///
+    project_group_share3 ///
+    project_group_share4, ///
+    over(recorded_project_year, ///
+        label(angle(45) labsize(small))) ///
+    stack ///
+    bar(1, color(navy%88) lcolor(white)) ///
+    bar(2, color(teal%82) lcolor(white)) ///
+    bar(3, color(orange%82) lcolor(white)) ///
+    bar(4, color(maroon%78) lcolor(white)) ///
+    ylabel(0(20)100, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    ytitle("Annual share (%)", size(small)) ///
+    title("Composition of collective-reparation projects over time", ///
+        size(medium) color(black)) ///
+    subtitle("Annual shares by broad project group, 2007-2023", ///
+        size(small) color(gs5)) ///
+    legend( ///
+        order( ///
+            1 "Productive/livelihood" ///
+            2 "Social/basic services" ///
+            3 "Community/civic infrastructure" ///
+            4 "Management/capacity") ///
+        rows(2) position(6) size(vsmall) region(lcolor(none))) ///
+    note( ///
+        "Notes: Unit of analysis is the CMAN project record (N = 4,433). Bars sum to 100 percent within recorded project year; annual counts vary." ///
+        "Broad groups aggregate the fourteen documented title-based primary categories. Recorded year need not equal project completion." ///
+        "No model or statistical uncertainty is used. Source: CMAN communities-attended register through 2023.", ///
+        size(vsmall) color(gs5) span) ///
+    xsize(12) ysize(7) ///
+    graphregion(color(white)) ///
+    plotregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_desc_19_project_composition_over_time.png", ///
+    width(2800) replace
+
+/*
+Project-type table: the median cofinancing amount conditions on a positive
+cofinancing record; the total-financing median uses every project.
+*/
+
+use "`project_registry'", clear
+tempname project_type_table
+file open `project_type_table' ///
+    using "`table_dir'/tab_desc_06_project_types_financing.tex", ///
+    write replace text
+
+file write `project_type_table' "\begin{table}[!htbp]" _n
+file write `project_type_table' "\centering" _n
+file write `project_type_table' "\caption{Collective-reparation project types and recorded financing}" _n
+file write `project_type_table' "\label{tab:desc_project_types_financing}" _n
+file write `project_type_table' "\begin{tabular}{lrrrrrr}" _n
+file write `project_type_table' "\toprule" _n
+file write `project_type_table' "Primary project type & Projects & Share (\%) & Cofinanced (\%) & Median cofinancing & Median total & Mean cofinancing share (\%) \\" _n
+file write `project_type_table' " &  &  &  & (S/ thousands) & (S/ thousands) &  \\" _n
+file write `project_type_table' "\midrule" _n
+
+forvalues project_type = 1/14 {
+    local project_type_label : label (prc_project_type) `project_type'
+
+    quietly count if prc_project_type == `project_type'
+    local project_type_n = r(N)
+    local project_type_share = ///
+        100 * `project_type_n' / `n_cman_projects'
+
+    quietly summarize prc_cofinanced if ///
+        prc_project_type == `project_type'
+    local project_type_cofinanced = 100 * r(mean)
+
+    quietly summarize cofinancing_soles if ///
+        prc_project_type == `project_type' & ///
+        prc_cofinanced, detail
+    local project_type_cofinance_median = r(p50) / 1000
+
+    quietly summarize prc_total_financing_soles if ///
+        prc_project_type == `project_type', detail
+    local project_type_total_median = r(p50) / 1000
+
+    quietly summarize prc_cofinancing_share if ///
+        prc_project_type == `project_type'
+    local project_type_share_mean = 100 * r(mean)
+
+    local type_n_fmt : display %9.0fc `project_type_n'
+    local type_share_fmt : display %5.1f `project_type_share'
+    local type_cofinanced_fmt : ///
+        display %5.1f `project_type_cofinanced'
+    local type_cofinance_med_fmt : ///
+        display %7.1f `project_type_cofinance_median'
+    local type_total_med_fmt : ///
+        display %7.1f `project_type_total_median'
+    local type_share_mean_fmt : ///
+        display %5.1f `project_type_share_mean'
+
+    foreach formatted_value in ///
+        type_n_fmt ///
+        type_share_fmt ///
+        type_cofinanced_fmt ///
+        type_cofinance_med_fmt ///
+        type_total_med_fmt ///
+        type_share_mean_fmt {
+
+        local `formatted_value' = strtrim("``formatted_value''")
+    }
+
+    file write `project_type_table' ///
+        "`project_type_label' & `type_n_fmt' & `type_share_fmt' & `type_cofinanced_fmt' & `type_cofinance_med_fmt' & `type_total_med_fmt' & `type_share_mean_fmt' \\" _n
+}
+
+file write `project_type_table' "\bottomrule" _n
+file write `project_type_table' "\end{tabular}" _n
+file write `project_type_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The unit is the CMAN project record (N = 4,433), including projects that do not link to the 2018-vintage RUV extract. Each normalized Spanish title receives one primary category using the versioned dictionary and priority hierarchy. Median cofinancing conditions on a positive value; median total financing uses all records. Amounts are nominal soles divided by 1,000 and are not inflation-adjusted. Source: CMAN communities-attended register through 2023.}" _n
+file write `project_type_table' "\end{table}" _n
+file close `project_type_table'
+
+tempname project_year_table
+file open `project_year_table' ///
+    using "`table_dir'/tab_desc_07_project_financing_by_year.tex", ///
+    write replace text
+
+file write `project_year_table' "\begin{table}[!htbp]" _n
+file write `project_year_table' "\centering" _n
+file write `project_year_table' "\caption{Recorded financing of collective-reparation projects by year}" _n
+file write `project_year_table' "\label{tab:desc_project_financing_year}" _n
+file write `project_year_table' "\begin{tabular}{rrrrrr}" _n
+file write `project_year_table' "\toprule" _n
+file write `project_year_table' "Year & Projects & Cofinanced (\%) & Median CMAN & Median cofinancing & Median total \\" _n
+file write `project_year_table' " &  &  & (S/ thousands) & (S/ thousands) & (S/ thousands) \\" _n
+file write `project_year_table' "\midrule" _n
+
+forvalues project_year = 2007/2023 {
+    quietly count if recorded_project_year == `project_year'
+    local project_year_n = r(N)
+
+    quietly summarize prc_cofinanced if ///
+        recorded_project_year == `project_year'
+    local project_year_cofinanced = 100 * r(mean)
+
+    quietly summarize cman_financing_soles if ///
+        recorded_project_year == `project_year', detail
+    local project_year_cman_median = r(p50) / 1000
+
+    quietly summarize cofinancing_soles if ///
+        recorded_project_year == `project_year' & ///
+        prc_cofinanced, detail
+    local project_year_cofinance_median = r(p50) / 1000
+
+    quietly summarize prc_total_financing_soles if ///
+        recorded_project_year == `project_year', detail
+    local project_year_total_median = r(p50) / 1000
+
+    local year_n_fmt : display %9.0fc `project_year_n'
+    local year_cofinanced_fmt : ///
+        display %5.1f `project_year_cofinanced'
+    local year_cman_med_fmt : ///
+        display %7.1f `project_year_cman_median'
+    local year_cofinance_med_fmt : ///
+        display %7.1f `project_year_cofinance_median'
+    local year_total_med_fmt : ///
+        display %7.1f `project_year_total_median'
+
+    foreach formatted_value in ///
+        year_n_fmt ///
+        year_cofinanced_fmt ///
+        year_cman_med_fmt ///
+        year_cofinance_med_fmt ///
+        year_total_med_fmt {
+
+        local `formatted_value' = strtrim("``formatted_value''")
+    }
+
+    file write `project_year_table' ///
+        "`project_year' & `year_n_fmt' & `year_cofinanced_fmt' & `year_cman_med_fmt' & `year_cofinance_med_fmt' & `year_total_med_fmt' \\" _n
+}
+
+file write `project_year_table' "\bottomrule" _n
+file write `project_year_table' "\end{tabular}" _n
+file write `project_year_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The unit is the CMAN project record. Cofinanced denotes a positive recorded amount. Median cofinancing conditions on positive values; other medians use all projects in the year. Amounts are nominal soles divided by 1,000 and are not inflation-adjusted. Recorded project year is the pipeline's authoritative treatment year but need not equal construction completion. Source: CMAN communities-attended register through 2023.}" _n
+file write `project_year_table' "\end{table}" _n
+file close `project_year_table'
+
+/*
+This table compares the composition recorded through the end of 2018 with the
+composition of projects added from 2019 onward in the current CMAN register.
+*/
+
+quietly count if recorded_project_year <= 2018
+local n_projects_2007_2018 = r(N)
+quietly count if recorded_project_year >= 2019
+local n_projects_2019_2023 = r(N)
+assert `n_projects_2007_2018' + `n_projects_2019_2023' == ///
+    `n_cman_projects'
+
+local n_early_fmt : display %9.0fc `n_projects_2007_2018'
+local n_late_fmt : display %9.0fc `n_projects_2019_2023'
+local n_early_fmt = strtrim("`n_early_fmt'")
+local n_late_fmt = strtrim("`n_late_fmt'")
+
+tempname project_period_table
+file open `project_period_table' ///
+    using "`table_dir'/tab_desc_08_project_composition_periods.tex", ///
+    write replace text
+
+file write `project_period_table' "\begin{table}[!htbp]" _n
+file write `project_period_table' "\centering" _n
+file write `project_period_table' "\caption{Evolution of collective-reparation project composition}" _n
+file write `project_period_table' "\label{tab:desc_project_composition_periods}" _n
+file write `project_period_table' "\begin{tabular}{lrrrr}" _n
+file write `project_period_table' "\toprule" _n
+file write `project_period_table' "Primary project type & 2007--2018 & 2019--2023 & Change & All years \\" _n
+file write `project_period_table' " & Share (\%) & Share (\%) & (percentage points) & Share (\%) \\" _n
+file write `project_period_table' "\midrule" _n
+
+forvalues project_type = 1/14 {
+    local project_type_label : label (prc_project_type) `project_type'
+
+    quietly count if ///
+        prc_project_type == `project_type' & ///
+        recorded_project_year <= 2018
+    local project_type_early = ///
+        100 * r(N) / `n_projects_2007_2018'
+
+    quietly count if ///
+        prc_project_type == `project_type' & ///
+        recorded_project_year >= 2019
+    local project_type_late = ///
+        100 * r(N) / `n_projects_2019_2023'
+
+    quietly count if prc_project_type == `project_type'
+    local project_type_all = ///
+        100 * r(N) / `n_cman_projects'
+    local project_type_change = ///
+        `project_type_late' - `project_type_early'
+
+    local type_early_fmt : display %5.1f `project_type_early'
+    local type_late_fmt : display %5.1f `project_type_late'
+    local type_change_fmt : display %5.1f `project_type_change'
+    local type_all_fmt : display %5.1f `project_type_all'
+
+    foreach formatted_value in ///
+        type_early_fmt ///
+        type_late_fmt ///
+        type_change_fmt ///
+        type_all_fmt {
+
+        local `formatted_value' = strtrim("``formatted_value''")
+    }
+
+    file write `project_period_table' ///
+        "`project_type_label' & `type_early_fmt' & `type_late_fmt' & `type_change_fmt' & `type_all_fmt' \\" _n
+}
+
+file write `project_period_table' "\midrule" _n
+file write `project_period_table' "All project types & 100.0 & 100.0 & 0.0 & 100.0 \\" _n
+file write `project_period_table' "\bottomrule" _n
+file write `project_period_table' "\end{tabular}" _n
+file write `project_period_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The unit is the CMAN project record. The 2007--2018 period contains `n_early_fmt' projects and the 2019--2023 period contains `n_late_fmt' projects. This is a retrospective split of the complete current register, not a reproduction of the working paper's older extract. Change is the later-period share minus the earlier-period share. Each title receives one primary category through the documented Stata classification. Recorded year need not equal completion year. Source: CMAN communities-attended register through 2023.}" _n
+file write `project_period_table' "\end{table}" _n
+file close `project_period_table'
+restore
+
+
+*-----------------------------------*
+**# 8. Academic descriptive tables
 *-----------------------------------*
 
 tempname coverage_table
@@ -1196,7 +1716,7 @@ restore
 
 
 *-----------------------------------*
-**# 8. Output validation and manifest
+**# 9. Output validation and manifest
 *-----------------------------------*
 
 foreach output_path of local output_paths {
@@ -1236,11 +1756,18 @@ local output_ids ///
     fig_desc_13 ///
     fig_desc_14 ///
     fig_desc_15 ///
+    fig_desc_16 ///
+    fig_desc_17 ///
+    fig_desc_18 ///
+    fig_desc_19 ///
     tab_desc_01 ///
     tab_desc_02 ///
     tab_desc_03 ///
     tab_desc_04 ///
-    tab_desc_05
+    tab_desc_05 ///
+    tab_desc_06 ///
+    tab_desc_07 ///
+    tab_desc_08
 local output_types ///
     figure ///
     figure ///
@@ -1257,6 +1784,13 @@ local output_types ///
     figure ///
     figure ///
     figure ///
+    figure ///
+    figure ///
+    figure ///
+    figure ///
+    table ///
+    table ///
+    table ///
     table ///
     table ///
     table ///
@@ -1278,12 +1812,20 @@ local output_specs ///
     full_ruv_department_treated_map ///
     full_ruv_department_treatment_share_map ///
     full_ruv_department_index_maps ///
+    full_cman_project_type_distribution ///
+    full_cman_cofinancing_by_project_type ///
+    full_cman_project_financing_by_year ///
+    full_cman_project_composition_by_year ///
     full_ruv_sample_coverage ///
     full_ruv_summary_statistics ///
     full_ruv_category_profile ///
     full_ruv_treatment_rollout ///
-    full_ruv_department_profile
+    full_ruv_department_profile ///
+    full_cman_project_type_financing_table ///
+    full_cman_project_financing_year_table ///
+    full_cman_project_composition_period_table
 local disclosure_statuses ///
+    aggregate_internal_review ///
     aggregate_internal_review ///
     aggregate_internal_review ///
     aggregate_internal_review ///
@@ -1303,10 +1845,16 @@ local disclosure_statuses ///
     aggregate_internal_review ///
     aggregate_internal_review ///
     aggregate_internal_review ///
+    aggregate_internal_review ///
+    aggregate_internal_review ///
+    aggregate_internal_review ///
+    aggregate_internal_review ///
+    aggregate_internal_review ///
+    aggregate_internal_review ///
     aggregate_internal_review
 
 local output_count : word count `output_paths'
-assert `output_count' == 20
+assert `output_count' == 27
 assert `output_count' == `: word count `output_ids''
 assert `output_count' == `: word count `output_types''
 assert `output_count' == `: word count `output_specs''
@@ -1324,10 +1872,19 @@ forvalues output_index = 1/`output_count' {
     local output_spec : word `output_index' of `output_specs'
     local disclosure_status : word `output_index' of `disclosure_statuses'
     local output_input "06_community_registry_geospatial.dta"
+    local output_datasignature "`input_datasignature'"
+    local output_unit "RUV centro poblado"
 
     if inrange(`output_index', 12, 15) {
         local output_input ///
             "06_community_registry_geospatial.dta+locked_legacy_department_geometry"
+    }
+
+    if inrange(`output_index', 16, 19) | ///
+       inrange(`output_index', 25, 27) {
+        local output_input "03_cman_projects_2023.dta"
+        local output_datasignature "`project_input_datasignature'"
+        local output_unit "CMAN project record"
     }
 
     quietly checksum "${project_root}/`output_path'"
@@ -1337,7 +1894,7 @@ forvalues output_index = 1/`output_count' {
     local output_bytes = strtrim("`output_bytes'")
 
     file write `output_manifest' ///
-        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/02_describe_data.do","`output_input'","`input_datasignature'","RUV centro poblado","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","`disclosure_status'","not_assigned""' _n
+        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/02_describe_data.do","`output_input'","`output_datasignature'","`output_unit'","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","`disclosure_status'","not_assigned""' _n
 }
 file close `output_manifest'
 

@@ -22,16 +22,21 @@ must extend that program instead of creating additional canonical preparation
 do-files. Its foundational source contract, current linkage results, complete-
 coverage release gate, and final-variable contract are documented in
 [`docs/FOUNDATIONAL_DATA_PREPARATION.md`](../../../docs/FOUNDATIONAL_DATA_PREPARATION.md).
+The title-based CMAN project taxonomy, multisector rule, and financing measures
+are documented in
+[`docs/CMAN_PROJECT_CLASSIFICATION.md`](../../../docs/CMAN_PROJECT_CLASSIFICATION.md).
 The dated multi-source UBIGEO recovery, rejected candidates, quarantined
 conflicts, and final RUV--CMAN accounting are documented in
 [`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](../../../docs/CCPP_UBIGEO_RECOVERY_LOG.tex).
 
 `02_describe_data.do` is the canonical full-universe descriptive module. It
 reads the final prepared community registry, preserves all 5,712 RUV rows in
-the descriptive denominator, and generates aggregate tables and figures under
-`output/`. It never defines an RD geography, estimates a discontinuity, tests
-adjacent categories, or analyzes outcomes. The point-location exhibit is
-explicitly marked for disclosure review before public release.
+the community-level descriptive denominator, and uses all 4,433 canonical CMAN
+project records for project-type and financing exhibits. It generates
+aggregate tables and figures under `output/`. It never defines an RD geography,
+estimates a discontinuity, tests adjacent categories, or analyzes outcomes.
+The point-location exhibit is explicitly marked for disclosure review before
+public release.
 
 Modules will be added sequentially. They must:
 
