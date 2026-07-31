@@ -6,6 +6,14 @@ approved by this document.
 
 **Date:** 2026-07-28
 
+**Policy-evidence update (2026-07-29):** Read
+`docs/PRC_ROLLOUT_AND_RD_REASSESSMENT.md` before applying this methodological
+memo. The later documentary review finds that the post-2012 operational rule
+jointly prioritized A and B, making B--C the only explicit boundary between
+that priority pool and the remaining categories. The general multiple-cutoff
+discussion below is therefore a diagnostic framework, not evidence that all
+four category boundaries operated as equivalent assignment rules.
+
 ## Purpose
 
 This memo consolidates the methodological issues that must be resolved before

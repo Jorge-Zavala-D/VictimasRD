@@ -1,12 +1,11 @@
 /*------------------------------------------------------------------------------
-| Title:            Full-universe descriptive analysis                         |
+| Title:            National and main-sample descriptive analysis              |
 | Project:          Victimas RD                                                |
 | Unit:             RUV centro poblado                                         |
 | Input:            06_community_registry_geospatial.dta                       |
 | Outputs:          Aggregate tables, figures, and output manifest             |
-| Description:      Describes the complete RUV universe without selecting an   |
-|                   RD geography, estimating discontinuities, or testing       |
-|                   outcomes.                                                   |
+| Description:      Describes the complete RUV universe and the research-team- |
+|                   selected legacy RD geography without estimating effects.   |
 -------------------------------------------------------------------------------*/
 
 version 19
@@ -42,6 +41,8 @@ local table_dir  "${tables_root}/descriptive"
 local manifest  "${metadata_root}/output-manifest.csv"
 local department_map_data   "${data_root}/data_dpto.dta"
 local department_map_coords "${data_root}/coor_dpto.dta"
+local province_map_data     "${data_root}/data_prov.dta"
+local province_map_coords   "${data_root}/coor_prov.dta"
 
 capture confirm file "`input_file'"
 
@@ -96,7 +97,16 @@ local output_paths ///
     output/tables/descriptive/tab_desc_05_department_profile.tex ///
     output/tables/descriptive/tab_desc_06_project_types_financing.tex ///
     output/tables/descriptive/tab_desc_07_project_financing_by_year.tex ///
-    output/tables/descriptive/tab_desc_08_project_composition_periods.tex
+    output/tables/descriptive/tab_desc_08_project_composition_periods.tex ///
+    output/figures/descriptive/fig_desc_20_treatment_by_category_over_time.png ///
+    output/tables/descriptive/rd_rollout_category_year.csv ///
+    output/tables/descriptive/tab_desc_09_treatment_by_category_over_time.tex ///
+    output/figures/descriptive/fig_desc_21_main_rd_sample_map.png ///
+    output/figures/descriptive/fig_desc_22_main_rd_sample_profile.png ///
+    output/tables/descriptive/rd_main_sample_geographic_profile.csv ///
+    output/tables/descriptive/rd_main_sample_comparison.csv ///
+    output/tables/descriptive/tab_desc_10_main_rd_sample_profile.tex ///
+    output/tables/descriptive/tab_desc_11_main_rd_sample_comparison.tex
 
 /*
 Remove only this module's exact generated products. This prevents an interrupted
@@ -109,7 +119,9 @@ capture erase "`manifest'"
 
 foreach boundary_file in ///
     "`department_map_data'" ///
-    "`department_map_coords'" {
+    "`department_map_coords'" ///
+    "`province_map_data'" ///
+    "`province_map_coords'" {
 
     capture confirm file "`boundary_file'"
 
@@ -126,6 +138,12 @@ assert r(filelen) == 5885
 quietly checksum "`department_map_coords'"
 assert r(checksum) == 3955920608
 assert r(filelen) == 4996565
+quietly checksum "`province_map_data'"
+assert r(checksum) == 3172781531
+assert r(filelen) == 27149
+quietly checksum "`province_map_coords'"
+assert r(checksum) == 2826354662
+assert r(filelen) == 11933505
 
 use "`input_file'", clear
 
@@ -137,6 +155,10 @@ assert victimization_index >= 0
 assert inlist(ubigeo_ccpp_verified, 0, 1)
 assert inlist(census2007_linked, 0, 1)
 assert inlist(geospatial_linked, 0, 1)
+assert inlist(sample_main_rd, 0, 1)
+assert sample_main_rd == ( ///
+    inlist(substr(ubigeo_dist, 1, 2), "03", "09") | ///
+    inlist(substr(ubigeo_dist, 1, 4), "0809", "1201"))
 
 local previous_treatment
 
@@ -194,10 +216,15 @@ quietly count if geospatial_linked == 1
 local n_spatial = r(N)
 quietly count if !missing(altitude_m_2017)
 local n_altitude = r(N)
+quietly count if sample_main_rd
+local n_main_rd = r(N)
+local n_outside_main_rd = `n_ruv' - `n_main_rd'
 
 assert `n_treated_2023' == 4221
 assert `n_not_recorded_2023' == 1491
 assert `n_treated_2023' + `n_not_recorded_2023' == `n_ruv'
+assert `n_main_rd' == 1162
+assert `n_outside_main_rd' == 4550
 
 local graph_scheme "${graph_scheme}"
 
@@ -240,6 +267,10 @@ label variable dist_dist_capital_km     "Corresponding district capital"
 label variable dist_prov_capital_km     "Corresponding province capital"
 label variable dist_dept_capital_km     "Corresponding department capital"
 label variable dist_nearest_city_km     "Nearest CCPP categorized as city"
+
+generate byte priority_ab = ///
+    inlist(victimization_level_source, "A", "B")
+label variable priority_ab "RUV category A or B"
 
 
 *-----------------------------------*
@@ -446,6 +477,220 @@ graph bar (asis) treat_13 treat_17 treat_23, ///
 graph export ///
     "`figure_dir'/fig_desc_04_treatment_by_category.png", ///
     width(2400) replace
+restore
+
+/*
+Annual category coverage distinguishes cumulative saturation from the
+composition of each newly recorded treatment cohort. The CMAN year is treated
+as the first recorded project year, not as a verified completion date.
+*/
+
+tempfile category_rollout category_cohorts category_rollout_complete
+
+preserve
+collapse ///
+    (count) category_communities=victimization_index ///
+    (mean) treat_07-treat_23, ///
+    by(victimization_level_source)
+
+forvalues year_suffix = 7/9 {
+    rename treat_0`year_suffix' treat_`year_suffix'
+}
+
+reshape long treat_, ///
+    i(victimization_level_source category_communities) ///
+    j(year_suffix)
+rename treat_ cumulative_treatment_share
+generate int year = 2000 + year_suffix
+generate int cumulative_treated = ///
+    round(category_communities * cumulative_treatment_share)
+replace cumulative_treatment_share = ///
+    100 * cumulative_treatment_share
+drop year_suffix
+isid victimization_level_source year
+save "`category_rollout'", replace
+restore
+
+preserve
+keep if !missing(recorded_project_year)
+contract ///
+    victimization_level_source ///
+    recorded_project_year, ///
+    freq(newly_treated)
+rename recorded_project_year year
+bysort year: egen int annual_newly_treated = total(newly_treated)
+generate double new_cohort_share = ///
+    100 * newly_treated / annual_newly_treated
+isid victimization_level_source year
+save "`category_cohorts'", replace
+restore
+
+preserve
+use "`category_rollout'", clear
+merge 1:1 victimization_level_source year ///
+    using "`category_cohorts'", ///
+    assert(master match) nogen
+replace newly_treated = 0 if missing(newly_treated)
+replace new_cohort_share = 0 if missing(new_cohort_share)
+bysort year: egen int annual_newly_treated_fill = ///
+    max(annual_newly_treated)
+replace annual_newly_treated = annual_newly_treated_fill if ///
+    missing(annual_newly_treated)
+drop annual_newly_treated_fill
+order ///
+    year ///
+    victimization_level_source ///
+    category_communities ///
+    cumulative_treated ///
+    cumulative_treatment_share ///
+    newly_treated ///
+    new_cohort_share ///
+    annual_newly_treated
+sort year victimization_level_source
+save "`category_rollout_complete'", replace
+export delimited using ///
+    "`table_dir'/rd_rollout_category_year.csv", ///
+    replace
+
+twoway ///
+    (connected cumulative_treatment_share year ///
+        if victimization_level_source == "A", ///
+        sort lcolor(navy) lwidth(medthick) ///
+        mcolor(navy) msymbol(O) msize(vsmall)) ///
+    (connected cumulative_treatment_share year ///
+        if victimization_level_source == "B", ///
+        sort lcolor(teal) lwidth(medthick) ///
+        mcolor(teal) msymbol(D) msize(vsmall)) ///
+    (connected cumulative_treatment_share year ///
+        if victimization_level_source == "C", ///
+        sort lcolor(orange) lwidth(medthick) ///
+        mcolor(orange) msymbol(T) msize(vsmall)) ///
+    (connected cumulative_treatment_share year ///
+        if victimization_level_source == "D", ///
+        sort lcolor(maroon) lwidth(medthick) ///
+        mcolor(maroon) msymbol(S) msize(vsmall)) ///
+    (connected cumulative_treatment_share year ///
+        if victimization_level_source == "E", ///
+        sort lcolor(forest_green) lwidth(medthick) ///
+        mcolor(forest_green) msymbol(Oh) msize(vsmall)), ///
+    xlabel(2007(4)2023, angle(45) labsize(vsmall)) ///
+    ylabel(0(20)100, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(vsmall)) ///
+    xtitle("First recorded project year", size(vsmall)) ///
+    ytitle("Cumulative coverage (%)", size(vsmall)) ///
+    title("Coverage within each category", ///
+        size(small) color(black)) ///
+    legend(off) ///
+    graphregion(color(white)) ///
+    plotregion(color(white)) ///
+    name(desc_category_coverage_year, replace)
+
+keep year victimization_level_source new_cohort_share
+generate byte category_order = ///
+    strpos("ABCDE", victimization_level_source)
+drop victimization_level_source
+reshape wide new_cohort_share, ///
+    i(year) j(category_order)
+
+forvalues category = 1/5 {
+    replace new_cohort_share`category' = 0 if ///
+        missing(new_cohort_share`category')
+}
+
+egen double cohort_share_check = ///
+    rowtotal(new_cohort_share1-new_cohort_share5)
+assert abs(cohort_share_check - 100) < 1e-8
+
+graph bar (asis) ///
+    new_cohort_share1 ///
+    new_cohort_share2 ///
+    new_cohort_share3 ///
+    new_cohort_share4 ///
+    new_cohort_share5, ///
+    over(year, label(angle(45) labsize(small))) ///
+    stack ///
+    bar(1, color(navy%88) lcolor(white)) ///
+    bar(2, color(teal%85) lcolor(white)) ///
+    bar(3, color(orange%82) lcolor(white)) ///
+    bar(4, color(maroon%78) lcolor(white)) ///
+    bar(5, color(forest_green%78) lcolor(white)) ///
+    ylabel(0(20)100, ///
+        grid glcolor(gs14) glwidth(vthin) labsize(vsmall)) ///
+    ytitle("New cohort share (%)", size(vsmall)) ///
+    title("Composition of annual cohorts", ///
+        size(small) color(black)) ///
+    legend( ///
+        order(1 "A" 2 "B" 3 "C" 4 "D" 5 "E") ///
+        rows(1) position(6) size(vsmall) region(lcolor(none))) ///
+    graphregion(color(white)) ///
+    plotregion(color(white)) ///
+    name(desc_category_cohort_year, replace)
+
+graph combine ///
+    desc_category_coverage_year ///
+    desc_category_cohort_year, ///
+    cols(1) xsize(11) ysize(8) imargin(tiny) ///
+    title("Collective-reparation rollout by victimization category", ///
+        size(medsmall) color(black)) ///
+    subtitle("Cumulative coverage and annual cohort composition, 2007-2023", ///
+        size(vsmall) color(gs5)) ///
+    note( ///
+        "Notes: RUV centro poblados (N = 5,712). Panel A reports cumulative coverage within each official category;" ///
+        "Panel B reports category shares within each newly linked annual cohort. A is the highest victimization tier." ///
+        "CMAN year is the first recorded project year, not verified completion. No model or uncertainty is used." ///
+        "Source: RUV Libro Segundo linked to the CMAN register through 2023.", ///
+        size(tiny) color(gs5)) ///
+    graphregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_desc_20_treatment_by_category_over_time.png", ///
+    width(2800) replace
+graph drop ///
+    desc_category_coverage_year ///
+    desc_category_cohort_year
+restore
+
+preserve
+use "`category_rollout_complete'", clear
+tempname category_year_table
+file open `category_year_table' ///
+    using "`table_dir'/tab_desc_09_treatment_by_category_over_time.tex", ///
+    write replace text
+
+file write `category_year_table' "\begin{table}[!htbp]" _n
+file write `category_year_table' "\centering" _n
+file write `category_year_table' "\caption{Cumulative collective-reparation coverage by victimization category}" _n
+file write `category_year_table' "\label{tab:desc_treatment_category_year}" _n
+file write `category_year_table' "\begin{tabular}{lrrrrrrr}" _n
+file write `category_year_table' "\toprule" _n
+file write `category_year_table' "Category & RUV communities & 2007 & 2010 & 2012 & 2016 & 2020 & 2023 \\" _n
+file write `category_year_table' "\midrule" _n
+
+foreach category in A B C D E {
+    quietly summarize category_communities if ///
+        victimization_level_source == "`category'"
+    local category_n : display %9.0fc r(mean)
+    local category_n = strtrim("`category_n'")
+    local category_row "`category' & `category_n'"
+
+    foreach year in 2007 2010 2012 2016 2020 2023 {
+        quietly summarize cumulative_treatment_share if ///
+            victimization_level_source == "`category'" & ///
+            year == `year'
+        assert r(N) == 1
+        local coverage : display %5.1f r(mean)
+        local coverage = strtrim("`coverage'")
+        local category_row "`category_row' & `coverage'"
+    }
+
+    file write `category_year_table' "`category_row' \\" _n
+}
+
+file write `category_year_table' "\bottomrule" _n
+file write `category_year_table' "\end{tabular}" _n
+file write `category_year_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} Entries after the community count are percentages of all RUV communities in the indicated official victimization category with a linked CMAN project by the end of the listed recorded year. Category A denotes the highest recorded victimization tier. CMAN year is the first project year in the available roster and is not verified as completion. No RD sample or model is used. Source: RUV Libro Segundo linked to the CMAN register through 2023.}" _n
+file write `category_year_table' "\end{table}" _n
+file close `category_year_table'
 restore
 
 preserve
@@ -939,7 +1184,420 @@ restore
 
 
 *-----------------------------------*
-**# 7. CMAN project types and financing
+**# 7. Selected main RD geography
+*-----------------------------------*
+
+/*
+The research team selected the exact legacy geography on 29 July 2026. These
+outputs describe that fixed rule; they do not re-run the geographic search,
+test an RD first stage, or compare outcomes.
+*/
+
+preserve
+use "`province_map_data'", clear
+
+isid ubigeo_prov
+assert _N == 193
+
+generate byte sample_main_rd = ///
+    inlist(substr(ubigeo_prov, 1, 2), "03", "09") | ///
+    inlist(ubigeo_prov, "0809", "1201")
+
+count if sample_main_rd
+assert r(N) == 16
+
+label define sample_main_rd_map ///
+    0 "Outside selected geography" ///
+    1 "Selected RD geography"
+label values sample_main_rd sample_main_rd_map
+
+spmap sample_main_rd using "`province_map_coords'", ///
+    id(id) ///
+    clmethod(unique) ///
+    fcolor(gs14 navy) ///
+    ocolor(white white) ///
+    osize(vthin thin) ///
+    legorder(lohi) ///
+    legend( ///
+        order(1 "Outside selected geography" 2 "Selected RD geography") ///
+        rows(1) position(6) ring(1) size(small) ///
+        region(lcolor(none))) ///
+    title("Geographic definition of the selected RD sample", ///
+        size(medium) color(black)) ///
+    subtitle( ///
+        "Apurimac and Huancavelica, plus La Convencion and Huancayo provinces", ///
+        size(small) color(gs5)) ///
+    note( ///
+        "Notes: The selected rule contains all RUV communities in the departments of Apurimac and Huancavelica, La Convencion province in Cusco," ///
+        "and Huancayo province in Junin (1,162 communities). Shading identifies the geographic rule and does not represent treatment or an estimate." ///
+        "Boundary geometry is the checksum-locked 2018 legacy province file; publication use requires verification against an official versioned source." ///
+        "Analytical source: RUV Libro Segundo. Geographic decision recorded by the research team on 29 July 2026.", ///
+        size(vsmall) color(gs5) span) ///
+    graphregion(color(white)) ///
+    xsize(8.5) ysize(8.5)
+
+graph export ///
+    "`figure_dir'/fig_desc_21_main_rd_sample_map.png", ///
+    width(2400) replace
+restore
+
+preserve
+contract sample_main_rd victimization_level_source
+bysort sample_main_rd: egen long sample_total = total(_freq)
+generate double category_share = 100 * _freq / sample_total
+keep sample_main_rd victimization_level_source category_share
+reshape wide category_share, ///
+    i(victimization_level_source) j(sample_main_rd)
+assert !missing(category_share0, category_share1)
+
+graph bar (asis) category_share0 category_share1, ///
+    over(victimization_level_source, label(labsize(small))) ///
+    bar(1, color(gs10) lcolor(gs8)) ///
+    bar(2, color(navy%80) lcolor(navy)) ///
+    blabel(bar, format(%4.1f) size(vsmall) color(gs4)) ///
+    ylabel(0(5)30, angle(horizontal) grid glcolor(gs14) ///
+        glwidth(vthin) labsize(small)) ///
+    yscale(range(0 30)) ///
+    ytitle("Communities in group (%)", size(small)) ///
+    title("Victimization-category composition", ///
+        size(medsmall) color(black)) ///
+    legend( ///
+        order(1 "Remaining RUV universe" 2 "Selected RD geography") ///
+        rows(1) size(vsmall) region(lcolor(none))) ///
+    graphregion(color(white)) plotregion(color(white)) ///
+    name(desc_main_rd_categories, replace)
+restore
+
+preserve
+collapse (mean) ///
+    coverage2007=treat_07 ///
+    coverage2012=treat_12 ///
+    coverage2016=treat_16 ///
+    coverage2023=treat_23, ///
+    by(sample_main_rd)
+
+reshape long coverage, i(sample_main_rd) j(year)
+replace coverage = 100 * coverage
+reshape wide coverage, i(year) j(sample_main_rd)
+assert !missing(coverage0, coverage1)
+
+graph bar (asis) coverage0 coverage1, ///
+    over(year, label(labsize(small))) ///
+    bar(1, color(gs10) lcolor(gs8)) ///
+    bar(2, color(teal%80) lcolor(teal)) ///
+    blabel(bar, format(%4.1f) size(vsmall) color(gs4)) ///
+    ylabel(0(20)100, angle(horizontal) grid glcolor(gs14) ///
+        glwidth(vthin) labsize(small)) ///
+    yscale(range(0 100)) ///
+    ytitle("Communities with a linked project (%)", size(small)) ///
+    title("Cumulative collective-reparation coverage", ///
+        size(medsmall) color(black)) ///
+    legend( ///
+        order(1 "Remaining RUV universe" 2 "Selected RD geography") ///
+        rows(1) size(vsmall) region(lcolor(none))) ///
+    graphregion(color(white)) plotregion(color(white)) ///
+    name(desc_main_rd_treatment, replace)
+restore
+
+graph combine desc_main_rd_categories desc_main_rd_treatment, ///
+    cols(2) xsize(12) ysize(6.2) ///
+    title("Profile of the selected RD geography", ///
+        size(medium) color(black)) ///
+    subtitle( ///
+        "Composition and cumulative project receipt relative to the remaining RUV universe", ///
+        size(small) color(gs5)) ///
+    note( ///
+        "Notes: Unit of analysis is the RUV centro poblado. The selected geography contains 1,162 communities; the remaining universe contains 4,550." ///
+        "Panel A reports within-group category shares. Panel B reports cumulative linked CMAN project receipt through each listed year." ///
+        "CMAN year is the first project year in the available roster and is not verified as completion. No statistical test or causal comparison is shown." ///
+        "Sources: RUV Libro Segundo and CMAN register through 2023.", ///
+        size(vsmall) color(gs5) span) ///
+    graphregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_desc_22_main_rd_sample_profile.png", ///
+    width(2800) replace
+graph drop desc_main_rd_categories desc_main_rd_treatment
+
+quietly summarize census2007_linked if sample_main_rd
+local main_rd_census_share = 100 * r(mean)
+quietly summarize geospatial_linked if sample_main_rd
+local main_rd_spatial_share = 100 * r(mean)
+quietly summarize treat_12 if sample_main_rd
+local main_rd_treat12_share = 100 * r(mean)
+quietly summarize treat_16 if sample_main_rd
+local main_rd_treat16_share = 100 * r(mean)
+quietly summarize treat_23 if sample_main_rd
+local main_rd_treat23_share = 100 * r(mean)
+
+preserve
+keep if sample_main_rd
+
+generate byte component_order = .
+generate str36 geographic_component = ""
+
+replace component_order = 1 if substr(ubigeo_dist, 1, 2) == "03"
+replace geographic_component = "Apurimac (all provinces)" if ///
+    component_order == 1
+replace component_order = 2 if substr(ubigeo_dist, 1, 2) == "09"
+replace geographic_component = "Huancavelica (all provinces)" if ///
+    component_order == 2
+replace component_order = 3 if substr(ubigeo_dist, 1, 4) == "0809"
+replace geographic_component = "La Convencion (Cusco)" if ///
+    component_order == 3
+replace component_order = 4 if substr(ubigeo_dist, 1, 4) == "1201"
+replace geographic_component = "Huancayo (Junin)" if ///
+    component_order == 4
+
+assert !missing(component_order, geographic_component)
+
+collapse ///
+    (count) communities=ruv_id ///
+    (mean) census_link_share=census2007_linked ///
+           spatial_link_share=geospatial_linked ///
+           treated_2012_share=treat_12 ///
+           treated_2016_share=treat_16 ///
+           treated_2023_share=treat_23, ///
+    by(component_order geographic_component)
+
+foreach share_variable in ///
+    census_link_share ///
+    spatial_link_share ///
+    treated_2012_share ///
+    treated_2016_share ///
+    treated_2023_share {
+
+    replace `share_variable' = 100 * `share_variable'
+}
+
+generate double sample_share = 100 * communities / `n_main_rd'
+
+set obs `=_N + 1'
+replace component_order = 5 in L
+replace geographic_component = "Total selected geography" in L
+replace communities = `n_main_rd' in L
+replace sample_share = 100 in L
+replace census_link_share = `main_rd_census_share' in L
+replace spatial_link_share = `main_rd_spatial_share' in L
+replace treated_2012_share = `main_rd_treat12_share' in L
+replace treated_2016_share = `main_rd_treat16_share' in L
+replace treated_2023_share = `main_rd_treat23_share' in L
+sort component_order
+
+export delimited ///
+    "`table_dir'/rd_main_sample_geographic_profile.csv", ///
+    replace
+
+tempname main_rd_profile_table
+file open `main_rd_profile_table' ///
+    using "`table_dir'/tab_desc_10_main_rd_sample_profile.tex", ///
+    write replace text
+
+file write `main_rd_profile_table' "\begin{table}[!htbp]" _n
+file write `main_rd_profile_table' "\centering" _n
+file write `main_rd_profile_table' "\caption{Composition and coverage of the selected RD geography}" _n
+file write `main_rd_profile_table' "\label{tab:desc_main_rd_sample_profile}" _n
+file write `main_rd_profile_table' "\begin{tabular}{lrrrrrrr}" _n
+file write `main_rd_profile_table' "\toprule" _n
+file write `main_rd_profile_table' "Geographic component & Communities & Sample share (\%) & Census 2007 linked (\%) & Spatially linked (\%) & Treated 2012 (\%) & Treated 2016 (\%) & Treated 2023 (\%) \\" _n
+file write `main_rd_profile_table' "\midrule" _n
+
+forvalues component_index = 1/`=_N' {
+    local component_name "`=geographic_component[`component_index']'"
+    local component_n : display %9.0fc communities[`component_index']
+    local component_share_fmt : display %5.1f sample_share[`component_index']
+    local census_share_fmt : display %5.1f census_link_share[`component_index']
+    local spatial_share_fmt : display %5.1f spatial_link_share[`component_index']
+    local treat12_share_fmt : display %5.1f treated_2012_share[`component_index']
+    local treat16_share_fmt : display %5.1f treated_2016_share[`component_index']
+    local treat23_share_fmt : display %5.1f treated_2023_share[`component_index']
+
+    foreach formatted_value in ///
+        component_n ///
+        component_share_fmt ///
+        census_share_fmt ///
+        spatial_share_fmt ///
+        treat12_share_fmt ///
+        treat16_share_fmt ///
+        treat23_share_fmt {
+
+        local `formatted_value' = strtrim("``formatted_value''")
+    }
+
+    if `component_index' == _N {
+        file write `main_rd_profile_table' "\midrule" _n
+    }
+
+    file write `main_rd_profile_table' ///
+        "`component_name' & `component_n' & `component_share_fmt' & `census_share_fmt' & `spatial_share_fmt' & `treat12_share_fmt' & `treat16_share_fmt' & `treat23_share_fmt' \\" _n
+}
+
+file write `main_rd_profile_table' "\bottomrule" _n
+file write `main_rd_profile_table' "\end{tabular}" _n
+file write `main_rd_profile_table' "\parbox{0.99\linewidth}{\footnotesize \textit{Notes:} The selected geography contains all RUV communities in Apurimac and Huancavelica, La Convencion province in Cusco, and Huancayo province in Junin. Linkage columns report the percentage of each component linked to the indicated source. Treatment columns report cumulative CMAN project receipt through the listed recorded year. The CMAN year is not yet verified as project completion. Sources: RUV Libro Segundo, CMAN register through 2023, 2007 Census CCPP tabulation, and 2017 CCPP spatial source.}" _n
+file write `main_rd_profile_table' "\end{table}" _n
+file close `main_rd_profile_table'
+restore
+
+tempname main_rd_comparison_post
+tempfile main_rd_comparison
+
+postfile `main_rd_comparison_post' ///
+    int row_order ///
+    str64 characteristic ///
+    double selected_n ///
+    double selected_mean ///
+    double remaining_n ///
+    double remaining_mean ///
+    double standardized_difference ///
+    using "`main_rd_comparison'", replace
+
+local comparison_variable_1 victimization_index
+local comparison_label_1 "Victimization index"
+local comparison_scale_1 1
+local comparison_variable_2 priority_ab
+local comparison_label_2 "RUV category A or B (percent)"
+local comparison_scale_2 100
+local comparison_variable_3 population_2007
+local comparison_label_3 "Population, 2007"
+local comparison_scale_3 1
+local comparison_variable_4 urban_2007
+local comparison_label_4 "Urban centro poblado, 2007 (percent)"
+local comparison_scale_4 100
+local comparison_variable_5 wellbeing_core_2007
+local comparison_label_5 "Baseline wellbeing score, 2007"
+local comparison_scale_5 1
+local comparison_variable_6 altitude_m_2017
+local comparison_label_6 "Altitude (meters)"
+local comparison_scale_6 1
+local comparison_variable_7 dist_dist_capital_km
+local comparison_label_7 "Distance to corresponding district capital (km)"
+local comparison_scale_7 1
+local comparison_variable_8 census2007_linked
+local comparison_label_8 "Linked to Census 2007 (percent)"
+local comparison_scale_8 100
+local comparison_variable_9 geospatial_linked
+local comparison_label_9 "Linked to spatial source (percent)"
+local comparison_scale_9 100
+local comparison_variable_10 treat_12
+local comparison_label_10 "Collective reparations by 2012 (percent)"
+local comparison_scale_10 100
+local comparison_variable_11 treat_16
+local comparison_label_11 "Collective reparations by 2016 (percent)"
+local comparison_scale_11 100
+local comparison_variable_12 treat_23
+local comparison_label_12 "Collective reparations by 2023 (percent)"
+local comparison_scale_12 100
+
+forvalues comparison_index = 1/12 {
+    local comparison_variable ///
+        "`comparison_variable_`comparison_index''"
+    local comparison_label ///
+        "`comparison_label_`comparison_index''"
+    local comparison_scale = ///
+        `comparison_scale_`comparison_index''
+
+    quietly summarize `comparison_variable' if sample_main_rd
+    local selected_n = r(N)
+    local selected_mean = r(mean)
+    local selected_sd = r(sd)
+
+    quietly summarize `comparison_variable' if !sample_main_rd
+    local remaining_n = r(N)
+    local remaining_mean = r(mean)
+    local remaining_sd = r(sd)
+
+    local pooled_sd = sqrt( ///
+        ((`selected_n' - 1) * `selected_sd'^2 + ///
+         (`remaining_n' - 1) * `remaining_sd'^2) / ///
+        (`selected_n' + `remaining_n' - 2))
+    local standardized_difference = ///
+        (`selected_mean' - `remaining_mean') / `pooled_sd'
+
+    post `main_rd_comparison_post' ///
+        (`comparison_index') ///
+        ("`comparison_label'") ///
+        (`selected_n') ///
+        (`selected_mean' * `comparison_scale') ///
+        (`remaining_n') ///
+        (`remaining_mean' * `comparison_scale') ///
+        (`standardized_difference')
+}
+postclose `main_rd_comparison_post'
+
+preserve
+use "`main_rd_comparison'", clear
+isid row_order
+sort row_order
+
+export delimited ///
+    "`table_dir'/rd_main_sample_comparison.csv", ///
+    replace
+
+tempname main_rd_comparison_table
+file open `main_rd_comparison_table' ///
+    using "`table_dir'/tab_desc_11_main_rd_sample_comparison.tex", ///
+    write replace text
+
+file write `main_rd_comparison_table' "\begin{table}[!htbp]" _n
+file write `main_rd_comparison_table' "\centering" _n
+file write `main_rd_comparison_table' "\caption{Descriptive comparison of the selected RD geography and remaining RUV universe}" _n
+file write `main_rd_comparison_table' "\label{tab:desc_main_rd_sample_comparison}" _n
+file write `main_rd_comparison_table' "\begin{tabular}{lrrrrr}" _n
+file write `main_rd_comparison_table' "\toprule" _n
+file write `main_rd_comparison_table' "Characteristic & Selected N & Selected mean & Remaining N & Remaining mean & Standardized difference \\" _n
+file write `main_rd_comparison_table' "\midrule" _n
+
+forvalues comparison_index = 1/`=_N' {
+    local characteristic_text ///
+        "`=characteristic[`comparison_index']'"
+    local selected_n_fmt : display ///
+        %9.0fc selected_n[`comparison_index']
+    local remaining_n_fmt : display ///
+        %9.0fc remaining_n[`comparison_index']
+    local mean_format "%7.3f"
+
+    if inlist(row_order[`comparison_index'], 2, 4, 8, 9, 10, 11, 12) {
+        local mean_format "%6.1f"
+    }
+    else if inlist(row_order[`comparison_index'], 3, 6) {
+        local mean_format "%9.1f"
+    }
+    else if row_order[`comparison_index'] == 7 {
+        local mean_format "%7.1f"
+    }
+
+    local selected_mean_fmt : display `mean_format' ///
+        selected_mean[`comparison_index']
+    local remaining_mean_fmt : display `mean_format' ///
+        remaining_mean[`comparison_index']
+    local standardized_difference_fmt : display %6.2f ///
+        standardized_difference[`comparison_index']
+
+    foreach formatted_value in ///
+        selected_n_fmt ///
+        remaining_n_fmt ///
+        selected_mean_fmt ///
+        remaining_mean_fmt ///
+        standardized_difference_fmt {
+
+        local `formatted_value' = strtrim("``formatted_value''")
+    }
+
+    file write `main_rd_comparison_table' ///
+        "`characteristic_text' & `selected_n_fmt' & `selected_mean_fmt' & `remaining_n_fmt' & `remaining_mean_fmt' & `standardized_difference_fmt' \\" _n
+}
+
+file write `main_rd_comparison_table' "\bottomrule" _n
+file write `main_rd_comparison_table' "\end{tabular}" _n
+file write `main_rd_comparison_table' "\parbox{0.99\linewidth}{\footnotesize \textit{Notes:} The selected group is the 1,162-community legacy geography encoded by \texttt{sample\_main\_rd}; the remaining group contains 4,550 RUV communities. Each row uses all nonmissing observations for that characteristic. The standardized difference is the selected-minus-remaining mean divided by the pooled standard deviation. Treatment variables are post-assignment descriptions; this is neither a balance test nor a causal comparison, and no significance tests are reported. Sources: RUV Libro Segundo, CMAN register through 2023, 2007 Census CCPP tabulation, and 2017 CCPP spatial source.}" _n
+file write `main_rd_comparison_table' "\end{table}" _n
+file close `main_rd_comparison_table'
+restore
+
+
+*-----------------------------------*
+**# 8. CMAN project types and financing
 *-----------------------------------*
 
 /*
@@ -1433,7 +2091,7 @@ restore
 
 
 *-----------------------------------*
-**# 8. Academic descriptive tables
+**# 9. Academic descriptive tables
 *-----------------------------------*
 
 tempname coverage_table
@@ -1716,7 +2374,7 @@ restore
 
 
 *-----------------------------------*
-**# 9. Output validation and manifest
+**# 10. Output validation and manifest
 *-----------------------------------*
 
 foreach output_path of local output_paths {
@@ -1767,7 +2425,16 @@ local output_ids ///
     tab_desc_05 ///
     tab_desc_06 ///
     tab_desc_07 ///
-    tab_desc_08
+    tab_desc_08 ///
+    fig_desc_20 ///
+    rd_rollout_category_year ///
+    tab_desc_09 ///
+    fig_desc_21 ///
+    fig_desc_22 ///
+    rd_main_sample_geographic_profile ///
+    rd_main_sample_comparison ///
+    tab_desc_10 ///
+    tab_desc_11
 local output_types ///
     figure ///
     figure ///
@@ -1792,6 +2459,15 @@ local output_types ///
     table ///
     table ///
     table ///
+    table ///
+    table ///
+    table ///
+    table ///
+    figure ///
+    table ///
+    table ///
+    figure ///
+    figure ///
     table ///
     table ///
     table ///
@@ -1823,42 +2499,21 @@ local output_specs ///
     full_ruv_department_profile ///
     full_cman_project_type_financing_table ///
     full_cman_project_financing_year_table ///
-    full_cman_project_composition_period_table
-local disclosure_statuses ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    point_map_review_required ///
-    boundary_source_review_required ///
-    boundary_source_review_required ///
-    boundary_source_review_required ///
-    boundary_source_review_required ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review ///
-    aggregate_internal_review
-
+    full_cman_project_composition_period_table ///
+    full_ruv_category_rollout_over_time ///
+    full_ruv_category_rollout_year_data ///
+    full_ruv_category_rollout_year_table ///
+    selected_main_rd_geographic_map ///
+    selected_main_rd_composition_profile ///
+    selected_main_rd_geographic_profile_data ///
+    selected_main_rd_comparison_data ///
+    selected_main_rd_geographic_profile_table ///
+    selected_main_rd_comparison_table
 local output_count : word count `output_paths'
-assert `output_count' == 27
+assert `output_count' == 36
 assert `output_count' == `: word count `output_ids''
 assert `output_count' == `: word count `output_types''
 assert `output_count' == `: word count `output_specs''
-assert `output_count' == `: word count `disclosure_statuses''
 
 tempname output_manifest
 file open `output_manifest' using "`manifest'", write replace text
@@ -1870,14 +2525,34 @@ forvalues output_index = 1/`output_count' {
     local output_id : word `output_index' of `output_ids'
     local output_type : word `output_index' of `output_types'
     local output_spec : word `output_index' of `output_specs'
-    local disclosure_status : word `output_index' of `disclosure_statuses'
+    local disclosure_status "aggregate_internal_review"
     local output_input "06_community_registry_geospatial.dta"
     local output_datasignature "`input_datasignature'"
     local output_unit "RUV centro poblado"
 
+    if "`output_id'" == "fig_desc_11" {
+        local disclosure_status "point_map_review_required"
+    }
+
+    if inlist( ///
+        "`output_id'", ///
+        "fig_desc_12", ///
+        "fig_desc_13", ///
+        "fig_desc_14", ///
+        "fig_desc_15", ///
+        "fig_desc_21") {
+
+        local disclosure_status "boundary_source_review_required"
+    }
+
     if inrange(`output_index', 12, 15) {
         local output_input ///
             "06_community_registry_geospatial.dta+locked_legacy_department_geometry"
+    }
+
+    if "`output_id'" == "fig_desc_21" {
+        local output_input ///
+            "06_community_registry_geospatial.dta+locked_legacy_province_geometry"
     }
 
     if inrange(`output_index', 16, 19) | ///

@@ -19,3 +19,9 @@ Planned metadata products include:
 Do not include restricted filenames, paths, checksums, labels, or counts when
 they would reveal confidential content. Never place data observations in this
 directory.
+
+The `rd-design/` subdirectory contains the approved cutoff registry, index
+formula audit, source inventory and checksums, specification registry inputs,
+and the compact documentary ledger for the PRC rollout reassessment. These are
+non-observation governance records; the complete specification-level Stata
+audit remains in the authorized Dropbox Working QA area.

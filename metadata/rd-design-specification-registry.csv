@@ -9,7 +9,8 @@ named_p1_mserd_band,named_candidates,drop_rounding_band,1,2,mserd,triangular,dis
 named_p1_cerrd_band,named_candidates,drop_rounding_band,1,2,cerrd,triangular,district_clustered,bandwidth sensitivity
 named_p2_mserd_band,named_candidates,drop_rounding_band,2,3,mserd,triangular,district_clustered,polynomial sensitivity
 dynamic_p1_mserd,dynamic_treatment_years,score_as_recorded,1,2,mserd,triangular,district_clustered,complete treatment trajectory
-atlas_p1_mserd,geographic_heterogeneity_atlas,drop_rounding_band,1,2,mserd,triangular,district_clustered,descriptive heterogeneity only
-department_subset_p1_mserd,bounded_department_subsets,drop_rounding_band,1,2,mserd,triangular,district_clustered,"all cutoffs and three horizons; diagnostic only"
-province_subset_bc_p1_mserd,bounded_province_subsets,drop_rounding_band,1,2,mserd,triangular,district_clustered,"B-C and three horizons; diagnostic only"
+support_full_p1_mserd,running_variable_support_sensitivity,score_as_recorded,1,2,mserd,triangular,district_clustered,"full score support for named candidates; compare with adjacent-category support"
+atlas_p1_mserd,geographic_heterogeneity_atlas,drop_rounding_band,1,2,mserd,triangular,district_clustered,"all cutoffs and all 2007-2023 treatment years; diagnostic only"
+department_subset_p1_mserd,bounded_department_subsets,drop_rounding_band,1,2,mserd,triangular,district_clustered,"all cutoffs and all 2007-2023 treatment years; diagnostic only"
+province_subset_p1_mserd,bounded_province_subsets,drop_rounding_band,1,2,mserd,triangular,district_clustered,"all cutoffs and all 2007-2023 treatment years; diagnostic only"
 covariate_continuity_p1_mserd,covariate_continuity,drop_rounding_band,1,2,mserd,triangular,district_clustered,"pre-treatment covariate falsification across named candidates and cutoffs"

@@ -29,33 +29,43 @@ The dated multi-source UBIGEO recovery, rejected candidates, quarantined
 conflicts, and final RUV--CMAN accounting are documented in
 [`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](../../../docs/CCPP_UBIGEO_RECOVERY_LOG.tex).
 
-`02_describe_data.do` is the canonical full-universe descriptive module. It
-reads the final prepared community registry, preserves all 5,712 RUV rows in
-the community-level descriptive denominator, and uses all 4,433 canonical CMAN
+`02_describe_data.do` is the canonical national and selected-sample
+descriptive module. It reads the final prepared community registry, preserves
+all 5,712 RUV rows in national denominators, describes the fixed
+1,162-community `sample_main_rd` geography, and uses all 4,433 canonical CMAN
 project records for project-type and financing exhibits. It generates
-aggregate tables and figures under `output/`. It never defines an RD geography,
-estimates a discontinuity, tests adjacent categories, or analyzes outcomes.
-The point-location exhibit is explicitly marked for disclosure review before
-public release.
+aggregate tables and figures under `output/`. It never changes the RD
+geography, estimates a discontinuity, tests adjacent categories, or analyzes
+outcomes. Point and legacy-boundary maps are explicitly marked for review
+before public release.
 
 `03_validate_rd_design.do` is the first-stage and design-diagnostic module. It
-reports all four official cutoffs, the 2012 and 2016 sample-review treatment
-horizons, the 2023 rollout-catch-up diagnostic, the full annual treatment
-trajectory, rounded-score sensitivities,
-11 declared national, historical, VRAEM, and CVR geographies, and a bounded
-geographic heterogeneity atlas. The atlas includes every nonempty subset of
-the seven-department conflict/VRAEM belt and every nonempty subset of INEI's
-ten-province VRAEM study envelope, so groups of three, four, five, and larger
-cells are fully reported inside independently defined universes. The 2012 and
-2016 horizons guide sample review; 2023 remains a rollout-catch-up diagnostic.
-It also exports candidate scorecards and 384 pre-treatment
+reports all four official cutoffs and every cumulative treatment year from
+2007 through 2023 for 11 declared national, historical, VRAEM, and CVR
+geographies and a bounded geographic heterogeneity atlas. The atlas includes
+every nonempty subset of the seven-department conflict/VRAEM belt and every
+nonempty subset of INEI's ten-province VRAEM study envelope, so groups of
+three, four, five, and larger cells are fully reported inside independently
+defined universes. It also compares adjacent-category and full score support
+for all named candidates, exports compact all-year cutoff summaries, candidate
+scorecards, and 384 pre-treatment
 covariate-continuity cells, including the post-search three-department
-statistical frontier. It never automatically selects a sample and does not
-write `sample_main_rd`. Its
-protocol and conditional team recommendation are documented in
-[`docs/RD_DESIGN_AUDIT_PROTOCOL.md`](../../../docs/RD_DESIGN_AUDIT_PROTOCOL.md)
+statistical frontier. It never automatically selects or changes a sample and
+does not write `sample_main_rd`; data preparation implements the separate
+research-team decision. The default execution is serial. Internal `base`,
+`province_chunk`, and `assemble` modes make the same 96,524-cell grid
+resumable and permit disjoint Stata MCP sessions to write validated worker
+files under Dropbox Working QA before one canonical assembly. These modes
+change computation only; they do not change a sample, cutoff, horizon, or
+specification. Its protocol, rollout reassessment, and team recommendation
+are documented in
+[`docs/RD_DESIGN_AUDIT_PROTOCOL.md`](../../../docs/RD_DESIGN_AUDIT_PROTOCOL.md),
+[`docs/PRC_ROLLOUT_AND_RD_REASSESSMENT.md`](../../../docs/PRC_ROLLOUT_AND_RD_REASSESSMENT.md),
 and
 [`docs/RD_DESIGN_RECOMMENDATION.md`](../../../docs/RD_DESIGN_RECOMMENDATION.md).
+Because the audit is computationally intensive, its master invocation is
+commented out, including under `run_all`; regeneration is an explicit
+standalone Stata MCP task.
 
 Modules will be added sequentially. They must:
 

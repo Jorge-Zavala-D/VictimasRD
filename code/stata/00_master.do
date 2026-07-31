@@ -620,17 +620,17 @@ display as text   "Default graph scheme: ${graph_scheme}"
 *-----------------------------------*
 
 /*
-The implemented data-preparation and full-universe descriptive modules are
-enabled for push-button reproduction. The RD-design audit is implemented but
-remains disabled by default because it is computationally intensive and does
-not resolve the pending research-team sample decision. Outcome modules remain
-disabled until the unresolved research decisions have been reviewed.
+The implemented data-preparation and national/main-sample descriptive modules are
+enabled for push-button reproduction. The main RD geography is now constructed
+in data preparation. The exhaustive RD-design search remains available as a
+standalone audit but is intentionally excluded from the master because its
+96,524-cell grid is computationally intensive. Outcome modules remain disabled
+until their treatment timing, tie rule, and estimands are approved.
 */
 
 local run_all                         0
 local run_01_data_preparation         1
 local run_02_describe_data            1
-local run_03_validate_rd_design       0
 local run_04_estimate_main_effects    0
 local run_05_run_robustness           0
 local run_06_analyze_mechanisms       0
@@ -641,7 +641,6 @@ local pipeline_switches ///
     run_all ///
     run_01_data_preparation ///
     run_02_describe_data ///
-    run_03_validate_rd_design ///
     run_04_estimate_main_effects ///
     run_05_run_robustness ///
     run_06_analyze_mechanisms ///
@@ -699,11 +698,17 @@ if `run_all' | `run_02_describe_data' {
         label("Descriptive analysis")
 }
 
-if `run_all' | `run_03_validate_rd_design' {
+/*
+The exhaustive search is preserved but deliberately bracketed out of every
+push-button master run, including run_all. Regenerate it only as an explicit
+standalone Stata MCP task after reviewing docs/RD_DESIGN_AUDIT_PROTOCOL.md.
+
+if `run_03_validate_rd_design' {
     victimasrd_run_step, ///
         file("${pipeline_root}/03_validate_rd_design.do") ///
         label("RD design and validity diagnostics")
 }
+*/
 
 if `run_all' | `run_04_estimate_main_effects' {
     victimasrd_run_step, ///

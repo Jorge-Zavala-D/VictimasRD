@@ -20,12 +20,13 @@
     2. Reusable first-stage programs
     3. Named-candidate specification grid
     4. Dynamic treatment-year grid
-    5. Broad geographic heterogeneity atlas
-    6. Bounded higher-order subset atlases
-    7. Baseline-covariate continuity audit
-    8. Aggregate audit tables and scorecards
-    9. Academic figures and TeX tables
-   10. Output manifest and closeout
+    5. Running-variable support sensitivity
+    6. Broad geographic heterogeneity atlas
+    7. Bounded higher-order subset atlases
+    8. Baseline-covariate continuity audit
+    9. Aggregate audit tables and scorecards
+   10. Academic figures and TeX tables
+   11. Output manifest and closeout
 
 *-------------------------------------------------------------------------------*/
 
@@ -39,9 +40,15 @@ set more off
 set varabbrev off
 
 /*
-This module is deliberately incapable of selecting the final RD sample. It
-reports every declared estimate and retains failed specifications. A reviewed
-research-team decision must define sample_main_rd in a later task.
+This module is deliberately incapable of creating or changing the main RD
+sample. The research team selected the exact legacy geography on 29 July 2026;
+01_data_preparation.do constructs sample_main_rd from the RUV district UBIGEO.
+This audit reports every declared estimate and retains failed specifications
+as design evidence and sensitivity analysis.
+
+The post-2012 written rule jointly prioritizes A and B, so B--C is the only
+explicit operational boundary in that regime. The other cutoffs remain
+diagnostic and cannot be promoted solely because a searched cell is strong.
 */
 
 local automatic_sample_selection 0
@@ -79,6 +86,36 @@ local table_dir "${tables_root}/rd_design"
 local figure_dir "${figures_root}/rd_design"
 local rd_manifest "${metadata_root}/rd-design-output-manifest.csv"
 
+/*
+The default mode runs the complete audit serially. The three internal modes
+make the same specification grid resumable: base writes every non-province
+cell, province_chunk writes a declared slice of the 1,023-mask power set, and
+assemble validates and combines those files before producing the public
+outputs. These globals are orchestration controls, not research choices.
+*/
+
+local execution_mode = lower(strtrim("${rd_design_execution_mode}"))
+if "`execution_mode'" == "" {
+    local execution_mode "full"
+}
+assert inlist( ///
+    "`execution_mode'", ///
+    "full", ///
+    "base", ///
+    "province_chunk", ///
+    "assemble")
+
+local province_chunk_count 16
+local province_chunk_id = real("${rd_design_chunk_id}")
+local province_chunk_start = real("${rd_design_chunk_start}")
+local province_chunk_end = real("${rd_design_chunk_end}")
+
+if "`execution_mode'" == "province_chunk" {
+    assert inrange(`province_chunk_id', 1, `province_chunk_count')
+    assert inrange(`province_chunk_start', 1, 1023)
+    assert inrange(`province_chunk_end', `province_chunk_start', 1023)
+}
+
 foreach input_path in ///
     "`input_file'" ///
     "`candidate_registry'" ///
@@ -109,6 +146,9 @@ local output_paths ///
     output/tables/rd_design/rd_design_geographic_atlas.csv ///
     output/tables/rd_design/rd_design_department_subsets.csv ///
     output/tables/rd_design/rd_design_vraem_province_subsets.csv ///
+    output/tables/rd_design/rd_design_support_sensitivity.csv ///
+    output/tables/rd_design/rd_design_cutoff_year_summary.csv ///
+    output/tables/rd_design/rd_design_cutoff_year_frontier.csv ///
     output/tables/rd_design/rd_design_tie_audit.csv ///
     output/tables/rd_design/rd_design_candidate_accounting.csv ///
     output/tables/rd_design/rd_design_candidate_scorecard.csv ///
@@ -122,20 +162,28 @@ local output_paths ///
     output/figures/rd_design/fig_rd_design_04_strength_support.png ///
     output/figures/rd_design/fig_rd_design_05_subset_size.png
 
-foreach output_path of local output_paths {
-    capture erase "${project_root}/`output_path'"
+if inlist("`execution_mode'", "full", "assemble") {
+    foreach output_path of local output_paths {
+        capture erase "${project_root}/`output_path'"
+    }
+    capture erase "`rd_manifest'"
 }
-capture erase "`rd_manifest'"
 
 local run_date = subinstr("`c(current_date)'", " ", "", .)
 local run_time = subinstr("`c(current_time)'", ":", "", .)
 local run_id = lower("`run_date'_`run_time'")
+local run_tag "`execution_mode'"
+if "`execution_mode'" == "province_chunk" {
+    local chunk_text : display %02.0f `province_chunk_id'
+    local chunk_text = strtrim("`chunk_text'")
+    local run_tag "`run_tag'_`chunk_text'"
+}
 
 capture log close victimasrd_rd_design
-log using "${logs_root}/rd_design_audit_`run_id'.smcl", ///
+log using "${logs_root}/rd_design_audit_`run_id'_`run_tag'.smcl", ///
     name(victimasrd_rd_design) replace
 
-display as result "Starting RD design audit."
+display as result "Starting RD design audit (`execution_mode' mode)."
 display as text "No automatic sample selection is permitted."
 display as text "Protocol: `protocol_file'"
 
@@ -170,6 +218,7 @@ isid grid_id
 assert inlist(scope, ///
     "named_candidates", ///
     "dynamic_treatment_years", ///
+    "running_variable_support_sensitivity", ///
     "geographic_heterogeneity_atlas", ///
     "bounded_department_subsets", ///
     "bounded_province_subsets", ///
@@ -324,11 +373,13 @@ program define _vrd_first_stage
         TREATmentvar(name) ///
         TREATmentyear(integer) ///
         TIERule(string) ///
+        SUPPORTrule(string) ///
         SPECification(string)
 
     assert inlist("`gridscope'", ///
         "named", ///
         "dynamic", ///
+        "support_sensitivity", ///
         "broad_atlas", ///
         "dept_subset", ///
         "prov_subset")
@@ -337,6 +388,9 @@ program define _vrd_first_stage
         "score_as_recorded", ///
         "drop_sign_conflicts", ///
         "drop_rounding_band")
+    assert inlist("`supportrule'", ///
+        "adjacent_categories", ///
+        "full_score_support")
     assert inlist("`specification'", ///
         "p1_mserd", ///
         "p1_cerrd", ///
@@ -351,12 +405,16 @@ program define _vrd_first_stage
     quietly count if `samplevar'
     local candidate_n = r(N)
 
-    quietly generate byte `analysis_use' = ///
-        `samplevar' == 1 & ///
-        inlist(victimization_level_source, "`highcat'", "`lowcat'")
+    quietly generate byte `analysis_use' = `samplevar' == 1
+
+    if "`supportrule'" == "adjacent_categories" {
+        quietly replace `analysis_use' = 0 if ///
+            !inlist(victimization_level_source, "`highcat'", "`lowcat'")
+    }
 
     quietly count if ///
         `analysis_use' & ///
+        inlist(victimization_level_source, "`highcat'", "`lowcat'") & ///
         ((`runningvar' >= 0) != ///
         (victimization_level_source == "`highcat'"))
     local sign_conflicts = r(N)
@@ -369,6 +427,7 @@ program define _vrd_first_stage
     if "`tierule'" == "drop_sign_conflicts" {
         quietly replace `analysis_use' = 0 if ///
             `analysis_use' & ///
+            inlist(victimization_level_source, "`highcat'", "`lowcat'") & ///
             ((`runningvar' >= 0) != ///
             (victimization_level_source == "`highcat'"))
     }
@@ -502,6 +561,7 @@ program define _vrd_first_stage
         ("`treatmentvar'") ///
         (`treatmentyear') ///
         ("`tierule'") ///
+        ("`supportrule'") ///
         ("`specification'") ///
         (`candidate_n') ///
         (`analysis_n') ///
@@ -555,9 +615,6 @@ program define _vrd_atlas_grid
     local low_categories "B C D E"
     local running_variables ///
         "running_ab running_bc running_cd running_de"
-    local treatment_variables ///
-        "treat_12 treat_16 treat_23"
-    local treatment_years "2012 2016 2023"
 
     forvalues cutoff_index = 1/4 {
         local cutoff : word `cutoff_index' of `cutoff_ids'
@@ -565,11 +622,10 @@ program define _vrd_atlas_grid
         local lowcat : word `cutoff_index' of `low_categories'
         local runningvar : word `cutoff_index' of `running_variables'
 
-        forvalues horizon_index = 1/3 {
-            local treatmentvar : ///
-                word `horizon_index' of `treatment_variables'
-            local treatmentyear : ///
-                word `horizon_index' of `treatment_years'
+        forvalues year_suffix = 7/23 {
+            local year_text : display %02.0f `year_suffix'
+            local treatmentvar "treat_`year_text'"
+            local treatmentyear = 2000 + `year_suffix'
 
             _vrd_first_stage, ///
                 posthandle(`posthandle') ///
@@ -587,60 +643,24 @@ program define _vrd_atlas_grid
                 treatmentvar(`treatmentvar') ///
                 treatmentyear(`treatmentyear') ///
                 tierule("drop_rounding_band") ///
+                supportrule("adjacent_categories") ///
                 specification("p1_mserd")
         }
     }
 end
 
-capture program drop _vrd_bc_horizon_grid
-
-program define _vrd_bc_horizon_grid
-    version 19
-    syntax, ///
-        POSTHandle(name) ///
-        GRIDScope(string) ///
-        SAMPLEvar(name) ///
-        CANDIDATEid(string) ///
-        CANDIDATElabel(string) ///
-        CANDIDATEtype(string) ///
-        TEAMreview(integer) ///
-        SUBSETsize(integer)
-
-    local treatment_variables ///
-        "treat_12 treat_16 treat_23"
-    local treatment_years "2012 2016 2023"
-
-    forvalues horizon_index = 1/3 {
-        local treatmentvar : ///
-            word `horizon_index' of `treatment_variables'
-        local treatmentyear : ///
-            word `horizon_index' of `treatment_years'
-
-        _vrd_first_stage, ///
-            posthandle(`posthandle') ///
-            gridscope("`gridscope'") ///
-            samplevar(`samplevar') ///
-            candidateid("`candidateid'") ///
-            candidatelabel("`candidatelabel'") ///
-            candidatetype("`candidatetype'") ///
-            teamreview(`teamreview') ///
-            subsetsize(`subsetsize') ///
-            cutoff("bc") ///
-            highcat("B") ///
-            lowcat("C") ///
-            runningvar(running_bc) ///
-            treatmentvar(`treatmentvar') ///
-            treatmentyear(`treatmentyear') ///
-            tierule("drop_rounding_band") ///
-            specification("p1_mserd")
-    }
-end
-
-tempfile audit_results
+tempfile audit_results covariate_results
 tempname audit_post
 
+local candidate_ids ///
+    national_full legacy_historical vraem10_provinces ///
+    vraem8_no_ayacucho vraem6_direct_provinces ///
+    vraem5_departments vraem4_no_ayacucho ///
+    cvr6_departments cvr5_no_ayacucho ///
+    conflict_belt7_departments legacy_department_core
+
 postfile `audit_post' ///
-    str16 grid_scope ///
+    str20 grid_scope ///
     str40 candidate_id ///
     str400 candidate_label ///
     str36 candidate_type ///
@@ -650,6 +670,7 @@ postfile `audit_post' ///
     str8 treatment_var ///
     int treatment_year ///
     str24 tie_rule ///
+    str24 support_rule ///
     str16 specification ///
     int candidate_n ///
     int analysis_n ///
@@ -684,6 +705,8 @@ postfile `audit_post' ///
     int effective_right ///
     using "`audit_results'", replace
 
+
+if inlist("`execution_mode'", "full", "base") {
 
 *-----------------------------------*
 **# 3. Named-candidate specification grid
@@ -782,6 +805,7 @@ forvalues candidate_index = 1/11 {
                         treatmentvar(`treatmentvar') ///
                         treatmentyear(`treatmentyear') ///
                         tierule("`tie_rule'") ///
+                        supportrule("adjacent_categories") ///
                         specification("`specification'")
                 }
             }
@@ -833,6 +857,7 @@ forvalues candidate_index = 1/11 {
                 treatmentvar(`treatmentvar') ///
                 treatmentyear(`treatmentyear') ///
                 tierule("score_as_recorded") ///
+                supportrule("adjacent_categories") ///
                 specification("p1_mserd")
         }
     }
@@ -840,13 +865,71 @@ forvalues candidate_index = 1/11 {
 
 
 *-----------------------------------*
-**# 5. Broad geographic heterogeneity atlas
+**# 5. Running-variable support sensitivity
+*-----------------------------------*
+
+/*
+Standard single-cutoff RD may begin from the full score support because
+rdrobust selects local bandwidths. In this ordered multi-threshold setting,
+the adjacent-category restriction prevents a selected bandwidth from crossing
+another policy threshold. This fully reported sensitivity quantifies whether
+that conservative support rule drives the named-candidate results.
+*/
+
+forvalues candidate_index = 1/11 {
+    local candidate_id : ///
+        word `candidate_index' of `candidate_ids'
+    local candidate_var : ///
+        word `candidate_index' of `candidate_variables'
+    local candidate_label ///
+        "`candidate_label_`candidate_index''"
+    local candidate_type : ///
+        word `candidate_index' of `candidate_types'
+    local team_review : ///
+        word `candidate_index' of `candidate_review'
+
+    forvalues cutoff_index = 1/4 {
+        local cutoff : word `cutoff_index' of `cutoff_ids'
+        local highcat : word `cutoff_index' of `high_categories'
+        local lowcat : word `cutoff_index' of `low_categories'
+        local runningvar : word `cutoff_index' of `running_variables'
+
+        forvalues year_suffix = 7/23 {
+            local year_text : display %02.0f `year_suffix'
+            local treatmentvar "treat_`year_text'"
+            local treatmentyear = 2000 + `year_suffix'
+
+            _vrd_first_stage, ///
+                posthandle(`audit_post') ///
+                gridscope("support_sensitivity") ///
+                samplevar(`candidate_var') ///
+                candidateid("`candidate_id'") ///
+                candidatelabel("`candidate_label'") ///
+                candidatetype("`candidate_type'") ///
+                teamreview(`team_review') ///
+                subsetsize(0) ///
+                cutoff("`cutoff'") ///
+                highcat("`highcat'") ///
+                lowcat("`lowcat'") ///
+                runningvar(`runningvar') ///
+                treatmentvar(`treatmentvar') ///
+                treatmentyear(`treatmentyear') ///
+                tierule("score_as_recorded") ///
+                supportrule("full_score_support") ///
+                specification("p1_mserd")
+        }
+    }
+}
+
+
+*-----------------------------------*
+**# 6. Broad geographic heterogeneity atlas
 *-----------------------------------*
 
 /*
 These estimates are ineligible for automatic sample selection. The atlas is
 retained for comparison with the historical pairwise search. Higher-order
-searches are confined to the independently defined envelopes in section 6.
+searches are confined to the independently defined envelopes in section 7.
 */
 
 foreach department_id of local department_ids {
@@ -938,7 +1021,7 @@ foreach province_id of local province_ids {
 
 
 *-----------------------------------*
-**# 6. Bounded higher-order subset atlases
+**# 7. Bounded higher-order subset atlases
 *-----------------------------------*
 
 /*
@@ -966,7 +1049,7 @@ forvalues subset_mask = 1/127 {
 
             local component_name ///
                 "`conflict_department_`component_index''"
-            replace sample_subset = 1 if ///
+            quietly replace sample_subset = 1 if ///
                 dpto_clean == "`component_name'"
             local ++subset_size
 
@@ -996,11 +1079,14 @@ forvalues subset_mask = 1/127 {
     drop sample_subset
 }
 
+}
+
 /*
 The province universe is INEI's complete ten-province VRAEM study envelope.
-All 1,023 nonempty subsets are estimated at B--C for the three outcome-linked
-treatment horizons. These results diagnose heterogeneity and cannot select a
-sample without an independently stated rule.
+All 1,023 nonempty subsets are estimated at all four thresholds for every
+cumulative treatment year from 2007 through 2023. These results diagnose
+heterogeneity and cannot select a sample without an independently stated
+rule.
 */
 
 local vraem_department_1 "APURIMAC"
@@ -1034,7 +1120,16 @@ local vraem_department_10 "JUNIN"
 local vraem_province_10 "SATIPO"
 local vraem_component_10 "JUNIN / SATIPO"
 
-forvalues subset_mask = 1/1023 {
+if inlist("`execution_mode'", "full", "province_chunk") {
+
+local province_mask_start 1
+local province_mask_end 1023
+if "`execution_mode'" == "province_chunk" {
+    local province_mask_start `province_chunk_start'
+    local province_mask_end `province_chunk_end'
+}
+
+forvalues subset_mask = `province_mask_start'/`province_mask_end' {
     generate byte sample_subset = 0
     local subset_label
     local subset_size 0
@@ -1050,7 +1145,7 @@ forvalues subset_mask = 1/1023 {
             local component_name ///
                 "`vraem_component_`component_index''"
 
-            replace sample_subset = 1 if ///
+            quietly replace sample_subset = 1 if ///
                 dpto_clean == "`component_department'" & ///
                 prov_clean == "`component_province'"
             local ++subset_size
@@ -1068,7 +1163,7 @@ forvalues subset_mask = 1/1023 {
     local mask_text : display %04.0f `subset_mask'
     local mask_text = strtrim("`mask_text'")
 
-    _vrd_bc_horizon_grid, ///
+    _vrd_atlas_grid, ///
         posthandle(`audit_post') ///
         gridscope("prov_subset") ///
         samplevar(sample_subset) ///
@@ -1081,12 +1176,85 @@ forvalues subset_mask = 1/1023 {
     drop sample_subset
 }
 
+}
+
 postclose `audit_post'
 
+if "`execution_mode'" == "province_chunk" {
+    local chunk_text : display %02.0f `province_chunk_id'
+    local chunk_text = strtrim("`chunk_text'")
+    local chunk_output ///
+        "${qa_data_root}/rd_design_first_stage_prov_chunk_`chunk_text'.dta"
+
+    use "`audit_results'", clear
+    local expected_chunk_rows = ///
+        (`province_chunk_end' - `province_chunk_start' + 1) * 68
+    assert _N == `expected_chunk_rows'
+    isid ///
+        grid_scope ///
+        candidate_id ///
+        cutoff ///
+        treatment_year ///
+        tie_rule ///
+        support_rule ///
+        specification
+    save "`chunk_output'", replace
+
+    display as result ///
+        "Province chunk `chunk_text' completed: `province_chunk_start'-`province_chunk_end'."
+    display as text "Rows saved: " _N
+    display as text "Output: `chunk_output'"
+
+    capture program drop _vrd_first_stage
+    capture program drop _vrd_atlas_grid
+    log close victimasrd_rd_design
+    exit
+}
+
+if "`execution_mode'" == "assemble" {
+    local base_output ///
+        "${qa_data_root}/rd_design_first_stage_base.dta"
+    local covariate_base ///
+        "${qa_data_root}/rd_design_covariate_continuity_base.dta"
+
+    capture confirm file "`base_output'"
+    assert !_rc
+    use "`base_output'", clear
+    assert _N == 26960
+
+    forvalues chunk_index = 1/`province_chunk_count' {
+        local chunk_text : display %02.0f `chunk_index'
+        local chunk_text = strtrim("`chunk_text'")
+        local chunk_output ///
+            "${qa_data_root}/rd_design_first_stage_prov_chunk_`chunk_text'.dta"
+        capture confirm file "`chunk_output'"
+        assert !_rc
+        append using "`chunk_output'"
+    }
+
+    assert _N == 96524
+    isid ///
+        grid_scope ///
+        candidate_id ///
+        cutoff ///
+        treatment_year ///
+        tie_rule ///
+        support_rule ///
+        specification
+    save "`audit_results'", replace
+
+    capture confirm file "`covariate_base'"
+    assert !_rc
+    use "`covariate_base'", clear
+    save "`covariate_results'", replace
+}
+
 
 *-----------------------------------*
-**# 7. Baseline-covariate continuity audit
+**# 8. Baseline-covariate continuity audit
 *-----------------------------------*
+
+if inlist("`execution_mode'", "full", "base") {
 
 capture program drop _vrd_covariate_test
 
@@ -1212,7 +1380,6 @@ program define _vrd_covariate_test
         (`effective_right')
 end
 
-tempfile covariate_results
 tempname covariate_post
 
 postfile `covariate_post' ///
@@ -1329,20 +1496,57 @@ forvalues cutoff_index = 1/4 {
 
 postclose `covariate_post'
 
+}
+
+if "`execution_mode'" == "base" {
+    local base_output ///
+        "${qa_data_root}/rd_design_first_stage_base.dta"
+    local covariate_base ///
+        "${qa_data_root}/rd_design_covariate_continuity_base.dta"
+
+    use "`audit_results'", clear
+    assert _N == 26960
+    isid ///
+        grid_scope ///
+        candidate_id ///
+        cutoff ///
+        treatment_year ///
+        tie_rule ///
+        support_rule ///
+        specification
+    save "`base_output'", replace
+
+    use "`covariate_results'", clear
+    assert _N > 0
+    save "`covariate_base'", replace
+
+    display as result "RD design base audit completed."
+    display as text "First-stage rows: 26,960"
+    display as text "First-stage output: `base_output'"
+    display as text "Covariate output: `covariate_base'"
+
+    capture program drop _vrd_first_stage
+    capture program drop _vrd_atlas_grid
+    capture program drop _vrd_covariate_test
+    log close victimasrd_rd_design
+    exit
+}
+
 
 *-----------------------------------*
-**# 8. Aggregate audit tables and scorecards
+**# 9. Aggregate audit tables and scorecards
 *-----------------------------------*
 
 use "`audit_results'", clear
 
-assert _N == 9289
+assert _N == 96524
 isid ///
     grid_scope ///
     candidate_id ///
     cutoff ///
     treatment_var ///
     tie_rule ///
+    support_rule ///
     specification
 assert inlist(support_ok, 0, 1)
 assert inlist(attempted, 0, 1)
@@ -1360,9 +1564,11 @@ label variable ci_left ///
 label variable ci_right ///
     "Robust 95 percent confidence-interval upper bound"
 label variable team_review_eligible ///
-    "Candidate may be considered by team; never automatically selected"
+    "Candidate was eligible for documented team review"
 label variable subset_size ///
     "Number of department or province components in subset"
+label variable support_rule ///
+    "Score-support rule used before local bandwidth selection"
 
 compress
 save "${qa_data_root}/rd_design_first_stage_audit.dta", ///
@@ -1394,7 +1600,22 @@ export delimited using ///
 restore
 
 preserve
+keep if grid_scope == "support_sensitivity"
+sort candidate_id cutoff treatment_year
+export delimited using ///
+    "`table_dir'/rd_design_support_sensitivity.csv", ///
+    replace
+restore
+
+/*
+The complete all-year atlases remain in the Dropbox QA dataset. Git receives
+the three outcome-linked slices plus compact all-year summaries so a large
+search artifact does not become repository storage.
+*/
+
+preserve
 keep if grid_scope == "broad_atlas"
+keep if inlist(treatment_year, 2012, 2016, 2023)
 sort candidate_type candidate_id cutoff treatment_year
 export delimited using ///
     "`table_dir'/rd_design_geographic_atlas.csv", ///
@@ -1403,6 +1624,7 @@ restore
 
 preserve
 keep if grid_scope == "dept_subset"
+keep if inlist(treatment_year, 2012, 2016, 2023)
 sort subset_size candidate_id cutoff treatment_year
 export delimited using ///
     "`table_dir'/rd_design_department_subsets.csv", ///
@@ -1411,9 +1633,95 @@ restore
 
 preserve
 keep if grid_scope == "prov_subset"
-sort subset_size candidate_id treatment_year
+keep if inlist(treatment_year, 2012, 2016, 2023)
+sort subset_size candidate_id cutoff treatment_year
 export delimited using ///
     "`table_dir'/rd_design_vraem_province_subsets.csv", ///
+    replace
+restore
+
+preserve
+keep if inlist(grid_scope, ///
+    "broad_atlas", "dept_subset", "prov_subset")
+generate byte estimate_success = ///
+    support_ok == 1 & estimation_rc == 0
+generate double robust_wald = ///
+    (tau_bc / se_rb)^2 if estimate_success & se_rb > 0 & se_rb < .
+generate byte positive_ci = ///
+    estimate_success & ci_left > 0 & ci_left < .
+generate byte strong_positive = ///
+    estimate_success & tau_cl > 0 & robust_wald >= 20 & robust_wald < .
+generate int effective_n = ///
+    effective_left + effective_right if estimate_success
+
+collapse ///
+    (count) candidate_cells=candidate_n ///
+    (sum) support_cells=support_ok ///
+    (sum) successful_cells=estimate_success ///
+    (sum) positive_ci_cells=positive_ci ///
+    (sum) strong_positive_cells=strong_positive ///
+    (p50) median_tau=tau_cl ///
+    (max) max_tau=tau_cl ///
+    (max) max_robust_wald=robust_wald ///
+    (max) max_effective_n=effective_n, ///
+    by(grid_scope cutoff treatment_year)
+
+sort grid_scope cutoff treatment_year
+isid grid_scope cutoff treatment_year
+export delimited using ///
+    "`table_dir'/rd_design_cutoff_year_summary.csv", ///
+    replace
+restore
+
+preserve
+keep if inlist(grid_scope, ///
+    "broad_atlas", "dept_subset", "prov_subset")
+generate byte estimate_success = ///
+    support_ok == 1 & estimation_rc == 0
+generate double robust_wald = ///
+    (tau_bc / se_rb)^2 if estimate_success & se_rb > 0 & se_rb < .
+generate int effective_n = ///
+    effective_left + effective_right if estimate_success
+keep if ///
+    estimate_success & ///
+    tau_cl > 0 & ///
+    robust_wald < . & ///
+    candidate_n >= 500 & ///
+    effective_n >= 50 & ///
+    clusters_left >= 20 & ///
+    clusters_right >= 20
+gsort ///
+    grid_scope ///
+    cutoff ///
+    treatment_year ///
+    -robust_wald ///
+    -effective_n ///
+    candidate_id
+by grid_scope cutoff treatment_year: ///
+    generate int frontier_rank = _n
+keep if frontier_rank <= 10
+order ///
+    grid_scope ///
+    cutoff ///
+    treatment_year ///
+    frontier_rank ///
+    candidate_id ///
+    candidate_label ///
+    subset_size ///
+    candidate_n ///
+    effective_n ///
+    clusters_left ///
+    clusters_right ///
+    tau_cl ///
+    tau_bc ///
+    se_rb ///
+    p_rb ///
+    ci_left ///
+    ci_right ///
+    robust_wald
+sort grid_scope cutoff treatment_year frontier_rank
+export delimited using ///
+    "`table_dir'/rd_design_cutoff_year_frontier.csv", ///
     replace
 restore
 
@@ -1438,7 +1746,7 @@ export delimited using ///
 restore
 
 preserve
-keep if grid_scope != "dynamic"
+keep if !inlist(grid_scope, "dynamic", "support_sensitivity")
 keep ///
     grid_scope ///
     candidate_id ///
@@ -1466,7 +1774,7 @@ tempfile candidate_scorecard
 
 preserve
 keep if ///
-    grid_scope != "dynamic" & ///
+    !inlist(grid_scope, "dynamic", "support_sensitivity") & ///
     cutoff == "bc" & ///
     tie_rule == "drop_rounding_band" & ///
     specification == "p1_mserd"
@@ -1762,7 +2070,7 @@ restore
 
 
 *-----------------------------------*
-**# 9. Academic figures and TeX tables
+**# 10. Academic figures and TeX tables
 *-----------------------------------*
 
 preserve
@@ -1874,8 +2182,8 @@ twoway ///
     note( ///
         "Notes: Unit of analysis is the RUV centro poblado in categories B or C. Lines show local-linear rdrobust estimates; thin bars are robust 95% confidence intervals." ///
         "Triangular-kernel estimates use MSE-optimal bandwidths, district-clustered inference, mass-point adjustment, and the score exactly as recorded." ///
-        "Vertical guides at 2012 and 2016 identify the principal sample-review horizons. The lighter 2023 guide is a rollout-catch-up diagnostic for the planned" ///
-        "Census 2025 migration extension, not a geography-selection criterion. The legacy geography is not automatically selected. Source: RUV and CMAN through 2023.", ///
+        "Vertical guides at 2012 and 2016 identify the outcome-linked reference horizons. The lighter 2023 guide is a rollout-catch-up diagnostic for the planned" ///
+        "Census 2025 migration extension, not a geography-selection criterion. The legacy geography was selected by the team, not by this audit. Source: RUV and CMAN through 2023.", ///
         size(vsmall) color(gs5) span) ///
     xsize(11) ysize(6.8) ///
     graphregion(color(white)) ///
@@ -1998,15 +2306,15 @@ foreach candidate_id in national_full legacy_historical {
 
 file write `first_stage_table' "\bottomrule" _n
 file write `first_stage_table' "\end{tabular}" _n
-file write `first_stage_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative receipt of a collective-reparation project by the listed year. Estimates use the two RUV categories adjacent to each official cutoff. Local-linear triangular-kernel regressions use MSE-optimal bandwidths, mass-point adjustment, and district-clustered inference. The table excludes observations with an absolute centered score no greater than 0.00005 because the four-decimal RUV score cannot recover the six-decimal administrative threshold. Effective N is the total number of observations inside the selected left and right bandwidths. The legacy geography is a historical benchmark, not a selected sample. Source: RUV and CMAN register through 2023.}" _n
+file write `first_stage_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative receipt of a collective-reparation project by the listed year. Estimates use the two RUV categories adjacent to each official cutoff. Local-linear triangular-kernel regressions use MSE-optimal bandwidths, mass-point adjustment, and district-clustered inference. The table excludes observations with an absolute centered score no greater than 0.00005 because the four-decimal RUV score cannot recover the six-decimal administrative threshold. Effective N is the total number of observations inside the selected left and right bandwidths. The legacy geography was selected by a separate research-team decision; this table does not select or change it. Source: RUV and CMAN register through 2023.}" _n
 file write `first_stage_table' "\end{table}" _n
 file close `first_stage_table'
 restore
 
 /*
 Forest plot of the eleven declared candidates at the B--C cutoff. The figure
-uses 2012 and 2016 for sample review and shows 2023 only as a catch-up
-diagnostic, without ranking candidates.
+uses the 2012 and 2016 outcome-linked reference horizons and shows 2023 only
+as a catch-up diagnostic, without ranking candidates.
 */
 
 preserve
@@ -2071,12 +2379,12 @@ twoway ///
             "B-C first stages across predeclared geographic candidates", ///
             size(medium) color(black)) ///
         subtitle( ///
-            "2012 and 2016 guide sample review; 2023 shows rollout catch-up", ///
+            "2012 and 2016 are outcome-linked references; 2023 shows rollout catch-up", ///
             size(small) color(gs5)) ///
         note( ///
             "Notes: Unit is the RUV centro poblado in categories B or C. Points are local-linear rdrobust estimates; bars are robust 95% confidence intervals." ///
             "All specifications use triangular kernels, MSE-optimal bandwidths, district-clustered inference, mass-point adjustment, and exclude the unresolved" ///
-            "half-rounding-unit band. The 2023 panel is diagnostic, and no sample is selected. Source: RUV, CMAN, INEI, and CVR.", ///
+            "half-rounding-unit band. The 2023 panel is diagnostic; the approved legacy geography was selected outside this audit. Source: RUV, CMAN, INEI, and CVR.", ///
             size(vsmall) color(gs5) span) ///
         legend(off) ///
         graphregion(color(white))) ///
@@ -2173,9 +2481,9 @@ graph export ///
 restore
 
 /*
-The subset-size figure summarizes the complete department and official VRAEM
-province power sets. It reports the share meeting the strength heuristic at
-each horizon, not a preferred subset.
+The subset-size figure plots the department power set. Every official VRAEM
+province subset has a zero qualifying share at the three displayed horizons,
+which is stated directly rather than devoting a blank panel to that result.
 */
 
 preserve
@@ -2194,11 +2502,10 @@ replace strong_early_2012 = 100 * strong_early_2012
 replace strong_mid_2016 = 100 * strong_mid_2016
 replace strong_late_2023 = 100 * strong_late_2023
 
-generate str40 subset_family = ///
-    cond( ///
-        grid_scope == "dept_subset", ///
-        "Seven-department conflict belt", ///
-        "Ten-province VRAEM envelope")
+assert strong_early_2012 == 0 if grid_scope == "prov_subset"
+assert strong_mid_2016 == 0 if grid_scope == "prov_subset"
+assert strong_late_2023 == 0 if grid_scope == "prov_subset"
+keep if grid_scope == "dept_subset"
 
 twoway ///
     (connected strong_early_2012 subset_size, ///
@@ -2210,31 +2517,30 @@ twoway ///
     (connected strong_late_2023 subset_size, ///
         lcolor(gs8) lpattern(dash) lwidth(medium) ///
         mcolor(gs8) msymbol(T) msize(small)), ///
-    by(subset_family, ///
-        rows(1) ///
-        title( ///
-            "First-stage strength across every bounded subset size", ///
-            size(medium) color(black)) ///
-        subtitle( ///
-            "2012 and 2016 guide selection; 2023 is a rollout-catch-up diagnostic", ///
-            size(small) color(gs5)) ///
-        note( ///
-            "Notes: Unit is a fully reported geographic subset. Department cells cover all 127 subsets of the seven-department CVR-VRAEM belt; province cells" ///
-            "cover all 1,023 subsets of INEI's ten-province VRAEM envelope. Estimates are local-linear rdrobust models at B-C with MSE-optimal bandwidths," ///
-            "district-clustered inference, mass-point adjustment, and the conservative score tie rule. A subset qualifies only with a positive estimate and" ///
-            "robust Wald diagnostic of at least 20. Shares are descriptive and search-unadjusted. Source: RUV and CMAN register through 2023.", ///
-            size(vsmall) color(gs5) span) ///
-        graphregion(color(white))) ///
-    xlabel(1(1)10, labsize(small)) ///
-    ylabel(0(5)20, ///
+    title( ///
+        "First-stage strength across the bounded department power set", ///
+        size(medium) color(black)) ///
+    subtitle( ///
+        "All VRAEM province-subset shares are zero at the displayed horizons", ///
+        size(small) color(gs5)) ///
+    xlabel(1(1)7, labsize(small)) ///
+    ylabel(0(5)15, ///
         format(%3.0f) grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
-    yscale(range(0 20)) ///
-    xtitle("Number of geographic components", size(small)) ///
+    yscale(range(0 15)) ///
+    xtitle("Number of departments in subset", size(small)) ///
     ytitle("Percent of subsets meeting strength heuristic", size(small)) ///
     legend( ///
         order(1 "Treated by 2012" 2 "Treated by 2016" 3 "2023 catch-up diagnostic") ///
         rows(1) position(6) size(small) region(lcolor(none))) ///
-    xsize(13) ysize(7.2) ///
+    note( ///
+        "Notes: Unit is one of all 127 nonempty subsets of the seven-department CVR-VRAEM belt." ///
+        "The 1,023 nonempty subsets of INEI's ten-province VRAEM envelope have a zero qualifying share" ///
+        "at every subset size for 2012, 2016, and 2023. Estimates are local-linear rdrobust models at B-C" ///
+        "with MSE-optimal bandwidths, district-clustered inference, mass-point adjustment, and the conservative" ///
+        "score tie rule. A subset qualifies only with a positive estimate and robust Wald diagnostic of at least 20." ///
+        "Shares are descriptive and search-unadjusted. Source: RUV and CMAN register through 2023.", ///
+        size(vsmall) color(gs5) span) ///
+    xsize(10) ysize(7.2) ///
     graphregion(color(white)) ///
     plotregion(color(white))
 
@@ -2315,14 +2621,14 @@ foreach candidate_id of local candidate_ids {
 
 file write `scorecard_table' "\bottomrule" _n
 file write `scorecard_table' "\end{tabular}" _n
-file write `scorecard_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through the listed year. Estimates use adjacent B and C communities, local-linear triangular-kernel regressions, MSE-optimal bandwidths, mass-point adjustment, district-clustered inference, and exclusion of the half-rounding-unit score band. \(W=(\widehat{\tau}_{bc}/SE_{robust})^2\) is a descriptive robust Wald-strength diagnostic; 20 is a conservative heuristic, not a search-adjusted critical value. Candidates were registered before the expanded run. No sample is selected by this table. Source: RUV and CMAN register through 2023.}" _n
+file write `scorecard_table' "\parbox{0.98\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through the listed year. Estimates use adjacent B and C communities, local-linear triangular-kernel regressions, MSE-optimal bandwidths, mass-point adjustment, district-clustered inference, and exclusion of the half-rounding-unit score band. \(W=(\widehat{\tau}_{bc}/SE_{robust})^2\) is a descriptive robust Wald-strength diagnostic; 20 is a conservative heuristic, not a search-adjusted critical value. Candidates were registered before the expanded run. The approved legacy geography was selected by a separate research-team decision; this table does not select or change it. Source: RUV and CMAN register through 2023.}" _n
 file write `scorecard_table' "\end{table}" _n
 file close `scorecard_table'
 restore
 
 
 *-----------------------------------*
-**# 10. Output manifest and closeout
+**# 11. Output manifest and closeout
 *-----------------------------------*
 
 foreach output_path of local output_paths {
@@ -2342,6 +2648,9 @@ local output_ids ///
     rd_design_atlas_csv ///
     rd_design_department_subsets_csv ///
     rd_design_vraem_province_subsets_csv ///
+    rd_design_support_sensitivity_csv ///
+    rd_design_cutoff_year_summary_csv ///
+    rd_design_cutoff_year_frontier_csv ///
     rd_design_tie_csv ///
     rd_design_accounting_csv ///
     rd_design_candidate_scorecard_csv ///
@@ -2357,6 +2666,9 @@ local output_ids ///
 local output_types ///
     table ///
     workbook ///
+    table ///
+    table ///
+    table ///
     table ///
     table ///
     table ///
@@ -2380,6 +2692,9 @@ local output_specs ///
     geographic_first_stage_heterogeneity_atlas ///
     bounded_department_subset_first_stages ///
     bounded_vraem_province_subset_first_stages ///
+    named_candidate_full_support_sensitivity ///
+    all_cutoff_year_atlas_summary ///
+    all_cutoff_year_supported_frontier ///
     rounded_score_cutoff_audit ///
     geographic_candidate_accounting ///
     bc_candidate_horizon_scorecard ///
@@ -2394,7 +2709,7 @@ local output_specs ///
     subset_size_strength_diagnostic
 
 local output_count : word count `output_paths'
-assert `output_count' == 18
+assert `output_count' == 21
 assert `output_count' == `: word count `output_ids''
 assert `output_count' == `: word count `output_types''
 assert `output_count' == `: word count `output_specs''
@@ -2418,7 +2733,7 @@ forvalues output_index = 1/`output_count' {
     local output_bytes = strtrim("`output_bytes'")
 
     file write `manifest_handle' ///
-        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/03_validate_rd_design.do","06_community_registry_geospatial.dta","`input_datasignature'","aggregate RD first-stage specification","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","aggregate_internal_review","no_sample_selected""' _n
+        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/03_validate_rd_design.do","06_community_registry_geospatial.dta","`input_datasignature'","aggregate RD first-stage specification","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","aggregate_internal_review","main_geography_selected_externally""' _n
 }
 file close `manifest_handle'
 
@@ -2440,13 +2755,12 @@ display as text "Specifications recorded: " _N
 display as text "Successful estimates: `successful_estimates'"
 display as text "Skipped for limited support: `skipped_estimates'"
 display as text "Estimation failures retained: `failed_estimates'"
-display as text "No final cutoff or geographic sample was selected."
+display as text "The audit did not create or alter the selected legacy geography."
 display as text "Tables: `table_dir'"
 display as text "Figures: `figure_dir'"
 display as text "Manifest: `rd_manifest'"
 
 capture program drop _vrd_first_stage
 capture program drop _vrd_atlas_grid
-capture program drop _vrd_bc_horizon_grid
 capture program drop _vrd_covariate_test
 log close victimasrd_rd_design

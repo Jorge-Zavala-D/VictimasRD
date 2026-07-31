@@ -7,12 +7,19 @@ victimization-index thresholds generated meaningful discontinuities in the
 probability of receiving collective reparations. It is a design-diagnostic
 module, not an automatic sample-selection algorithm.
 
+The institutional interpretation is governed by
+`docs/PRC_ROLLOUT_AND_RD_REASSESSMENT.md`. The documentary record shows a
+material regime change in 2012, inherited commitments, geographic priority
+channels, and a multi-stage project process. Consequently, a discontinuity
+found in the search is not treated as evidence of a policy-valid RD unless it
+can be mapped to the rule and risk set in force at that date.
+
 The module reports every estimate in its declared grids. It never ranks
 geographies by the largest coefficient or smallest p-value, never deletes
-unsuccessful specifications, and never writes `sample_main_rd`. A final
-analysis geography requires a versioned research-team decision that states the
-institutional rationale, geographic rule, cutoff strategy, score-tie rule, and
-treatment horizon.
+unsuccessful specifications, and never writes or changes `sample_main_rd`.
+The research team selected the exact legacy geography on 29 July 2026;
+`01_data_preparation.do` encodes that separate versioned decision. The audit
+therefore remains sensitivity evidence rather than a sample-selection engine.
 
 ## Bounded higher-order subset search
 
@@ -36,6 +43,11 @@ using two independently defined universes:
   seven); and
 - every nonempty subset of the ten complete provinces in INEI's official VRAEM
   study envelope (1,023 subsets, sizes one through ten).
+
+Every bounded subset is now estimated at all four cutoffs for every cumulative
+treatment year from 2007 through 2023. The complete all-year result dataset is
+retained in Dropbox Working QA. Git contains compact summaries and the
+2012/2016/2023 slices of the large atlases.
 
 Every subset is reported. None is automatically eligible merely because it
 has a large coefficient or small p-value. The subset atlases diagnose where
@@ -71,33 +83,32 @@ official thresholds:
 | C--D | C | D |
 | D--E | D | E |
 
-The principal sample-selection treatment horizons are:
+The four rows do not represent four equally documented assignment thresholds.
+The post-2012 operational rule jointly prioritizes A and B, then refers to the
+remaining communities. Therefore:
 
-- `treat_12` for SISFOH 2013 outcomes;
-- `treat_16` for 2017 Census outcomes.
+- B--C is the only explicit boundary between the written post-2012 priority
+  pool and the remaining categories;
+- A--B lies inside the joint A/B priority pool; and
+- the reviewed operational documents do not establish separate C-before-D
+  and D-before-E stages.
 
-These are conservative end-of-prior-year exposure indicators. The exact
-measurement date of each outcome source must still be confirmed. `treat_23`
-is retained as a rollout-catch-up diagnostic and for interpreting the planned
-2025 Census migration extension, but it does not select the geography because
-no searched cutoff or defensible subset has a usable 2023 first stage. The
-audit also estimates the complete `treat_07`--`treat_23` trajectory so the two
-principal horizons cannot conceal a nonmonotonic or isolated result.
+All cutoffs remain in the diagnostic grid. A non-B--C jump cannot become the
+primary causal design solely because it is empirically strong.
 
-One common geography should normally be used across outcome families.
-Different treatment horizons identify different time-specific first stages
-and potentially different complier populations; they do not justify choosing
-different geographic samples solely because one sample is stronger in a
-particular year. The disappearance of the receipt discontinuity by 2023 is
-interpreted as program catch-up and does not justify a new 2025 geography.
+Every cumulative treatment indicator from `treat_07` through `treat_23` is
+estimated for every bounded geographic candidate and cutoff. `treat_12` and
+`treat_16` remain outcome-linked reference dates for SISFOH 2013 and Census
+2017, but they do not select the geography. The exact measurement date of each
+outcome and the meaning of the CMAN year must still be confirmed.
 
-The audit also distinguishes two possible longitudinal estimands that the team
-must resolve. A contemporaneous-receipt strategy uses `treat_12`, `treat_16`,
-and `treat_23` for the three outcome waves, but changes the treatment and
-complier population over time. An early-versus-delayed-receipt strategy fixes
-an early treatment definition, such as `treat_12`, across outcome waves and
-interprets later estimates as longer-run effects of early priority. The
-complete annual first-stage paths are reported to reveal rollout catch-up.
+Treatment years are interpreted as distinct estimands, not interchangeable
+specifications. Selecting the year with the largest first stage is prohibited.
+Dropping communities because they receive treatment between an early cutoff
+year and outcome measurement conditions on realized future treatment and is
+not the default fuzzy RD. The preferred hierarchy for team review is a
+priority-assignment ITT and a secondary fixed early-versus-delayed receipt
+estimand, conditional on reconstructing the applicable assignment regime.
 
 ## Rounded score and authoritative category
 
@@ -127,12 +138,26 @@ The research team must predeclare one rule before treatment-effect estimation.
 The geographic atlas uses the conservative half-rounding-band exclusion to
 avoid treating an unresolved side conflict as geographic heterogeneity.
 
+## Running-variable support
+
+The main geographic atlas uses the two source categories adjacent to each
+cutoff. This is a conservative cap that prevents an automatically selected
+bandwidth from crossing another policy threshold. It is not a general
+requirement of single-cutoff RD.
+
+For every named candidate, cutoff, and treatment year, the audit also estimates
+the same local-linear specification on the full score support. The selected
+bandwidths must be checked against the neighboring thresholds. Material
+differences between adjacent-category and full-support estimates are reported
+as a design-sensitivity warning.
+
 ## Estimation grid
 
 The first-stage outcome is binary treatment receipt by the relevant year.
-Each estimate uses the two categories adjacent to the cutoff, a triangular
-kernel, mass-point adjustment, and district-clustered inference. Named
-candidates are estimated with:
+Each estimate uses a triangular kernel, mass-point adjustment, and
+district-clustered inference. The geographic atlas uses adjacent categories;
+the named support-sensitivity grid uses the full score. Named candidates are
+estimated with:
 
 - local linear, MSE-optimal bandwidth (`p1_mserd`);
 - local linear, coverage-error-rate bandwidth (`p1_cerrd`); and
@@ -177,20 +202,36 @@ separate written identification argument.
 ## Outputs and decision gate
 
 Aggregate results are written under `output/tables/rd_design` and
-`output/figures/rd_design`. These include complete raw grids, horizon
-scorecards, candidate-by-horizon matrices, covariate-continuity tests, and
-subset-size diagnostics. The complete Stata result datasets are retained in
-Dropbox Working QA. No row-level community data enter Git.
+`output/figures/rd_design`. The complete 96,524-cell Stata audit dataset is
+retained in Dropbox Working QA. Git contains the named grids, full-support
+sensitivity, outcome-linked slices of the large atlases, compact cutoff-year
+summaries, supported frontier diagnostics, horizon scorecards,
+covariate-continuity tests, and figures. No row-level community data enter Git.
 
-Before creating `sample_main_rd`, the research team must approve:
+The program is serial by default and also exposes three internal orchestration
+modes for recovery from long runs. `base` writes the 26,960 non-province
+first-stage cells and covariate audit; sixteen declared `province_chunk`
+workers partition masks 1--1,023 without overlap; and `assemble` requires,
+appends, and uniquely identifies all worker products before generating the
+same public outputs. Worker datasets remain in Dropbox Working QA. These modes
+alter execution only and cannot alter the research grid or select a design.
 
-1. one institutionally justified geographic rule;
-2. one primary cutoff or an explicitly defined multiple-cutoff estimand;
-3. the rounded-score/tie rule;
-4. the three treatment-horizon definitions after confirming outcome dates;
-5. the intended ITT and fuzzy-RD estimands;
-6. weak-first-stage and finite-cluster inference procedures; and
-7. the full validity-test and robustness plan.
+Because the complete audit is computationally intensive, its invocation is
+bracketed out of `00_master.do`, including `run_all`. It may be regenerated
+only as an explicit standalone Stata MCP task.
+
+The geographic rule is now approved. Before estimating primary causal effects,
+the research team must still approve:
+
+1. a dated assignment regime and versioned pre-decision RUV score/category;
+2. the administrative risk set within the selected geography;
+3. one primary cutoff or an explicitly defined multiple-cutoff estimand;
+4. the rounded-score/tie and running-variable-support rules;
+5. treatment-event and treatment-horizon definitions after confirming outcome
+   and CMAN dates;
+6. the intended ITT and fuzzy-RD estimands;
+7. weak-first-stage and finite-cluster inference procedures; and
+8. the full validity-test and robustness plan.
 
 If no defensible geography has an adequate first stage at the relevant
 horizons, the correct conclusion is that the current data do not support the

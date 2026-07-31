@@ -1139,6 +1139,27 @@ victimasrd_normalize_name ccpp_victim_raw, generate(community_norm)
 isid region_norm province_norm district_norm community_norm
 
 /*
+Research-team geographic-sample decision, 29 July 2026: the main RD geography
+reproduces the exact legacy executable rule. It contains every RUV community
+in Apurimac or Huancavelica and every RUV community in La Convencion province
+of Cusco or Huancayo province of Junin. The RUV-supplied district UBIGEO makes
+the rule deterministic even when a ten-digit CCPP code remains unresolved.
+*/
+
+generate byte sample_main_rd = ///
+    inlist(substr(ubigeo_dist, 1, 2), "03", "09") | ///
+    inlist(substr(ubigeo_dist, 1, 4), "0809", "1201")
+
+assert sample_main_rd == ( ///
+    inlist(region_norm, "APURIMAC", "HUANCAVELICA") | ///
+    (region_norm == "CUSCO" & province_norm == "LA CONVENCION") | ///
+    (region_norm == "JUNIN" & province_norm == "HUANCAYO"))
+
+count if sample_main_rd
+assert r(N) == 1162
+local main_rd_sample_rows = r(N)
+
+/*
 The official thresholds have six decimals, but the workbook stores scores to
 four. Preserve the RUV category as the authoritative assignment field. The
 score-based reconstruction below distinguishes rounding artifacts from genuine
@@ -1598,6 +1619,8 @@ label variable running_de ///
     "Victimization index centered at official D-E cutoff 0.015220"
 label variable victimization_level_source ///
     "Victimization category supplied by RUV"
+label variable sample_main_rd ///
+    "Selected legacy geographic sample for main RD analysis"
 label variable victim_inei_match_method ///
     "Method linking RUV community to INEI CCPP directory"
 
@@ -2950,6 +2973,7 @@ keep ///
     running_bc ///
     running_cd ///
     running_de ///
+    sample_main_rd ///
     deaths ///
     disappearances ///
     torture ///
@@ -3014,6 +3038,7 @@ order ///
     running_bc ///
     running_cd ///
     running_de ///
+    sample_main_rd ///
     prc_project_observed ///
     prc_project_link_status ///
     cman_project_count ///
@@ -3034,6 +3059,9 @@ local foundational_missing_ubigeo = r(N)
 assert `foundational_missing_ubigeo' == ///
     `victimization_inei_unresolved'
 assert `foundational_rows' == `victimization_rows'
+assert inlist(sample_main_rd, 0, 1)
+count if sample_main_rd
+assert r(N) == `main_rd_sample_rows'
 
 egen byte missing_treatment_indicator = rowmiss(treat_07-treat_23)
 assert missing_treatment_indicator == 0
@@ -5664,6 +5692,12 @@ post `qa_post' ///
     ("All RUV source rows retained; CMAN-only rows excluded")
 
 post `qa_post' ///
+    ("main_rd_sample_rows") ///
+    (`main_rd_sample_rows') ///
+    ("team_selected") ///
+    ("Exact legacy geography: Apurimac, Huancavelica, La Convencion, and Huancayo")
+
+post `qa_post' ///
     ("foundational_missing_ubigeo") ///
     (`foundational_missing_ubigeo') ///
     ("retained_unresolved") ///
@@ -5952,6 +5986,7 @@ display as text   "2017 geospatial source rows:     `geospatial_source_rows'"
 display as text   "RUV rows with spatial attributes: `geospatial_linked'"
 display as text   "RUV rows without spatial attributes: `geospatial_unmatched'"
 display as text   "RUV rows with altitude:          `geospatial_altitude_available'"
+display as text   "Main RD geographic sample rows: `main_rd_sample_rows'"
 display as text   "All RUV rows retained with complete treatment status."
 
 capture program drop victimasrd_normalize_name

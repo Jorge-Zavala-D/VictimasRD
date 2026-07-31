@@ -46,14 +46,17 @@ The master:
 The implemented `pipeline/01_data_preparation.do` and
 `pipeline/02_describe_data.do` modules are enabled for push-button
 reproduction. The first is the single authoritative preparation program; the
-second produces full-RUV and full-CMAN-project descriptive tables and figures
-without defining or testing an RD sample.
+second produces full-RUV, selected-main-sample, and full-CMAN-project
+descriptive tables and figures without reselecting the geography or estimating
+treatment effects.
 
 `pipeline/03_validate_rd_design.do` is implemented as a structured,
 non-selective first-stage audit. It writes aggregate diagnostics but never
-defines `sample_main_rd`. Its master switch, outcome estimation, robustness,
-and mechanism switches remain disabled while substantive design decisions are
-open.
+defines or changes `sample_main_rd`. The research-team-selected legacy
+geography is created in data preparation. The exhaustive audit call is
+bracketed out of the master, including `run_all`; outcome estimation,
+robustness, and mechanism switches remain disabled while their specifications
+are open.
 
 The CMAN PDF table and ReporteCCPP HTML tables are one-time source-ingestion
 products shared through Dropbox Working. Their CSVs and extraction manifests

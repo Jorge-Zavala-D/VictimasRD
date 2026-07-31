@@ -73,6 +73,28 @@ one CMAN project is linked to one RUV community, the first recorded project
 year defines treatment onset and `cman_project_count` records the number of
 projects.
 
+## Main RD geographic sample
+
+On 29 July 2026, the research team selected the exact executable geography
+used in the legacy analysis as the main RD sample. The canonical flag is
+`sample_main_rd`, defined as one for:
+
+- every RUV community in Apurimac department;
+- every RUV community in Huancavelica department;
+- every RUV community in La Convencion province of Cusco; and
+- every RUV community in Huancayo province of Junin.
+
+The rule is encoded from the RUV-supplied six-digit district UBIGEO:
+department codes `03` and `09`, plus province codes `0809` and `1201`. This
+assigns sample status to all 5,712 RUV records, including communities without
+a verified ten-digit CCPP code. The selected sample contains 1,162
+communities. National descriptive work continues to retain the full RUV
+universe.
+
+This decision resolves the geographic flag only. Treatment timing, rounded
+score ties, the exact risk set, and the primary causal estimand remain separate
+specification decisions.
+
 ## CMAN project types and financing
 
 Every one of the 4,433 CMAN project titles is normalized and classified into a
@@ -160,6 +182,8 @@ The complete run now produces:
 - 3,946 CMAN rows with a verified CCPP code and 487 without one;
 - 4,221 treated RUV communities and 1,491 RUV communities with no recorded
   CMAN project through 2023;
+- 1,162 communities in the research-team-selected main RD geography, with
+  complete `sample_main_rd` status for all 5,712 RUV rows;
 - two later repeated CMAN project rows collapsed after the earliest treatment
   year is retained; and
 - complete treatment indicators and zero remaining accepted exact-link code
@@ -205,6 +229,7 @@ At every major milestone, the polished dataset keeps only:
 
 - durable identifiers and substantively necessary provenance;
 - geographic fields needed for interpretation and linkage;
+- the approved main-sample flag `sample_main_rd`;
 - victimization measures;
 - approved treatment and project fields;
 - INEI attributes intended for analysis; and

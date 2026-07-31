@@ -306,31 +306,56 @@ pre-treatment covariates. Full details are in
 
 ## Recorded descriptive-analysis boundary
 
-On July 28, 2026, the canonical full-universe descriptive module was separated
-from RD-design validation and outcome analysis. It uses all 5,712 RUV
-communities for national counts and distributions, while linkage-dependent
-exhibits report their exact nonmissing sample. It may describe treatment
-coverage across source categories, score bins, years, and departments, but it
-must not select an RD geography, optimize a first stage, run cutoff validity
+On July 28, 2026, the canonical descriptive module was separated from
+RD-design validation and outcome analysis. It uses all 5,712 RUV communities
+for national counts and distributions, while linkage-dependent exhibits report
+their exact nonmissing sample. Following the recorded 29 July geographic
+decision below, it may also describe the fixed `sample_main_rd` geography and
+compare its observed characteristics with the remaining RUV universe. It must
+not optimize a first stage, change the geographic rule, run cutoff validity
 tests, or estimate treatment effects.
 
-The later RD-design module must distinguish theory-grounded geographic
-heterogeneity from significance-based sample selection. Any exhaustive
-exploration must report the complete predeclared candidate set and cannot make
-the preferred sample a mechanical function of the largest discontinuity or
-smallest p-value. The final geography remains an unresolved research-team
-decision. The descriptive output contract and legacy-code boundary are
+The RD-design module distinguishes theory-grounded geographic heterogeneity
+from significance-based sample selection. Its exhaustive exploration reports
+the complete predeclared candidate set and does not change the approved
+geography. The descriptive output contract and legacy-code boundary are
 documented in `docs/DESCRIPTIVE_ANALYSIS.md`.
+
+## Recorded main RD geographic-sample decision
+
+On July 29, 2026, the research team selected the exact executable legacy
+geography as the main RD sample. `sample_main_rd` equals one for every RUV
+community in Apurimac or Huancavelica and every RUV community in La Convencion
+province of Cusco or Huancayo province of Junin. The rule uses the RUV district
+UBIGEO: department codes `03` and `09`, plus province codes `0809` and `1201`.
+
+The selected geography contains 1,162 of the 5,712 RUV communities. The flag
+is created in the RUV block of `01_data_preparation.do`, before downstream
+linkages, so all RUV rows receive sample status even when their ten-digit CCPP
+code is unresolved. The full RUV universe remains the denominator for national
+descriptive work.
+
+This is an explicit team decision to retain continuity with the historical
+paper design; it is not an automatic output of the expanded first-stage
+search. The decision fixes geography but does not silently settle treatment
+timing, score ties, running-variable support, the dated administrative risk
+set, clustering, or the final ITT and fuzzy-RD estimands.
+
+The 96,524-cell search is preserved as an opt-in design audit. Its invocation
+is bracketed out of `00_master.do`, including `run_all`, because routine
+push-button preparation and description should not repeat that intensive
+search.
 
 ## Provisional RD design-audit protocol
 
-On July 29, 2026, the project added a diagnostic RD first-stage module covering
-all four official cutoffs, the principal sample-review horizons `treat_12` and
-`treat_16`, and the `treat_23` rollout-catch-up diagnostic. It also reports the
-complete `treat_07`--`treat_23` trajectory. `treat_23` is retained as a
-diagnostic and for interpreting the planned Census 2025 migration extension,
-not as a requirement for choosing geography. The exact timing of the SISFOH
-2013, Census 2017, and Census 2025 sources remains to be confirmed.
+On July 29, 2026, the project added and then expanded a diagnostic RD
+first-stage module covering all four official cutoffs and every cumulative
+treatment indicator from `treat_07` through `treat_23`. Every bounded
+geographic candidate is now estimated across that complete cutoff-year grid.
+`treat_12` and `treat_16` remain outcome-linked reference dates for SISFOH
+2013 and Census 2017, but no year is permitted to select the geography. The
+exact timing of SISFOH 2013, Census 2017, Census 2025, and the event represented
+by the CMAN year remain to be confirmed.
 
 The module does not optimize or select a geographic sample. It reports the
 national baseline; the exact legacy restriction and its two-department core;
@@ -345,26 +370,44 @@ The unrestricted national department and province power sets are not searched
 because that would make the sample a function of the observed first stage and
 invalidate conventional inference.
 
-The expanded audit finds no candidate with a strong 2023 first stage. It
-conditionally recommends retaining the exact legacy geography as one common
-sample, using B--C priority assignment as the primary ITT estimand, and using
-an early-receipt definition fixed before the first outcome wave as a secondary
-fuzzy-RD exposure. The smaller Apurímac--Huancavelica core has a stronger
-early first stage but less local support and a significant baseline altitude
-discontinuity. Adding San Martín produces a larger and statistically stronger
-post-search frontier but an even larger altitude discontinuity; it remains a
-diagnostic rather than an eligible sample. The exact legacy rule retains 1,162
-RUV communities and nearly the same effective early/mid support as that
-three-department frontier. This remains a recommendation for explicit
-research-team approval; no `sample_main_rd` flag has been created. Details are
-in `docs/RD_DESIGN_RECOMMENDATION.md`.
+The documentary reassessment identifies a material 2012 regime break. The
+first 2007 cohort used the preliminary Censo por la Paz; the 2008 cohort used
+Libro Segundo only in part; and RUV registration, A/B affectation, and
+executing-body accountability were described as three new prioritization
+criteria in the 2012 CMAN report. The same report records 150 inherited
+technical files of diverse affectation and a separate VRAEM priority.
+Defensoría also documents serious irregularities in 2011 prioritization.
+Priority did not itself produce treatment: community choice, a government
+technical file, CMAN validation, financing, cofinancing, and implementation
+stood between the annual list and delivery.
+
+The research team subsequently selected the exact legacy geography as the
+main analysis geography. A policy-valid RD within that geography still
+requires a dated assignment regime, the score/category visible before
+decision, an annual untreated risk set, identification of inherited
+commitments, and consistent administrative priority rules. The
+`sample_main_rd` flag records geography only and must not be interpreted as
+resolving those conditions.
+Details are in `docs/PRC_ROLLOUT_AND_RD_REASSESSMENT.md` and
+`docs/RD_DESIGN_RECOMMENDATION.md`.
+
+The completed 96,524-cell audit finds that every supported positive
+strength-qualified cell is B--C and occurs during 2012--2018. No such cell
+appears at A--B, C--D, or D--E, in 2010, or in 2023. The only geography strong
+in both 2012 and 2016 is a post-search three-department combination with a
+severe altitude discontinuity. The exact legacy B--C first stage is also
+materially attenuated when full-score support selects a wider local
+bandwidth. These results remain required limitations and sensitivity evidence
+for the team-selected geography.
 
 The four-decimal RUV score creates numerical-side conflicts at the six-decimal
 official thresholds, especially D--E. The named-candidate grid therefore
 reports the score as recorded, exclusion of category-sign conflicts, and
 exclusion of the half-rounding-unit band. No rule is designated primary until
-the research team reviews the resulting sensitivity. The protocol, decision
-gate, specification grid, and output contract are documented in
+the research team reviews the resulting sensitivity. The audit also compares
+the conservative adjacent-category support with full score support for every
+named candidate, cutoff, and year. The protocol, decision gate, specification
+grid, and output contract are documented in
 `docs/RD_DESIGN_AUDIT_PROTOCOL.md`.
 
 ## Critical research decisions
@@ -372,8 +415,12 @@ gate, specification grid, and output contract are documented in
 The following issues affect the estimand, sample, or reported results and must
 be resolved by the research team before an authoritative release:
 
-1. **Geographic sample:** the manuscript narrative includes Ayacucho areas,
-   while the current executable rule appears to exclude Ayacucho.
+1. **Assignment regime within the selected geography:** the exact executable
+   legacy geography is now approved and excludes Ayacucho. Reconstruct the
+   annual rule, registry status, inherited commitments, geographic priorities,
+   and untreated risk set before interpreting receipt as one stable fuzzy-RD
+   treatment mechanism. Update the manuscript narrative where it implies a
+   different geographic rule.
 2. **Score integrity and tied assignment:** the official cutoffs are now
    resolved, but the four-decimal score is coarser than the six-decimal
    assignment rule. RD analysis must explicitly address tied mass points,
@@ -483,9 +530,8 @@ unless a registry explains them.
 
 ## Immediate repository priorities
 
-1. Obtain the research-team decision on the geographic analysis sample and
-   predeclare how tied score values at the official cutoffs will enter RD
-   estimation.
+1. Predeclare how tied score values, treatment timing, and the administrative
+   risk set will enter RD estimation within the selected geography.
 2. Map all active manuscript tables and figures to canonical Git outputs,
    producing scripts, logical inputs, and specifications.
 3. Identify canonical data snapshots without copying them into Git.
