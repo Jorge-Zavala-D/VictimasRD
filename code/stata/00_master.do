@@ -748,7 +748,6 @@ if `run_all' | `run_08_run_release_checks' {
 if !`run_all' & ///
    !`run_01_data_preparation' & ///
    !`run_02_describe_data' & ///
-   !`run_03_validate_rd_design' & ///
    !`run_04_estimate_main_effects' & ///
    !`run_05_run_robustness' & ///
    !`run_06_analyze_mechanisms' & ///

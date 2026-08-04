@@ -1219,7 +1219,7 @@ spmap sample_main_rd using "`province_map_coords'", ///
     osize(vthin thin) ///
     legorder(lohi) ///
     legend( ///
-        order(1 "Outside selected geography" 2 "Selected RD geography") ///
+        order(2 "Outside selected geography" 3 "Selected RD geography") ///
         rows(1) position(6) ring(1) size(small) ///
         region(lcolor(none))) ///
     title("Geographic definition of the selected RD sample", ///
@@ -1228,10 +1228,12 @@ spmap sample_main_rd using "`province_map_coords'", ///
         "Apurimac and Huancavelica, plus La Convencion and Huancayo provinces", ///
         size(small) color(gs5)) ///
     note( ///
-        "Notes: The selected rule contains all RUV communities in the departments of Apurimac and Huancavelica, La Convencion province in Cusco," ///
-        "and Huancayo province in Junin (1,162 communities). Shading identifies the geographic rule and does not represent treatment or an estimate." ///
-        "Boundary geometry is the checksum-locked 2018 legacy province file; publication use requires verification against an official versioned source." ///
-        "Analytical source: RUV Libro Segundo. Geographic decision recorded by the research team on 29 July 2026.", ///
+        "Notes: Selected geography includes all RUV communities in Apurimac and Huancavelica;" ///
+        "La Convencion province (Cusco); and Huancayo province (Junin). N = 1,162." ///
+        "Shading identifies the geographic rule, not treatment assignment or an estimate." ///
+        "Boundary geometry is the checksum-locked 2018 legacy province file. Publication use" ///
+        "requires verification against an official versioned source. Source: RUV Libro Segundo." ///
+        "Research-team geographic decision recorded on 29 July 2026.", ///
         size(vsmall) color(gs5) span) ///
     graphregion(color(white)) ///
     xsize(8.5) ysize(8.5)
@@ -1352,7 +1354,7 @@ replace geographic_component = "Huancayo (Junin)" if ///
 assert !missing(component_order, geographic_component)
 
 collapse ///
-    (count) communities=ruv_id ///
+    (count) communities=sample_main_rd ///
     (mean) census_link_share=census2007_linked ///
            spatial_link_share=geospatial_linked ///
            treated_2012_share=treat_12 ///

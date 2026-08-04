@@ -4491,7 +4491,22 @@ foreach spatial_database in ///
 
     use "`spatial_database'.dta", clear
     spset, modify coordsys(latlong, kilometers)
-    save "`spatial_database'.dta", replace
+
+    /* Dropbox may briefly lock a newly translated file while synchronizing. */
+    local spatial_save_rc = 1
+    forvalues spatial_save_attempt = 1/5 {
+        capture save "`spatial_database'.dta", replace
+        local spatial_save_rc = _rc
+        if `spatial_save_rc' == 0 continue, break
+        if `spatial_save_attempt' < 5 sleep 2000
+    }
+
+    if `spatial_save_rc' {
+        cd "`geospatial_prior_directory'"
+        display as error "Unable to save the translated spatial database after five attempts:"
+        display as error "  `spatial_database'.dta"
+        exit `spatial_save_rc'
+    }
 }
 
 cd "`geospatial_prior_directory'"
