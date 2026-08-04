@@ -26,14 +26,14 @@ estimand.
 
 The community-level input is:
 
-`2 data/3 Coded/1 Current analysis datasets/06_community_registry_geospatial.dta`
+`2 data/3 Coded/1 Current analysis datasets/07_community_registry_gdp.dta`
 
 The module validates the 5,712-row RUV master, the unique `ruv_id`, the
 official centered running variables, cumulative treatment coding through
 2023, and the exact UBIGEO definition of `sample_main_rd`. Downstream linkage
 gaps never remove an RUV row from national counts or sample membership.
-Exhibits that require the 2007 Census or 2017 spatial source report their
-nonmissing sample explicitly.
+Exhibits that require the 2007 Census, 2017 spatial source, or CCPP GDP source
+report their nonmissing sample explicitly.
 
 Project-content and financing exhibits use:
 

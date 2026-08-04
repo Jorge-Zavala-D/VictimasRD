@@ -1,0 +1,18 @@
+variable,storage_concept,definition,source_or_construction,interpretation_limit
+gdp_ccpp_linked,indicator,RUV row linked to a CCPP in the GDP source,Deterministic source-vintage linkage,Unlinked RUV rows are retained
+gdp_ccpp_link_method,category,Highest-priority accepted CCPP GDP link method,Current code then unused exact alternative codes then unique exact names,No fuzzy match is accepted
+gdp_ccpp_ubigeo,identifier,Ten-digit code used in the GDP-source link,Seminario-Palomino workbook,Source-vintage code that does not replace RUV ubigeo_ccpp
+gdp_ccpp_1993,source-scale GDP,Estimated CCPP GDP in 1993,Seminario-Palomino workbook,Workbook cells are retained without rescaling
+gdp_ccpp_2006,source-scale GDP,Estimated CCPP GDP in 2006,Seminario-Palomino workbook,Last strictly pre-program annual level
+ihs_gdp_ccpp_2006,transformed GDP,Inverse hyperbolic sine of estimated CCPP GDP in 2006,asinh of gdp_ccpp_2006,Zero-safe log-like transformation whose scale follows the source
+gdp_ccpp_zero_9318,indicator,Estimated CCPP GDP equals zero in every source year from 1993 through 2018,Row maximum across the annual source series,Source zero may reflect the estimation procedure rather than no economic activity
+gdp_dist_linked,indicator,RUV row linked to a district represented in the GDP source,Source CCPP district then exact district-code and name passes,Does not imply a CCPP-level GDP link
+gdp_dist_link_method,category,Highest-priority accepted GDP-district link method,Deterministic district linkage,No fuzzy match is accepted
+gdp_dist_ubigeo,identifier,Six-digit district code used for district GDP measures,Seminario-Palomino source vintage,May differ from a current district code after boundary change
+gdp_dist_ccpp_count,count,Number of source CCPPs contributing to the district total,Count of keyed source rows by district,Fixed source universe rather than a current CCPP count
+gdp_dist_1993,source-scale GDP,Sum of estimated CCPP GDP within source district in 1993,Exact source aggregation,Workbook cells are retained without rescaling
+gdp_dist_2006,source-scale GDP,Sum of estimated CCPP GDP within source district in 2006,Exact source aggregation,Last strictly pre-program annual level
+ihs_gdp_dist_2006,transformed GDP,Inverse hyperbolic sine of estimated district GDP in 2006,asinh of gdp_dist_2006,Zero-safe log-like transformation whose scale follows the source
+gdp_dist_aagr_9306,annual proportion,Annualized compound change in estimated district GDP from 1993 to 2006,(GDP2006/GDP1993)^(1/13)-1,CCPP growth is not separately retained because the source assigns district growth to communities
+gdp_dist_hhi_2006,index,Sum of squared CCPP shares of estimated district GDP in 2006,HHI from source CCPP allocations,Higher values mean settlement concentration and not income inequality
+gdp_dist_topshare_2006,proportion,Largest CCPP share of estimated district GDP in 2006,Maximum source CCPP share within district,Settlement concentration and not household welfare inequality

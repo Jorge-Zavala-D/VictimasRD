@@ -1,0 +1,18 @@
+metric,value,status,note
+gdp_ccpp_source_rows,98011,validated,Unique keyed CCPP rows in the Seminario-Palomino workbook
+gdp_district_source_rows,1833,validated,Unique six-digit districts represented in the GDP source
+gdp_department_source_rows,25,validated,Two-digit departments represented in the GDP source
+gdp_national_total_rows,1,validated,Workbook total rows reconciled exactly to keyed annual sums
+gdp_ccpp_zero_1993_2018,12141,source_feature,Source CCPPs with zero estimated GDP in every annual column
+gdp_exact_current_ubigeo,4992,validated,RUV rows linked by exact current ten-digit CCPP UBIGEO
+gdp_exact_census2007_ubigeo,10,validated,Additional rows linked by unique unused exact Census 2007 UBIGEO
+gdp_exact_geospatial_ubigeo,0,validated,Additional rows linked by unique unused exact spatial UBIGEO
+gdp_unique_exact_full_path,2,validated,Additional rows linked by a unique exact normalized full path
+gdp_unique_exact_primary_name,17,validated,Additional rows linked by unique exact primary name within district
+gdp_ccpp_linked,5021,validated,RUV rows linked to a CCPP in the GDP source
+gdp_ccpp_unmatched,691,retained_unmatched,RUV rows retained without a verified CCPP-level GDP link
+gdp_ccpp_main_sample_linked,1045,validated,Selected-sample RUV rows linked to a CCPP in the GDP source
+gdp_district_linked,5695,validated,RUV rows linked to a district in the GDP source
+gdp_district_unmatched,17,retained_unmatched,RUV rows retained without verified GDP-district context
+gdp_district_main_sample_linked,1162,validated,All selected-sample RUV rows linked to GDP-district context
+gdp_registry_rows,5712,validated,All RUV records retained after the GDP-source merge

@@ -2,7 +2,7 @@
 Project:       Victimas RD
 Program:       01_data_preparation.do
 Purpose:       Authoritative end-to-end data-preparation program
-Current scope: Foundational community, Census 2007, and spatial covariates
+Current scope: Foundational community, Census 2007, spatial, and GDP covariates
 
 This file is the only canonical Stata data-preparation program. New source
 families will be added as clearly delimited sections here so that the master
@@ -15,6 +15,7 @@ Current source families:
     4. Historical and alternative CCPP directories, 2007--2025
     5. INEI 2007 CCPP-level census tabulation
     6. INEI-derived 2017 CCPP point and category shapefiles
+    7. Seminario-Palomino estimated CCPP GDP, 1993--2018
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -5411,7 +5412,809 @@ cd "`geospatial_prior_directory'"
 
 
 *===============================================================================
-**# 10. Write aggregate QA metrics and close
+**# 10. Prepare and link Seminario-Palomino CCPP GDP estimates
+*===============================================================================
+
+/*
+The source estimates real GDP for a fixed 2007 CCPP universe from 1993 to
+2018. District GDP is allocated across CCPPs using 2007 population shares, and
+the community series then inherits district growth. The full annual source is
+kept in Dropbox Working. The analytical registry retains only two
+pre-treatment levels, a zero-safe transformation, district pre-treatment
+growth, and transparent settlement-concentration measures.
+
+The concentration measures are not income or household-welfare inequality.
+They summarize how the source allocates estimated district activity across
+its constituent CCPPs. No Gini coefficient is constructed from these totals.
+*/
+
+local gdp_source ///
+    "${raw_root}/10 Nightlights/4. PBI_CentrosPoblados_1993-2018.xlsx"
+
+capture confirm file "`gdp_source'"
+if _rc {
+    display as error "Seminario-Palomino CCPP GDP workbook was not found:"
+    display as error "  `gdp_source'"
+    exit 601
+}
+
+tempfile ///
+    gdp_ccpp_source ///
+    gdp_district_source ///
+    gdp_district_names ///
+    gdp_ccpp_code_lookup ///
+    gdp_ccpp_full_path_lookup ///
+    gdp_ccpp_primary_name_lookup ///
+    gdp_links ///
+    gdp_accepted_ids ///
+    gdp_used_codes ///
+    gdp_link_values ///
+    gdp_district_code_lookup ///
+    gdp_district_path_lookup ///
+    gdp_district_name_links
+
+import excel using "`gdp_source'", ///
+    sheet("PBI_CP") firstrow clear
+
+assert _N == 98012
+
+foreach source_id in IDDIST IDCARTOGR {
+    confirm string variable `source_id'
+}
+
+local gdp_excel_columns ///
+    G H I J K L M N O P Q R S T U V W X Y Z AA AB AC AD AE AF
+local gdp_column_count : word count `gdp_excel_columns'
+assert `gdp_column_count' == 26
+
+forvalues year_index = 1/`gdp_column_count' {
+    local source_column : word `year_index' of `gdp_excel_columns'
+    local source_year = 1992 + `year_index'
+    confirm numeric variable `source_column'
+    rename `source_column' gdp_ccpp_`source_year'
+}
+
+rename ///
+    (IDDIST IDCARTOGR NOMB_DEP NOMB_PRO NOMB_DIST NOMCCPP) ///
+    (gdp_dist_ubigeo gdp_ccpp_ubigeo gdp_source_department ///
+     gdp_source_province gdp_source_district gdp_source_ccpp)
+
+generate byte gdp_national_total = missing(gdp_ccpp_ubigeo)
+count if gdp_national_total
+local gdp_national_total_rows = r(N)
+assert `gdp_national_total_rows' == 1
+
+assert strlen(gdp_dist_ubigeo) == 6 if !gdp_national_total
+assert strlen(gdp_ccpp_ubigeo) == 10 if !gdp_national_total
+assert substr(gdp_ccpp_ubigeo, 1, 6) == gdp_dist_ubigeo ///
+    if !gdp_national_total
+
+forvalues source_year = 1993/2018 {
+    assert !missing(gdp_ccpp_`source_year')
+    assert gdp_ccpp_`source_year' >= 0
+
+    quietly summarize ///
+        gdp_ccpp_`source_year' if gdp_national_total, meanonly
+    scalar __gdp_reported_total = r(mean)
+    quietly summarize ///
+        gdp_ccpp_`source_year' if !gdp_national_total, meanonly
+    assert reldif(r(sum), __gdp_reported_total) < 1e-10
+}
+scalar drop __gdp_reported_total
+
+drop if gdp_national_total
+drop gdp_national_total
+isid gdp_ccpp_ubigeo
+
+count
+local gdp_ccpp_source_rows = r(N)
+assert `gdp_ccpp_source_rows' == 98011
+
+preserve
+keep gdp_dist_ubigeo
+duplicates drop
+count
+local gdp_district_source_rows = r(N)
+assert `gdp_district_source_rows' == 1833
+restore
+
+preserve
+generate str2 gdp_department_code = substr(gdp_dist_ubigeo, 1, 2)
+keep gdp_department_code
+duplicates drop
+count
+local gdp_department_source_rows = r(N)
+assert `gdp_department_source_rows' == 25
+restore
+
+egen double __gdp_series_max = ///
+    rowmax(gdp_ccpp_1993-gdp_ccpp_2018)
+generate byte gdp_ccpp_zero_9318 = __gdp_series_max == 0
+drop __gdp_series_max
+
+count if gdp_ccpp_zero_9318
+local gdp_ccpp_zero_rows = r(N)
+assert `gdp_ccpp_zero_rows' == 12141
+
+label variable gdp_dist_ubigeo ///
+    "Six-digit district code in the GDP source"
+label variable gdp_ccpp_ubigeo ///
+    "Ten-digit CCPP code in the GDP source"
+label variable gdp_ccpp_zero_9318 ///
+    "Estimated CCPP GDP equals zero in every source year, 1993-2018"
+
+forvalues source_year = 1993/2018 {
+    label variable gdp_ccpp_`source_year' ///
+        "Estimated CCPP GDP, source units, `source_year'"
+}
+
+order ///
+    gdp_dist_ubigeo ///
+    gdp_ccpp_ubigeo ///
+    gdp_source_department ///
+    gdp_source_province ///
+    gdp_source_district ///
+    gdp_source_ccpp ///
+    gdp_ccpp_1993-gdp_ccpp_2018 ///
+    gdp_ccpp_zero_9318
+
+compress
+sort gdp_ccpp_ubigeo
+save ///
+    "${intermediate_root}/12_ccpp_gdp_1993_2018.dta", ///
+    replace
+save `gdp_ccpp_source'
+
+/*
+District totals are exact sums of the source CCPP estimates. The HHI and
+largest-CCPP share use the 2006 source allocation, the final strictly
+pre-program year. The source methodology makes these shares effectively
+time-invariant because community shares originate in 2007 population.
+*/
+
+preserve
+keep ///
+    gdp_dist_ubigeo ///
+    gdp_source_department ///
+    gdp_source_province ///
+    gdp_source_district
+bysort gdp_dist_ubigeo: keep if _n == 1
+isid gdp_dist_ubigeo
+save `gdp_district_names'
+restore
+
+bysort gdp_dist_ubigeo: egen double __gdp_dist_2006 = ///
+    total(gdp_ccpp_2006)
+assert __gdp_dist_2006 > 0
+
+generate double __gdp_ccpp_share_2006 = ///
+    gdp_ccpp_2006 / __gdp_dist_2006
+generate double __gdp_ccpp_share_sq_2006 = ///
+    __gdp_ccpp_share_2006^2
+bysort gdp_dist_ubigeo: egen double __gdp_dist_hhi_2006 = ///
+    total(__gdp_ccpp_share_sq_2006)
+bysort gdp_dist_ubigeo: egen double __gdp_dist_topshare_2006 = ///
+    max(__gdp_ccpp_share_2006)
+generate byte __gdp_ccpp_record = 1
+
+collapse ///
+    (sum) gdp_ccpp_1993-gdp_ccpp_2018 ///
+          gdp_dist_ccpp_count=__gdp_ccpp_record ///
+    (firstnm) gdp_dist_hhi_2006=__gdp_dist_hhi_2006 ///
+              gdp_dist_topshare_2006=__gdp_dist_topshare_2006, ///
+    by(gdp_dist_ubigeo)
+
+forvalues source_year = 1993/2018 {
+    rename gdp_ccpp_`source_year' gdp_dist_`source_year'
+    label variable gdp_dist_`source_year' ///
+        "Estimated district GDP, source units, `source_year'"
+}
+
+merge 1:1 gdp_dist_ubigeo using `gdp_district_names', ///
+    assert(match) nogen
+
+generate double ihs_gdp_dist_2006 = asinh(gdp_dist_2006)
+generate double gdp_dist_aagr_9306 = ///
+    (gdp_dist_2006 / gdp_dist_1993)^(1 / 13) - 1
+
+assert !missing(gdp_dist_aagr_9306)
+assert inrange(gdp_dist_hhi_2006, 0, 1)
+assert inrange(gdp_dist_topshare_2006, 0, 1)
+assert gdp_dist_topshare_2006^2 <= gdp_dist_hhi_2006 + 1e-12
+
+label variable gdp_dist_ccpp_count ///
+    "Number of source CCPPs in the GDP district"
+label variable ihs_gdp_dist_2006 ///
+    "Inverse-hyperbolic-sine estimated district GDP, 2006"
+label variable gdp_dist_aagr_9306 ///
+    "Annualized estimated district GDP growth, 1993-2006"
+label variable gdp_dist_hhi_2006 ///
+    "HHI of estimated district GDP across source CCPPs, 2006"
+label variable gdp_dist_topshare_2006 ///
+    "Largest CCPP share of estimated district GDP, 2006"
+
+order ///
+    gdp_dist_ubigeo ///
+    gdp_source_department ///
+    gdp_source_province ///
+    gdp_source_district ///
+    gdp_dist_ccpp_count ///
+    gdp_dist_1993-gdp_dist_2018 ///
+    ihs_gdp_dist_2006 ///
+    gdp_dist_aagr_9306 ///
+    gdp_dist_hhi_2006 ///
+    gdp_dist_topshare_2006
+
+compress
+sort gdp_dist_ubigeo
+isid gdp_dist_ubigeo
+save ///
+    "${intermediate_root}/13_district_gdp_1993_2018.dta", ///
+    replace
+save `gdp_district_source'
+
+/*
+CCPP linkage is deterministic and source-vintage specific. It never replaces
+the verified RUV UBIGEO. Current exact codes have priority, followed by unused
+and unique exact 2007 Census or spatial codes, unique exact full paths, and a
+unique exact primary name within district after removing only a terminal
+parenthetical alias. Candidate codes already assigned to another RUV row are
+quarantined by construction. No fuzzy candidate is accepted.
+*/
+
+use `gdp_ccpp_source', clear
+keep gdp_ccpp_ubigeo
+generate byte gdp_code_in_source = 1
+save `gdp_ccpp_code_lookup'
+
+use ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    clear
+keep ruv_id ubigeo_ccpp
+drop if missing(ubigeo_ccpp)
+rename ubigeo_ccpp gdp_ccpp_ubigeo
+merge m:1 gdp_ccpp_ubigeo using `gdp_ccpp_code_lookup', ///
+    keep(match) keepusing(gdp_code_in_source) nogen
+drop gdp_code_in_source
+generate str40 gdp_ccpp_link_method = "exact_current_ubigeo"
+isid ruv_id
+isid gdp_ccpp_ubigeo
+save `gdp_links'
+
+count
+local gdp_exact_current = r(N)
+assert `gdp_exact_current' == 4992
+
+foreach candidate_code in ///
+    census2007_ubigeo_ccpp ///
+    geospatial_ubigeo_ccpp {
+
+    use ///
+        "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+        clear
+    keep ruv_id `candidate_code'
+    drop if missing(`candidate_code')
+    rename `candidate_code' gdp_ccpp_ubigeo
+    merge m:1 gdp_ccpp_ubigeo using `gdp_ccpp_code_lookup', ///
+        keep(match) keepusing(gdp_code_in_source) nogen
+    drop gdp_code_in_source
+
+    preserve
+    use `gdp_links', clear
+    keep ruv_id
+    save `gdp_accepted_ids', replace
+    restore
+    merge 1:1 ruv_id using `gdp_accepted_ids', ///
+        keep(master) nogen
+
+    preserve
+    use `gdp_links', clear
+    keep gdp_ccpp_ubigeo
+    save `gdp_used_codes', replace
+    restore
+    merge m:1 gdp_ccpp_ubigeo using `gdp_used_codes', ///
+        keep(master) nogen
+
+    bysort gdp_ccpp_ubigeo: keep if _N == 1
+
+    if "`candidate_code'" == "census2007_ubigeo_ccpp" {
+        generate str40 gdp_ccpp_link_method = ///
+            "exact_census2007_ubigeo"
+    }
+    else {
+        generate str40 gdp_ccpp_link_method = ///
+            "exact_geospatial_ubigeo"
+    }
+
+    append using `gdp_links'
+    isid ruv_id
+    isid gdp_ccpp_ubigeo
+    save `gdp_links', replace
+}
+
+use `gdp_links', clear
+count if gdp_ccpp_link_method == "exact_census2007_ubigeo"
+local gdp_exact_census2007 = r(N)
+assert `gdp_exact_census2007' == 10
+count if gdp_ccpp_link_method == "exact_geospatial_ubigeo"
+local gdp_exact_geospatial = r(N)
+assert `gdp_exact_geospatial' == 0
+
+use `gdp_ccpp_source', clear
+victimasrd_normalize_name gdp_source_department, ///
+    generate(gdp_department_key)
+victimasrd_normalize_name gdp_source_province, ///
+    generate(gdp_province_key)
+victimasrd_normalize_name gdp_source_district, ///
+    generate(gdp_district_key)
+victimasrd_normalize_name gdp_source_ccpp, ///
+    generate(gdp_ccpp_name_key)
+bysort ///
+    gdp_department_key ///
+    gdp_province_key ///
+    gdp_district_key ///
+    gdp_ccpp_name_key: ///
+    keep if _N == 1
+keep ///
+    gdp_department_key ///
+    gdp_province_key ///
+    gdp_district_key ///
+    gdp_ccpp_name_key ///
+    gdp_ccpp_ubigeo
+isid ///
+    gdp_department_key ///
+    gdp_province_key ///
+    gdp_district_key ///
+    gdp_ccpp_name_key
+save `gdp_ccpp_full_path_lookup'
+
+use ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    clear
+keep ///
+    ruv_id ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw
+victimasrd_normalize_name dpto_victim_raw, ///
+    generate(gdp_department_key)
+victimasrd_normalize_name prov_victim_raw, ///
+    generate(gdp_province_key)
+victimasrd_normalize_name dist_victim_raw, ///
+    generate(gdp_district_key)
+victimasrd_normalize_name ccpp_victim_raw, ///
+    generate(gdp_ccpp_name_key)
+keep ruv_id gdp_department_key gdp_province_key ///
+    gdp_district_key gdp_ccpp_name_key
+merge m:1 ///
+    gdp_department_key ///
+    gdp_province_key ///
+    gdp_district_key ///
+    gdp_ccpp_name_key ///
+    using `gdp_ccpp_full_path_lookup', ///
+    keep(match) nogen
+
+preserve
+use `gdp_links', clear
+keep ruv_id
+save `gdp_accepted_ids', replace
+restore
+merge 1:1 ruv_id using `gdp_accepted_ids', ///
+    keep(master) nogen
+
+preserve
+use `gdp_links', clear
+keep gdp_ccpp_ubigeo
+save `gdp_used_codes', replace
+restore
+merge m:1 gdp_ccpp_ubigeo using `gdp_used_codes', ///
+    keep(master) nogen
+bysort gdp_ccpp_ubigeo: keep if _N == 1
+generate str40 gdp_ccpp_link_method = "unique_exact_full_path"
+append using `gdp_links'
+isid ruv_id
+isid gdp_ccpp_ubigeo
+save `gdp_links', replace
+
+count if gdp_ccpp_link_method == "unique_exact_full_path"
+local gdp_exact_full_path = r(N)
+assert `gdp_exact_full_path' == 2
+
+use `gdp_ccpp_source', clear
+generate str244 gdp_source_ccpp_primary = ustrregexra( ///
+    gdp_source_ccpp, "\s*\([^()]*\)\s*$", "")
+victimasrd_normalize_name gdp_source_ccpp_primary, ///
+    generate(gdp_ccpp_primary_key)
+bysort gdp_dist_ubigeo gdp_ccpp_primary_key: ///
+    keep if _N == 1
+keep ///
+    gdp_dist_ubigeo ///
+    gdp_ccpp_primary_key ///
+    gdp_ccpp_ubigeo
+isid gdp_dist_ubigeo gdp_ccpp_primary_key
+save `gdp_ccpp_primary_name_lookup'
+
+use ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    clear
+keep ruv_id ubigeo_dist ccpp_victim_raw
+rename ubigeo_dist gdp_dist_ubigeo
+generate str244 gdp_ruv_ccpp_primary = ustrregexra( ///
+    ccpp_victim_raw, "\s*\([^()]*\)\s*$", "")
+victimasrd_normalize_name gdp_ruv_ccpp_primary, ///
+    generate(gdp_ccpp_primary_key)
+keep ruv_id gdp_dist_ubigeo gdp_ccpp_primary_key
+merge m:1 ///
+    gdp_dist_ubigeo ///
+    gdp_ccpp_primary_key ///
+    using `gdp_ccpp_primary_name_lookup', ///
+    keep(match) nogen
+
+preserve
+use `gdp_links', clear
+keep ruv_id
+save `gdp_accepted_ids', replace
+restore
+merge 1:1 ruv_id using `gdp_accepted_ids', ///
+    keep(master) nogen
+
+preserve
+use `gdp_links', clear
+keep gdp_ccpp_ubigeo
+save `gdp_used_codes', replace
+restore
+merge m:1 gdp_ccpp_ubigeo using `gdp_used_codes', ///
+    keep(master) nogen
+bysort gdp_ccpp_ubigeo: keep if _N == 1
+generate str40 gdp_ccpp_link_method = "unique_exact_primary_name"
+append using `gdp_links'
+keep ruv_id gdp_ccpp_ubigeo gdp_ccpp_link_method
+isid ruv_id
+isid gdp_ccpp_ubigeo
+sort ruv_id
+save `gdp_links', replace
+save ///
+    "${intermediate_root}/14_ruv_ccpp_gdp_links.dta", ///
+    replace
+
+count if gdp_ccpp_link_method == "unique_exact_primary_name"
+local gdp_exact_primary_name = r(N)
+assert `gdp_exact_primary_name' == 17
+
+count
+local gdp_ccpp_linked = r(N)
+assert `gdp_ccpp_linked' == 5021
+
+merge 1:1 ruv_id using ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    keep(match) keepusing(sample_main_rd) nogen
+count if sample_main_rd
+local gdp_ccpp_main_linked = r(N)
+assert `gdp_ccpp_main_linked' == 1045
+
+preserve
+keep if inlist( ///
+    gdp_ccpp_link_method, ///
+    "unique_exact_full_path", ///
+    "unique_exact_primary_name")
+count
+assert r(N) == 19
+merge 1:1 ruv_id using ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    keep(match) ///
+    keepusing( ///
+        ubigeo_ccpp ///
+        census2007_ubigeo_ccpp ///
+        geospatial_ubigeo_ccpp ///
+        dpto_victim_raw ///
+        prov_victim_raw ///
+        dist_victim_raw ///
+        ccpp_victim_raw) ///
+    nogen
+merge m:1 gdp_ccpp_ubigeo using `gdp_ccpp_source', ///
+    keep(match) ///
+    keepusing( ///
+        gdp_dist_ubigeo ///
+        gdp_source_department ///
+        gdp_source_province ///
+        gdp_source_district ///
+        gdp_source_ccpp) ///
+    nogen
+generate str52 linkage_disposition = ///
+    "accepted_unique_exact_source_vintage_name"
+order ///
+    ruv_id ///
+    sample_main_rd ///
+    gdp_ccpp_link_method ///
+    gdp_ccpp_ubigeo ///
+    gdp_dist_ubigeo ///
+    ubigeo_ccpp ///
+    census2007_ubigeo_ccpp ///
+    geospatial_ubigeo_ccpp ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    gdp_source_department ///
+    gdp_source_province ///
+    gdp_source_district ///
+    gdp_source_ccpp ///
+    linkage_disposition
+sort ruv_id
+save ///
+    "${qa_data_root}/gdp_ccpp_exact_name_links.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/gdp_ccpp_exact_name_links.csv", ///
+    replace
+restore
+
+use `gdp_links', clear
+merge m:1 gdp_ccpp_ubigeo using `gdp_ccpp_source', ///
+    keep(match) ///
+    keepusing( ///
+        gdp_ccpp_1993 ///
+        gdp_ccpp_2006 ///
+        gdp_ccpp_zero_9318) ///
+    nogen
+generate double ihs_gdp_ccpp_2006 = asinh(gdp_ccpp_2006)
+label variable ihs_gdp_ccpp_2006 ///
+    "Inverse-hyperbolic-sine estimated CCPP GDP, 2006"
+isid ruv_id
+save `gdp_link_values'
+
+/*
+District context remains available even when a CCPP-level link is unresolved.
+The linked source-vintage district governs first; otherwise the pipeline uses
+an exact current, Census, or spatial district code. A unique exact normalized
+district path is the final deterministic pass.
+*/
+
+use `gdp_district_source', clear
+keep gdp_dist_ubigeo
+rename gdp_dist_ubigeo gdp_dist_candidate
+generate byte gdp_district_in_source = 1
+save `gdp_district_code_lookup'
+
+use `gdp_district_source', clear
+victimasrd_normalize_name gdp_source_department, ///
+    generate(gdp_department_key)
+victimasrd_normalize_name gdp_source_province, ///
+    generate(gdp_province_key)
+victimasrd_normalize_name gdp_source_district, ///
+    generate(gdp_district_key)
+bysort gdp_department_key gdp_province_key gdp_district_key: ///
+    keep if _N == 1
+keep ///
+    gdp_department_key ///
+    gdp_province_key ///
+    gdp_district_key ///
+    gdp_dist_ubigeo
+rename gdp_dist_ubigeo gdp_dist_name_candidate
+isid gdp_department_key gdp_province_key gdp_district_key
+save `gdp_district_path_lookup'
+
+use ///
+    "${analysis_data_root}/06_community_registry_geospatial.dta", ///
+    clear
+merge 1:1 ruv_id using `gdp_link_values', ///
+    generate(gdp_ccpp_data_merge)
+assert inlist(gdp_ccpp_data_merge, 1, 3)
+generate byte gdp_ccpp_linked = gdp_ccpp_data_merge == 3
+drop gdp_ccpp_data_merge
+
+count if !gdp_ccpp_linked
+local gdp_ccpp_unmatched = r(N)
+assert `gdp_ccpp_unmatched' == 691
+
+label variable gdp_ccpp_linked ///
+    "RUV community linked to the Seminario-Palomino CCPP GDP source"
+label variable gdp_ccpp_link_method ///
+    "Method linking the RUV row to the CCPP GDP source"
+label variable gdp_ccpp_ubigeo ///
+    "Ten-digit source-vintage code used for the CCPP GDP link"
+label variable gdp_ccpp_1993 ///
+    "Estimated CCPP GDP, source units, 1993"
+label variable gdp_ccpp_2006 ///
+    "Estimated CCPP GDP, source units, 2006"
+label variable gdp_ccpp_zero_9318 ///
+    "Estimated CCPP GDP equals zero in every source year, 1993-2018"
+
+generate str6 gdp_dist_ubigeo = ///
+    substr(gdp_ccpp_ubigeo, 1, 6) if gdp_ccpp_linked
+generate str40 gdp_dist_link_method = ///
+    "linked_ccpp_source_district" if gdp_ccpp_linked
+
+foreach district_candidate in ///
+    ubigeo_dist ///
+    census2007_ubigeo_ccpp ///
+    geospatial_ubigeo_ccpp {
+
+    if "`district_candidate'" == "ubigeo_dist" {
+        generate str6 gdp_dist_candidate = `district_candidate'
+        local gdp_district_method "exact_current_district"
+    }
+    else {
+        generate str6 gdp_dist_candidate = ///
+            substr(`district_candidate', 1, 6)
+
+        if "`district_candidate'" == "census2007_ubigeo_ccpp" {
+            local gdp_district_method "exact_census2007_district"
+        }
+        else {
+            local gdp_district_method "exact_geospatial_district"
+        }
+    }
+
+    replace gdp_dist_candidate = "" ///
+        if strlen(gdp_dist_candidate) != 6
+    merge m:1 gdp_dist_candidate using `gdp_district_code_lookup', ///
+        keep(master match) keepusing(gdp_district_in_source) nogen
+    replace gdp_dist_ubigeo = gdp_dist_candidate ///
+        if missing(gdp_dist_ubigeo) & gdp_district_in_source == 1
+    replace gdp_dist_link_method = "`gdp_district_method'" ///
+        if missing(gdp_dist_link_method) & gdp_district_in_source == 1
+    drop gdp_dist_candidate gdp_district_in_source
+}
+
+preserve
+keep if missing(gdp_dist_ubigeo)
+keep ///
+    ruv_id ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw
+victimasrd_normalize_name dpto_victim_raw, ///
+    generate(gdp_department_key)
+victimasrd_normalize_name prov_victim_raw, ///
+    generate(gdp_province_key)
+victimasrd_normalize_name dist_victim_raw, ///
+    generate(gdp_district_key)
+keep ruv_id gdp_department_key gdp_province_key gdp_district_key
+merge m:1 ///
+    gdp_department_key ///
+    gdp_province_key ///
+    gdp_district_key ///
+    using `gdp_district_path_lookup', ///
+    keep(match) nogen
+keep ruv_id gdp_dist_name_candidate
+save `gdp_district_name_links'
+restore
+
+merge 1:1 ruv_id using `gdp_district_name_links', ///
+    keep(master match) nogen
+replace gdp_dist_ubigeo = gdp_dist_name_candidate ///
+    if missing(gdp_dist_ubigeo) & !missing(gdp_dist_name_candidate)
+replace gdp_dist_link_method = "unique_exact_district_path" ///
+    if missing(gdp_dist_link_method) & !missing(gdp_dist_name_candidate)
+drop gdp_dist_name_candidate
+
+merge m:1 gdp_dist_ubigeo using `gdp_district_source', ///
+    keep(master match) ///
+    keepusing( ///
+        gdp_dist_ccpp_count ///
+        gdp_dist_1993 ///
+        gdp_dist_2006 ///
+        ihs_gdp_dist_2006 ///
+        gdp_dist_aagr_9306 ///
+        gdp_dist_hhi_2006 ///
+        gdp_dist_topshare_2006) ///
+    generate(gdp_district_data_merge)
+assert inlist(gdp_district_data_merge, 1, 3)
+generate byte gdp_dist_linked = gdp_district_data_merge == 3
+drop gdp_district_data_merge
+
+count if gdp_dist_linked
+local gdp_district_linked = r(N)
+assert `gdp_district_linked' == 5695
+count if !gdp_dist_linked
+local gdp_district_unmatched = r(N)
+assert `gdp_district_unmatched' == 17
+count if gdp_dist_linked & sample_main_rd
+local gdp_district_main_linked = r(N)
+assert `gdp_district_main_linked' == 1162
+
+label variable gdp_dist_linked ///
+    "RUV row linked to a district in the CCPP GDP source"
+label variable gdp_dist_link_method ///
+    "Method linking the RUV row to the GDP-source district"
+label variable gdp_dist_ubigeo ///
+    "Six-digit source-vintage district code for GDP measures"
+label variable gdp_dist_ccpp_count ///
+    "Number of source CCPPs in the GDP district"
+label variable gdp_dist_1993 ///
+    "Estimated district GDP, source units, 1993"
+label variable gdp_dist_2006 ///
+    "Estimated district GDP, source units, 2006"
+label variable ihs_gdp_dist_2006 ///
+    "Inverse-hyperbolic-sine estimated district GDP, 2006"
+label variable gdp_dist_aagr_9306 ///
+    "Annualized estimated district GDP growth, 1993-2006"
+label variable gdp_dist_hhi_2006 ///
+    "HHI of estimated district GDP across source CCPPs, 2006"
+label variable gdp_dist_topshare_2006 ///
+    "Largest CCPP share of estimated district GDP, 2006"
+
+preserve
+keep if !gdp_ccpp_linked
+keep ///
+    ruv_id ///
+    ubigeo_dist ///
+    ubigeo_ccpp ///
+    census2007_ubigeo_ccpp ///
+    geospatial_ubigeo_ccpp ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    sample_main_rd
+generate str52 linkage_disposition = ///
+    "retained_without_verified_ccpp_gdp_link"
+save ///
+    "${qa_data_root}/gdp_ccpp_unmatched_ruv.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/gdp_ccpp_unmatched_ruv.csv", ///
+    replace
+restore
+
+preserve
+keep if !gdp_dist_linked
+keep ///
+    ruv_id ///
+    ubigeo_dist ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    sample_main_rd
+generate str52 linkage_disposition = ///
+    "retained_without_verified_district_gdp_link"
+save ///
+    "${qa_data_root}/gdp_district_unmatched_ruv.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/gdp_district_unmatched_ruv.csv", ///
+    replace
+restore
+
+local gdp_release_vars ///
+    gdp_ccpp_linked ///
+    gdp_ccpp_link_method ///
+    gdp_ccpp_ubigeo ///
+    gdp_ccpp_1993 ///
+    gdp_ccpp_2006 ///
+    ihs_gdp_ccpp_2006 ///
+    gdp_ccpp_zero_9318 ///
+    gdp_dist_linked ///
+    gdp_dist_link_method ///
+    gdp_dist_ubigeo ///
+    gdp_dist_ccpp_count ///
+    gdp_dist_1993 ///
+    gdp_dist_2006 ///
+    ihs_gdp_dist_2006 ///
+    gdp_dist_aagr_9306 ///
+    gdp_dist_hhi_2006 ///
+    gdp_dist_topshare_2006
+
+order `gdp_release_vars', after(ln1p_dist_nearest_city)
+
+compress
+sort ruv_id
+isid ruv_id
+count
+local gdp_registry_rows = r(N)
+assert `gdp_registry_rows' == `geospatial_registry_rows'
+assert `gdp_registry_rows' == 5712
+
+save ///
+    "${analysis_data_root}/07_community_registry_gdp.dta", ///
+    replace
+
+
+*===============================================================================
+**# 11. Write aggregate QA metrics and close
 *===============================================================================
 
 tempname qa_post
@@ -5910,6 +6713,108 @@ post `qa_post' ///
     ("validated") ///
     ("All RUV records retained after the geospatial merge")
 
+post `qa_post' ///
+    ("gdp_ccpp_source_rows") ///
+    (`gdp_ccpp_source_rows') ///
+    ("validated") ///
+    ("Unique keyed CCPP rows in the Seminario-Palomino workbook")
+
+post `qa_post' ///
+    ("gdp_district_source_rows") ///
+    (`gdp_district_source_rows') ///
+    ("validated") ///
+    ("Unique six-digit districts represented in the GDP source")
+
+post `qa_post' ///
+    ("gdp_department_source_rows") ///
+    (`gdp_department_source_rows') ///
+    ("validated") ///
+    ("Two-digit departments represented in the GDP source")
+
+post `qa_post' ///
+    ("gdp_national_total_rows") ///
+    (`gdp_national_total_rows') ///
+    ("validated") ///
+    ("Workbook total rows reconciled exactly to keyed annual sums")
+
+post `qa_post' ///
+    ("gdp_ccpp_zero_1993_2018") ///
+    (`gdp_ccpp_zero_rows') ///
+    ("source_feature") ///
+    ("Source CCPPs with zero estimated GDP in every annual column")
+
+post `qa_post' ///
+    ("gdp_exact_current_ubigeo") ///
+    (`gdp_exact_current') ///
+    ("validated") ///
+    ("RUV rows linked by exact current ten-digit CCPP UBIGEO")
+
+post `qa_post' ///
+    ("gdp_exact_census2007_ubigeo") ///
+    (`gdp_exact_census2007') ///
+    ("validated") ///
+    ("Additional rows linked by unique unused exact Census 2007 UBIGEO")
+
+post `qa_post' ///
+    ("gdp_exact_geospatial_ubigeo") ///
+    (`gdp_exact_geospatial') ///
+    ("validated") ///
+    ("Additional rows linked by unique unused exact spatial UBIGEO")
+
+post `qa_post' ///
+    ("gdp_unique_exact_full_path") ///
+    (`gdp_exact_full_path') ///
+    ("validated") ///
+    ("Additional rows linked by a unique exact normalized full path")
+
+post `qa_post' ///
+    ("gdp_unique_exact_primary_name") ///
+    (`gdp_exact_primary_name') ///
+    ("validated") ///
+    ("Additional rows linked by unique exact primary name within district")
+
+post `qa_post' ///
+    ("gdp_ccpp_linked") ///
+    (`gdp_ccpp_linked') ///
+    ("validated") ///
+    ("RUV rows linked to a CCPP in the GDP source")
+
+post `qa_post' ///
+    ("gdp_ccpp_unmatched") ///
+    (`gdp_ccpp_unmatched') ///
+    ("retained_unmatched") ///
+    ("RUV rows retained without a verified CCPP-level GDP link")
+
+post `qa_post' ///
+    ("gdp_ccpp_main_sample_linked") ///
+    (`gdp_ccpp_main_linked') ///
+    ("validated") ///
+    ("Selected-sample RUV rows linked to a CCPP in the GDP source")
+
+post `qa_post' ///
+    ("gdp_district_linked") ///
+    (`gdp_district_linked') ///
+    ("validated") ///
+    ("RUV rows linked to a district in the GDP source")
+
+post `qa_post' ///
+    ("gdp_district_unmatched") ///
+    (`gdp_district_unmatched') ///
+    ("retained_unmatched") ///
+    ("RUV rows retained without verified GDP-district context")
+
+post `qa_post' ///
+    ("gdp_district_main_sample_linked") ///
+    (`gdp_district_main_linked') ///
+    ("validated") ///
+    ("All selected-sample RUV rows linked to GDP-district context")
+
+post `qa_post' ///
+    ("gdp_registry_rows") ///
+    (`gdp_registry_rows') ///
+    ("validated") ///
+    ("All RUV records retained after the GDP-source merge")
+
 postclose `qa_post'
 
 use `qa_metrics', clear
@@ -5950,6 +6855,13 @@ preserve
 keep if strpos(metric, "geospatial_") == 1
 export delimited ///
     "${metadata_root}/geospatial-2017/sample-flow.csv", ///
+    replace
+restore
+
+preserve
+keep if strpos(metric, "gdp_") == 1
+export delimited ///
+    "${metadata_root}/gdp-ccpp/sample-flow.csv", ///
     replace
 restore
 
@@ -6001,6 +6913,11 @@ display as text   "2017 geospatial source rows:     `geospatial_source_rows'"
 display as text   "RUV rows with spatial attributes: `geospatial_linked'"
 display as text   "RUV rows without spatial attributes: `geospatial_unmatched'"
 display as text   "RUV rows with altitude:          `geospatial_altitude_available'"
+display as text   "CCPP GDP source rows:            `gdp_ccpp_source_rows'"
+display as text   "RUV rows with CCPP GDP:          `gdp_ccpp_linked'"
+display as text   "RUV rows without CCPP GDP:       `gdp_ccpp_unmatched'"
+display as text   "RUV rows with district GDP:      `gdp_district_linked'"
+display as text   "Selected rows with CCPP GDP:     `gdp_ccpp_main_linked'"
 display as text   "Main RD geographic sample rows: `main_rd_sample_rows'"
 display as text   "All RUV rows retained with complete treatment status."
 

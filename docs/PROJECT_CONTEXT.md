@@ -304,6 +304,33 @@ are post-treatment for some project years and must not be relabeled as
 pre-treatment covariates. Full details are in
 `docs/GEOSPATIAL_2017_PREPARATION.md`.
 
+## Recorded CCPP GDP source and construction decision
+
+On August 4, 2026, the Seminario-Palomino 1993--2018 estimated CCPP GDP
+workbook was designated as the current source for pre-treatment local economic
+context. Its 98,011 unique CCPP rows, 1,833 districts, annual nonnegative
+values, and national totals are validated against the locked workbook
+checksum. The complete annual source and district aggregation remain in
+Dropbox Working; the all-row analytical registry retains only compact 1993 and
+2006 levels, inverse-hyperbolic-sine 2006 transformations, 1993--2006 district
+annualized growth, and district settlement-concentration measures.
+
+The source allocates district GDP across CCPPs using 2007 population shares
+and applies district growth to the community series. Community growth is
+therefore not treated as independent local growth. The district HHI and
+largest-settlement share describe concentration of estimated source activity
+across CCPPs; they must not be labeled income inequality, poverty, welfare, or
+a Gini coefficient. The source workbook is not rescaled because its embedded
+sheet does not independently label the numeric display unit.
+
+GDP linkage never overwrites the verified RUV code. It prioritizes exact
+current and alternative CCPP codes and then accepts only unique exact
+geographic-name links, including a documented terminal-parenthetical alias
+normalization. No fuzzy GDP candidate is accepted. All 5,712 RUV rows remain
+in `07_community_registry_gdp.dta`; unmatched rows remain explicit and
+district context is linked independently. Full provenance, construction,
+linkage rules, and limitations are in `docs/CCPP_GDP_PREPARATION.md`.
+
 ## Recorded descriptive-analysis boundary
 
 On July 28, 2026, the canonical descriptive module was separated from

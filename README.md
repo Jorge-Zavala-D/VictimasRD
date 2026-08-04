@@ -71,8 +71,9 @@ or unreviewed archival outputs belong in Git.
 
 The authoritative pipeline now prepares the RUV victimization registry, CMAN
 collective-reparation treatment history through 2023, selected 2007 Census
-baseline covariates, and 2017 CCPP geospatial attributes and capital-distance
-measures. Run `code/stata/00_master.do` after configuring
+baseline covariates, 2017 CCPP geospatial attributes and capital-distance
+measures, and Seminario-Palomino pre-treatment CCPP and district GDP context.
+Run `code/stata/00_master.do` after configuring
 `config/paths.local.do`.
 
 Data products remain outside Git:
@@ -83,11 +84,14 @@ Data products remain outside Git:
   as `05_community_registry_census2007.dta`; and
 - the all-row registry with 2017 geospatial attributes and geodesic distance
   measures is written to Dropbox Coded as
-  `06_community_registry_geospatial.dta`.
+  `06_community_registry_geospatial.dta`; and
+- the current all-row registry with compact CCPP and district GDP covariates is
+  written to Dropbox Coded as `07_community_registry_gdp.dta`.
 
-The Census and geospatial source audits and linkage rules are documented in
+The Census, geospatial, and GDP source audits and linkage rules are documented in
 [`docs/CENSUS_2007_PREPARATION.md`](docs/CENSUS_2007_PREPARATION.md) and
-[`docs/GEOSPATIAL_2017_PREPARATION.md`](docs/GEOSPATIAL_2017_PREPARATION.md).
+[`docs/GEOSPATIAL_2017_PREPARATION.md`](docs/GEOSPATIAL_2017_PREPARATION.md),
+and [`docs/CCPP_GDP_PREPARATION.md`](docs/CCPP_GDP_PREPARATION.md).
 
 ## Current release status
 

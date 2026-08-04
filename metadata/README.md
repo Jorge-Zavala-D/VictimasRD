@@ -25,3 +25,8 @@ formula audit, source inventory and checksums, specification registry inputs,
 and the compact documentary ledger for the PRC rollout reassessment. These are
 non-observation governance records; the complete specification-level Stata
 audit remains in the authorized Dropbox Working QA area.
+
+The `gdp-ccpp/` subdirectory records the source identity, aggregate linkage
+flow, and variable contract for the Seminario-Palomino estimated CCPP GDP
+series. The annual source, row-level linkage, and unmatched records remain in
+Dropbox Working.

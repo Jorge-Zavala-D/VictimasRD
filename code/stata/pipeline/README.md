@@ -28,9 +28,14 @@ are documented in
 The dated multi-source UBIGEO recovery, rejected candidates, quarantined
 conflicts, and final RUV--CMAN accounting are documented in
 [`docs/CCPP_UBIGEO_RECOVERY_LOG.tex`](../../../docs/CCPP_UBIGEO_RECOVERY_LOG.tex).
+The Seminario-Palomino annual CCPP GDP source audit, deterministic
+source-vintage linkage, district aggregation, and interpretation limits are
+documented in
+[`docs/CCPP_GDP_PREPARATION.md`](../../../docs/CCPP_GDP_PREPARATION.md).
 
 `02_describe_data.do` is the canonical national and selected-sample
-descriptive module. It reads the final prepared community registry, preserves
+descriptive module. It reads `07_community_registry_gdp.dta`, the current final
+prepared community registry, preserves
 all 5,712 RUV rows in national denominators, describes the fixed
 1,162-community `sample_main_rd` geography, and uses all 4,433 canonical CMAN
 project records for project-type and financing exhibits. It generates

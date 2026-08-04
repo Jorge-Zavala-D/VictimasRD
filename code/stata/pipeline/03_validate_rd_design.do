@@ -74,7 +74,7 @@ foreach global_name of local required_globals {
 }
 
 local input_file ///
-    "${analysis_data_root}/06_community_registry_geospatial.dta"
+    "${analysis_data_root}/07_community_registry_gdp.dta"
 local candidate_registry ///
     "${metadata_root}/rd-design-candidate-registry.csv"
 local specification_registry ///
@@ -2733,7 +2733,7 @@ forvalues output_index = 1/`output_count' {
     local output_bytes = strtrim("`output_bytes'")
 
     file write `manifest_handle' ///
-        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/03_validate_rd_design.do","06_community_registry_geospatial.dta","`input_datasignature'","aggregate RD first-stage specification","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","aggregate_internal_review","main_geography_selected_externally""' _n
+        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/03_validate_rd_design.do","07_community_registry_gdp.dta","`input_datasignature'","aggregate RD first-stage specification","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","aggregate_internal_review","main_geography_selected_externally""' _n
 }
 file close `manifest_handle'
 
