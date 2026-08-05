@@ -30,3 +30,9 @@ The `gdp-ccpp/` subdirectory records the source identity, aggregate linkage
 flow, and variable contract for the Seminario-Palomino estimated CCPP GDP
 series. The annual source, row-level linkage, and unmatched records remain in
 Dropbox Working.
+
+The `municipal-elections/` subdirectory records the JNE/INFOgob and ONPE source
+and documentation inventory and checksums, the aggregate contest and RUV
+linkage flow, and the 52-variable analytical contract. Mesa-level returns,
+contest-level reconciliations, and row-level RUV linkage records remain in
+Dropbox Working.

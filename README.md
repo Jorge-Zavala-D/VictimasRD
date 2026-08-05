@@ -72,26 +72,31 @@ or unreviewed archival outputs belong in Git.
 The authoritative pipeline now prepares the RUV victimization registry, CMAN
 collective-reparation treatment history through 2023, selected 2007 Census
 baseline covariates, 2017 CCPP geospatial attributes and capital-distance
-measures, and Seminario-Palomino pre-treatment CCPP and district GDP context.
+measures, Seminario-Palomino pre-treatment CCPP and district GDP context, and
+2002/2006 municipal political and electoral context from JNE/INFOgob and ONPE.
 Run `code/stata/00_master.do` after configuring
 `config/paths.local.do`.
 
 Data products remain outside Git:
 
 - the validated foundational RUV–CMAN registry is written to Dropbox Coded as
-  `04_foundational_community_registry.dta`; and
+  `04_foundational_community_registry.dta`;
 - the all-row registry with 2007 Census covariates is written to Dropbox Coded
-  as `05_community_registry_census2007.dta`; and
+  as `05_community_registry_census2007.dta`;
 - the all-row registry with 2017 geospatial attributes and geodesic distance
   measures is written to Dropbox Coded as
-  `06_community_registry_geospatial.dta`; and
+  `06_community_registry_geospatial.dta`;
 - the current all-row registry with compact CCPP and district GDP covariates is
-  written to Dropbox Coded as `07_community_registry_gdp.dta`.
+  written to Dropbox Coded as `07_community_registry_gdp.dta`; and
+- the current all-row analytical registry with municipal-election covariates is
+  written to Dropbox Coded as `08_community_registry_elections.dta`.
 
-The Census, geospatial, and GDP source audits and linkage rules are documented in
+The Census, geospatial, GDP, and municipal-election source audits and linkage
+rules are documented in
 [`docs/CENSUS_2007_PREPARATION.md`](docs/CENSUS_2007_PREPARATION.md) and
 [`docs/GEOSPATIAL_2017_PREPARATION.md`](docs/GEOSPATIAL_2017_PREPARATION.md),
-and [`docs/CCPP_GDP_PREPARATION.md`](docs/CCPP_GDP_PREPARATION.md).
+[`docs/CCPP_GDP_PREPARATION.md`](docs/CCPP_GDP_PREPARATION.md), and
+[`docs/MUNICIPAL_ELECTIONS_PREPARATION.md`](docs/MUNICIPAL_ELECTIONS_PREPARATION.md).
 
 ## Current release status
 

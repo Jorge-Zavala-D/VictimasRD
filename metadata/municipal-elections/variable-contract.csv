@@ -1,0 +1,53 @@
+variable,storage_type,level,timing,source,definition,analysis_status
+elect_scope_2002,string,municipality,2002 cycle,INFOgob,"district except that province-capital districts use the provincial municipality",pre_program_context
+elect_result_year_2002,integer,municipality,2002 or 2003,INFOgob and ONPE,"actual result year after complementary-election replacement",pre_program_context
+elect_complementary_2002,binary,municipality,2003,ONPE,"one when a 2003 complementary result replaces an annulled 2002 contest",pre_program_context
+elect_winner_org_2002,string,municipality,2002 cycle,INFOgob and ONPE,"proclaimed winning mayoral political organization",pre_program_context
+mayor_org_type_2002,categorical,municipality,2002 cycle,INFOgob and ONPE,"1 national party; 2 electoral alliance; 3 regional movement; 4 local organization",pre_program_context
+mayor_apra_2002,binary,municipality,2002 cycle,INFOgob and ONPE,"winner is Partido Aprista Peruano",pre_program_context
+mayor_female_2002,binary,municipality,2002 cycle,INFOgob authorities,"proclaimed mayor is female",pre_program_context
+mayor_young_2002,binary,municipality,2002 cycle,INFOgob authorities,"proclaimed mayor satisfies INFOgob young-candidate flag",pre_program_context
+elect_registered_2002,count,municipality,2002 or 2003,INFOgob and ONPE,"registered electors in the governing municipal contest",pre_program_context
+elect_turnout_2002,share,municipality,2002 or 2003,INFOgob and ONPE,"ballots cast divided by registered electors",pre_program_context
+elect_invalid_share_2002,share,municipality,2002 or 2003,INFOgob and ONPE,"blank null and challenged votes divided by ballots cast",pre_program_context
+elect_winner_share_2002,share,municipality,2002 or 2003,INFOgob and ONPE,"winning list votes divided by valid votes",pre_program_context
+elect_margin_2002,share_difference,municipality,2002 or 2003,INFOgob and ONPE,"winner valid-vote share minus runner-up share",pre_program_context
+elect_nep_2002,index,municipality,2002 or 2003,computed from results,"inverse Herfindahl index across municipal list vote shares",pre_program_context
+elect_hhi_2002,index,municipality,2002 or 2003,computed from results,"sum of squared municipal list vote shares",pre_program_context
+elect_top2_share_2002,share,municipality,2002 or 2003,computed from results,"combined valid-vote share of the two leading lists",pre_program_context
+elect_candidate_count_2002,count,municipality,2002 or 2003,INFOgob and ONPE,"mayoral lists receiving votes",pre_program_context
+elect_candidate_female_2002,share,municipality,2002 cycle,INFOgob candidates,"female share of mayoral candidates",pre_program_context
+elect_candidate_young_2002,share,municipality,2002 cycle,INFOgob candidates,"share of mayoral candidates satisfying INFOgob young flag",pre_program_context
+elect_voter_female_2002,share,municipality,2002 cycle,INFOgob electoral register,"female share of registered electors",pre_program_context
+elect_voter_young_2002,share,municipality,2002 cycle,INFOgob electoral register,"INFOgob young share of registered electors",pre_program_context
+elect_voter_senior_2002,share,municipality,2002 cycle,INFOgob electoral register,"share of registered electors older than 70",pre_program_context
+fpl_vacancies_2002,count,municipality,2003-2006,INFOgob FPL,"municipal authorities vacated during the term",pre_program_governance
+fpl_recall_processes_2002,count,municipality,2003-2006,INFOgob FPL,"recall processes convened during the term",pre_program_governance
+fpl_recalled_authorities_2002,count,municipality,2003-2006,INFOgob FPL,"municipal authorities recalled during the term",pre_program_governance
+fpl_council_female_2002,count,municipality,2002 cycle,INFOgob FPL,"women elected to the municipal council",pre_program_context
+fpl_council_young_2002,count,municipality,2002 cycle,INFOgob FPL,"young members elected to the municipal council",pre_program_context
+fpl_ccl_early_2002,binary,municipality,2003-2004,INFOgob FPL,"Local Coordination Council election recorded in 2003-2004",pre_program_governance
+fpl_ccl_late_2002,binary,municipality,2005-2006,INFOgob FPL,"Local Coordination Council election recorded in 2005-2006",pre_program_governance
+elect_scope_2006,string,municipality,2006 cycle,INFOgob,"district except that province-capital districts use the provincial municipality",pre_program_context
+elect_result_year_2006,integer,municipality,2006 or 2007,INFOgob and ONPE,"actual result year after complementary-election replacement",timing_sensitive
+elect_complementary_2006,binary,municipality,2007,ONPE,"one when a 2007 complementary result replaces an annulled 2006 contest",timing_sensitive
+elect_winner_org_2006,string,municipality,2006 cycle,INFOgob and ONPE,"proclaimed winning mayoral political organization",timing_sensitive
+mayor_org_type_2006,categorical,municipality,2006 cycle,INFOgob and ONPE,"1 national party; 2 electoral alliance; 3 regional movement; 4 local organization",timing_sensitive
+mayor_apra_2006,binary,municipality,2006 cycle,INFOgob and ONPE,"winner is Partido Aprista Peruano",timing_sensitive
+mayor_female_2006,binary,municipality,2006 cycle,INFOgob authorities,"proclaimed mayor is female",pre_program_where_observed
+mayor_young_2006,binary,municipality,2006 cycle,INFOgob authorities,"proclaimed mayor satisfies INFOgob young-candidate flag",pre_program_where_observed
+elect_registered_2006,count,municipality,2006 or 2007,INFOgob and ONPE,"registered electors in the governing municipal contest",timing_sensitive
+elect_turnout_2006,share,municipality,2006 or 2007,INFOgob and ONPE,"ballots cast divided by registered electors",timing_sensitive
+elect_invalid_share_2006,share,municipality,2006 or 2007,INFOgob and ONPE,"blank null and challenged votes divided by ballots cast",timing_sensitive
+elect_winner_share_2006,share,municipality,2006 or 2007,INFOgob and ONPE,"winning list votes divided by valid votes",timing_sensitive
+elect_margin_2006,share_difference,municipality,2006 or 2007,INFOgob and ONPE,"winner valid-vote share minus runner-up share",timing_sensitive
+elect_nep_2006,index,municipality,2006 or 2007,computed from results,"inverse Herfindahl index across municipal list vote shares",timing_sensitive
+elect_hhi_2006,index,municipality,2006 or 2007,computed from results,"sum of squared municipal list vote shares",timing_sensitive
+elect_top2_share_2006,share,municipality,2006 or 2007,computed from results,"combined valid-vote share of the two leading lists",timing_sensitive
+elect_candidate_count_2006,count,municipality,2006 or 2007,INFOgob and ONPE,"mayoral lists receiving votes",timing_sensitive
+elect_candidate_female_2006,share,municipality,2006 cycle,INFOgob candidates,"female share of mayoral candidates",pre_program_where_observed
+elect_candidate_young_2006,share,municipality,2006 cycle,INFOgob candidates,"share of mayoral candidates satisfying INFOgob young flag",pre_program_where_observed
+elect_voter_female_2006,share,municipality,2006 cycle,INFOgob electoral register,"female share of registered electors",pre_program_context
+elect_voter_young_2006,share,municipality,2006 cycle,INFOgob electoral register,"INFOgob young share of registered electors",pre_program_context
+elect_voter_senior_2006,share,municipality,2006 cycle,INFOgob electoral register,"share of registered electors older than 70",pre_program_context
+elect_volatility_2006,index,municipality,2006 cycle,INFOgob ISP,"INFOgob total electoral volatility for ordinary 2006 contests",pre_program_where_observed

@@ -2,7 +2,7 @@
 | Title:            National and main-sample descriptive analysis              |
 | Project:          Victimas RD                                                |
 | Unit:             RUV centro poblado                                         |
-| Input:            07_community_registry_gdp.dta                              |
+| Input:            08_community_registry_elections.dta                        |
 | Outputs:          Aggregate tables, figures, and output manifest             |
 | Description:      Describes the complete RUV universe and the research-team- |
 |                   selected legacy RD geography without estimating effects.   |
@@ -33,7 +33,7 @@ foreach required_global in ///
 }
 
 local input_file ///
-    "${analysis_data_root}/07_community_registry_gdp.dta"
+    "${analysis_data_root}/08_community_registry_elections.dta"
 local project_input_file ///
     "${intermediate_root}/03_cman_projects_2023.dta"
 local figure_dir "${figures_root}/descriptive"
@@ -2528,7 +2528,7 @@ forvalues output_index = 1/`output_count' {
     local output_type : word `output_index' of `output_types'
     local output_spec : word `output_index' of `output_specs'
     local disclosure_status "aggregate_internal_review"
-    local output_input "07_community_registry_gdp.dta"
+    local output_input "08_community_registry_elections.dta"
     local output_datasignature "`input_datasignature'"
     local output_unit "RUV centro poblado"
 
@@ -2549,12 +2549,12 @@ forvalues output_index = 1/`output_count' {
 
     if inrange(`output_index', 12, 15) {
         local output_input ///
-            "07_community_registry_gdp.dta+locked_legacy_department_geometry"
+            "08_community_registry_elections.dta+locked_legacy_department_geometry"
     }
 
     if "`output_id'" == "fig_desc_21" {
         local output_input ///
-            "07_community_registry_gdp.dta+locked_legacy_province_geometry"
+            "08_community_registry_elections.dta+locked_legacy_province_geometry"
     }
 
     if inrange(`output_index', 16, 19) | ///

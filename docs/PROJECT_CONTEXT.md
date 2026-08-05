@@ -331,6 +331,41 @@ in `07_community_registry_gdp.dta`; unmatched rows remain explicit and
 district context is linked independently. Full provenance, construction,
 linkage rules, and limitations are in `docs/CCPP_GDP_PREPARATION.md`.
 
+## Recorded municipal-election source and construction decision
+
+On August 4, 2026, the research team supplied the complete JNE/INFOgob
+candidate, result, electorate, proclaimed-authority, political-system, and
+local-political-factor modules for the 2002 and 2006 district and provincial
+municipal election cycles, plus the 2003 and 2007 complementary-election
+returns. These are the canonical sources for pre-program municipal political
+context. The legacy hand-curated national-election workbook is not used to
+measure local-government alignment.
+
+The pipeline assigns each RUV community the contest governing its district:
+the provincial contest for a province-capital district and the district
+contest otherwise. It translates RENIEC geography to INEI district UBIGEO,
+uses proclaimed authorities to resolve plurality ties, replaces 13 annulled
+2002 contests with 2003 results and 22 annulled 2006 contests with 2007
+results, and gives Manantay the Calleria predecessor-municipality exposure.
+No fuzzy electoral link is accepted.
+
+All 5,712 RUV rows and all 1,162 selected-sample rows link to both cycles. The
+acquired 2002 ONPE files partially reconcile the cycle: 1,773 contests match,
+43 non-complementary INFOgob contests are absent, and four matched contests
+have a differing total or statistic. By contrast, the non-complementary 2006
+INFOgob statistics reconcile to official ONPE mesa returns within machine
+precision. Computed competition measures agree with INFOgob's rounded
+indicators to approximately 0.0005. The current final registry is
+`08_community_registry_elections.dta`. It keeps 52 research variables and
+places row-level linkage and reconciliation detail in Dropbox Working.
+
+APRA-mayor status and other municipal characteristics are contextual
+covariates, not randomized assignments or instruments. Municipal values are
+repeated across communities and require municipality-aware inference. The 22
+replacement results observed in 2007 are explicitly timing-sensitive. Full
+source provenance, construction rules, exclusions, and limitations are in
+`docs/MUNICIPAL_ELECTIONS_PREPARATION.md`.
+
 ## Recorded descriptive-analysis boundary
 
 On July 28, 2026, the canonical descriptive module was separated from

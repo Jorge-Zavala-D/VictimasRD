@@ -2,7 +2,7 @@
 Project:       Victimas RD
 Program:       01_data_preparation.do
 Purpose:       Authoritative end-to-end data-preparation program
-Current scope: Foundational community, Census 2007, spatial, and GDP covariates
+Current scope: Foundational, Census 2007, spatial, GDP, and electoral covariates
 
 This file is the only canonical Stata data-preparation program. New source
 families will be added as clearly delimited sections here so that the master
@@ -16,6 +16,7 @@ Current source families:
     5. INEI 2007 CCPP-level census tabulation
     6. INEI-derived 2017 CCPP point and category shapefiles
     7. Seminario-Palomino estimated CCPP GDP, 1993--2018
+    8. JNE/INFOgob and ONPE municipal elections, 2002--2007
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -6214,7 +6215,1980 @@ save ///
 
 
 *===============================================================================
-**# 11. Write aggregate QA metrics and close
+**# 11. Municipal elections, local political context, and RUV linkage
+*===============================================================================
+
+/*
+JNE/INFOgob supplies the candidate, result, electorate, elected-authority,
+political-system, and local-political-factor modules. Proclaimed authorities
+resolve plurality ties. ONPE mesa returns independently validate the 2006
+ordinary results and supply the 2003/2007 complementary-election replacements.
+
+The municipal jurisdiction governing a province-capital district is the
+provincial municipality; other districts use the district contest. Barranca
+in 2002 is treated as a district contest because Datem del Maranon had not yet
+been created. Manantay is linked to its predecessor Calleria municipality in
+both cycles because it held no ordinary 2002 or 2006 municipal election.
+*/
+
+local election_root "${raw_root}/6 ONPE"
+local election_official_stage ///
+    "${staging_root}/official_elections_1998_2006"
+local election_crosswalk ///
+    "`election_root'/Official municipal electoral sources 1998-2006/17_reniec_inei_ubigeo_crosswalk/TB_UBIGEOS.csv"
+local election_emc_2003 ///
+    "`election_root'/Resultados por mesa  de las EMC2003 Distrital.csv"
+local election_emc_2007 ///
+    "`election_root'/Resultados por mesa EMC2007.csv"
+local election_onpe_2002_district ///
+    "`election_root'/Official municipal electoral sources 1998-2006/05_2002_municipal_district/ERM2002_Municipal_Distrital.csv"
+local election_onpe_2002_province ///
+    "`election_root'/Official municipal electoral sources 1998-2006/06_2002_municipal_provincial/ERM2002_Municipal_Provincial.csv"
+local election_onpe_2006_district ///
+    "`election_official_stage'/13_2006_municipal_district/ERM2006_Municipal_Distrital.csv"
+local election_onpe_2006_province ///
+    "`election_official_stage'/14_2006_municipal_provincial/ERM2006_Municipal_Provincial.csv"
+
+capture label drop municipal_org_type
+label define municipal_org_type ///
+    1 "National party" ///
+    2 "Electoral alliance" ///
+    3 "Regional movement" ///
+    4 "Local political organization"
+
+foreach election_file in ///
+    "`election_crosswalk'" ///
+    "`election_emc_2003'" ///
+    "`election_emc_2007'" ///
+    "`election_onpe_2002_district'" ///
+    "`election_onpe_2002_province'" ///
+    "`election_onpe_2006_district'" ///
+    "`election_onpe_2006_province'" {
+
+    capture confirm file "`election_file'"
+    if _rc {
+        display as error "Required electoral source is unavailable:"
+        display as error "  `election_file'"
+        exit 601
+    }
+}
+
+foreach election_year in 2002 2006 {
+    foreach election_scope in Distrital Provincial {
+        local election_directory = upper("`election_scope'")
+
+        foreach election_module in ///
+            Autoridades ///
+            Candidatos ///
+            FPL ///
+            ISP ///
+            Padron ///
+            Resultados {
+
+            local election_file ///
+                "`election_root'/MUNICIPAL `election_directory' `election_year'/ERM`election_year'_`election_module'_`election_scope'.xlsx"
+            capture confirm file "`election_file'"
+            if _rc {
+                display as error "Required INFOgob module is unavailable:"
+                display as error "  `election_file'"
+                exit 601
+            }
+        }
+    }
+}
+
+tempfile ///
+    election_code_bridge ///
+    election_province_bridge ///
+    election_name_bridge ///
+    election_comp_2002 ///
+    election_comp_2006 ///
+    election_cycle_2002 ///
+    election_cycle_2006
+
+import delimited ///
+    "`election_crosswalk'", ///
+    clear ///
+    varnames(1) ///
+    encoding(utf8) ///
+    stringcols(_all)
+
+assert _N == 1893
+keep ///
+    ubigeo_reniec ///
+    ubigeo_inei ///
+    departamento ///
+    provincia ///
+    distrito
+drop if missing(ubigeo_reniec) | missing(ubigeo_inei)
+rename ///
+    (ubigeo_reniec ubigeo_inei) ///
+    (reniec_code ubigeo_dist)
+assert ustrregexm(reniec_code, "^[0-9]{6}$")
+assert ustrregexm(ubigeo_dist, "^[0-9]{6}$")
+isid reniec_code
+
+preserve
+keep reniec_code ubigeo_dist
+save `election_code_bridge', replace
+restore
+
+preserve
+generate str6 reniec_province = substr(reniec_code, 1, 4) + "00"
+generate str4 inei_province = substr(ubigeo_dist, 1, 4)
+keep reniec_province inei_province
+duplicates drop
+isid reniec_province
+rename reniec_province reniec_code
+save `election_province_bridge', replace
+restore
+
+victimasrd_normalize_name departamento, generate(elect_dep_key)
+victimasrd_normalize_name provincia, generate(elect_prov_key)
+victimasrd_normalize_name distrito, generate(elect_dist_key)
+keep ///
+    ubigeo_dist ///
+    elect_dep_key ///
+    elect_prov_key ///
+    elect_dist_key
+isid ubigeo_dist
+isid elect_dep_key elect_prov_key elect_dist_key
+save `election_name_bridge', replace
+
+/*
+Convert each complementary election from mesa-by-list returns to one district
+record. Mesa totals are counted once; party votes remain list-specific until
+the contest statistics and winning organization are calculated.
+*/
+
+foreach result_year in 2003 2007 {
+    local election_cycle = `result_year' - 1
+    if `result_year' == 2003 {
+        local complementary_file "`election_emc_2003'"
+    }
+    else {
+        local complementary_file "`election_emc_2007'"
+    }
+
+    import delimited ///
+        "`complementary_file'", ///
+        clear ///
+        varnames(1) ///
+        encoding(utf8)
+
+    tostring ubigeo, generate(reniec_code) format(%06.0f)
+    merge m:1 reniec_code using `election_code_bridge', ///
+        keep(master match) ///
+        generate(_merge_election_code)
+    assert _merge_election_code == 3
+    drop _merge_election_code
+
+    tempfile complementary_turnout
+    preserve
+    bysort ubigeo_dist mesa: keep if _n == 1
+    collapse ///
+        (sum) elect_registered = electores_habiles ///
+        (sum) comp_blank = votos_blancos ///
+        (sum) comp_null = votos_nulos ///
+        (sum) comp_challenged = votos_impug, ///
+        by(ubigeo_dist)
+    save `complementary_turnout', replace
+    restore
+
+    collapse ///
+        (sum) list_votes = votos_obtenidos, ///
+        by(ubigeo_dist agrupacion_politica tipo_agrupacion)
+    merge m:1 ubigeo_dist using `complementary_turnout', ///
+        assert(match) ///
+        nogen
+
+    bysort ubigeo_dist: egen double comp_valid_votes = ///
+        total(list_votes)
+    generate double list_share = ///
+        list_votes / comp_valid_votes
+    generate double list_share_sq = list_share^2
+    bysort ubigeo_dist: egen double elect_hhi = ///
+        total(list_share_sq)
+    generate double elect_nep = 1 / elect_hhi
+    bysort ubigeo_dist: egen long top_votes = max(list_votes)
+    bysort ubigeo_dist: egen byte top_ties = ///
+        total(list_votes == top_votes)
+    assert top_ties == 1
+
+    gsort ubigeo_dist -list_votes agrupacion_politica
+    by ubigeo_dist: generate double elect_runner_share = ///
+        list_share[2]
+    by ubigeo_dist: generate double elect_top2_share = ///
+        list_share[1] + list_share[2]
+    by ubigeo_dist: generate int elect_candidate_count = _N
+    by ubigeo_dist: keep if _n == 1
+
+    generate long comp_ballots = ///
+        comp_valid_votes + comp_blank + comp_null + comp_challenged
+    generate double elect_turnout = ///
+        comp_ballots / elect_registered
+    generate double elect_invalid_share = ///
+        (comp_blank + comp_null + comp_challenged) / comp_ballots
+    generate double elect_winner_share = list_share
+    generate double elect_margin = ///
+        elect_winner_share - elect_runner_share
+    generate str90 elect_winner_org = agrupacion_politica
+    generate str32 elect_winner_type_raw = tipo_agrupacion
+    generate int elect_result_year = `result_year'
+
+    keep ///
+        ubigeo_dist ///
+        elect_result_year ///
+        elect_registered ///
+        elect_turnout ///
+        elect_invalid_share ///
+        elect_winner_share ///
+        elect_runner_share ///
+        elect_margin ///
+        elect_hhi ///
+        elect_nep ///
+        elect_top2_share ///
+        elect_candidate_count ///
+        elect_winner_org ///
+        elect_winner_type_raw
+    isid ubigeo_dist
+    count
+    local emc_`election_cycle'_contests = r(N)
+
+    foreach complementary_variable in ///
+        elect_result_year ///
+        elect_registered ///
+        elect_turnout ///
+        elect_invalid_share ///
+        elect_winner_share ///
+        elect_runner_share ///
+        elect_margin ///
+        elect_hhi ///
+        elect_nep ///
+        elect_top2_share ///
+        elect_candidate_count ///
+        elect_winner_org ///
+        elect_winner_type_raw {
+        rename `complementary_variable' comp_`complementary_variable'
+    }
+
+    if `election_cycle' == 2002 {
+        save `election_comp_2002', replace
+    }
+    else {
+        save `election_comp_2006', replace
+    }
+}
+
+
+/*
+Build one clean contest file per election cycle. The loop uses the same
+construction contract for district and provincial contests while respecting
+their different workbook layouts and municipal jurisdictions.
+*/
+
+foreach election_year in 2002 2006 {
+    tempfile election_cycle_work
+    local first_election_scope = 1
+
+    foreach scope_key in district province {
+        local scope_suffix = cond( ///
+            "`scope_key'" == "district", ///
+            "Distrital", ///
+            "Provincial")
+        local scope_directory = upper("`scope_suffix'")
+        local election_prefix ///
+            "`election_root'/MUNICIPAL `scope_directory' `election_year'/ERM`election_year'_"
+
+        tempfile ///
+            election_isp ///
+            election_contest_lookup ///
+            election_result_metrics ///
+            election_authority ///
+            election_candidate_orgs ///
+            election_candidate_stats ///
+            election_padron ///
+            election_fpl
+
+        * INFOgob political-system indicators also provide the RENIEC code key.
+        import excel ///
+            "`election_prefix'ISP_`scope_suffix'.xlsx", ///
+            sheet("Hoja1") ///
+            clear ///
+            allstring
+
+        if "`scope_key'" == "district" {
+            rename (A B C D) ///
+                (reniec_code source_department source_province source_district)
+        }
+        else {
+            rename (A B C) ///
+                (reniec_code source_department source_province)
+        }
+        keep if ustrregexm(reniec_code, "^[0-9]{6}$")
+
+        if "`scope_key'" == "district" & `election_year' == 2002 {
+            rename ///
+                (E H I J) ///
+                (isp_nep isp_top2_share isp_hhi isp_margin)
+            generate double isp_volatility = .
+        }
+        if "`scope_key'" == "province" & `election_year' == 2002 {
+            rename ///
+                (D G H I) ///
+                (isp_nep isp_top2_share isp_hhi isp_margin)
+            generate double isp_volatility = .
+        }
+        if "`scope_key'" == "district" & `election_year' == 2006 {
+            rename ///
+                (E H I J K) ///
+                (isp_nep isp_volatility isp_top2_share isp_hhi isp_margin)
+        }
+        if "`scope_key'" == "province" & `election_year' == 2006 {
+            rename ///
+                (D G H I J) ///
+                (isp_nep isp_volatility isp_top2_share isp_hhi isp_margin)
+        }
+
+        foreach isp_variable in ///
+            isp_nep ///
+            isp_volatility ///
+            isp_top2_share ///
+            isp_hhi ///
+            isp_margin {
+            destring `isp_variable', replace force
+        }
+
+        victimasrd_normalize_name ///
+            source_department, ///
+            generate(map_dep_key)
+        victimasrd_normalize_name ///
+            source_province, ///
+            generate(map_prov_key)
+
+        if "`scope_key'" == "district" {
+            victimasrd_normalize_name ///
+                source_district, ///
+                generate(map_dist_key)
+            merge m:1 reniec_code using `election_code_bridge', ///
+                keep(master match) ///
+                generate(_merge_election_code)
+            assert _merge_election_code == 3
+            drop _merge_election_code
+            keep ///
+                map_dep_key ///
+                map_prov_key ///
+                map_dist_key ///
+                reniec_code ///
+                ubigeo_dist ///
+                isp_*
+            isid map_dep_key map_prov_key map_dist_key
+        }
+        else {
+            merge m:1 reniec_code using `election_province_bridge', ///
+                keep(master match) ///
+                generate(_merge_election_code)
+            assert _merge_election_code == 3
+            drop _merge_election_code
+            generate str6 ubigeo_dist = inei_province + "01"
+            keep ///
+                map_dep_key ///
+                map_prov_key ///
+                reniec_code ///
+                ubigeo_dist ///
+                isp_*
+            isid map_dep_key map_prov_key
+        }
+        isid ubigeo_dist
+        save `election_isp', replace
+
+        * List-level results determine participation and competition measures.
+        import excel ///
+            "`election_prefix'Resultados_`scope_suffix'.xlsx", ///
+            sheet("Sheet 1") ///
+            firstrow ///
+            clear
+        unab raw_result_variables : _all
+
+        if "`scope_key'" == "district" {
+            rename (`raw_result_variables') ///
+                (source_department ///
+                 source_province ///
+                 source_district ///
+                 source_registered ///
+                 source_turnout ///
+                 source_ballots ///
+                 source_valid_votes ///
+                 source_organization ///
+                 source_org_type ///
+                 source_votes ///
+                 source_vote_share)
+        }
+        else {
+            rename (`raw_result_variables') ///
+                (source_department ///
+                 source_province ///
+                 source_registered ///
+                 source_turnout ///
+                 source_ballots ///
+                 source_valid_votes ///
+                 source_organization ///
+                 source_org_type ///
+                 source_votes ///
+                 source_vote_share)
+        }
+
+        foreach numeric_result in ///
+            source_registered ///
+            source_turnout ///
+            source_ballots ///
+            source_valid_votes ///
+            source_votes ///
+            source_vote_share {
+            capture confirm numeric variable `numeric_result'
+            if _rc {
+                destring `numeric_result', replace ignore(",%") force
+            }
+        }
+
+        victimasrd_normalize_name ///
+            source_department, ///
+            generate(join_dep_key)
+        victimasrd_normalize_name ///
+            source_province, ///
+            generate(join_prov_key)
+        clonevar map_dep_key = join_dep_key
+        clonevar map_prov_key = join_prov_key
+        generate str40 contest_code_method = ///
+            "infogob_name_to_official_code"
+
+        if "`scope_key'" == "district" {
+            victimasrd_normalize_name ///
+                source_district, ///
+                generate(join_dist_key)
+            clonevar map_dist_key = join_dist_key
+
+            replace contest_code_method = "documented_name_alias" if ///
+                (map_dep_key == "ANCASH" & ///
+                 map_prov_key == "HUARAZ" & ///
+                 map_dist_key == "PAMPAS") | ///
+                (map_dep_key == "APURIMAC" & ///
+                 map_prov_key == "AYMARAES" & ///
+                 map_dist_key == "IHUAYLLO") | ///
+                (map_dep_key == "LIMA" & ///
+                 map_prov_key == "HUAROCHIRI" & ///
+                 inlist(map_dist_key, "CUENCA", "SAN PEDRO DE CASTA"))
+
+            replace map_dist_key = "PAMPAS GRANDE" if ///
+                map_dep_key == "ANCASH" & ///
+                map_prov_key == "HUARAZ" & ///
+                map_dist_key == "PAMPAS"
+            replace map_dist_key = "HUAYLLO" if ///
+                map_dep_key == "APURIMAC" & ///
+                map_prov_key == "AYMARAES" & ///
+                map_dist_key == "IHUAYLLO"
+            replace map_dist_key = ///
+                "SAN JOSE DE LOS CHORRILLOS CUENCA" if ///
+                map_dep_key == "LIMA" & ///
+                map_prov_key == "HUAROCHIRI" & ///
+                map_dist_key == "CUENCA"
+            replace map_dist_key = ///
+                "CASTA SAN PEDRO DE CASTA" if ///
+                map_dep_key == "LIMA" & ///
+                map_prov_key == "HUAROCHIRI" & ///
+                map_dist_key == "SAN PEDRO DE CASTA"
+
+            replace contest_code_method = ///
+                "historical_province_reassignment" if ///
+                `election_year' == 2002 & ///
+                map_dep_key == "LORETO" & ///
+                map_prov_key == "ALTO AMAZONAS" & ///
+                inlist( ///
+                    map_dist_key, ///
+                    "BARRANCA", ///
+                    "CAHUAPANAS", ///
+                    "MANSERICHE", ///
+                    "MORONA", ///
+                    "PASTAZA")
+            replace map_prov_key = "DATEM DEL MARANON" if ///
+                contest_code_method == ///
+                    "historical_province_reassignment"
+
+            merge m:1 ///
+                map_dep_key ///
+                map_prov_key ///
+                map_dist_key ///
+                using `election_isp', ///
+                keep(master match) ///
+                generate(_merge_isp)
+
+            replace ubigeo_dist = "160701" if ///
+                `election_year' == 2002 & ///
+                map_dep_key == "LORETO" & ///
+                map_prov_key == "DATEM DEL MARANON" & ///
+                map_dist_key == "BARRANCA" & ///
+                _merge_isp == 1
+            replace contest_code_method = ///
+                "official_crosswalk_historical_code" if ///
+                `election_year' == 2002 & ///
+                map_dep_key == "LORETO" & ///
+                map_prov_key == "DATEM DEL MARANON" & ///
+                map_dist_key == "BARRANCA"
+            assert _merge_isp == 3 | ///
+                (`election_year' == 2002 & ubigeo_dist == "160701")
+        }
+        else {
+            merge m:1 ///
+                map_dep_key ///
+                map_prov_key ///
+                using `election_isp', ///
+                keep(master match) ///
+                generate(_merge_isp)
+            assert _merge_isp == 3
+        }
+        drop _merge_isp
+
+        merge m:1 ubigeo_dist using `election_name_bridge', ///
+            generate(_merge_election_name_bridge)
+        assert _merge_election_name_bridge != 1
+        keep if _merge_election_name_bridge == 3
+        drop _merge_election_name_bridge
+
+        preserve
+        if "`scope_key'" == "district" {
+            keep ///
+                join_dep_key ///
+                join_prov_key ///
+                join_dist_key ///
+                ubigeo_dist ///
+                elect_dep_key ///
+                elect_prov_key ///
+                elect_dist_key ///
+                contest_code_method
+            duplicates drop
+            isid join_dep_key join_prov_key join_dist_key
+        }
+        else {
+            keep ///
+                join_dep_key ///
+                join_prov_key ///
+                ubigeo_dist ///
+                elect_dep_key ///
+                elect_prov_key ///
+                elect_dist_key ///
+                contest_code_method
+            duplicates drop
+            isid join_dep_key join_prov_key
+        }
+        save `election_contest_lookup', replace
+        restore
+
+        generate byte valid_organization_row = ///
+            ustrtrim(source_org_type) != ""
+        bysort ubigeo_dist: egen double result_invalid_sum = ///
+            total(cond(!valid_organization_row, source_votes, 0))
+        assert abs( ///
+            result_invalid_sum - ///
+            (source_ballots - source_valid_votes)) < .5
+        keep if valid_organization_row
+
+        bysort ubigeo_dist: egen double result_valid_sum = ///
+            total(source_votes)
+        assert abs(result_valid_sum - source_valid_votes) < .5
+        generate double computed_list_share = ///
+            source_votes / source_valid_votes
+        assert abs(computed_list_share - source_vote_share) < .0002 if ///
+            source_valid_votes > 0 & !missing(source_vote_share)
+        generate double computed_share_sq = computed_list_share^2
+        bysort ubigeo_dist: egen double elect_hhi = ///
+            total(computed_share_sq)
+        generate double elect_nep = 1 / elect_hhi
+        bysort ubigeo_dist: egen long result_top_votes = ///
+            max(source_votes)
+        bysort ubigeo_dist: egen byte result_top_ties = ///
+            total(source_votes == result_top_votes)
+
+        gsort ubigeo_dist -source_votes source_organization
+        by ubigeo_dist: generate double elect_runner_share = ///
+            computed_list_share[2]
+        by ubigeo_dist: generate double elect_top2_share = ///
+            computed_list_share[1] + computed_list_share[2]
+        by ubigeo_dist: generate int elect_candidate_count = _N
+        by ubigeo_dist: keep if _n == 1
+
+        generate double elect_registered = source_registered
+        generate double elect_turnout = ///
+            source_ballots / source_registered
+        generate double elect_invalid_share = ///
+            (source_ballots - source_valid_votes) / source_ballots
+        generate double elect_winner_share = computed_list_share
+        generate double elect_margin = ///
+            elect_winner_share - elect_runner_share
+        generate str90 plurality_org = source_organization
+        generate str32 plurality_type = source_org_type
+        generate str10 elect_scope = "`scope_key'"
+        generate int elect_result_year = `election_year'
+
+        keep ///
+            ubigeo_dist ///
+            elect_dep_key ///
+            elect_prov_key ///
+            elect_dist_key ///
+            contest_code_method ///
+            elect_scope ///
+            elect_result_year ///
+            elect_registered ///
+            elect_turnout ///
+            elect_invalid_share ///
+            elect_winner_share ///
+            elect_runner_share ///
+            elect_margin ///
+            elect_hhi ///
+            elect_nep ///
+            elect_top2_share ///
+            elect_candidate_count ///
+            result_top_votes ///
+            result_top_ties ///
+            plurality_org ///
+            plurality_type ///
+            isp_*
+        isid ubigeo_dist
+        count
+        local election_`election_year'_`scope_key'_contests = r(N)
+        save `election_result_metrics', replace
+
+        * Elected mayors are the authoritative winner source, including ties.
+        import excel ///
+            "`election_prefix'Autoridades_`scope_suffix'.xlsx", ///
+            sheet("Sheet 1") ///
+            firstrow ///
+            clear
+        unab raw_authority_variables : _all
+
+        if "`scope_key'" == "district" {
+            rename (`raw_authority_variables') ///
+                (source_department ///
+                 source_province ///
+                 source_district ///
+                 elected_office ///
+                 surname_1 ///
+                 surname_2 ///
+                 given_names ///
+                 elect_winner_org ///
+                 elect_winner_type_raw ///
+                 mayor_sex ///
+                 mayor_young_raw ///
+                 mayor_native_raw ///
+                 authority_votes ///
+                 authority_vote_share)
+        }
+        else {
+            rename (`raw_authority_variables') ///
+                (source_department ///
+                 source_province ///
+                 elected_office ///
+                 surname_1 ///
+                 surname_2 ///
+                 given_names ///
+                 elect_winner_org ///
+                 elect_winner_type_raw ///
+                 mayor_sex ///
+                 mayor_young_raw ///
+                 mayor_native_raw ///
+                 authority_votes ///
+                 authority_vote_share)
+        }
+        keep if ustrupper(elected_office) == ///
+            ustrupper("ALCALDE `scope_suffix'")
+
+        victimasrd_normalize_name ///
+            source_department, ///
+            generate(join_dep_key)
+        victimasrd_normalize_name ///
+            source_province, ///
+            generate(join_prov_key)
+
+        if "`scope_key'" == "district" {
+            victimasrd_normalize_name ///
+                source_district, ///
+                generate(join_dist_key)
+            merge m:1 ///
+                join_dep_key ///
+                join_prov_key ///
+                join_dist_key ///
+                using `election_contest_lookup', ///
+                keep(master match) ///
+                generate(_merge_authority_code)
+        }
+        else {
+            merge m:1 ///
+                join_dep_key ///
+                join_prov_key ///
+                using `election_contest_lookup', ///
+                keep(master match) ///
+                generate(_merge_authority_code)
+        }
+        assert _merge_authority_code == 3
+        drop _merge_authority_code
+
+        victimasrd_normalize_name ///
+            elect_winner_org, ///
+            generate(winner_org_key)
+        generate byte mayor_female = ///
+            ustrupper(ustrtrim(mayor_sex)) == "FEMENINO"
+        generate byte mayor_young = ///
+            ustrtrim(mayor_young_raw) != ""
+
+        keep ///
+            ubigeo_dist ///
+            elect_winner_org ///
+            elect_winner_type_raw ///
+            winner_org_key ///
+            mayor_female ///
+            mayor_young ///
+            authority_votes ///
+            authority_vote_share
+        isid ubigeo_dist
+        count
+        local election_`election_year'_`scope_key'_mayors = r(N)
+        save `election_authority', replace
+
+        * Candidate rosters yield transparent representation measures.
+        import excel ///
+            "`election_prefix'Candidatos_`scope_suffix'.xlsx", ///
+            sheet("Sheet 1") ///
+            firstrow ///
+            clear
+        unab raw_candidate_variables : _all
+
+        if "`scope_key'" == "district" {
+            rename (`raw_candidate_variables') ///
+                (source_department ///
+                 source_province ///
+                 source_district ///
+                 candidate_org ///
+                 candidate_org_type ///
+                 candidate_office ///
+                 candidate_position ///
+                 surname_1 ///
+                 surname_2 ///
+                 given_names ///
+                 candidate_sex ///
+                 candidate_young_raw ///
+                 candidate_native_raw)
+        }
+        else {
+            rename (`raw_candidate_variables') ///
+                (source_department ///
+                 source_province ///
+                 candidate_org ///
+                 candidate_org_type ///
+                 candidate_office ///
+                 candidate_position ///
+                 surname_1 ///
+                 surname_2 ///
+                 given_names ///
+                 candidate_sex ///
+                 candidate_young_raw ///
+                 candidate_native_raw)
+        }
+        keep if ustrupper(candidate_office) == ///
+            ustrupper("ALCALDE `scope_suffix'")
+
+        victimasrd_normalize_name ///
+            source_department, ///
+            generate(join_dep_key)
+        victimasrd_normalize_name ///
+            source_province, ///
+            generate(join_prov_key)
+
+        if "`scope_key'" == "district" {
+            victimasrd_normalize_name ///
+                source_district, ///
+                generate(join_dist_key)
+            merge m:1 ///
+                join_dep_key ///
+                join_prov_key ///
+                join_dist_key ///
+                using `election_contest_lookup', ///
+                keep(master match) ///
+                generate(_merge_candidate_code)
+        }
+        else {
+            merge m:1 ///
+                join_dep_key ///
+                join_prov_key ///
+                using `election_contest_lookup', ///
+                keep(master match) ///
+                generate(_merge_candidate_code)
+        }
+        assert _merge_candidate_code == 3
+        drop _merge_candidate_code
+
+        victimasrd_normalize_name ///
+            candidate_org, ///
+            generate(candidate_org_key)
+        generate byte candidate_female = ///
+            ustrupper(ustrtrim(candidate_sex)) == "FEMENINO"
+        generate byte candidate_young = ///
+            ustrtrim(candidate_young_raw) != ""
+
+        preserve
+        keep ubigeo_dist candidate_org_key
+        duplicates drop
+        rename candidate_org_key winner_org_key
+        isid ubigeo_dist winner_org_key
+        save `election_candidate_orgs', replace
+        restore
+
+        generate byte candidate_record = 1
+        collapse ///
+            (sum) candidate_roster_count = candidate_record ///
+            (mean) elect_candidate_female = candidate_female ///
+            (mean) elect_candidate_young = candidate_young, ///
+            by(ubigeo_dist)
+        isid ubigeo_dist
+        save `election_candidate_stats', replace
+
+        preserve
+        use `election_authority', clear
+        merge 1:1 ///
+            ubigeo_dist ///
+            winner_org_key ///
+            using `election_candidate_orgs', ///
+            keep(master match) ///
+            generate(_merge_authority_candidate)
+        count if _merge_authority_candidate == 1
+        local authority_candidate_unmatched = r(N)
+        local elect_`election_year'_`scope_key'_authmiss = ///
+            `authority_candidate_unmatched'
+        restore
+
+        * Electorate composition comes from the district-level register rows.
+        import excel ///
+            "`election_prefix'Padron_`scope_suffix'.xlsx", ///
+            sheet("Sheet 1") ///
+            firstrow ///
+            clear
+        unab raw_padron_variables : _all
+        rename (`raw_padron_variables') ///
+            (source_department ///
+             source_province ///
+             source_district ///
+             padron_registered ///
+             padron_male ///
+             padron_male_share_raw ///
+             padron_female ///
+             padron_female_share_raw ///
+             padron_young ///
+             padron_young_share_raw ///
+             padron_senior ///
+             padron_senior_share_raw)
+
+        foreach padron_count in ///
+            padron_registered ///
+            padron_male ///
+            padron_female ///
+            padron_young ///
+            padron_senior {
+            capture confirm numeric variable `padron_count'
+            if _rc {
+                destring `padron_count', replace ignore(",") force
+            }
+        }
+
+        victimasrd_normalize_name ///
+            source_department, ///
+            generate(join_dep_key)
+        victimasrd_normalize_name ///
+            source_province, ///
+            generate(join_prov_key)
+
+        if "`scope_key'" == "district" {
+            victimasrd_normalize_name ///
+                source_district, ///
+                generate(join_dist_key)
+            merge m:1 ///
+                join_dep_key ///
+                join_prov_key ///
+                join_dist_key ///
+                using `election_contest_lookup', ///
+                keep(match) ///
+                nogen
+            collapse ///
+                (sum) padron_registered ///
+                (sum) padron_female ///
+                (sum) padron_young ///
+                (sum) padron_senior, ///
+                by(ubigeo_dist)
+        }
+        else {
+            collapse ///
+                (sum) padron_registered ///
+                (sum) padron_female ///
+                (sum) padron_young ///
+                (sum) padron_senior, ///
+                by(join_dep_key join_prov_key)
+            merge 1:1 ///
+                join_dep_key ///
+                join_prov_key ///
+                using `election_contest_lookup', ///
+                keep(match) ///
+                nogen
+        }
+
+        generate double elect_voter_female = ///
+            padron_female / padron_registered
+        generate double elect_voter_young = ///
+            padron_young / padron_registered
+        generate double elect_voter_senior = ///
+            padron_senior / padron_registered
+        keep ///
+            ubigeo_dist ///
+            elect_voter_female ///
+            elect_voter_young ///
+            elect_voter_senior
+        isid ubigeo_dist
+        save `election_padron', replace
+
+        * Local-political factors are retained in Working; only pre-treatment
+        * fields enter the final RUV analytical registry.
+        import excel ///
+            "`election_prefix'FPL_`scope_suffix'.xlsx", ///
+            sheet("Hoja1") ///
+            clear ///
+            allstring
+
+        if "`scope_key'" == "district" {
+            rename (A B C D) ///
+                (reniec_code source_department source_province source_district)
+            rename ///
+                (E F G H I L M) ///
+                (fpl_vacancies ///
+                 fpl_recall_processes ///
+                 fpl_recalled_authorities ///
+                 fpl_nullified ///
+                 fpl_list_count ///
+                 fpl_ccl_early ///
+                 fpl_ccl_late)
+
+            if `election_year' == 2002 {
+                rename ///
+                    (J K) ///
+                    (fpl_council_female fpl_council_young)
+            }
+            else {
+                rename ///
+                    (J K) ///
+                    (fpl_council_young fpl_council_female)
+            }
+        }
+        else {
+            rename (A B C) ///
+                (reniec_code source_department source_province)
+            rename ///
+                (D E F G H I J K L) ///
+                (fpl_vacancies ///
+                 fpl_recall_processes ///
+                 fpl_recalled_authorities ///
+                 fpl_nullified ///
+                 fpl_list_count ///
+                 fpl_council_female ///
+                 fpl_council_young ///
+                 fpl_ccl_early ///
+                 fpl_ccl_late)
+        }
+        keep if ustrregexm(reniec_code, "^[0-9]{6}$")
+
+        foreach fpl_variable in ///
+            fpl_vacancies ///
+            fpl_recall_processes ///
+            fpl_recalled_authorities ///
+            fpl_nullified ///
+            fpl_list_count ///
+            fpl_council_female ///
+            fpl_council_young ///
+            fpl_ccl_early ///
+            fpl_ccl_late {
+            destring `fpl_variable', replace force
+        }
+
+        if "`scope_key'" == "district" {
+            merge m:1 reniec_code using `election_code_bridge', ///
+                keep(master match) ///
+                generate(_merge_fpl_code)
+            assert _merge_fpl_code == 3
+            drop _merge_fpl_code
+        }
+        else {
+            merge m:1 reniec_code using `election_province_bridge', ///
+                keep(master match) ///
+                generate(_merge_fpl_code)
+            assert _merge_fpl_code == 3
+            drop _merge_fpl_code
+            generate str6 ubigeo_dist = inei_province + "01"
+        }
+
+        keep ///
+            ubigeo_dist ///
+            fpl_*
+        isid ubigeo_dist
+        save `election_fpl', replace
+
+        * Reconcile the modules and replace annulled contests with EMC returns.
+        use `election_result_metrics', clear
+        merge 1:1 ubigeo_dist using `election_authority', ///
+            keep(master match) ///
+            generate(_merge_authority)
+        assert _merge_authority != 2
+        merge 1:1 ubigeo_dist using `election_candidate_stats', ///
+            assert(match) ///
+            nogen
+        merge 1:1 ubigeo_dist using `election_padron', ///
+            keep(master match) ///
+            generate(_merge_padron)
+        assert _merge_padron != 2
+        drop _merge_padron
+        merge 1:1 ubigeo_dist using `election_fpl', ///
+            keep(master match) ///
+            generate(_merge_fpl)
+        assert _merge_fpl != 2
+        drop _merge_fpl
+
+        victimasrd_normalize_name ///
+            plurality_org, ///
+            generate(plurality_org_key)
+        assert authority_votes == result_top_votes if ///
+            _merge_authority == 3
+        assert winner_org_key == plurality_org_key | ///
+            result_top_ties > 1 if _merge_authority == 3
+
+        if `election_year' == 2002 {
+            merge 1:1 ubigeo_dist using `election_comp_2002', ///
+                keep(master match) ///
+                generate(_merge_complementary)
+        }
+        else {
+            merge 1:1 ubigeo_dist using `election_comp_2006', ///
+                keep(master match) ///
+                generate(_merge_complementary)
+        }
+
+        generate byte elect_complementary = ///
+            _merge_complementary == 3
+        assert _merge_authority == 1 if elect_complementary
+        assert _merge_authority == 3 if !elect_complementary
+        assert fpl_nullified > 0 if elect_complementary
+
+        foreach result_variable in ///
+            elect_result_year ///
+            elect_registered ///
+            elect_turnout ///
+            elect_invalid_share ///
+            elect_winner_share ///
+            elect_runner_share ///
+            elect_margin ///
+            elect_hhi ///
+            elect_nep ///
+            elect_top2_share ///
+            elect_candidate_count ///
+            elect_winner_org ///
+            elect_winner_type_raw {
+            replace `result_variable' = ///
+                comp_`result_variable' if elect_complementary
+            drop comp_`result_variable'
+        }
+
+        replace mayor_female = . if elect_complementary
+        replace mayor_young = . if elect_complementary
+        replace elect_candidate_female = . if elect_complementary
+        replace elect_candidate_young = . if elect_complementary
+        replace isp_volatility = . if elect_complementary
+
+        victimasrd_normalize_name ///
+            elect_winner_org, ///
+            generate(elect_winner_org_key)
+        victimasrd_normalize_name ///
+            elect_winner_type_raw, ///
+            generate(elect_winner_type_key)
+        generate str20 elect_winner_type = ""
+        replace elect_winner_type = "electoral_alliance" if ///
+            strpos(elect_winner_type_key, "ALIANZA")
+        replace elect_winner_type = "regional_movement" if ///
+            elect_winner_type == "" & ///
+            (strpos(elect_winner_type_key, "MOVIMIENTO") | ///
+             elect_winner_type_key == "REGIONAL")
+        replace elect_winner_type = "local_organization" if ///
+            elect_winner_type == "" & ///
+            (strpos(elect_winner_type_key, "LOCAL") | ///
+             strpos(elect_winner_type_key, "LISTA INDEPENDIENTE") | ///
+             inlist(elect_winner_type_key, "PROVINCIAL", "DISTRITAL"))
+        replace elect_winner_type = "national_party" if ///
+            elect_winner_type == "" & ///
+            (strpos(elect_winner_type_key, "PARTIDO") | ///
+             elect_winner_type_key == "NACIONAL")
+        assert elect_winner_type != ""
+
+        generate byte mayor_org_type = ///
+            cond(elect_winner_type == "national_party", 1, ///
+            cond(elect_winner_type == "electoral_alliance", 2, ///
+            cond(elect_winner_type == "regional_movement", 3, 4)))
+        label values mayor_org_type municipal_org_type
+
+        generate byte mayor_apra = ///
+            elect_winner_org_key == "PARTIDO APRISTA PERUANO"
+        generate double elect_volatility = isp_volatility
+        generate byte elect_nullified = elect_complementary
+
+        generate double isp_nep_diff = ///
+            abs(elect_nep - isp_nep) if !elect_complementary
+        generate double isp_hhi_diff = ///
+            abs(elect_hhi - isp_hhi) if !elect_complementary
+        generate double isp_top2_diff = ///
+            abs(elect_top2_share - isp_top2_share) if ///
+            !elect_complementary
+        generate double isp_margin_diff = ///
+            abs(elect_margin - isp_margin) if !elect_complementary
+
+        drop ///
+            _merge_authority ///
+            _merge_complementary ///
+            plurality_org_key ///
+            elect_winner_org_key ///
+            elect_winner_type_key ///
+            elect_winner_type_raw
+
+        order ///
+            ubigeo_dist ///
+            elect_scope ///
+            elect_result_year ///
+            elect_complementary ///
+            elect_winner_org ///
+            elect_winner_type ///
+            mayor_apra
+        isid ubigeo_dist
+
+        if `first_election_scope' {
+            save `election_cycle_work', replace
+            local first_election_scope = 0
+        }
+        else {
+            append using `election_cycle_work'
+            save `election_cycle_work', replace
+        }
+    }
+
+    use `election_cycle_work', clear
+    isid ubigeo_dist
+    sort ubigeo_dist
+    compress
+
+    if `election_year' == 2002 {
+        save ///
+            "${intermediate_root}/15_municipal_elections_2002.dta", ///
+            replace
+        save `election_cycle_2002', replace
+    }
+    else {
+        save ///
+            "${intermediate_root}/16_municipal_elections_2006.dta", ///
+            replace
+        save `election_cycle_2006', replace
+    }
+}
+
+assert `election_2002_district_contests' == 1635
+assert `election_2002_province_contests' == 194
+assert `election_2006_district_contests' == 1637
+assert `election_2006_province_contests' == 195
+assert `election_2002_district_mayors' == 1622
+assert `election_2002_province_mayors' == 194
+assert `election_2006_district_mayors' == 1615
+assert `election_2006_province_mayors' == 195
+assert `emc_2002_contests' == 13
+assert `emc_2006_contests' == 22
+
+
+/*
+The official 2002 ONPE files provide a diagnostic rather than a complete
+validation gate. They omit 43 INFOgob contests and disagree on at least one
+reported total in four matched contests. Preserve those discrepancies instead
+of altering the cycle-specific INFOgob construction.
+*/
+
+tempfile election_onpe_2002
+local first_official_scope = 1
+
+foreach official_scope in district province {
+    if "`official_scope'" == "district" {
+        local official_file "`election_onpe_2002_district'"
+    }
+    else {
+        local official_file "`election_onpe_2002_province'"
+    }
+
+    import delimited ///
+        "`official_file'", ///
+        clear ///
+        delimiter(";") ///
+        varnames(1) ///
+        encoding(utf8) ///
+        stringcols(_all)
+
+    destring ///
+        votos_obtenidos ///
+        electores_habiles ///
+        votos_blancos ///
+        votos_nulos ///
+        votos_impugnados, ///
+        replace
+
+    if "`official_scope'" == "district" {
+        rename ubigeo reniec_code
+        merge m:1 reniec_code using `election_code_bridge', ///
+            keep(master match) ///
+            generate(_merge_onpe_code)
+
+        replace ubigeo_dist = "160701" if ///
+            reniec_code == "150203" & _merge_onpe_code == 1
+        replace ubigeo_dist = "160702" if ///
+            reniec_code == "150204" & _merge_onpe_code == 1
+        replace ubigeo_dist = "160703" if ///
+            reniec_code == "150207" & _merge_onpe_code == 1
+        replace ubigeo_dist = "160704" if ///
+            reniec_code == "150208" & _merge_onpe_code == 1
+        replace ubigeo_dist = "160705" if ///
+            reniec_code == "150209" & _merge_onpe_code == 1
+        assert !missing(ubigeo_dist)
+        drop _merge_onpe_code
+        clonevar official_ubigeo = ubigeo_dist
+    }
+    else {
+        generate str6 reniec_code = substr(ubigeo, 1, 4) + "00"
+        merge m:1 reniec_code using `election_province_bridge', ///
+            keep(master match) ///
+            generate(_merge_onpe_code)
+        assert _merge_onpe_code == 3
+        drop _merge_onpe_code
+        generate str6 official_ubigeo = inei_province + "01"
+    }
+
+    tempfile official_party_stats_2002
+    preserve
+    collapse ///
+        (sum) official_org_votes = votos_obtenidos, ///
+        by(official_ubigeo codigo_agrupacion)
+    bysort official_ubigeo: egen double official_valid_votes = ///
+        total(official_org_votes)
+    generate double official_share = ///
+        official_org_votes / official_valid_votes
+    generate double official_share_sq = official_share^2
+    bysort official_ubigeo: egen double official_hhi = ///
+        total(official_share_sq)
+    gsort official_ubigeo -official_org_votes codigo_agrupacion
+    by official_ubigeo: generate double official_winner_share = ///
+        official_share[1]
+    by official_ubigeo: generate double official_top2_share = ///
+        official_share[1] + official_share[2]
+    by official_ubigeo: generate double official_margin = ///
+        official_share[1] - official_share[2]
+    by official_ubigeo: keep if _n == 1
+    keep ///
+        official_ubigeo ///
+        official_valid_votes ///
+        official_hhi ///
+        official_winner_share ///
+        official_top2_share ///
+        official_margin
+    save `official_party_stats_2002', replace
+    restore
+
+    bysort official_ubigeo mesa: keep if _n == 1
+    generate double official_invalid_votes = ///
+        votos_blancos + votos_nulos + votos_impugnados
+    collapse ///
+        (sum) official_registered = electores_habiles ///
+              official_invalid_votes, ///
+        by(official_ubigeo)
+    merge 1:1 official_ubigeo using `official_party_stats_2002', ///
+        assert(match) ///
+        nogen
+    generate double official_ballots = ///
+        official_valid_votes + official_invalid_votes
+    generate double official_turnout = ///
+        official_ballots / official_registered
+    generate double official_invalid_share = ///
+        official_invalid_votes / official_ballots
+    generate str8 elect_scope = "`official_scope'"
+    rename official_ubigeo ubigeo_dist
+
+    if `first_official_scope' {
+        save `election_onpe_2002', replace
+        local first_official_scope = 0
+    }
+    else {
+        append using `election_onpe_2002'
+        save `election_onpe_2002', replace
+    }
+}
+
+tempfile election_comp_codes_2002
+use `election_cycle_2002', clear
+preserve
+keep if elect_complementary
+keep ubigeo_dist elect_scope
+isid ubigeo_dist elect_scope
+save `election_comp_codes_2002', replace
+restore
+keep if !elect_complementary
+merge 1:1 ///
+    ubigeo_dist ///
+    elect_scope ///
+    using `election_onpe_2002', ///
+    generate(_merge_onpe_2002)
+
+merge m:1 ///
+    ubigeo_dist ///
+    elect_scope ///
+    using `election_comp_codes_2002', ///
+    keep(master match) ///
+    generate(_merge_onpe_2002_comp)
+assert _merge_onpe_2002_comp == 3 if _merge_onpe_2002 == 2
+assert _merge_onpe_2002_comp == 1 if _merge_onpe_2002 != 2
+drop _merge_onpe_2002_comp
+
+count if _merge_onpe_2002 == 1
+local onpe_2002_infogob_only_n = r(N)
+assert `onpe_2002_infogob_only_n' == 43
+count if _merge_onpe_2002 == 2
+local onpe_2002_emc_excluded_n = r(N)
+assert `onpe_2002_emc_excluded_n' == `emc_2002_contests'
+count if _merge_onpe_2002 == 3
+local onpe_2002_match_n = r(N)
+assert `onpe_2002_match_n' == 1773
+
+foreach metric in ///
+    registered ///
+    turnout ///
+    invalid_share ///
+    winner_share ///
+    top2_share ///
+    margin ///
+    hhi {
+
+    generate double onpe_`metric'_diff = ///
+        abs(elect_`metric' - official_`metric') if ///
+        _merge_onpe_2002 == 3
+}
+
+egen double onpe_2002_stats_diff = rowmax( ///
+    onpe_turnout_diff ///
+    onpe_invalid_share_diff ///
+    onpe_winner_share_diff ///
+    onpe_top2_share_diff ///
+    onpe_margin_diff ///
+    onpe_hhi_diff)
+generate byte onpe_2002_any_difference = ///
+    max(onpe_registered_diff, onpe_2002_stats_diff) > 1e-10 if ///
+    _merge_onpe_2002 == 3
+count if onpe_2002_any_difference == 1
+local onpe_2002_diff_n = r(N)
+assert `onpe_2002_diff_n' == 4
+quietly summarize onpe_registered_diff, meanonly
+local onpe_2002_reg_max = r(max)
+quietly summarize onpe_2002_stats_diff, meanonly
+local onpe_2002_stats_max = r(max)
+
+generate str16 reconciliation_status = ///
+    cond(_merge_onpe_2002 == 1, "infogob_only", ///
+    cond(_merge_onpe_2002 == 2, "onpe_only", "matched"))
+keep ///
+    ubigeo_dist ///
+    elect_scope ///
+    reconciliation_status ///
+    onpe_*_diff ///
+    onpe_2002_any_difference
+save ///
+    "${qa_data_root}/municipal_election_onpe_2002_reconciliation.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/municipal_election_onpe_2002_reconciliation.csv", ///
+    replace
+
+
+/*
+Independently reconcile all non-complementary 2006 contests to ONPE's
+mesa-by-list returns. The 22 ordinary district contests annulled in 2006 are
+retained in ONPE but excluded here because the cycle file correctly replaces
+them with their 2007 complementary-election results.
+*/
+
+tempfile election_onpe_2006
+local first_official_scope = 1
+
+foreach official_scope in district province {
+    if "`official_scope'" == "district" {
+        local official_file "`election_onpe_2006_district'"
+    }
+    else {
+        local official_file "`election_onpe_2006_province'"
+    }
+
+    import delimited ///
+        "`official_file'", ///
+        clear ///
+        delimiter(";") ///
+        varnames(1) ///
+        encoding(utf8) ///
+        stringcols(_all)
+
+    destring ///
+        votos_obtenidos ///
+        electores_habiles ///
+        votos_blancos ///
+        votos_nulos ///
+        votos_impug, ///
+        replace
+
+    rename ubigeo reniec_code
+    merge m:1 reniec_code using `election_code_bridge', ///
+        keep(master match) ///
+        generate(_merge_onpe_code)
+    assert _merge_onpe_code == 3
+    drop _merge_onpe_code
+
+    generate str6 official_ubigeo = ubigeo_dist
+    if "`official_scope'" == "province" {
+        replace official_ubigeo = ///
+            substr(ubigeo_dist, 1, 4) + "01"
+    }
+
+    tempfile official_party_stats
+    preserve
+    collapse ///
+        (sum) official_org_votes = votos_obtenidos, ///
+        by(official_ubigeo codigo_agrupacion)
+    bysort official_ubigeo: egen double official_valid_votes = ///
+        total(official_org_votes)
+    generate double official_share = ///
+        official_org_votes / official_valid_votes
+    generate double official_share_sq = official_share^2
+    bysort official_ubigeo: egen double official_hhi = ///
+        total(official_share_sq)
+    gsort official_ubigeo -official_org_votes codigo_agrupacion
+    by official_ubigeo: generate double official_winner_share = ///
+        official_share[1]
+    by official_ubigeo: generate double official_top2_share = ///
+        official_share[1] + official_share[2]
+    by official_ubigeo: generate double official_margin = ///
+        official_share[1] - official_share[2]
+    by official_ubigeo: keep if _n == 1
+    keep ///
+        official_ubigeo ///
+        official_valid_votes ///
+        official_hhi ///
+        official_winner_share ///
+        official_top2_share ///
+        official_margin
+    save `official_party_stats', replace
+    restore
+
+    bysort official_ubigeo mesa: keep if _n == 1
+    generate double official_invalid_votes = ///
+        votos_blancos + votos_nulos + votos_impug
+    collapse ///
+        (sum) official_registered = electores_habiles ///
+              official_invalid_votes, ///
+        by(official_ubigeo)
+    merge 1:1 official_ubigeo using `official_party_stats', ///
+        assert(match) ///
+        nogen
+    generate double official_ballots = ///
+        official_valid_votes + official_invalid_votes
+    generate double official_turnout = ///
+        official_ballots / official_registered
+    generate double official_invalid_share = ///
+        official_invalid_votes / official_ballots
+    generate str8 elect_scope = "`official_scope'"
+    rename official_ubigeo ubigeo_dist
+
+    if `first_official_scope' {
+        save `election_onpe_2006', replace
+        local first_official_scope = 0
+    }
+    else {
+        append using `election_onpe_2006'
+        save `election_onpe_2006', replace
+    }
+}
+
+use `election_cycle_2006', clear
+keep if !elect_complementary
+merge 1:1 ///
+    ubigeo_dist ///
+    elect_scope ///
+    using `election_onpe_2006', ///
+    generate(_merge_onpe_2006)
+count if _merge_onpe_2006 == 2
+local onpe_emc_excluded_n = r(N)
+assert `onpe_emc_excluded_n' == `emc_2006_contests'
+assert _merge_onpe_2006 != 1
+keep if _merge_onpe_2006 == 3
+drop _merge_onpe_2006
+count
+local onpe_ordinary_n = r(N)
+assert `onpe_ordinary_n' == 1810
+
+foreach metric in ///
+    registered ///
+    turnout ///
+    invalid_share ///
+    winner_share ///
+    top2_share ///
+    margin ///
+    hhi {
+
+    generate double onpe_`metric'_diff = ///
+        abs(elect_`metric' - official_`metric')
+    assert onpe_`metric'_diff < 1e-10
+}
+
+quietly summarize onpe_registered_diff, meanonly
+local onpe_reg_max = r(max)
+quietly summarize onpe_turnout_diff, meanonly
+local onpe_turn_max = r(max)
+quietly summarize onpe_invalid_share_diff, meanonly
+local onpe_inv_max = r(max)
+quietly summarize onpe_winner_share_diff, meanonly
+local onpe_win_max = r(max)
+quietly summarize onpe_top2_share_diff, meanonly
+local onpe_top2_max = r(max)
+quietly summarize onpe_margin_diff, meanonly
+local onpe_margin_max = r(max)
+quietly summarize onpe_hhi_diff, meanonly
+local onpe_hhi_max = r(max)
+local onpe_stats_max = max( ///
+    `onpe_turn_max', ///
+    `onpe_inv_max', ///
+    `onpe_win_max', ///
+    `onpe_top2_max', ///
+    `onpe_margin_max', ///
+    `onpe_hhi_max')
+
+keep ///
+    ubigeo_dist ///
+    elect_scope ///
+    onpe_*_diff
+save ///
+    "${qa_data_root}/municipal_election_onpe_2006_reconciliation.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/municipal_election_onpe_2006_reconciliation.csv", ///
+    replace
+
+
+/*
+The contest-level reconciliation is retained in Dropbox Working. These fields
+show that the transparent vote-share calculations agree with INFOgob's ISP
+indicators without placing row-level QA in Git.
+*/
+
+use `election_cycle_2002', clear
+generate int election_cycle = 2002
+append using `election_cycle_2006', generate(_appended_cycle)
+replace election_cycle = 2006 if _appended_cycle
+drop _appended_cycle
+
+preserve
+keep ///
+    election_cycle ///
+    ubigeo_dist ///
+    elect_scope ///
+    elect_complementary ///
+    isp_nep_diff ///
+    isp_hhi_diff ///
+    isp_top2_diff ///
+    isp_margin_diff
+save ///
+    "${qa_data_root}/municipal_election_isp_reconciliation.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/municipal_election_isp_reconciliation.csv", ///
+    replace
+restore
+
+quietly summarize isp_nep_diff, meanonly
+local election_isp_nep_max_diff = r(max)
+quietly summarize isp_hhi_diff, meanonly
+local election_isp_hhi_max_diff = r(max)
+quietly summarize isp_top2_diff, meanonly
+local election_isp_top2_max_diff = r(max)
+quietly summarize isp_margin_diff, meanonly
+local election_isp_margin_max_diff = r(max)
+local election_isp_max_diff = max( ///
+    `election_isp_nep_max_diff', ///
+    `election_isp_hhi_max_diff', ///
+    `election_isp_top2_max_diff', ///
+    `election_isp_margin_max_diff')
+
+
+/*
+Merge each cycle to all RUV rows. Exact district UBIGEO is primary. A unique
+exact current geographic path is used only when the RUV district code is not
+linked. Manantay receives the Calleria municipal exposure that governed its
+territory before Manantay's first municipal election.
+*/
+
+use ///
+    "${analysis_data_root}/07_community_registry_gdp.dta", ///
+    clear
+count
+assert r(N) == `gdp_registry_rows'
+
+foreach election_year in 2002 2006 {
+    tempfile ///
+        election_cycle_link_source ///
+        election_link_file ///
+        election_name_file ///
+        election_name_recovery
+
+    if `election_year' == 2002 {
+        preserve
+        use `election_cycle_2002', clear
+    }
+    else {
+        preserve
+        use `election_cycle_2006', clear
+    }
+
+    local election_release_variables ///
+        elect_result_year ///
+        elect_complementary ///
+        elect_scope ///
+        elect_winner_org ///
+        mayor_org_type ///
+        mayor_apra ///
+        mayor_female ///
+        mayor_young ///
+        elect_registered ///
+        elect_turnout ///
+        elect_invalid_share ///
+        elect_winner_share ///
+        elect_margin ///
+        elect_nep ///
+        elect_hhi ///
+        elect_top2_share ///
+        elect_candidate_count ///
+        elect_candidate_female ///
+        elect_candidate_young ///
+        elect_voter_female ///
+        elect_voter_young ///
+        elect_voter_senior
+
+    if `election_year' == 2006 {
+        local election_release_variables ///
+            `election_release_variables' ///
+            elect_volatility
+    }
+
+    if `election_year' == 2002 {
+        local election_release_variables ///
+            `election_release_variables' ///
+            fpl_vacancies ///
+            fpl_recall_processes ///
+            fpl_recalled_authorities ///
+            fpl_council_female ///
+            fpl_council_young ///
+            fpl_ccl_early ///
+            fpl_ccl_late
+    }
+
+    save `election_cycle_link_source', replace
+    keep ///
+        elect_dep_key ///
+        elect_prov_key ///
+        elect_dist_key ///
+        `election_release_variables'
+    isid elect_dep_key elect_prov_key elect_dist_key
+    foreach release_variable of local election_release_variables {
+        rename `release_variable' `release_variable'_`election_year'
+    }
+    save `election_name_file', replace
+
+    use `election_cycle_link_source', clear
+    keep ubigeo_dist `election_release_variables'
+    generate str40 elect_link_method = "exact_district_ubigeo"
+    generate byte elect_predecessor = 0
+
+    count if ubigeo_dist == "250101"
+    assert r(N) == 1
+    expand 2 if ubigeo_dist == "250101", ///
+        generate(manantay_predecessor_copy)
+    replace ubigeo_dist = "250107" if manantay_predecessor_copy
+    replace elect_link_method = ///
+        "historical_predecessor_municipality" if ///
+        manantay_predecessor_copy
+    replace elect_predecessor = 1 if manantay_predecessor_copy
+    drop manantay_predecessor_copy
+    isid ubigeo_dist
+
+    local election_release_variables ///
+        `election_release_variables' ///
+        elect_link_method ///
+        elect_predecessor
+    foreach release_variable of local election_release_variables {
+        rename `release_variable' `release_variable'_`election_year'
+    }
+    save `election_link_file', replace
+    restore
+
+    merge m:1 ubigeo_dist using `election_link_file', ///
+        keep(master match) ///
+        generate(_merge_election_`election_year')
+    generate byte elect_linked_`election_year' = ///
+        _merge_election_`election_year' == 3
+
+    count if !elect_linked_`election_year'
+    local election_name_recovery_needed = r(N)
+
+    if `election_name_recovery_needed' {
+        preserve
+        keep if !elect_linked_`election_year'
+        keep ///
+            ruv_id ///
+            dpto_victim_raw ///
+            prov_victim_raw ///
+            dist_victim_raw
+        victimasrd_normalize_name ///
+            dpto_victim_raw, ///
+            generate(elect_dep_key)
+        victimasrd_normalize_name ///
+            prov_victim_raw, ///
+            generate(elect_prov_key)
+        victimasrd_normalize_name ///
+            dist_victim_raw, ///
+            generate(elect_dist_key)
+
+        replace elect_prov_key = "NAZCA" if ///
+            elect_dep_key == "ICA" & elect_prov_key == "NASCA"
+        replace elect_dist_key = "NAZCA" if ///
+            elect_dep_key == "ICA" & ///
+            elect_prov_key == "NAZCA" & ///
+            elect_dist_key == "NASCA"
+        replace elect_dist_key = "SAN PEDRO DE LARAOS" if ///
+            elect_dep_key == "LIMA" & ///
+            elect_prov_key == "HUAROCHIRI" & ///
+            elect_dist_key == "LARAOS"
+
+        merge m:1 ///
+            elect_dep_key ///
+            elect_prov_key ///
+            elect_dist_key ///
+            using `election_name_file', ///
+            keep(master match) ///
+            generate(_merge_election_name)
+        keep if _merge_election_name == 3
+        drop _merge_election_name
+
+        foreach release_variable of local election_release_variables {
+            capture confirm variable `release_variable'_`election_year'
+            if !_rc {
+                rename ///
+                    `release_variable'_`election_year' ///
+                    fb_`release_variable'_`election_year'
+            }
+        }
+        generate str40 fb_elect_link_method_`election_year' = ///
+            "unique_exact_geographic_path"
+        generate byte fb_elect_predecessor_`election_year' = 0
+        keep ruv_id fb_*
+        isid ruv_id
+        save `election_name_recovery', replace
+        restore
+
+        merge 1:1 ruv_id using `election_name_recovery', ///
+            keep(master match) ///
+            generate(_merge_election_recovery)
+
+        foreach release_variable of local election_release_variables {
+            capture confirm variable fb_`release_variable'_`election_year'
+            if !_rc {
+                replace `release_variable'_`election_year' = ///
+                    fb_`release_variable'_`election_year' if ///
+                    _merge_election_recovery == 3
+                drop fb_`release_variable'_`election_year'
+            }
+        }
+        replace elect_link_method_`election_year' = ///
+            fb_elect_link_method_`election_year' if ///
+            _merge_election_recovery == 3
+        replace elect_predecessor_`election_year' = ///
+            fb_elect_predecessor_`election_year' if ///
+            _merge_election_recovery == 3
+        drop ///
+            fb_elect_link_method_`election_year' ///
+            fb_elect_predecessor_`election_year'
+        replace elect_linked_`election_year' = 1 if ///
+            _merge_election_recovery == 3
+        drop _merge_election_recovery
+    }
+
+    drop _merge_election_`election_year'
+
+    count if elect_linked_`election_year'
+    local electoral_`election_year'_linked = r(N)
+    count if !elect_linked_`election_year'
+    local electoral_`election_year'_unmatched = r(N)
+    count if elect_linked_`election_year' & sample_main_rd
+    local electoral_`election_year'_main_linked = r(N)
+}
+
+generate byte elect_linked_both = ///
+    elect_linked_2002 & elect_linked_2006
+count if elect_linked_both
+local electoral_both_linked = r(N)
+
+preserve
+keep if !elect_linked_both
+keep ///
+    ruv_id ///
+    ubigeo_dist ///
+    dpto_victim_raw ///
+    prov_victim_raw ///
+    dist_victim_raw ///
+    ccpp_victim_raw ///
+    sample_main_rd ///
+    elect_linked_2002 ///
+    elect_linked_2006
+generate str52 linkage_disposition = ///
+    "retained_without_both_municipal_election_cycles"
+save ///
+    "${qa_data_root}/municipal_election_unmatched_ruv.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/municipal_election_unmatched_ruv.csv", ///
+    replace
+restore
+
+preserve
+keep ///
+    ruv_id ///
+    ubigeo_dist ///
+    sample_main_rd ///
+    elect_linked_2002 ///
+    elect_link_method_2002 ///
+    elect_predecessor_2002 ///
+    elect_scope_2002 ///
+    elect_result_year_2002 ///
+    elect_linked_2006 ///
+    elect_link_method_2006 ///
+    elect_predecessor_2006 ///
+    elect_scope_2006 ///
+    elect_result_year_2006
+save ///
+    "${intermediate_root}/17_ruv_municipal_election_links.dta", ///
+    replace
+restore
+
+capture label drop municipal_org_type
+label define municipal_org_type ///
+    1 "National party" ///
+    2 "Electoral alliance" ///
+    3 "Regional movement" ///
+    4 "Local political organization"
+label values mayor_org_type_2002 municipal_org_type
+label values mayor_org_type_2006 municipal_org_type
+
+foreach election_year in 2002 2006 {
+    label variable elect_scope_`election_year' ///
+        "Governing municipal jurisdiction scope, `election_year' cycle"
+    label variable elect_result_year_`election_year' ///
+        "Actual municipal election result year, `election_year' cycle"
+    label variable elect_complementary_`election_year' ///
+        "Result comes from the next-year complementary election"
+    label variable elect_winner_org_`election_year' ///
+        "Winning mayoral political organization, `election_year' cycle"
+    label variable mayor_org_type_`election_year' ///
+        "Winning mayoral organization type, `election_year' cycle"
+    label variable mayor_apra_`election_year' ///
+        "Governing mayor elected by the Peruvian Aprista Party"
+    label variable mayor_female_`election_year' ///
+        "Governing mayor is female, `election_year' cycle"
+    label variable mayor_young_`election_year' ///
+        "Governing mayor meets INFOgob's young-candidate criterion"
+    label variable elect_registered_`election_year' ///
+        "Registered municipal electors, `election_year' cycle"
+    label variable elect_turnout_`election_year' ///
+        "Municipal election turnout share, `election_year' cycle"
+    label variable elect_invalid_share_`election_year' ///
+        "Blank, null, or challenged votes as share of ballots cast"
+    label variable elect_winner_share_`election_year' ///
+        "Winning list share of valid votes, `election_year' cycle"
+    label variable elect_margin_`election_year' ///
+        "Winner-runner-up valid-vote share margin, `election_year' cycle"
+    label variable elect_nep_`election_year' ///
+        "Effective number of municipal lists, `election_year' cycle"
+    label variable elect_hhi_`election_year' ///
+        "Municipal list vote-share Herfindahl index, `election_year' cycle"
+    label variable elect_top2_share_`election_year' ///
+        "Top-two municipal lists' combined valid-vote share"
+    label variable elect_candidate_count_`election_year' ///
+        "Mayoral lists receiving votes, `election_year' cycle"
+    label variable elect_candidate_female_`election_year' ///
+        "Female share of mayoral candidates, `election_year' cycle"
+    label variable elect_candidate_young_`election_year' ///
+        "Young share of mayoral candidates, `election_year' cycle"
+    label variable elect_voter_female_`election_year' ///
+        "Female share of registered municipal electors"
+    label variable elect_voter_young_`election_year' ///
+        "Young share of registered municipal electors"
+    label variable elect_voter_senior_`election_year' ///
+        "Share of registered municipal electors older than 70"
+}
+
+label variable elect_volatility_2006 ///
+    "INFOgob total electoral volatility for the ordinary 2006 contest"
+label variable fpl_vacancies_2002 ///
+    "Municipal authorities vacated during the 2003-2006 term"
+label variable fpl_recall_processes_2002 ///
+    "Municipal recall processes convened during the 2003-2006 term"
+label variable fpl_recalled_authorities_2002 ///
+    "Municipal authorities recalled during the 2003-2006 term"
+label variable fpl_council_female_2002 ///
+    "Women elected to the municipal council, 2002 cycle"
+label variable fpl_council_young_2002 ///
+    "Young members elected to the municipal council, 2002 cycle"
+label variable fpl_ccl_early_2002 ///
+    "Local Coordination Council election held in 2003-2004"
+label variable fpl_ccl_late_2002 ///
+    "Local Coordination Council election held in 2005-2006"
+
+drop ///
+    elect_linked_2002 ///
+    elect_linked_2006 ///
+    elect_linked_both ///
+    elect_link_method_2002 ///
+    elect_predecessor_2002 ///
+    elect_link_method_2006 ///
+    elect_predecessor_2006
+
+order elect_scope_2002, after(gdp_dist_topshare_2006)
+
+compress
+sort ruv_id
+isid ruv_id
+count
+local electoral_registry_rows = r(N)
+assert `electoral_registry_rows' == `gdp_registry_rows'
+assert `electoral_registry_rows' == 5712
+
+save ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    replace
+
+
+*===============================================================================
+**# 12. Write aggregate QA metrics and close
 *===============================================================================
 
 tempname qa_post
@@ -6815,6 +8789,170 @@ post `qa_post' ///
     ("validated") ///
     ("All RUV records retained after the GDP-source merge")
 
+post `qa_post' ///
+    ("electoral_2002_district_contests") ///
+    (`election_2002_district_contests') ///
+    ("validated") ///
+    ("INFOgob ordinary municipal district contests in the 2002 cycle")
+
+post `qa_post' ///
+    ("electoral_2002_province_contests") ///
+    (`election_2002_province_contests') ///
+    ("validated") ///
+    ("INFOgob ordinary municipal provincial contests in the 2002 cycle")
+
+post `qa_post' ///
+    ("electoral_2006_district_contests") ///
+    (`election_2006_district_contests') ///
+    ("validated") ///
+    ("INFOgob ordinary municipal district contests in the 2006 cycle")
+
+post `qa_post' ///
+    ("electoral_2006_province_contests") ///
+    (`election_2006_province_contests') ///
+    ("validated") ///
+    ("INFOgob ordinary municipal provincial contests in the 2006 cycle")
+
+post `qa_post' ///
+    ("electoral_2003_complementary_contests") ///
+    (`emc_2002_contests') ///
+    ("validated") ///
+    ("Annulled 2002 district contests replaced by ONPE 2003 results")
+
+post `qa_post' ///
+    ("electoral_2007_complementary_contests") ///
+    (`emc_2006_contests') ///
+    ("validated") ///
+    ("Annulled 2006 district contests replaced by ONPE 2007 results")
+
+post `qa_post' ///
+    ("electoral_2002_authority_candidate_mismatches") ///
+    (`elect_2002_district_authmiss' + ///
+     `elect_2002_province_authmiss') ///
+    ("source_issue") ///
+    ("Proclaimed winner organizations absent from the INFOgob candidate roster")
+
+post `qa_post' ///
+    ("electoral_2006_authority_candidate_mismatches") ///
+    (`elect_2006_district_authmiss' + ///
+     `elect_2006_province_authmiss') ///
+    ("source_issue") ///
+    ("Proclaimed winner organizations absent from the INFOgob candidate roster")
+
+post `qa_post' ///
+    ("electoral_isp_max_rounding_difference") ///
+    (`election_isp_max_diff') ///
+    ("validated") ///
+    ("Maximum absolute difference from INFOgob's rounded ISP indicators")
+
+post `qa_post' ///
+    ("electoral_onpe_2002_matched_contests") ///
+    (`onpe_2002_match_n') ///
+    ("partial_validation") ///
+    ("Non-complementary 2002 INFOgob contests represented in ONPE mesa returns")
+
+post `qa_post' ///
+    ("electoral_onpe_2002_infogob_only") ///
+    (`onpe_2002_infogob_only_n') ///
+    ("source_issue") ///
+    ("Non-complementary INFOgob contests absent from the acquired ONPE file")
+
+post `qa_post' ///
+    ("electoral_onpe_2002_complementary_excluded") ///
+    (`onpe_2002_emc_excluded_n') ///
+    ("validated") ///
+    ("Annulled ordinary contests replaced by the 2003 complementary results")
+
+post `qa_post' ///
+    ("electoral_onpe_2002_differing_contests") ///
+    (`onpe_2002_diff_n') ///
+    ("source_issue") ///
+    ("Matched contests with at least one INFOgob-ONPE difference above 1e-10")
+
+post `qa_post' ///
+    ("electoral_onpe_2002_registered_max_difference") ///
+    (`onpe_2002_reg_max') ///
+    ("source_issue") ///
+    ("Maximum absolute electorate difference among matched 2002 contests")
+
+post `qa_post' ///
+    ("electoral_onpe_2002_statistics_max_difference") ///
+    (`onpe_2002_stats_max') ///
+    ("source_issue") ///
+    ("Maximum turnout, invalid-vote, vote-share, margin, or HHI difference")
+
+post `qa_post' ///
+    ("electoral_onpe_2006_ordinary_reconciled") ///
+    (`onpe_ordinary_n') ///
+    ("validated") ///
+    ("Non-complementary 2006 contests reproduced from official ONPE mesa returns")
+
+post `qa_post' ///
+    ("electoral_onpe_2006_complementary_excluded") ///
+    (`onpe_emc_excluded_n') ///
+    ("validated") ///
+    ("Annulled ordinary contests replaced by the 2007 complementary results")
+
+post `qa_post' ///
+    ("electoral_onpe_2006_registered_max_difference") ///
+    (`onpe_reg_max') ///
+    ("validated") ///
+    ("Maximum absolute electorate difference between INFOgob and ONPE")
+
+post `qa_post' ///
+    ("electoral_onpe_2006_statistics_max_difference") ///
+    (`onpe_stats_max') ///
+    ("validated") ///
+    ("Maximum absolute turnout, invalid-vote, vote-share, margin, or HHI difference")
+
+post `qa_post' ///
+    ("electoral_2002_ruv_linked") ///
+    (`electoral_2002_linked') ///
+    ("validated") ///
+    ("RUV rows linked to their governing municipality in the 2002 cycle")
+
+post `qa_post' ///
+    ("electoral_2002_ruv_unmatched") ///
+    (`electoral_2002_unmatched') ///
+    ("validated") ///
+    ("RUV rows retained without a governing-election link in the 2002 cycle")
+
+post `qa_post' ///
+    ("electoral_2002_main_sample_linked") ///
+    (`electoral_2002_main_linked') ///
+    ("validated") ///
+    ("Selected-sample RUV rows linked to the 2002 municipal cycle")
+
+post `qa_post' ///
+    ("electoral_2006_ruv_linked") ///
+    (`electoral_2006_linked') ///
+    ("validated") ///
+    ("RUV rows linked to their governing municipality in the 2006 cycle")
+
+post `qa_post' ///
+    ("electoral_2006_ruv_unmatched") ///
+    (`electoral_2006_unmatched') ///
+    ("validated") ///
+    ("RUV rows retained without a governing-election link in the 2006 cycle")
+
+post `qa_post' ///
+    ("electoral_2006_main_sample_linked") ///
+    (`electoral_2006_main_linked') ///
+    ("validated") ///
+    ("Selected-sample RUV rows linked to the 2006 municipal cycle")
+
+post `qa_post' ///
+    ("electoral_both_cycles_ruv_linked") ///
+    (`electoral_both_linked') ///
+    ("validated") ///
+    ("RUV rows linked to both pre-program municipal election cycles")
+
+post `qa_post' ///
+    ("electoral_registry_rows") ///
+    (`electoral_registry_rows') ///
+    ("validated") ///
+    ("All RUV records retained after the municipal-election merge")
+
 postclose `qa_post'
 
 use `qa_metrics', clear
@@ -6862,6 +9000,13 @@ preserve
 keep if strpos(metric, "gdp_") == 1
 export delimited ///
     "${metadata_root}/gdp-ccpp/sample-flow.csv", ///
+    replace
+restore
+
+preserve
+keep if strpos(metric, "electoral_") == 1
+export delimited ///
+    "${metadata_root}/municipal-elections/sample-flow.csv", ///
     replace
 restore
 

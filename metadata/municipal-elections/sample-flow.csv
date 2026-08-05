@@ -1,0 +1,28 @@
+metric,value,status,note
+electoral_2002_district_contests,1635,validated,INFOgob ordinary municipal district contests in the 2002 cycle
+electoral_2002_province_contests,194,validated,INFOgob ordinary municipal provincial contests in the 2002 cycle
+electoral_2006_district_contests,1637,validated,INFOgob ordinary municipal district contests in the 2006 cycle
+electoral_2006_province_contests,195,validated,INFOgob ordinary municipal provincial contests in the 2006 cycle
+electoral_2003_complementary_contests,13,validated,Annulled 2002 district contests replaced by ONPE 2003 results
+electoral_2007_complementary_contests,22,validated,Annulled 2006 district contests replaced by ONPE 2007 results
+electoral_2002_authority_candidate_mismatches,9,source_issue,Proclaimed winner organizations absent from the INFOgob candidate roster
+electoral_2006_authority_candidate_mismatches,8,source_issue,Proclaimed winner organizations absent from the INFOgob candidate roster
+electoral_isp_max_rounding_difference,.0005000000000001,validated,Maximum absolute difference from INFOgob's rounded ISP indicators
+electoral_onpe_2002_matched_contests,1773,partial_validation,Non-complementary 2002 INFOgob contests represented in ONPE mesa returns
+electoral_onpe_2002_infogob_only,43,source_issue,Non-complementary INFOgob contests absent from the acquired ONPE file
+electoral_onpe_2002_complementary_excluded,13,validated,Annulled ordinary contests replaced by the 2003 complementary results
+electoral_onpe_2002_differing_contests,4,source_issue,Matched contests with at least one INFOgob-ONPE difference above 1e-10
+electoral_onpe_2002_registered_max_difference,82,source_issue,Maximum absolute electorate difference among matched 2002 contests
+electoral_onpe_2002_statistics_max_difference,.1538071224492982,source_issue,"Maximum turnout, invalid-vote, vote-share, margin, or HHI difference"
+electoral_onpe_2006_ordinary_reconciled,1810,validated,Non-complementary 2006 contests reproduced from official ONPE mesa returns
+electoral_onpe_2006_complementary_excluded,22,validated,Annulled ordinary contests replaced by the 2007 complementary results
+electoral_onpe_2006_registered_max_difference,0,validated,Maximum absolute electorate difference between INFOgob and ONPE
+electoral_onpe_2006_statistics_max_difference,1.11022302463e-16,validated,"Maximum absolute turnout, invalid-vote, vote-share, margin, or HHI difference"
+electoral_2002_ruv_linked,5712,validated,RUV rows linked to their governing municipality in the 2002 cycle
+electoral_2002_ruv_unmatched,0,validated,RUV rows retained without a governing-election link in the 2002 cycle
+electoral_2002_main_sample_linked,1162,validated,Selected-sample RUV rows linked to the 2002 municipal cycle
+electoral_2006_ruv_linked,5712,validated,RUV rows linked to their governing municipality in the 2006 cycle
+electoral_2006_ruv_unmatched,0,validated,RUV rows retained without a governing-election link in the 2006 cycle
+electoral_2006_main_sample_linked,1162,validated,Selected-sample RUV rows linked to the 2006 municipal cycle
+electoral_both_cycles_ruv_linked,5712,validated,RUV rows linked to both pre-program municipal election cycles
+electoral_registry_rows,5712,validated,All RUV records retained after the municipal-election merge
