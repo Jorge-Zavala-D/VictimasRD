@@ -629,8 +629,8 @@ until their treatment timing, tie rule, and estimands are approved.
 */
 
 local run_all                         0
-local run_01_data_preparation         1
-local run_02_describe_data            1
+local run_01_data_preparation         0
+local run_02_describe_data            0
 local run_04_estimate_main_effects    0
 local run_05_run_robustness           0
 local run_06_analyze_mechanisms       0
