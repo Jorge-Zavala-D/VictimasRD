@@ -29,6 +29,8 @@ build/
 cache/
 tmp/
 temp/
+graphify-out/
+.codex/hooks.json
 
 # Compressed archives
 *.zip
