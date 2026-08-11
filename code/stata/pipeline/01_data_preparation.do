@@ -2,7 +2,7 @@
 Project:       Victimas RD
 Program:       01_data_preparation.do
 Purpose:       Authoritative end-to-end data-preparation program
-Current scope: Foundational, Census 2007, spatial, GDP, and electoral covariates
+Current scope: Foundational, Census 2007, spatial, GDP, electoral, and SISFOH
 
 This file is the only canonical Stata data-preparation program. New source
 families will be added as clearly delimited sections here so that the master
@@ -17,6 +17,7 @@ Current source families:
     6. INEI-derived 2017 CCPP point and category shapefiles
     7. Seminario-Palomino estimated CCPP GDP, 1993--2018
     8. JNE/INFOgob and ONPE municipal elections, 2002--2007
+    9. INEI SISFOH district enumeration, 2012--2013
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -8188,7 +8189,1523 @@ save ///
 
 
 *===============================================================================
-**# 12. Write aggregate QA metrics and close
+**# 12. Prepare SISFOH 2012-2013 at person, household, and CCPP levels
+*===============================================================================
+
+local sisfoh_person_raw ///
+    "${raw_root}/15 SISFOH/sisfoh_persona.dta"
+local sisfoh_household_raw ///
+    "${raw_root}/15 SISFOH/sisfoh_hogar.dta"
+local sisfoh_legacy_ccpp_raw ///
+    "${raw_root}/15 SISFOH/ccpp_sisfoh2013.dta"
+
+foreach sisfoh_source in ///
+    "`sisfoh_person_raw'" ///
+    "`sisfoh_household_raw'" ///
+    "`sisfoh_legacy_ccpp_raw'" {
+
+    capture confirm file "`sisfoh_source'"
+    if _rc {
+        display as error "Required SISFOH source is unavailable:"
+        display as error "  `sisfoh_source'"
+        exit 601
+    }
+}
+
+tempfile ///
+    sisfoh_household_keys ///
+    sisfoh_ccpp_directory ///
+    sisfoh_source_codes ///
+    sisfoh_link_candidates ///
+    sisfoh_code_links ///
+    sisfoh_used_source_codes ///
+    sisfoh_name_links ///
+    sisfoh_ruv_links ///
+    sisfoh_ccpp_linked
+
+
+*-------------------------------------------------------------------------------
+**# 12.1 Validate household keys and build a de-identified key spine
+*-------------------------------------------------------------------------------
+
+use ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    RV10 DIAFIN MESFIN ANIOFIN ///
+    using "`sisfoh_household_raw'", clear
+
+count
+local sisfoh2013_household_records = r(N)
+assert `sisfoh2013_household_records' == 8336891
+
+isid ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR
+
+generate str10 ubigeo_ccpp_sisfoh = ///
+    DPTO + PROV + DIST + CODCCPP_N
+assert regexm(ubigeo_ccpp_sisfoh, "^[0-9]{10}$")
+
+count if RV10 == 1
+local sisfoh2013_complete_households = r(N)
+assert `sisfoh2013_complete_households' == 6163201
+
+count if RV10 == 2
+local sisfoh2013_incomplete_hh = r(N)
+assert `sisfoh2013_incomplete_hh' == 446369
+
+count if inlist(RV10, 1, 2)
+local sisfoh2013_households_info = r(N)
+assert `sisfoh2013_households_info' == 6609570
+
+count if inlist(RV10, 1, 2) & !inrange(ANIOFIN, 2012, 2013)
+local sisfoh2013_invalid_year = r(N)
+
+count if inlist(RV10, 1, 2) & !inrange(MESFIN, 1, 12)
+local sisfoh2013_invalid_month = r(N)
+
+count if inlist(RV10, 1, 2) & !inrange(DIAFIN, 1, 31)
+local sisfoh2013_invalid_day = r(N)
+
+sort ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR
+generate long sisfoh_hhid = _n
+
+keep if inlist(RV10, 1, 2)
+rename RV10 sisfoh_interview_result_2013
+rename DIAFIN sisfoh_interview_day_raw
+rename MESFIN sisfoh_interview_month_raw
+rename ANIOFIN sisfoh_interview_year_raw
+
+keep ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    sisfoh_hhid ///
+    sisfoh_interview_result_2013 ///
+    sisfoh_interview_day_raw ///
+    sisfoh_interview_month_raw ///
+    sisfoh_interview_year_raw
+
+isid ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR
+isid sisfoh_hhid
+save `sisfoh_household_keys'
+
+use ///
+    DPTO PROV DIST CODCCPP_N ///
+    NOMBREDD NOMBREPP NOMBREDI CENPOB ///
+    AREA CATEG1 RV10 ///
+    using "`sisfoh_household_raw'", clear
+
+keep if inlist(RV10, 1, 2)
+generate str10 ubigeo_ccpp_sisfoh = ///
+    DPTO + PROV + DIST + CODCCPP_N
+
+contract ///
+    ubigeo_ccpp_sisfoh ///
+    NOMBREDD NOMBREPP NOMBREDI CENPOB ///
+    AREA CATEG1, ///
+    freq(directory_record_count)
+
+bysort ubigeo_ccpp_sisfoh: ///
+    generate int directory_distinct_records = _N
+gsort ///
+    ubigeo_ccpp_sisfoh ///
+    -directory_record_count ///
+    NOMBREDD NOMBREPP NOMBREDI CENPOB ///
+    AREA CATEG1
+by ubigeo_ccpp_sisfoh: generate byte directory_selected = _n == 1
+by ubigeo_ccpp_sisfoh: generate byte directory_top_tie = ///
+    directory_record_count == directory_record_count[1] & _N > 1
+by ubigeo_ccpp_sisfoh: egen int directory_top_tie_count = ///
+    total(directory_top_tie)
+
+count if directory_selected & directory_distinct_records > 1
+local sisfoh2013_ccpp_attr_conflict = r(N)
+count if directory_selected & directory_top_tie_count > 1
+local sisfoh2013_ccpp_modal_ties = r(N)
+
+rename NOMBREDD department_name_sisfoh2013
+rename NOMBREPP province_name_sisfoh2013
+rename NOMBREDI district_name_sisfoh2013
+rename CENPOB ccpp_name_sisfoh2013
+rename AREA area_sisfoh2013
+rename CATEG1 ccpp_category_sisfoh2013
+
+preserve
+keep if directory_distinct_records > 1
+save ///
+    "${qa_data_root}/sisfoh2013_ccpp_directory_disagreements.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/sisfoh2013_ccpp_directory_disagreements.csv", ///
+    replace
+restore
+
+keep if directory_selected
+drop ///
+    directory_record_count ///
+    directory_distinct_records ///
+    directory_selected ///
+    directory_top_tie ///
+    directory_top_tie_count
+isid ubigeo_ccpp_sisfoh
+
+count
+local sisfoh2013_source_ccpp = r(N)
+assert `sisfoh2013_source_ccpp' == 81220
+save `sisfoh_ccpp_directory'
+
+
+*-------------------------------------------------------------------------------
+**# 12.2 Clean and de-identify the national person roster
+*-------------------------------------------------------------------------------
+
+use ///
+    DPTO PROV DIST CODCCPP_N ///
+    AREA CATEG1 ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    NRO NRO_ORD ///
+    EDAD01 PTES01 SEXO01 GESTA01 ESTA01 ///
+    SEGU01_1-SEGU01_6 ///
+    IDIOMA01 LEE01 NIV01 ULT01 ///
+    ERA01 SECT01 ///
+    DISCA01_1-DISCA01_6 ///
+    PROG01_1-PROG01_11 ///
+    using "`sisfoh_person_raw'", clear
+
+count
+local sisfoh2013_person_records = r(N)
+assert `sisfoh2013_person_records' == 24009026
+
+merge m:1 ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    using `sisfoh_household_keys', ///
+    keep(master match) ///
+    keepusing( ///
+        sisfoh_hhid ///
+        sisfoh_interview_result_2013 ///
+        sisfoh_interview_day_raw ///
+        sisfoh_interview_month_raw ///
+        sisfoh_interview_year_raw)
+
+assert _merge == 3
+drop _merge
+assert inlist(sisfoh_interview_result_2013, 1, 2)
+
+isid sisfoh_hhid NRO
+count if NRO != NRO_ORD
+local sisfoh2013_person_order_diff = r(N)
+
+sort sisfoh_hhid NRO
+generate long sisfoh_pid = _n
+rename NRO sisfoh_person_number
+
+generate str10 ubigeo_ccpp_sisfoh = ///
+    DPTO + PROV + DIST + CODCCPP_N
+assert regexm(ubigeo_ccpp_sisfoh, "^[0-9]{10}$")
+
+generate byte sisfoh_area_2013 = AREA if inlist(AREA, 1, 2)
+generate str2 sisfoh_ccpp_category_2013 = CATEG1
+generate byte sisfoh_interview_complete = ///
+    sisfoh_interview_result_2013 == 1
+
+generate double interview_date_sisfoh2013 = mdy( ///
+    sisfoh_interview_month_raw, ///
+    sisfoh_interview_day_raw, ///
+    sisfoh_interview_year_raw) ///
+    if inrange(sisfoh_interview_year_raw, 2012, 2013)
+format interview_date_sisfoh2013 %td
+
+assert inrange(EDAD01, 0, 120) | missing(EDAD01)
+generate int age_2013 = EDAD01 if inrange(EDAD01, 0, 120)
+count if missing(age_2013)
+local sisfoh2013_person_age_missing = r(N)
+
+assert inlist(SEXO01, 1, 2)
+generate byte female_2013 = SEXO01 == 2
+generate byte household_head_2013 = PTES01 == 1
+generate byte relation_head_2013 = PTES01
+label values relation_head_2013 PTES01
+
+generate byte pregnant_2013 = .
+replace pregnant_2013 = GESTA01 == 1 ///
+    if female_2013 & age_2013 >= 12 & inlist(GESTA01, 1, 2)
+
+generate byte marital_status_2013 = ESTA01 ///
+    if age_2013 >= 12 & inrange(ESTA01, 1, 6)
+label values marital_status_2013 ESTA01
+
+egen byte insurance_selected = ///
+    anycount(SEGU01_1-SEGU01_5), values(1 2 3 4 5)
+generate byte insurance_none = SEGU01_6 == 6
+assert insurance_selected > 0 | insurance_none
+assert !(insurance_selected > 0 & insurance_none)
+
+generate byte insurance_any_2013 = insurance_selected > 0
+generate byte insurance_essalud_2013 = SEGU01_1 == 1
+generate byte insurance_armed_forces_2013 = SEGU01_2 == 2
+generate byte insurance_private_2013 = SEGU01_3 == 3
+generate byte insurance_sis_2013 = SEGU01_4 == 4
+generate byte insurance_other_2013 = SEGU01_5 == 5
+
+generate byte language_childhood_2013 = IDIOMA01 ///
+    if age_2013 >= 3 & inrange(IDIOMA01, 1, 7)
+capture label drop sisfoh_language_2013
+label define sisfoh_language_2013 ///
+    1 "Quechua" ///
+    2 "Aymara" ///
+    3 "Ashaninka" ///
+    4 "Spanish" ///
+    5 "Foreign language" ///
+    6 "Unable to speak" ///
+    7 "Other"
+label values language_childhood_2013 sisfoh_language_2013
+
+generate byte spanish_childhood_2013 = ///
+    language_childhood_2013 == 4 ///
+    if !missing(language_childhood_2013)
+generate byte named_indigenous_language_2013 = ///
+    inlist(language_childhood_2013, 1, 2, 3) ///
+    if !missing(language_childhood_2013)
+generate byte nonspanish_language_2013 = ///
+    language_childhood_2013 != 4 ///
+    if !missing(language_childhood_2013)
+
+count if age_2013 >= 3
+local sisfoh2013_language_eligible = r(N)
+count if age_2013 >= 3 & !missing(language_childhood_2013)
+local sisfoh2013_language_valid = r(N)
+
+generate byte literate_2013 = LEE01 == 1 ///
+    if age_2013 >= 3 & inlist(LEE01, 1, 2)
+generate byte education_level_2013 = NIV01 ///
+    if age_2013 >= 3 & inrange(NIV01, 1, 7)
+label values education_level_2013 NIV01
+generate byte last_grade_2013 = ULT01 ///
+    if inrange(education_level_2013, 3, 7) & ///
+       inrange(ULT01, 1, 6)
+
+generate byte primary_complete_2013 = .
+replace primary_complete_2013 = 0 ///
+    if inlist(education_level_2013, 1, 2)
+replace primary_complete_2013 = last_grade_2013 == 6 ///
+    if education_level_2013 == 3 & !missing(last_grade_2013)
+replace primary_complete_2013 = 1 ///
+    if inrange(education_level_2013, 4, 7)
+
+generate byte secondaryplus_2013 = ///
+    education_level_2013 >= 4 ///
+    if !missing(education_level_2013)
+
+generate byte education_years_approx_2013 = .
+replace education_years_approx_2013 = 0 ///
+    if inlist(education_level_2013, 1, 2)
+replace education_years_approx_2013 = last_grade_2013 ///
+    if education_level_2013 == 3
+replace education_years_approx_2013 = 6 + last_grade_2013 ///
+    if education_level_2013 == 4
+replace education_years_approx_2013 = 11 + last_grade_2013 ///
+    if inlist(education_level_2013, 5, 6)
+replace education_years_approx_2013 = 16 + last_grade_2013 ///
+    if education_level_2013 == 7
+
+generate byte labor_status_2013 = ERA01 ///
+    if age_2013 >= 6 & inrange(ERA01, 1, 10)
+label values labor_status_2013 ERA01
+generate byte employed_2013 = ///
+    inrange(labor_status_2013, 1, 5) ///
+    if !missing(labor_status_2013)
+generate byte labor_force_2013 = ///
+    inrange(labor_status_2013, 1, 6) ///
+    if !missing(labor_status_2013)
+generate byte unemployed_2013 = ///
+    labor_status_2013 == 6 ///
+    if !missing(labor_status_2013)
+
+generate byte employment_sector_2013 = SECT01 ///
+    if employed_2013 == 1 & inrange(SECT01, 1, 10)
+label values employment_sector_2013 SECT01
+
+generate byte employed_agriculture_2013 = ///
+    employment_sector_2013 == 1 if !missing(employed_2013)
+generate byte employed_livestock_2013 = ///
+    employment_sector_2013 == 2 if !missing(employed_2013)
+generate byte employed_forestry_2013 = ///
+    employment_sector_2013 == 3 if !missing(employed_2013)
+generate byte employed_fishing_2013 = ///
+    employment_sector_2013 == 4 if !missing(employed_2013)
+generate byte employed_mining_2013 = ///
+    employment_sector_2013 == 5 if !missing(employed_2013)
+generate byte employed_handicraft_2013 = ///
+    employment_sector_2013 == 6 if !missing(employed_2013)
+generate byte employed_commerce_2013 = ///
+    employment_sector_2013 == 7 if !missing(employed_2013)
+generate byte employed_services_2013 = ///
+    employment_sector_2013 == 8 if !missing(employed_2013)
+generate byte employed_other_2013 = ///
+    employment_sector_2013 == 9 if !missing(employed_2013)
+generate byte employed_government_2013 = ///
+    employment_sector_2013 == 10 if !missing(employed_2013)
+
+egen byte disability_selected = ///
+    anycount(DISCA01_1-DISCA01_5), values(1 2 3 4 5)
+generate byte disability_none = DISCA01_6 == 6
+assert disability_selected > 0 | disability_none
+assert !(disability_selected > 0 & disability_none)
+
+generate byte disability_any_2013 = disability_selected > 0
+generate byte disability_visual_2013 = DISCA01_1 == 1
+generate byte disability_hearing_2013 = DISCA01_2 == 2
+generate byte disability_speech_2013 = DISCA01_3 == 3
+generate byte disability_mobility_2013 = DISCA01_4 == 4
+generate byte disability_cognitive_2013 = DISCA01_5 == 5
+
+egen byte program_selected = ///
+    anycount(PROG01_1-PROG01_10), ///
+    values(1 2 3 4 5 6 7 8 9 10)
+generate byte program_none = PROG01_11 == 11
+assert program_selected > 0 | program_none
+assert !(program_selected > 0 & program_none)
+
+generate byte program_any_2013 = program_selected > 0
+generate byte program_milk_2013 = PROG01_1 == 1
+generate byte program_soup_kitchen_2013 = PROG01_2 == 2
+generate byte program_school_meal_2013 = PROG01_3 == 3
+generate byte program_supplement_2013 = PROG01_4 == 4
+generate byte program_food_basket_2013 = PROG01_5 == 5
+generate byte program_juntos_2013 = PROG01_6 == 6
+generate byte program_housing_2013 = PROG01_7 == 7
+generate byte program_pension65_2013 = PROG01_8 == 8
+generate byte program_cunamas_2013 = PROG01_9 == 9
+generate byte program_other_2013 = PROG01_10 == 10
+
+label variable sisfoh_hhid ///
+    "De-identified national SISFOH household identifier"
+label variable sisfoh_pid ///
+    "De-identified national SISFOH person identifier"
+label variable interview_date_sisfoh2013 ///
+    "Valid final SISFOH interview date, 2012-2013"
+label variable education_years_approx_2013 ///
+    "Approximate completed education years from level and grade"
+label variable named_indigenous_language_2013 ///
+    "Childhood language is Quechua, Aymara, or Ashaninka"
+label variable age_2013 "Age at SISFOH enumeration"
+label variable female_2013 "Female"
+label variable household_head_2013 "Household head"
+label variable pregnant_2013 "Pregnant; females age 12 or older"
+label variable literate_2013 "Can read and write; age three or older"
+label variable education_level_2013 "Highest education level"
+label variable primary_complete_2013 "Completed primary education"
+label variable secondaryplus_2013 "Secondary or higher education"
+label variable insurance_any_2013 "Reports any health insurance"
+label variable insurance_sis_2013 "Reports SIS health insurance"
+label variable employed_2013 "Employed in the preceding month"
+label variable labor_force_2013 "In the labor force"
+label variable unemployed_2013 "Unemployed and in the labor force"
+label variable employment_sector_2013 "Employment sector"
+label variable disability_any_2013 "Reports any permanent limitation"
+label variable program_any_2013 "Current beneficiary of a listed program"
+label variable program_juntos_2013 "Current beneficiary of Juntos"
+
+keep ///
+    sisfoh_pid sisfoh_hhid sisfoh_person_number ///
+    ubigeo_ccpp_sisfoh ///
+    sisfoh_area_2013 sisfoh_ccpp_category_2013 ///
+    sisfoh_interview_result_2013 ///
+    sisfoh_interview_complete ///
+    interview_date_sisfoh2013 ///
+    age_2013 female_2013 ///
+    household_head_2013 relation_head_2013 ///
+    pregnant_2013 marital_status_2013 ///
+    language_childhood_2013 ///
+    spanish_childhood_2013 ///
+    named_indigenous_language_2013 ///
+    nonspanish_language_2013 ///
+    literate_2013 education_level_2013 last_grade_2013 ///
+    education_years_approx_2013 ///
+    primary_complete_2013 secondaryplus_2013 ///
+    insurance_any_2013 insurance_essalud_2013 ///
+    insurance_armed_forces_2013 insurance_private_2013 ///
+    insurance_sis_2013 insurance_other_2013 ///
+    labor_status_2013 employed_2013 ///
+    labor_force_2013 unemployed_2013 ///
+    employment_sector_2013 ///
+    employed_agriculture_2013 employed_livestock_2013 ///
+    employed_forestry_2013 employed_fishing_2013 ///
+    employed_mining_2013 employed_handicraft_2013 ///
+    employed_commerce_2013 employed_services_2013 ///
+    employed_other_2013 employed_government_2013 ///
+    disability_any_2013 disability_visual_2013 ///
+    disability_hearing_2013 disability_speech_2013 ///
+    disability_mobility_2013 disability_cognitive_2013 ///
+    program_any_2013 program_milk_2013 ///
+    program_soup_kitchen_2013 program_school_meal_2013 ///
+    program_supplement_2013 program_food_basket_2013 ///
+    program_juntos_2013 program_housing_2013 ///
+    program_pension65_2013 program_cunamas_2013 ///
+    program_other_2013
+
+compress
+sort sisfoh_hhid sisfoh_person_number
+isid sisfoh_pid
+isid sisfoh_hhid sisfoh_person_number
+save ///
+    "${intermediate_root}/18_sisfoh_2013_person_clean.dta", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 12.3 Aggregate person information to households and CCPPs
+*-------------------------------------------------------------------------------
+
+generate byte person_one = 1
+generate byte age_valid_aux = !missing(age_2013)
+generate byte age_0_14_aux = inrange(age_2013, 0, 14)
+generate byte age_15_29_aux = inrange(age_2013, 15, 29)
+generate byte age_30_44_aux = inrange(age_2013, 30, 44)
+generate byte age_45_64_aux = inrange(age_2013, 45, 64)
+generate byte age_65p_aux = age_2013 >= 65 & !missing(age_2013)
+
+generate byte literacy_eligible_aux = age_2013 >= 14 & !missing(age_2013)
+generate byte literacy_valid_aux = ///
+    literacy_eligible_aux & !missing(literate_2013)
+generate byte literate_age14_aux = ///
+    literacy_eligible_aux & literate_2013 == 1
+
+generate byte education_eligible_aux = ///
+    age_2013 >= 14 & !missing(age_2013)
+generate byte education_valid_aux = ///
+    education_eligible_aux & !missing(education_level_2013)
+generate byte secondaryplus_age14_aux = ///
+    education_eligible_aux & secondaryplus_2013 == 1
+
+generate byte language_eligible_aux = age_2013 >= 3 & !missing(age_2013)
+generate byte language_valid_aux = ///
+    language_eligible_aux & !missing(language_childhood_2013)
+generate byte nonspanish_aux = ///
+    language_eligible_aux & nonspanish_language_2013 == 1
+generate byte indigenous_aux = ///
+    language_eligible_aux & named_indigenous_language_2013 == 1
+
+generate byte labor_eligible_aux = age_2013 >= 14 & !missing(age_2013)
+generate byte labor_valid_aux = ///
+    labor_eligible_aux & !missing(labor_status_2013)
+generate byte labor_force_aux = ///
+    labor_eligible_aux & labor_force_2013 == 1
+generate byte employed_age14_aux = ///
+    labor_eligible_aux & employed_2013 == 1
+generate byte unemployed_age14_aux = ///
+    labor_eligible_aux & unemployed_2013 == 1
+
+generate byte sector_agriculture_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 1
+generate byte sector_livestock_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 2
+generate byte sector_forestry_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 3
+generate byte sector_fishing_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 4
+generate byte sector_mining_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 5
+generate byte sector_handicraft_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 6
+generate byte sector_commerce_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 7
+generate byte sector_services_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 8
+generate byte sector_other_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 9
+generate byte sector_government_aux = ///
+    labor_eligible_aux & employment_sector_2013 == 10
+
+generate byte child_labor_eligible_aux = ///
+    inrange(age_2013, 6, 14) & !missing(labor_status_2013)
+generate byte child_employed_aux = ///
+    child_labor_eligible_aux & employed_2013 == 1
+
+generate byte nbi_school_risk_aux = 0 if !missing(age_2013)
+replace nbi_school_risk_aux = ///
+    inlist(education_level_2013, 1, 2) ///
+    if inrange(age_2013, 7, 12) & !missing(education_level_2013)
+replace nbi_school_risk_aux = . ///
+    if inrange(age_2013, 7, 12) & missing(education_level_2013)
+generate byte nbi_school_unknown_aux = ///
+    missing(age_2013) | ///
+    (inrange(age_2013, 7, 12) & missing(education_level_2013))
+
+generate byte nbi_employed_aux = .
+replace nbi_employed_aux = 0 if inrange(age_2013, 0, 5)
+replace nbi_employed_aux = employed_2013 if age_2013 >= 6
+generate byte employment_valid_aux = !missing(nbi_employed_aux)
+
+generate int head_age_aux = age_2013 if household_head_2013
+generate byte head_female_aux = female_2013 if household_head_2013
+generate byte head_education_aux = ///
+    education_level_2013 if household_head_2013
+generate byte head_employed_aux = employed_2013 if household_head_2013
+generate byte head_primary2less_aux = .
+replace head_primary2less_aux = 1 ///
+    if household_head_2013 & inlist(education_level_2013, 1, 2)
+replace head_primary2less_aux = 1 ///
+    if household_head_2013 & education_level_2013 == 3 & ///
+       inrange(last_grade_2013, 1, 2)
+replace head_primary2less_aux = 0 ///
+    if household_head_2013 & education_level_2013 == 3 & ///
+       inrange(last_grade_2013, 3, 6)
+replace head_primary2less_aux = 0 ///
+    if household_head_2013 & ///
+       inrange(education_level_2013, 4, 7)
+
+collapse ///
+    (sum) ///
+        hh_members_2013=person_one ///
+        hh_age_valid_2013=age_valid_aux ///
+        hh_female_2013=female_2013 ///
+        hh_age_0_14_2013=age_0_14_aux ///
+        hh_age_15_29_2013=age_15_29_aux ///
+        hh_age_30_44_2013=age_30_44_aux ///
+        hh_age_45_64_2013=age_45_64_aux ///
+        hh_age_65p_2013=age_65p_aux ///
+        hh_literacy_eligible_2013=literacy_eligible_aux ///
+        hh_literacy_valid_2013=literacy_valid_aux ///
+        hh_literate_2013=literate_age14_aux ///
+        hh_education_eligible_2013=education_eligible_aux ///
+        hh_education_valid_2013=education_valid_aux ///
+        hh_secondaryplus_2013=secondaryplus_age14_aux ///
+        hh_language_eligible_2013=language_eligible_aux ///
+        hh_language_valid_2013=language_valid_aux ///
+        hh_nonspanish_2013=nonspanish_aux ///
+        hh_named_indigenous_2013=indigenous_aux ///
+        hh_insured_2013=insurance_any_2013 ///
+        hh_disability_2013=disability_any_2013 ///
+        hh_program_any_2013=program_any_2013 ///
+        hh_juntos_2013=program_juntos_2013 ///
+        hh_labor_eligible_2013=labor_eligible_aux ///
+        hh_labor_valid_2013=labor_valid_aux ///
+        hh_labor_force_2013=labor_force_aux ///
+        hh_employed_age14_2013=employed_age14_aux ///
+        hh_unemployed_age14_2013=unemployed_age14_aux ///
+        hh_sector_agriculture_2013=sector_agriculture_aux ///
+        hh_sector_livestock_2013=sector_livestock_aux ///
+        hh_sector_forestry_2013=sector_forestry_aux ///
+        hh_sector_fishing_2013=sector_fishing_aux ///
+        hh_sector_mining_2013=sector_mining_aux ///
+        hh_sector_handicraft_2013=sector_handicraft_aux ///
+        hh_sector_commerce_2013=sector_commerce_aux ///
+        hh_sector_services_2013=sector_services_aux ///
+        hh_sector_other_2013=sector_other_aux ///
+        hh_sector_government_2013=sector_government_aux ///
+        hh_child_labor_eligible_2013=child_labor_eligible_aux ///
+        hh_child_employed_2013=child_employed_aux ///
+        hh_school_unknown_2013=nbi_school_unknown_aux ///
+        hh_employment_valid_2013=employment_valid_aux ///
+        hh_employed_all_2013=nbi_employed_aux ///
+    (max) ///
+        hh_nbi4_school_proxy_2013=nbi_school_risk_aux ///
+        hh_head_age_2013=head_age_aux ///
+        hh_head_female_2013=head_female_aux ///
+        hh_head_education_2013=head_education_aux ///
+        hh_head_employed_2013=head_employed_aux ///
+        hh_head_primary2less_2013=head_primary2less_aux, ///
+    by(sisfoh_hhid ubigeo_ccpp_sisfoh)
+
+replace hh_nbi4_school_proxy_2013 = . ///
+    if hh_nbi4_school_proxy_2013 == 0 & hh_school_unknown_2013 > 0
+
+generate double hh_share_female_2013 = ///
+    hh_female_2013 / hh_members_2013
+generate double hh_share_literate_2013 = ///
+    hh_literate_2013 / hh_literacy_valid_2013 ///
+    if hh_literacy_valid_2013 > 0
+generate double hh_share_secondaryplus_2013 = ///
+    hh_secondaryplus_2013 / hh_education_valid_2013 ///
+    if hh_education_valid_2013 > 0
+generate double hh_share_nonspanish_2013 = ///
+    hh_nonspanish_2013 / hh_language_valid_2013 ///
+    if hh_language_valid_2013 > 0
+generate double hh_share_insured_2013 = ///
+    hh_insured_2013 / hh_members_2013
+generate double hh_share_disability_2013 = ///
+    hh_disability_2013 / hh_members_2013
+generate double hh_share_program_any_2013 = ///
+    hh_program_any_2013 / hh_members_2013
+
+compress
+sort sisfoh_hhid
+isid sisfoh_hhid
+count
+assert r(N) == `sisfoh2013_households_info'
+save ///
+    "${intermediate_root}/19_sisfoh_2013_person_household.dta", ///
+    replace
+
+generate byte household_one = 1
+collapse ///
+    (sum) ///
+        sisfoh2013_person_households=household_one ///
+        sisfoh2013_population=hh_members_2013 ///
+        sisfoh2013_age_valid=hh_age_valid_2013 ///
+        sisfoh2013_female=hh_female_2013 ///
+        sisfoh2013_age_0_14=hh_age_0_14_2013 ///
+        sisfoh2013_age_15_29=hh_age_15_29_2013 ///
+        sisfoh2013_age_30_44=hh_age_30_44_2013 ///
+        sisfoh2013_age_45_64=hh_age_45_64_2013 ///
+        sisfoh2013_age_65p=hh_age_65p_2013 ///
+        sisfoh2013_lit_eligible=hh_literacy_eligible_2013 ///
+        sisfoh2013_lit_valid=hh_literacy_valid_2013 ///
+        sisfoh2013_literate=hh_literate_2013 ///
+        sisfoh2013_edu_eligible=hh_education_eligible_2013 ///
+        sisfoh2013_edu_valid=hh_education_valid_2013 ///
+        sisfoh2013_secondaryplus=hh_secondaryplus_2013 ///
+        sisfoh2013_lang_eligible=hh_language_eligible_2013 ///
+        sisfoh2013_lang_valid=hh_language_valid_2013 ///
+        sisfoh2013_nonspanish=hh_nonspanish_2013 ///
+        sisfoh2013_indigenous=hh_named_indigenous_2013 ///
+        sisfoh2013_insured=hh_insured_2013 ///
+        sisfoh2013_disability=hh_disability_2013 ///
+        sisfoh2013_program_any=hh_program_any_2013 ///
+        sisfoh2013_juntos=hh_juntos_2013 ///
+        sisfoh2013_labor_eligible=hh_labor_eligible_2013 ///
+        sisfoh2013_labor_valid=hh_labor_valid_2013 ///
+        sisfoh2013_labor_force=hh_labor_force_2013 ///
+        sisfoh2013_employed=hh_employed_age14_2013 ///
+        sisfoh2013_unemployed=hh_unemployed_age14_2013 ///
+        sisfoh2013_sector_agri=hh_sector_agriculture_2013 ///
+        sisfoh2013_sector_livestock=hh_sector_livestock_2013 ///
+        sisfoh2013_sector_forestry=hh_sector_forestry_2013 ///
+        sisfoh2013_sector_fishing=hh_sector_fishing_2013 ///
+        sisfoh2013_sector_mining=hh_sector_mining_2013 ///
+        sisfoh2013_sector_handicraft=hh_sector_handicraft_2013 ///
+        sisfoh2013_sector_commerce=hh_sector_commerce_2013 ///
+        sisfoh2013_sector_services=hh_sector_services_2013 ///
+        sisfoh2013_sector_other=hh_sector_other_2013 ///
+        sisfoh2013_sector_government=hh_sector_government_2013 ///
+        sisfoh2013_child_labor_eligible=hh_child_labor_eligible_2013 ///
+        sisfoh2013_child_employed=hh_child_employed_2013, ///
+    by(ubigeo_ccpp_sisfoh)
+
+generate double share_female_2013 = ///
+    sisfoh2013_female / sisfoh2013_population
+generate double share_age_0_14_2013 = ///
+    sisfoh2013_age_0_14 / sisfoh2013_age_valid ///
+    if sisfoh2013_age_valid > 0
+generate double share_age_15_29_2013 = ///
+    sisfoh2013_age_15_29 / sisfoh2013_age_valid ///
+    if sisfoh2013_age_valid > 0
+generate double share_age_30_44_2013 = ///
+    sisfoh2013_age_30_44 / sisfoh2013_age_valid ///
+    if sisfoh2013_age_valid > 0
+generate double share_age_45_64_2013 = ///
+    sisfoh2013_age_45_64 / sisfoh2013_age_valid ///
+    if sisfoh2013_age_valid > 0
+generate double share_age_65p_2013 = ///
+    sisfoh2013_age_65p / sisfoh2013_age_valid ///
+    if sisfoh2013_age_valid > 0
+generate double share_literate_2013 = ///
+    sisfoh2013_literate / sisfoh2013_lit_valid ///
+    if sisfoh2013_lit_valid > 0
+generate double share_educ_secondaryplus_2013 = ///
+    sisfoh2013_secondaryplus / sisfoh2013_edu_valid ///
+    if sisfoh2013_edu_valid > 0
+generate double share_nonspanish_2013 = ///
+    sisfoh2013_nonspanish / sisfoh2013_lang_valid ///
+    if sisfoh2013_lang_valid > 0
+generate double share_indigenous_language_2013 = ///
+    sisfoh2013_indigenous / sisfoh2013_lang_valid ///
+    if sisfoh2013_lang_valid > 0
+generate double language_coverage_2013 = ///
+    sisfoh2013_lang_valid / sisfoh2013_lang_eligible ///
+    if sisfoh2013_lang_eligible > 0
+generate double share_any_insurance_2013 = ///
+    sisfoh2013_insured / sisfoh2013_population
+generate double share_any_disability_2013 = ///
+    sisfoh2013_disability / sisfoh2013_population
+generate double share_any_program_2013 = ///
+    sisfoh2013_program_any / sisfoh2013_population
+generate double share_juntos_2013 = ///
+    sisfoh2013_juntos / sisfoh2013_population
+generate double labor_force_participation_2013 = ///
+    sisfoh2013_labor_force / sisfoh2013_labor_valid ///
+    if sisfoh2013_labor_valid > 0
+generate double employment_rate_2013 = ///
+    sisfoh2013_employed / sisfoh2013_labor_force ///
+    if sisfoh2013_labor_force > 0
+generate double unemployment_rate_2013 = ///
+    sisfoh2013_unemployed / sisfoh2013_labor_force ///
+    if sisfoh2013_labor_force > 0
+generate double child_employment_rate_2013 = ///
+    sisfoh2013_child_employed / sisfoh2013_child_labor_eligible ///
+    if sisfoh2013_child_labor_eligible > 0
+
+compress
+sort ubigeo_ccpp_sisfoh
+isid ubigeo_ccpp_sisfoh
+count
+assert r(N) == `sisfoh2013_source_ccpp'
+save ///
+    "${intermediate_root}/20_sisfoh_2013_person_ccpp.dta", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 12.4 Clean household and dwelling information
+*-------------------------------------------------------------------------------
+
+use ///
+    DPTO PROV DIST CODCCPP_N ///
+    AREA CATEG1 ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    RV10 DIAFIN MESFIN ANIOFIN ///
+    TVIV VIVES MPARED MTECHO MATPISO ///
+    TALUM ABASAG SERHIG CTAHAB COMBUSA ///
+    BIEN1-BIEN15 ///
+    TOTAL HOMBRES MUJERES ///
+    using "`sisfoh_household_raw'", clear
+
+keep if inlist(RV10, 1, 2)
+merge 1:1 ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    using `sisfoh_household_keys', ///
+    keep(master match) keepusing(sisfoh_hhid)
+assert _merge == 3
+drop _merge
+
+generate str10 ubigeo_ccpp_sisfoh = ///
+    DPTO + PROV + DIST + CODCCPP_N
+assert regexm(ubigeo_ccpp_sisfoh, "^[0-9]{10}$")
+
+merge 1:1 sisfoh_hhid using ///
+    "${intermediate_root}/19_sisfoh_2013_person_household.dta"
+assert _merge == 3
+drop _merge
+
+count if TOTAL != hh_members_2013
+local sisfoh2013_roster_total_diff = r(N)
+generate byte roster_total_matches_2013 = ///
+    TOTAL == hh_members_2013
+
+assert inrange(TVIV, 1, 8) | missing(TVIV)
+assert inrange(VIVES, 1, 7) | missing(VIVES)
+assert inrange(MPARED, 1, 8) | missing(MPARED)
+assert inrange(MTECHO, 1, 8) | missing(MTECHO)
+assert inrange(MATPISO, 1, 7) | missing(MATPISO)
+assert inrange(TALUM, 1, 6) | missing(TALUM)
+assert inrange(ABASAG, 1, 7) | missing(ABASAG)
+assert inrange(SERHIG, 1, 6) | missing(SERHIG)
+assert inrange(COMBUSA, 1, 8)
+assert CTAHAB > 0 & !missing(CTAHAB)
+
+generate byte household_items_valid_2013 = ///
+    !missing(TVIV, VIVES, MPARED, MTECHO, MATPISO, ///
+             TALUM, ABASAG, SERHIG)
+count if !household_items_valid_2013
+local sisfoh2013_hh_items_missing = r(N)
+
+rename RV10 sisfoh_interview_result_2013
+generate byte sisfoh_interview_complete = ///
+    sisfoh_interview_result_2013 == 1
+generate double interview_date_sisfoh2013 = ///
+    mdy(MESFIN, DIAFIN, ANIOFIN) ///
+    if inrange(ANIOFIN, 2012, 2013)
+format interview_date_sisfoh2013 %td
+count if missing(interview_date_sisfoh2013)
+local sisfoh2013_bad_calendar_date = r(N)
+
+rename AREA sisfoh_area_2013
+rename CATEG1 sisfoh_ccpp_category_2013
+rename TVIV dwelling_type_2013
+rename VIVES housing_tenure_2013
+rename MPARED wall_material_2013
+rename MTECHO roof_material_2013
+rename MATPISO floor_material_2013
+rename TALUM lighting_source_2013
+rename ABASAG water_source_2013
+rename SERHIG sanitation_source_2013
+rename CTAHAB occupied_rooms_2013
+rename COMBUSA cooking_fuel_2013
+rename TOTAL source_person_total_2013
+rename HOMBRES source_male_total_2013
+rename MUJERES source_female_total_2013
+
+egen byte asset_selected = ///
+    anycount(BIEN1-BIEN14), ///
+    values(1 2 3 4 5 6 7 8 9 10 11 12 13 14)
+generate byte asset_none = BIEN15 == 15
+assert asset_selected > 0 | asset_none
+assert !(asset_selected > 0 & asset_none)
+
+generate byte asset_sound_2013 = BIEN1 == 1
+generate byte asset_tv_2013 = BIEN2 == 2
+generate byte asset_dvd_2013 = BIEN3 == 3
+generate byte asset_blender_2013 = BIEN4 == 4
+generate byte asset_refrigerator_2013 = BIEN5 == 5
+generate byte asset_gas_stove_2013 = BIEN6 == 6
+generate byte asset_fixed_phone_2013 = BIEN7 == 7
+generate byte asset_iron_2013 = BIEN8 == 8
+generate byte asset_washing_machine_2013 = BIEN9 == 9
+generate byte asset_computer_2013 = BIEN10 == 10
+generate byte asset_microwave_2013 = BIEN11 == 11
+generate byte asset_internet_2013 = BIEN12 == 12
+generate byte asset_cable_2013 = BIEN13 == 13
+generate byte asset_mobile_2013 = BIEN14 == 14
+generate byte asset_any_2013 = asset_selected > 0
+
+generate byte earth_floor_2013 = ///
+    floor_material_2013 == 6 if !missing(floor_material_2013)
+generate byte public_pylon_water_2013 = ///
+    inlist(water_source_2013, 1, 2, 3) ///
+    if !missing(water_source_2013)
+generate byte improved_sanitation_2013 = ///
+    inlist(sanitation_source_2013, 1, 2, 3, 4) ///
+    if !missing(sanitation_source_2013)
+generate byte electricity_2013 = ///
+    lighting_source_2013 == 1 if !missing(lighting_source_2013)
+generate byte clean_cooking_2013 = ///
+    inlist(cooking_fuel_2013, 1, 2) if !missing(cooking_fuel_2013)
+
+generate byte nbi1_housing_2013 = .
+replace nbi1_housing_2013 = ///
+    dwelling_type_2013 == 6 | ///
+    wall_material_2013 == 7 | ///
+    (floor_material_2013 == 6 & ///
+     inlist(wall_material_2013, 4, 5, 6, 8)) ///
+    if !missing( ///
+        dwelling_type_2013, wall_material_2013, floor_material_2013)
+
+generate double persons_per_room_2013 = ///
+    hh_members_2013 / occupied_rooms_2013
+generate byte nbi2_overcrowding_2013 = ///
+    persons_per_room_2013 > 3.4 ///
+    if !missing(persons_per_room_2013)
+generate byte nbi3_sanitation_2013 = ///
+    inlist(sanitation_source_2013, 5, 6) ///
+    if !missing(sanitation_source_2013)
+rename hh_nbi4_school_proxy_2013 nbi4_school_proxy_2013
+
+generate byte nbi5_dependency_2013 = .
+replace nbi5_dependency_2013 = 0 ///
+    if hh_head_primary2less_2013 == 0
+replace nbi5_dependency_2013 = 1 ///
+    if hh_head_primary2less_2013 == 1 & ///
+       hh_employment_valid_2013 == hh_members_2013 & ///
+       (hh_employed_all_2013 == 0 | ///
+        hh_members_2013 / hh_employed_all_2013 >= 4)
+replace nbi5_dependency_2013 = 0 ///
+    if hh_head_primary2less_2013 == 1 & ///
+       hh_employment_valid_2013 == hh_members_2013 & ///
+       hh_employed_all_2013 > 0 & ///
+       hh_members_2013 / hh_employed_all_2013 < 4
+
+egen byte nbi_count_2013 = rowtotal( ///
+    nbi1_housing_2013 ///
+    nbi2_overcrowding_2013 ///
+    nbi3_sanitation_2013 ///
+    nbi4_school_proxy_2013 ///
+    nbi5_dependency_2013)
+egen byte nbi_components_valid_2013 = rownonmiss( ///
+    nbi1_housing_2013 ///
+    nbi2_overcrowding_2013 ///
+    nbi3_sanitation_2013 ///
+    nbi4_school_proxy_2013 ///
+    nbi5_dependency_2013)
+replace nbi_count_2013 = . if nbi_components_valid_2013 < 5
+generate byte nbi_any_2013 = nbi_count_2013 >= 1 ///
+    if !missing(nbi_count_2013)
+generate byte nbi_two_plus_2013 = nbi_count_2013 >= 2 ///
+    if !missing(nbi_count_2013)
+
+generate double wellbeing_housing_2013 = ///
+    1 - earth_floor_2013 if !missing(earth_floor_2013)
+generate double wellbeing_services_proxy_2013 = ///
+    (public_pylon_water_2013 + improved_sanitation_2013) / 2 ///
+    if !missing(public_pylon_water_2013, improved_sanitation_2013)
+generate double wellbeing_energy_2013 = ///
+    (electricity_2013 + clean_cooking_2013) / 2 ///
+    if !missing(electricity_2013, clean_cooking_2013)
+generate double wellbeing_humancapital_2013 = ///
+    (hh_share_literate_2013 + hh_share_secondaryplus_2013) / 2 ///
+    if !missing(hh_share_literate_2013, hh_share_secondaryplus_2013)
+generate double wellbeing_assets_2013 = ///
+    (asset_tv_2013 + asset_refrigerator_2013 + ///
+     asset_washing_machine_2013 + asset_computer_2013) / 4
+generate double wellbeing_connectivity_2013 = ///
+    (asset_mobile_2013 + asset_internet_2013 + asset_cable_2013) / 3
+generate double wellbeing_core_proxy_2013 = ///
+    (wellbeing_housing_2013 + ///
+     wellbeing_services_proxy_2013 + ///
+     wellbeing_energy_2013 + ///
+     wellbeing_humancapital_2013) / 4 ///
+    if !missing( ///
+        wellbeing_housing_2013, ///
+        wellbeing_services_proxy_2013, ///
+        wellbeing_energy_2013, ///
+        wellbeing_humancapital_2013)
+generate double deprivation_core_proxy_2013 = ///
+    1 - wellbeing_core_proxy_2013 ///
+    if !missing(wellbeing_core_proxy_2013)
+
+label variable nbi4_school_proxy_2013 ///
+    "INEI SISFOH proxy: child age 7-12 with no/initial education"
+label variable nbi5_dependency_2013 ///
+    "Official NBI high economic dependency indicator"
+label variable roster_total_matches_2013 ///
+    "Household total equals linked person-roster count"
+label variable persons_per_room_2013 ///
+    "Rostered people per occupied room"
+label variable nbi1_housing_2013 ///
+    "Official NBI inadequate-housing indicator"
+label variable nbi2_overcrowding_2013 ///
+    "Official NBI overcrowding indicator"
+label variable nbi3_sanitation_2013 ///
+    "Official NBI inadequate-sanitation indicator"
+label variable nbi_any_2013 "Household has at least one NBI"
+label variable nbi_two_plus_2013 "Household has at least two NBIs"
+label variable earth_floor_2013 "Dwelling has an earth floor"
+label variable public_pylon_water_2013 ///
+    "Water from public network or public pylon"
+label variable improved_sanitation_2013 ///
+    "Sanitation is sewer, septic system, or latrine"
+label variable electricity_2013 "Dwelling has electric lighting"
+label variable clean_cooking_2013 "Household cooks with gas or electricity"
+label variable wellbeing_services_proxy_2013 ///
+    "Services proxy; SISFOH lacks daily water-availability item"
+label variable wellbeing_core_proxy_2013 ///
+    "Equal-domain 2013 wellbeing proxy; higher is better"
+label variable deprivation_core_proxy_2013 ///
+    "Equal-domain 2013 deprivation proxy; higher is worse"
+
+drop ///
+    DPTO PROV DIST CODCCPP_N ///
+    SECUENCIA CONG NROVIV NHOGAR ///
+    DIAFIN MESFIN ANIOFIN ///
+    BIEN1-BIEN15 ///
+    asset_selected asset_none
+
+compress
+sort sisfoh_hhid
+isid sisfoh_hhid
+count
+assert r(N) == `sisfoh2013_households_info'
+save ///
+    "${intermediate_root}/21_sisfoh_2013_household_clean.dta", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 12.5 Aggregate households and assemble the national SISFOH CCPP file
+*-------------------------------------------------------------------------------
+
+generate byte household_one = 1
+generate byte nbi_complete_aux = !missing(nbi_count_2013)
+generate byte wellbeing_core_valid_aux = ///
+    !missing(wellbeing_core_proxy_2013)
+generate byte interview_date_valid_aux = ///
+    !missing(interview_date_sisfoh2013)
+generate byte household_any_program_aux = hh_program_any_2013 > 0
+generate byte household_juntos_aux = hh_juntos_2013 > 0
+generate byte household_any_insured_aux = hh_insured_2013 > 0
+
+generate byte nbi1_count_aux = nbi1_housing_2013
+generate byte nbi2_count_aux = nbi2_overcrowding_2013
+generate byte nbi3_count_aux = nbi3_sanitation_2013
+generate byte nbi4_count_aux = nbi4_school_proxy_2013
+generate byte nbi5_count_aux = nbi5_dependency_2013
+generate byte nbi_any_count_aux = nbi_any_2013
+generate byte nbi_two_count_aux = nbi_two_plus_2013
+
+collapse ///
+    (sum) ///
+        sisfoh2013_households=household_one ///
+        sisfoh2013_complete_hh=sisfoh_interview_complete ///
+        sisfoh2013_population_hh=hh_members_2013 ///
+        sisfoh2013_dwelling_valid=household_items_valid_2013 ///
+        sisfoh2013_nbi_complete=nbi_complete_aux ///
+        sisfoh2013_core_valid=wellbeing_core_valid_aux ///
+        sisfoh2013_date_valid=interview_date_valid_aux ///
+        sisfoh2013_nbi1_count=nbi1_count_aux ///
+        sisfoh2013_nbi2_count=nbi2_count_aux ///
+        sisfoh2013_nbi3_count=nbi3_count_aux ///
+        sisfoh2013_nbi4_count=nbi4_count_aux ///
+        sisfoh2013_nbi5_count=nbi5_count_aux ///
+        sisfoh2013_nbi_any_count=nbi_any_count_aux ///
+        sisfoh2013_nbi_two_count=nbi_two_count_aux ///
+    (mean) ///
+        mean_household_size_2013=hh_members_2013 ///
+        mean_persons_per_room_2013=persons_per_room_2013 ///
+        share_interview_complete_2013=sisfoh_interview_complete ///
+        share_household_items_valid_2013=household_items_valid_2013 ///
+        share_nbi_complete_2013=nbi_complete_aux ///
+        share_nbi1_housing_2013=nbi1_housing_2013 ///
+        share_nbi2_overcrowding_2013=nbi2_overcrowding_2013 ///
+        share_nbi3_sanitation_2013=nbi3_sanitation_2013 ///
+        share_nbi4_school_proxy_2013=nbi4_school_proxy_2013 ///
+        share_nbi5_dependency_2013=nbi5_dependency_2013 ///
+        share_nbi_any_2013=nbi_any_2013 ///
+        share_nbi_two_plus_2013=nbi_two_plus_2013 ///
+        mean_nbi_count_2013=nbi_count_2013 ///
+        share_earth_floor_2013=earth_floor_2013 ///
+        share_water_public_pylon_2013=public_pylon_water_2013 ///
+        share_sanitation_improved_2013=improved_sanitation_2013 ///
+        share_electricity_2013=electricity_2013 ///
+        share_clean_cooking_2013=clean_cooking_2013 ///
+        share_asset_tv_2013=asset_tv_2013 ///
+        share_asset_refrigerator_2013=asset_refrigerator_2013 ///
+        share_asset_washing_machine_2013=asset_washing_machine_2013 ///
+        share_asset_computer_2013=asset_computer_2013 ///
+        share_asset_mobile_2013=asset_mobile_2013 ///
+        share_asset_internet_2013=asset_internet_2013 ///
+        share_asset_cable_2013=asset_cable_2013 ///
+        share_household_any_insured_2013=household_any_insured_aux ///
+        share_household_any_program_2013=household_any_program_aux ///
+        share_household_juntos_2013=household_juntos_aux ///
+        share_head_female_2013=hh_head_female_2013 ///
+        mean_head_age_2013=hh_head_age_2013 ///
+        wellbeing_housing_2013=wellbeing_housing_2013 ///
+        wellbeing_services_proxy_2013=wellbeing_services_proxy_2013 ///
+        wellbeing_energy_2013=wellbeing_energy_2013 ///
+        wellbeing_humancapital_2013=wellbeing_humancapital_2013 ///
+        wellbeing_assets_2013=wellbeing_assets_2013 ///
+        wellbeing_connectivity_2013=wellbeing_connectivity_2013 ///
+        wellbeing_core_proxy_2013=wellbeing_core_proxy_2013 ///
+        deprivation_core_proxy_2013=deprivation_core_proxy_2013 ///
+    (min) ///
+        sisfoh2013_fieldwork_start=interview_date_sisfoh2013 ///
+    (max) ///
+        sisfoh2013_fieldwork_end=interview_date_sisfoh2013, ///
+    by(ubigeo_ccpp_sisfoh)
+
+format ///
+    sisfoh2013_fieldwork_start ///
+    sisfoh2013_fieldwork_end %td
+
+compress
+sort ubigeo_ccpp_sisfoh
+isid ubigeo_ccpp_sisfoh
+count
+assert r(N) == `sisfoh2013_source_ccpp'
+save ///
+    "${intermediate_root}/22_sisfoh_2013_household_ccpp.dta", ///
+    replace
+
+use ///
+    "${intermediate_root}/20_sisfoh_2013_person_ccpp.dta", ///
+    clear
+merge 1:1 ubigeo_ccpp_sisfoh using ///
+    "${intermediate_root}/22_sisfoh_2013_household_ccpp.dta"
+assert _merge == 3
+drop _merge
+
+assert sisfoh2013_population == sisfoh2013_population_hh
+assert sisfoh2013_person_households == sisfoh2013_households
+drop ///
+    sisfoh2013_population_hh ///
+    sisfoh2013_person_households
+
+merge 1:1 ubigeo_ccpp_sisfoh using `sisfoh_ccpp_directory'
+assert _merge == 3
+drop _merge
+
+label variable sisfoh2013_population ///
+    "Rostered SISFOH population with household information"
+label variable sisfoh2013_households ///
+    "SISFOH households with complete or incomplete information"
+label variable language_coverage_2013 ///
+    "Valid childhood-language responses among eligible people"
+label variable share_literate_2013 ///
+    "Share of valid people age 14+ who can read and write"
+label variable share_educ_secondaryplus_2013 ///
+    "Share of valid people age 14+ with secondary or higher education"
+label variable share_any_insurance_2013 ///
+    "Share of rostered people reporting any health insurance"
+label variable share_any_disability_2013 ///
+    "Share of rostered people reporting a permanent limitation"
+label variable labor_force_participation_2013 ///
+    "Labor-force share among valid people age 14+"
+label variable employment_rate_2013 ///
+    "Employment share of the labor force age 14+"
+label variable unemployment_rate_2013 ///
+    "Unemployment share of the labor force age 14+"
+label variable share_nbi4_school_proxy_2013 ///
+    "Share of households meeting INEI SISFOH school proxy NBI"
+label variable wellbeing_core_proxy_2013 ///
+    "Mean household equal-domain 2013 wellbeing proxy"
+
+compress
+sort ubigeo_ccpp_sisfoh
+isid ubigeo_ccpp_sisfoh
+count
+local sisfoh2013_ccpp_rows = r(N)
+assert `sisfoh2013_ccpp_rows' == `sisfoh2013_source_ccpp'
+save ///
+    "${intermediate_root}/23_sisfoh_2013_ccpp.dta", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 12.6 Reconcile the legacy CCPP compilation without using it as an input
+*-------------------------------------------------------------------------------
+
+use ///
+    ccpp pob hog viv ///
+    sis_nbi1 sis_nbi2 sis_nbi3 sis_nbi5 ///
+    using "`sisfoh_legacy_ccpp_raw'", clear
+
+rename ccpp ubigeo_ccpp_sisfoh
+rename pob legacy_population_2013
+rename hog legacy_households_2013
+rename viv legacy_dwellings_2013
+rename sis_nbi1 legacy_nbi1_count_2013
+rename sis_nbi2 legacy_nbi2_count_2013
+rename sis_nbi3 legacy_nbi3_count_2013
+rename sis_nbi5 legacy_nbi5_count_2013
+
+isid ubigeo_ccpp_sisfoh
+merge 1:1 ubigeo_ccpp_sisfoh using ///
+    "${intermediate_root}/23_sisfoh_2013_ccpp.dta", ///
+    keep(master match) ///
+    keepusing( ///
+        sisfoh2013_population ///
+        sisfoh2013_households ///
+        sisfoh2013_nbi1_count ///
+        sisfoh2013_nbi2_count ///
+        sisfoh2013_nbi3_count ///
+        sisfoh2013_nbi5_count)
+
+count if _merge == 3
+local sisfoh2013_legacy_ccpp_matched = r(N)
+
+generate double population_difference = ///
+    sisfoh2013_population - legacy_population_2013 ///
+    if _merge == 3
+generate double household_difference = ///
+    sisfoh2013_households - legacy_households_2013 ///
+    if _merge == 3
+generate double nbi1_difference = ///
+    sisfoh2013_nbi1_count - legacy_nbi1_count_2013 ///
+    if _merge == 3
+generate double nbi2_difference = ///
+    sisfoh2013_nbi2_count - legacy_nbi2_count_2013 ///
+    if _merge == 3
+generate double nbi3_difference = ///
+    sisfoh2013_nbi3_count - legacy_nbi3_count_2013 ///
+    if _merge == 3
+generate double nbi5_difference = ///
+    sisfoh2013_nbi5_count - legacy_nbi5_count_2013 ///
+    if _merge == 3
+
+count if _merge == 3 & population_difference == 0
+local sisfoh2013_legacy_pop_exact = r(N)
+count if _merge == 3 & household_difference == 0
+local sisfoh2013_legacy_hh_exact = r(N)
+count if _merge == 3 & nbi1_difference == 0
+local sisfoh2013_legacy_nbi1_exact = r(N)
+count if _merge == 3 & nbi2_difference == 0
+local sisfoh2013_legacy_nbi2_exact = r(N)
+count if _merge == 3 & nbi3_difference == 0
+local sisfoh2013_legacy_nbi3_exact = r(N)
+count if _merge == 3 & nbi5_difference == 0
+local sisfoh2013_legacy_nbi5_exact = r(N)
+
+generate str28 reconciliation_status = cond( ///
+    _merge == 1, ///
+    "legacy_code_absent_microdata", ///
+    "matched_for_reconciliation")
+drop _merge
+
+save ///
+    "${qa_data_root}/sisfoh2013_legacy_ccpp_reconciliation.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/sisfoh2013_legacy_ccpp_reconciliation.csv", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 12.7 Link SISFOH CCPPs to the RUV universe without fuzzy acceptance
+*-------------------------------------------------------------------------------
+
+use ubigeo_ccpp_sisfoh using ///
+    "${intermediate_root}/23_sisfoh_2013_ccpp.dta", ///
+    clear
+rename ubigeo_ccpp_sisfoh link_code
+isid link_code
+save `sisfoh_source_codes'
+
+use ruv_id ubigeo_ccpp using ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+rename ubigeo_ccpp link_code
+drop if missing(link_code)
+generate byte link_priority = 1
+generate str28 sisfoh2013_link_method = "current_ubigeo_exact"
+save `sisfoh_link_candidates'
+
+use ruv_id census2007_ubigeo_ccpp using ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+rename census2007_ubigeo_ccpp link_code
+drop if missing(link_code)
+generate byte link_priority = 2
+generate str28 sisfoh2013_link_method = "census2007_code_exact"
+append using `sisfoh_link_candidates'
+save `sisfoh_link_candidates', replace
+
+use ruv_id geospatial_ubigeo_ccpp using ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+rename geospatial_ubigeo_ccpp link_code
+drop if missing(link_code)
+generate byte link_priority = 3
+generate str28 sisfoh2013_link_method = "geospatial_code_exact"
+append using `sisfoh_link_candidates'
+save `sisfoh_link_candidates', replace
+
+use ruv_id gdp_ccpp_ubigeo using ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+rename gdp_ccpp_ubigeo link_code
+drop if missing(link_code)
+generate byte link_priority = 4
+generate str28 sisfoh2013_link_method = "gdp_source_code_exact"
+append using `sisfoh_link_candidates'
+
+bysort ruv_id link_code (link_priority): keep if _n == 1
+merge m:1 link_code using `sisfoh_source_codes', ///
+    keep(match) nogen
+
+bysort link_code: egen byte minimum_priority = min(link_priority)
+keep if link_priority == minimum_priority
+bysort link_code: generate byte best_priority_candidates = _N
+
+preserve
+keep if best_priority_candidates > 1
+save ///
+    "${qa_data_root}/sisfoh2013_ambiguous_code_candidates.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/sisfoh2013_ambiguous_code_candidates.csv", ///
+    replace
+restore
+
+count if best_priority_candidates > 1
+local sisfoh2013_ambiguous_code_rows = r(N)
+keep if best_priority_candidates == 1
+
+bysort ruv_id (link_priority link_code): keep if _n == 1
+rename link_code ubigeo_ccpp_sisfoh
+keep ///
+    ruv_id ubigeo_ccpp_sisfoh ///
+    sisfoh2013_link_method link_priority
+isid ruv_id
+isid ubigeo_ccpp_sisfoh
+save `sisfoh_code_links'
+
+keep ubigeo_ccpp_sisfoh
+isid ubigeo_ccpp_sisfoh
+save `sisfoh_used_source_codes'
+
+use ///
+    ubigeo_ccpp_sisfoh ///
+    department_name_sisfoh2013 ///
+    province_name_sisfoh2013 ///
+    district_name_sisfoh2013 ///
+    ccpp_name_sisfoh2013 ///
+    using "${intermediate_root}/23_sisfoh_2013_ccpp.dta", ///
+    clear
+
+victimasrd_normalize_name ///
+    department_name_sisfoh2013, generate(dpto_norm)
+victimasrd_normalize_name ///
+    province_name_sisfoh2013, generate(prov_norm)
+victimasrd_normalize_name ///
+    district_name_sisfoh2013, generate(dist_norm)
+victimasrd_normalize_name ///
+    ccpp_name_sisfoh2013, generate(ccpp_norm)
+
+bysort dpto_norm prov_norm dist_norm ccpp_norm: ///
+    generate int source_path_count = _N
+keep if source_path_count == 1
+keep ///
+    ubigeo_ccpp_sisfoh ///
+    dpto_norm prov_norm dist_norm ccpp_norm
+isid dpto_norm prov_norm dist_norm ccpp_norm
+save `sisfoh_name_links'
+
+use ///
+    ruv_id ///
+    dpto_victim_raw prov_victim_raw ///
+    dist_victim_raw ccpp_victim_raw ///
+    using "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+
+merge 1:1 ruv_id using `sisfoh_code_links'
+keep if _merge == 1
+drop _merge ubigeo_ccpp_sisfoh sisfoh2013_link_method link_priority
+
+victimasrd_normalize_name dpto_victim_raw, generate(dpto_norm)
+victimasrd_normalize_name prov_victim_raw, generate(prov_norm)
+victimasrd_normalize_name dist_victim_raw, generate(dist_norm)
+victimasrd_normalize_name ccpp_victim_raw, generate(ccpp_norm)
+
+drop if missing(dpto_norm, prov_norm, dist_norm, ccpp_norm)
+bysort dpto_norm prov_norm dist_norm ccpp_norm: ///
+    generate int ruv_path_count = _N
+keep if ruv_path_count == 1
+
+merge 1:1 ///
+    dpto_norm prov_norm dist_norm ccpp_norm ///
+    using `sisfoh_name_links', keep(match) nogen
+
+merge m:1 ubigeo_ccpp_sisfoh using ///
+    `sisfoh_used_source_codes'
+keep if _merge == 1
+drop _merge
+
+generate str28 sisfoh2013_link_method = "unique_exact_full_path"
+generate byte link_priority = 5
+keep ///
+    ruv_id ubigeo_ccpp_sisfoh ///
+    sisfoh2013_link_method link_priority
+isid ruv_id
+isid ubigeo_ccpp_sisfoh
+save `sisfoh_name_links', replace
+
+append using `sisfoh_code_links'
+sort ruv_id
+isid ruv_id
+isid ubigeo_ccpp_sisfoh
+
+count if sisfoh2013_link_method == "current_ubigeo_exact"
+local sisfoh2013_exact_current = r(N)
+count if sisfoh2013_link_method == "census2007_code_exact"
+local sisfoh2013_exact_census = r(N)
+count if sisfoh2013_link_method == "geospatial_code_exact"
+local sisfoh2013_exact_geospatial = r(N)
+count if sisfoh2013_link_method == "gdp_source_code_exact"
+local sisfoh2013_exact_gdp = r(N)
+count if sisfoh2013_link_method == "unique_exact_full_path"
+local sisfoh2013_exact_name = r(N)
+count
+local sisfoh2013_ruv_linked = r(N)
+local sisfoh2013_ruv_unmatched = 5712 - `sisfoh2013_ruv_linked'
+
+save `sisfoh_ruv_links'
+save ///
+    "${intermediate_root}/24_ruv_sisfoh_2013_links.dta", ///
+    replace
+
+use ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+merge 1:1 ruv_id using `sisfoh_ruv_links'
+keep if _merge == 1
+drop _merge
+generate str52 linkage_disposition = ///
+    "retained_ruv_without_deterministic_sisfoh_link"
+save ///
+    "${qa_data_root}/sisfoh2013_unmatched_ruv.dta", ///
+    replace
+export delimited ///
+    "${qa_data_root}/sisfoh2013_unmatched_ruv.csv", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 12.8 Create linked analysis files at all three levels
+*-------------------------------------------------------------------------------
+
+use ///
+    "${intermediate_root}/18_sisfoh_2013_person_clean.dta", ///
+    clear
+merge m:1 ubigeo_ccpp_sisfoh using `sisfoh_ruv_links', ///
+    keep(match)
+assert _merge == 3
+drop _merge link_priority
+
+merge m:1 ruv_id using ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    keep(match)
+assert _merge == 3
+drop _merge
+
+compress
+sort sisfoh_pid
+isid sisfoh_pid
+count
+local sisfoh2013_indiv_rows = r(N)
+save ///
+    "${analysis_data_root}/09_sisfoh_2013_individual_analysis.dta", ///
+    replace
+
+use ///
+    "${intermediate_root}/21_sisfoh_2013_household_clean.dta", ///
+    clear
+merge m:1 ubigeo_ccpp_sisfoh using `sisfoh_ruv_links', ///
+    keep(match)
+assert _merge == 3
+drop _merge link_priority
+
+merge m:1 ruv_id using ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    keep(match)
+assert _merge == 3
+drop _merge
+
+compress
+sort sisfoh_hhid
+isid sisfoh_hhid
+count
+local sisfoh2013_hh_analysis_rows = r(N)
+save ///
+    "${analysis_data_root}/10_sisfoh_2013_household_analysis.dta", ///
+    replace
+
+use ///
+    "${intermediate_root}/23_sisfoh_2013_ccpp.dta", ///
+    clear
+merge 1:1 ubigeo_ccpp_sisfoh using `sisfoh_ruv_links', ///
+    keep(match)
+assert _merge == 3
+drop _merge link_priority
+isid ruv_id
+save `sisfoh_ccpp_linked'
+
+use ///
+    "${analysis_data_root}/08_community_registry_elections.dta", ///
+    clear
+merge 1:1 ruv_id using `sisfoh_ccpp_linked'
+generate byte sisfoh2013_linked = _merge == 3
+drop _merge
+
+label variable sisfoh2013_linked ///
+    "RUV community linked deterministically to SISFOH 2012-2013"
+label variable sisfoh2013_link_method ///
+    "Deterministic method linking RUV and SISFOH CCPP"
+
+count if sisfoh2013_linked
+assert r(N) == `sisfoh2013_ruv_linked'
+count if sample_main_rd & sisfoh2013_linked
+local sisfoh2013_main_sample_linked = r(N)
+
+compress
+sort ruv_id
+isid ruv_id
+count
+local sisfoh2013_registry_rows = r(N)
+assert `sisfoh2013_registry_rows' == `electoral_registry_rows'
+assert `sisfoh2013_registry_rows' == 5712
+save ///
+    "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
+    replace
+
+
+*===============================================================================
+**# 13. Write aggregate QA metrics and close
 *===============================================================================
 
 tempname qa_post
@@ -8953,6 +10470,228 @@ post `qa_post' ///
     ("validated") ///
     ("All RUV records retained after the municipal-election merge")
 
+post `qa_post' ///
+    ("sisfoh2013_person_records") ///
+    (`sisfoh2013_person_records') ///
+    ("validated") ///
+    ("National person records; exactly matches INEI's published fieldwork total")
+
+post `qa_post' ///
+    ("sisfoh2013_household_records") ///
+    (`sisfoh2013_household_records') ///
+    ("validated") ///
+    ("All household-file records, including noninterviews and vacant dwellings")
+
+post `qa_post' ///
+    ("sisfoh2013_households_with_information") ///
+    (`sisfoh2013_households_info') ///
+    ("validated") ///
+    ("Complete or incomplete interviews; exactly matches INEI's published total")
+
+post `qa_post' ///
+    ("sisfoh2013_complete_households") ///
+    (`sisfoh2013_complete_households') ///
+    ("validated") ///
+    ("Households with final interview result complete")
+
+post `qa_post' ///
+    ("sisfoh2013_incomplete_households") ///
+    (`sisfoh2013_incomplete_hh') ///
+    ("retained") ///
+    ("Households with partial information retained with item-specific missingness")
+
+post `qa_post' ///
+    ("sisfoh2013_source_ccpp") ///
+    (`sisfoh2013_source_ccpp') ///
+    ("validated") ///
+    ("Unique ten-digit CCPP codes represented by households with information")
+
+post `qa_post' ///
+    ("sisfoh2013_ccpp_attribute_conflicts") ///
+    (`sisfoh2013_ccpp_attr_conflict') ///
+    ("resolved_modal_record") ///
+    ("CCPP codes with multiple descriptive records; modal record selected deterministically")
+
+post `qa_post' ///
+    ("sisfoh2013_ccpp_modal_ties") ///
+    (`sisfoh2013_ccpp_modal_ties') ///
+    ("resolved_lexical_tie") ///
+    ("CCPP codes whose most frequent descriptive record tied; lexical order selected")
+
+post `qa_post' ///
+    ("sisfoh2013_person_age_missing") ///
+    (`sisfoh2013_person_age_missing') ///
+    ("source_missingness") ///
+    ("Rostered person records without a valid reported age")
+
+post `qa_post' ///
+    ("sisfoh2013_person_order_disagreements") ///
+    (`sisfoh2013_person_order_diff') ///
+    ("source_issue") ///
+    ("NRO differs from NRO_ORD; unique canonical person order uses NRO")
+
+post `qa_post' ///
+    ("sisfoh2013_language_eligible") ///
+    (`sisfoh2013_language_eligible') ///
+    ("denominator") ///
+    ("People age three or older with valid age")
+
+post `qa_post' ///
+    ("sisfoh2013_language_valid") ///
+    (`sisfoh2013_language_valid') ///
+    ("source_missingness") ///
+    ("Eligible people with a valid childhood-language response")
+
+post `qa_post' ///
+    ("sisfoh2013_household_items_missing") ///
+    (`sisfoh2013_hh_items_missing') ///
+    ("source_missingness") ///
+    ("Households missing the main dwelling and services block")
+
+post `qa_post' ///
+    ("sisfoh2013_fieldwork_year_invalid") ///
+    (`sisfoh2013_invalid_year') ///
+    ("source_issue") ///
+    ("Households with information whose recorded final year is outside 2012-2013")
+
+post `qa_post' ///
+    ("sisfoh2013_fieldwork_month_invalid") ///
+    (`sisfoh2013_invalid_month') ///
+    ("source_issue") ///
+    ("Households with information whose recorded final month is invalid")
+
+post `qa_post' ///
+    ("sisfoh2013_fieldwork_day_invalid") ///
+    (`sisfoh2013_invalid_day') ///
+    ("source_issue") ///
+    ("Households with information whose recorded final day is invalid")
+
+post `qa_post' ///
+    ("sisfoh2013_calendar_date_invalid") ///
+    (`sisfoh2013_bad_calendar_date') ///
+    ("source_issue") ///
+    ("Households whose final day-month-year combination is not a valid calendar date")
+
+post `qa_post' ///
+    ("sisfoh2013_roster_total_mismatches") ///
+    (`sisfoh2013_roster_total_diff') ///
+    ("source_issue") ///
+    ("Household source total differs from exact linked person-roster count")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_ccpp_matched") ///
+    (`sisfoh2013_legacy_ccpp_matched') ///
+    ("reconciliation") ///
+    ("Legacy-derived CCPP rows found in the national microdata aggregation")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_population_exact") ///
+    (`sisfoh2013_legacy_pop_exact') ///
+    ("reconciliation") ///
+    ("Matched legacy CCPP rows reproducing the roster population exactly")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_households_exact") ///
+    (`sisfoh2013_legacy_hh_exact') ///
+    ("reconciliation") ///
+    ("Matched legacy CCPP rows reproducing household counts exactly")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_nbi1_exact") ///
+    (`sisfoh2013_legacy_nbi1_exact') ///
+    ("reconciliation") ///
+    ("Matched legacy CCPP rows reproducing NBI1 counts exactly")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_nbi2_exact") ///
+    (`sisfoh2013_legacy_nbi2_exact') ///
+    ("reconciliation") ///
+    ("Matched legacy CCPP rows reproducing NBI2 counts exactly")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_nbi3_exact") ///
+    (`sisfoh2013_legacy_nbi3_exact') ///
+    ("reconciliation") ///
+    ("Matched legacy CCPP rows reproducing NBI3 counts exactly")
+
+post `qa_post' ///
+    ("sisfoh2013_legacy_nbi5_exact") ///
+    (`sisfoh2013_legacy_nbi5_exact') ///
+    ("reconciliation") ///
+    ("Matched legacy CCPP rows reproducing NBI5 counts exactly")
+
+post `qa_post' ///
+    ("sisfoh2013_ambiguous_code_candidates") ///
+    (`sisfoh2013_ambiguous_code_rows') ///
+    ("quarantined") ///
+    ("Same-priority code candidates excluded from deterministic linkage")
+
+post `qa_post' ///
+    ("sisfoh2013_exact_current_code") ///
+    (`sisfoh2013_exact_current') ///
+    ("validated") ///
+    ("RUV rows linked by the verified canonical CCPP code")
+
+post `qa_post' ///
+    ("sisfoh2013_exact_census2007_code") ///
+    (`sisfoh2013_exact_census') ///
+    ("validated") ///
+    ("Additional RUV rows linked by the 2007 Census CCPP code")
+
+post `qa_post' ///
+    ("sisfoh2013_exact_geospatial_code") ///
+    (`sisfoh2013_exact_geospatial') ///
+    ("validated") ///
+    ("Additional RUV rows linked by the 2017 geospatial CCPP code")
+
+post `qa_post' ///
+    ("sisfoh2013_exact_gdp_code") ///
+    (`sisfoh2013_exact_gdp') ///
+    ("validated") ///
+    ("Additional RUV rows linked by the GDP-source CCPP code")
+
+post `qa_post' ///
+    ("sisfoh2013_unique_exact_path") ///
+    (`sisfoh2013_exact_name') ///
+    ("validated") ///
+    ("Additional RUV rows linked by a unique normalized full geographic path")
+
+post `qa_post' ///
+    ("sisfoh2013_ruv_linked") ///
+    (`sisfoh2013_ruv_linked') ///
+    ("validated") ///
+    ("RUV communities linked deterministically to SISFOH CCPPs")
+
+post `qa_post' ///
+    ("sisfoh2013_ruv_unmatched") ///
+    (`sisfoh2013_ruv_unmatched') ///
+    ("retained_unmatched") ///
+    ("RUV communities retained without a deterministic SISFOH link")
+
+post `qa_post' ///
+    ("sisfoh2013_main_sample_linked") ///
+    (`sisfoh2013_main_sample_linked') ///
+    ("validated") ///
+    ("Selected main-RD sample rows linked to SISFOH")
+
+post `qa_post' ///
+    ("sisfoh2013_individual_analysis_rows") ///
+    (`sisfoh2013_indiv_rows') ///
+    ("validated") ///
+    ("RUV-linked person records in the coded individual analysis file")
+
+post `qa_post' ///
+    ("sisfoh2013_household_analysis_rows") ///
+    (`sisfoh2013_hh_analysis_rows') ///
+    ("validated") ///
+    ("RUV-linked household records in the coded household analysis file")
+
+post `qa_post' ///
+    ("sisfoh2013_registry_rows") ///
+    (`sisfoh2013_registry_rows') ///
+    ("validated") ///
+    ("All RUV rows retained after adding CCPP-level SISFOH outcomes")
+
 postclose `qa_post'
 
 use `qa_metrics', clear
@@ -9011,6 +10750,13 @@ export delimited ///
 restore
 
 preserve
+keep if strpos(metric, "sisfoh2013_") == 1
+export delimited ///
+    "${metadata_root}/sisfoh-2013/sample-flow.csv", ///
+    replace
+restore
+
+preserve
 keep if inlist( ///
     metric, ///
     "victimization_rows", ///
@@ -9064,6 +10810,13 @@ display as text   "RUV rows without CCPP GDP:       `gdp_ccpp_unmatched'"
 display as text   "RUV rows with district GDP:      `gdp_district_linked'"
 display as text   "Selected rows with CCPP GDP:     `gdp_ccpp_main_linked'"
 display as text   "Main RD geographic sample rows: `main_rd_sample_rows'"
+display as text   "SISFOH person source rows:       `sisfoh2013_person_records'"
+display as text   "SISFOH households with information: `sisfoh2013_households_info'"
+display as text   "SISFOH source CCPPs:             `sisfoh2013_source_ccpp'"
+display as text   "RUV rows linked to SISFOH:       `sisfoh2013_ruv_linked'"
+display as text   "RUV rows without SISFOH link:    `sisfoh2013_ruv_unmatched'"
+display as text   "SISFOH individual analysis rows: `sisfoh2013_indiv_rows'"
+display as text   "SISFOH household analysis rows:  `sisfoh2013_hh_analysis_rows'"
 display as text   "All RUV rows retained with complete treatment status."
 
 capture program drop victimasrd_normalize_name

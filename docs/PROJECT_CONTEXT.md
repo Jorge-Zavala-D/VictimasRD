@@ -366,6 +366,33 @@ replacement results observed in 2007 are explicitly timing-sensitive. Full
 source provenance, construction rules, exclusions, and limitations are in
 `docs/MUNICIPAL_ELECTIONS_PREPARATION.md`.
 
+## Recorded SISFOH 2012-2013 preparation decision
+
+On August 11, 2026, the pipeline reconstructed the project-supplied SISFOH
+person and household extracts from the national microdata rather than using the
+legacy preaggregated CCPP file as an input. The raw household `KEY` is not
+unique. The canonical household key is the exact geography-enumeration-dwelling
+composite; the person key adds the within-household person number. Persistent
+derived files replace those raw keys with deterministic de-identified numeric
+IDs and remain in Dropbox Working or Coded only.
+
+The pipeline retains all 24,009,026 rostered person records and all 6,609,570
+complete or incomplete household interviews in national Working milestones. It
+constructs person outcomes, person-derived household aggregates, dwelling and
+household outcomes, official NBI components, transparent wellbeing proxies, and
+national CCPP aggregates. The final RUV-linked analytical files contain
+1,425,575 people and 415,007 households. The CCPP registry preserves all 5,712
+RUV rows; 4,881 link deterministically to SISFOH and 831 remain explicit with
+missing SISFOH measures.
+
+The operation ran from February 2012 through September 2013 and the supplied
+extract lacks INEI's official nonresponse/population adjustment factor.
+Consequently, enumerated counts are not described as adjusted population
+totals, and treatment timing relative to each interview remains an analysis
+decision rather than a data-cleaning recode. Full construction, linkage,
+confidentiality, and interpretation rules are in
+`docs/SISFOH_2013_PREPARATION.md`.
+
 ## Recorded descriptive-analysis boundary
 
 On July 28, 2026, the canonical descriptive module was separated from

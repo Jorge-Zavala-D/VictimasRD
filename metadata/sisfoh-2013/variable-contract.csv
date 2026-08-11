@@ -1,0 +1,28 @@
+domain,level,constructed_measure,source_items,universe_or_denominator,interpretation
+demography,person,age_2013,EDAD01,valid ages 0-120,age at enumeration
+demography,person,female_2013,SEXO01,all rostered people,one for female
+education,person,literate_2013,LEE01,people age 3 or older with valid response,can read and write
+education,person,secondaryplus_2013,NIV01,people age 3 or older with valid response,secondary or higher level
+language,person,named_indigenous_language_2013,IDIOMA01,people age 3 or older with valid response,Quechua Aymara or Ashaninka
+health,person,insurance_any_2013,SEGU01_1-SEGU01_6,validated multiple-response block,any reported insurance
+health,person,disability_any_2013,DISCA01_1-DISCA01_6,validated multiple-response block,any reported permanent limitation
+social_programs,person,program_any_2013,PROG01_1-PROG01_11,validated multiple-response block,current beneficiary of any listed program
+labor,person,employed_2013,ERA01,people with valid age and labor universe,working as employee independent employer domestic or unpaid family worker
+labor,ccpp,labor_force_participation_2013,ERA01,valid people age 14 or older,labor force divided by eligible valid population
+labor,ccpp,employment_rate_2013,ERA01,labor force age 14 or older,employed divided by labor force
+labor,ccpp,unemployment_rate_2013,ERA01,labor force age 14 or older,unemployed divided by labor force
+housing,household,nbi1_housing_2013,TVIV MPARED MATPISO,households with required items,official inadequate-housing NBI
+housing,household,nbi2_overcrowding_2013,CTAHAB and person roster,households with positive room count,more than 3.4 people per room
+sanitation,household,nbi3_sanitation_2013,SERHIG,households with valid item,river or canal connection or no facility
+education,household,nbi4_school_proxy_2013,EDAD01 NIV01,households with assessable child roster,INEI SISFOH proxy for school nonattendance
+dependency,household,nbi5_dependency_2013,PTES01 NIV01 ULT01 ERA01,households with valid head education and labor roster,official high economic dependency NBI
+poverty,household,nbi_any_2013,five NBI components,households with all five components,at least one official NBI
+poverty,household,nbi_two_plus_2013,five NBI components,households with all five components,at least two official NBIs
+wellbeing,household,wellbeing_housing_2013,MATPISO,households with valid floor item,one minus earth-floor indicator
+wellbeing,household,wellbeing_services_proxy_2013,ABASAG SERHIG,households with both valid items,mean of public or pylon water and improved sanitation
+wellbeing,household,wellbeing_energy_2013,TALUM COMBUSA,households with both valid items,mean of public electricity and clean cooking fuel
+wellbeing,household,wellbeing_humancapital_2013,LEE01 NIV01,households with valid age-14-plus denominators,mean literacy and secondary-or-higher shares
+wellbeing,household,wellbeing_assets_2013,BIEN2 BIEN5 BIEN9 BIEN10,validated asset block,mean ownership of TV refrigerator washing machine and computer
+wellbeing,household,wellbeing_connectivity_2013,BIEN12 BIEN13 BIEN14,validated asset block,mean internet cable and mobile ownership
+wellbeing,household,wellbeing_core_proxy_2013,four wellbeing domains,households with all four domains,equal-domain proxy higher is better
+linkage,ccpp,sisfoh2013_linked,ten-digit source code and canonical RUV link spine,all 5712 RUV rows,unique deterministic SISFOH linkage indicator

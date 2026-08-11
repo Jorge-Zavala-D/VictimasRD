@@ -1,0 +1,38 @@
+metric,value,status,note
+sisfoh2013_person_records,24009026,validated,National person records; exactly matches INEI's published fieldwork total
+sisfoh2013_household_records,8336891,validated,"All household-file records, including noninterviews and vacant dwellings"
+sisfoh2013_households_with_information,6609570,validated,Complete or incomplete interviews; exactly matches INEI's published total
+sisfoh2013_complete_households,6163201,validated,Households with final interview result complete
+sisfoh2013_incomplete_households,446369,retained,Households with partial information retained with item-specific missingness
+sisfoh2013_source_ccpp,81220,validated,Unique ten-digit CCPP codes represented by households with information
+sisfoh2013_ccpp_attribute_conflicts,7763,resolved_modal_record,CCPP codes with multiple descriptive records; modal record selected deterministically
+sisfoh2013_ccpp_modal_ties,133,resolved_lexical_tie,CCPP codes whose most frequent descriptive record tied; lexical order selected
+sisfoh2013_person_age_missing,435314,source_missingness,Rostered person records without a valid reported age
+sisfoh2013_person_order_disagreements,3011,source_issue,NRO differs from NRO_ORD; unique canonical person order uses NRO
+sisfoh2013_language_eligible,23091791,denominator,People age three or older with valid age
+sisfoh2013_language_valid,11713329,source_missingness,Eligible people with a valid childhood-language response
+sisfoh2013_household_items_missing,201121,source_missingness,Households missing the main dwelling and services block
+sisfoh2013_fieldwork_year_invalid,1626,source_issue,Households with information whose recorded final year is outside 2012-2013
+sisfoh2013_fieldwork_month_invalid,1247,source_issue,Households with information whose recorded final month is invalid
+sisfoh2013_fieldwork_day_invalid,5939,source_issue,Households with information whose recorded final day is invalid
+sisfoh2013_calendar_date_invalid,12662,source_issue,Households whose final day-month-year combination is not a valid calendar date
+sisfoh2013_roster_total_mismatches,3,source_issue,Household source total differs from exact linked person-roster count
+sisfoh2013_legacy_ccpp_matched,40863,reconciliation,Legacy-derived CCPP rows found in the national microdata aggregation
+sisfoh2013_legacy_population_exact,40853,reconciliation,Matched legacy CCPP rows reproducing the roster population exactly
+sisfoh2013_legacy_households_exact,40853,reconciliation,Matched legacy CCPP rows reproducing household counts exactly
+sisfoh2013_legacy_nbi1_exact,924,reconciliation,Matched legacy CCPP rows reproducing NBI1 counts exactly
+sisfoh2013_legacy_nbi2_exact,50,reconciliation,Matched legacy CCPP rows reproducing NBI2 counts exactly
+sisfoh2013_legacy_nbi3_exact,19,reconciliation,Matched legacy CCPP rows reproducing NBI3 counts exactly
+sisfoh2013_legacy_nbi5_exact,1071,reconciliation,Matched legacy CCPP rows reproducing NBI5 counts exactly
+sisfoh2013_ambiguous_code_candidates,0,quarantined,Same-priority code candidates excluded from deterministic linkage
+sisfoh2013_exact_current_code,4849,validated,RUV rows linked by the verified canonical CCPP code
+sisfoh2013_exact_census2007_code,9,validated,Additional RUV rows linked by the 2007 Census CCPP code
+sisfoh2013_exact_geospatial_code,0,validated,Additional RUV rows linked by the 2017 geospatial CCPP code
+sisfoh2013_exact_gdp_code,17,validated,Additional RUV rows linked by the GDP-source CCPP code
+sisfoh2013_unique_exact_path,6,validated,Additional RUV rows linked by a unique normalized full geographic path
+sisfoh2013_ruv_linked,4881,validated,RUV communities linked deterministically to SISFOH CCPPs
+sisfoh2013_ruv_unmatched,831,retained_unmatched,RUV communities retained without a deterministic SISFOH link
+sisfoh2013_main_sample_linked,1033,validated,Selected main-RD sample rows linked to SISFOH
+sisfoh2013_individual_analysis_rows,1425575,validated,RUV-linked person records in the coded individual analysis file
+sisfoh2013_household_analysis_rows,415007,validated,RUV-linked household records in the coded household analysis file
+sisfoh2013_registry_rows,5712,validated,All RUV rows retained after adding CCPP-level SISFOH outcomes

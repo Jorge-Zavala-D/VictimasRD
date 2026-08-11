@@ -1,0 +1,5 @@
+source_file,relative_dropbox_path,role,observations,variables,bytes,sha256,raw_immutable,contains_direct_identifiers,construction_use
+sisfoh_persona.dta,2 data/1 Raw/15 SISFOH/sisfoh_persona.dta,person microdata,24009026,71,6746553812,3C45C037DADC85A4DFD464FFDD9121451A6699EE7F4BF52BD31CDB53B796C4D0,yes,yes,authoritative person source
+sisfoh_hogar.dta,2 data/1 Raw/15 SISFOH/sisfoh_hogar.dta,household and dwelling microdata,8336891,119,4635341102,0E8FDEC03225676AAB32260A931F2F06990AADC4605104D24DBC60ED990BEB26,yes,yes,authoritative household source
+ccpp_sisfoh2013.dta,2 data/1 Raw/15 SISFOH/ccpp_sisfoh2013.dta,legacy derived CCPP compilation,41436,626,67169198,6597BBAE8DBF5E54393641F75419AC6545224F154D4EA47FA9335C6FAB61C500,yes,no,reconciliation only
+

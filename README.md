@@ -74,6 +74,9 @@ collective-reparation treatment history through 2023, selected 2007 Census
 baseline covariates, 2017 CCPP geospatial attributes and capital-distance
 measures, Seminario-Palomino pre-treatment CCPP and district GDP context, and
 2002/2006 municipal political and electoral context from JNE/INFOgob and ONPE.
+It also prepares the national SISFOH 2012-2013 person and household files,
+constructs person-, household-, and CCPP-level outcomes, and links them to the
+RUV community universe without dropping unmatched RUV rows.
 Run `code/stata/00_master.do` after configuring
 `config/paths.local.do`.
 
@@ -86,17 +89,23 @@ Data products remain outside Git:
 - the all-row registry with 2017 geospatial attributes and geodesic distance
   measures is written to Dropbox Coded as
   `06_community_registry_geospatial.dta`;
-- the current all-row registry with compact CCPP and district GDP covariates is
+- the all-row registry with compact CCPP and district GDP covariates is
   written to Dropbox Coded as `07_community_registry_gdp.dta`; and
-- the current all-row analytical registry with municipal-election covariates is
-  written to Dropbox Coded as `08_community_registry_elections.dta`.
+- the all-row analytical registry with municipal-election covariates is written
+  to Dropbox Coded as `08_community_registry_elections.dta`;
+- the RUV-linked SISFOH person and household files are written to Dropbox Coded
+  as `09_sisfoh_2013_individual_analysis.dta` and
+  `10_sisfoh_2013_household_analysis.dta`; and
+- the current 5,712-row CCPP registry with SISFOH aggregates is written to
+  Dropbox Coded as `11_community_registry_sisfoh_2013.dta`.
 
-The Census, geospatial, GDP, and municipal-election source audits and linkage
-rules are documented in
+The Census, geospatial, GDP, municipal-election, and SISFOH source audits and
+linkage rules are documented in
 [`docs/CENSUS_2007_PREPARATION.md`](docs/CENSUS_2007_PREPARATION.md) and
 [`docs/GEOSPATIAL_2017_PREPARATION.md`](docs/GEOSPATIAL_2017_PREPARATION.md),
-[`docs/CCPP_GDP_PREPARATION.md`](docs/CCPP_GDP_PREPARATION.md), and
-[`docs/MUNICIPAL_ELECTIONS_PREPARATION.md`](docs/MUNICIPAL_ELECTIONS_PREPARATION.md).
+[`docs/CCPP_GDP_PREPARATION.md`](docs/CCPP_GDP_PREPARATION.md),
+[`docs/MUNICIPAL_ELECTIONS_PREPARATION.md`](docs/MUNICIPAL_ELECTIONS_PREPARATION.md),
+and [`docs/SISFOH_2013_PREPARATION.md`](docs/SISFOH_2013_PREPARATION.md).
 
 ## Current release status
 
