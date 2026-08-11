@@ -472,6 +472,22 @@ named candidate, cutoff, and year. The protocol, decision gate, specification
 grid, and output contract are documented in
 `docs/RD_DESIGN_AUDIT_PROTOCOL.md`.
 
+## Recorded literature and NotebookLM decision
+
+The project literature notebook `IE Collective Reparations Peru` is the
+primary synthesis and discovery layer for the substantive bibliography. Its
+public URL, 39-upload inventory, evidence map, known duplicate/version risks,
+missing-literature assessment, stage-specific use rules, and citation gate are
+documented in `docs/LITERATURE_NOTEBOOKLM_WORKFLOW.md`.
+
+Future literature, theory, interpretation, and manuscript tasks must consult
+that notebook. A NotebookLM answer is not a citable source and cannot by itself
+support a manuscript claim. Exact metadata and the supporting passage or
+result must be checked in the underlying PDF or official document before use.
+The notebook is not authoritative for official CMAN/RUV rules or records and
+does not contain a sufficient modern RD methods corpus; those require separate
+official and methodological sources.
+
 ## Critical research decisions
 
 The following issues affect the estimand, sample, or reported results and must

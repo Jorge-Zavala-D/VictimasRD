@@ -9,6 +9,10 @@ Before inspecting, changing, or running analysis code, read
 governance questions as blockers that require an explicit research-team
 decision; do not silently choose an answer. Read
 `docs/DATA_STORAGE_WORKFLOW.md` before changing any data path or destination.
+For literature, theory, interpretation, or manuscript tasks, also read
+`docs/LITERATURE_NOTEBOOKLM_WORKFLOW.md` and consult the linked project
+NotebookLM. Treat NotebookLM answers as discovery and synthesis aids; verify
+every citation and supporting passage in the underlying source before use.
 
 ## Data and Dropbox safety
 
