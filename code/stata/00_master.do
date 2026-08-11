@@ -426,7 +426,6 @@ Each adjacent pair is:
 */
 
 local ssc_package_command_pairs ///
-    lpdensity   lpdensity ///
     reclink     reclink ///
     freqindex   freqindex ///
     matchit     matchit ///
@@ -487,6 +486,7 @@ their authors' repositories rather than SSC.
 */
 
 local net_specs ///
+    lpdensity lpdensity https://raw.githubusercontent.com/nppackages/lpdensity/main/stata ///
     rdrobust rdrobust     https://raw.githubusercontent.com/rdpackages/rdrobust/main/stata ///
     rddensity rddensity   https://raw.githubusercontent.com/rdpackages/rddensity/main/stata ///
     rdpower   rdmde       https://raw.githubusercontent.com/rdpackages/rdpower/main/stata ///
@@ -610,6 +610,24 @@ capture quietly rddensity ///
     bwselect(comb) ///
     vce(jackknife)
 local rddensity_smoke_rc = _rc
+
+/*
+The plotting path is a separate compatibility surface: current rddensity
+passes precision() to lpdensity. This smoke test catches a stale SSC
+lpdensity installation even when the formal manipulation test still runs.
+*/
+
+capture quietly rddensity ///
+    smoke_x, ///
+    c(0) p(2) q(3) ///
+    fitselect(unrestricted) ///
+    kernel(triangular) ///
+    bwselect(comb) ///
+    vce(jackknife) ///
+    plot nohistogram ///
+    graph_opt(name(_vrd_density_smoke, replace) nodraw)
+local rddensity_plot_smoke_rc = _rc
+capture graph drop _vrd_density_smoke
 clear
 
 if `rdrobust_smoke_rc' {
@@ -626,6 +644,14 @@ if `rddensity_smoke_rc' {
     display as error "Stata return code: `rddensity_smoke_rc'"
     log close victimasrd_master
     exit `rddensity_smoke_rc'
+}
+
+if `rddensity_plot_smoke_rc' {
+    display as error "The rddensity-lpdensity plotting stack failed its smoke test."
+    display as error "Install both packages from their official GitHub sources and rerun."
+    display as error "Stata return code: `rddensity_plot_smoke_rc'"
+    log close victimasrd_master
+    exit `rddensity_plot_smoke_rc'
 }
 
 display as result "Project paths and user-written dependencies verified."

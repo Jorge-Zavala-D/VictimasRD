@@ -7,9 +7,12 @@ The project literature notebook is:
 - **Title:** `IE Collective Reparations Peru`
 - **Public URL:**
   `https://notebook.google.com/notebook/1057e1f5-e2ff-4dc9-8b46-39ad44841f9c`
-- **Audited:** 2026-08-10
-- **Notebook inventory:** 39 uploads representing about 30 distinct
-  intellectual works after known duplicates and versions are reconciled
+- **Substantive inventory audited:** 2026-08-10
+- **RD-methods scope verified:** 2026-08-11
+- **Historical substantive inventory:** 39 uploads representing about 30
+  distinct intellectual works after known duplicates and versions are
+  reconciled. The user subsequently added methodological sources, so the
+  numbered inventory below is not a current full-notebook count.
 
 The notebook is the project's primary synthesis and discovery layer for the
 substantive literature. It is not the source of record for a citation. The
@@ -40,14 +43,25 @@ Do not use the notebook as the authority for:
 
 - the official victimization-index formula, cutoffs, or rollout directives;
 - CMAN/RUV administrative counts, dates, budgets, or treatment status;
-- modern RD implementation, fuzzy or multiple-cutoff RD, discrete running
-  variables, bandwidth choice, density tests, or weak-first-stage inference;
 - the content or provenance of project datasets; or
 - an exact citation, quotation, statistic, or page number that has not been
   checked in the underlying source.
 
 Those questions require official project documents, canonical data, and the
-separate RD-methods corpus.
+verified underlying RD-methods sources. The notebook may now be used to locate
+and synthesize those methods sources, but its answer is never the authority.
+
+### RD-methods addendum, 11 August 2026
+
+A direct NotebookLM source-grounded query confirmed that the expanded notebook
+now includes, at minimum, Cattaneo, Idrobo, and Titiunik's 2018 *Volume I*,
+2019 *Foundations*, and 2018 *Volume II/Extensions*, plus Cattaneo, Keele, and
+Titiunik's 2023 covariate-adjustment handbook chapter. These sources are
+relevant for RD plots, density/manipulation diagnostics, covariate
+falsification, robust bias-corrected inference, and discrete-score cautions.
+The underlying PDFs and maintained RD Packages documentation must still be
+checked before code or manuscript claims are finalized. A refreshed exhaustive
+source inventory remains a separate documentation task.
 
 ## Verified notebook inventory
 
@@ -211,8 +225,10 @@ instrument without separate justification.
 
 ## Identification and interpretation safeguards
 
-1. The current notebook contains no adequate modern RD methods corpus. Do not
-   use it to justify the project's RD specification.
+1. The expanded notebook contains relevant modern RD-methods sources, but use
+   it only for discovery and synthesis. Justify specifications from the
+   verified underlying papers, official software documentation, and the
+   project's empirical design evidence.
 2. The substantive literature cannot establish that the administrative
    victimization thresholds caused a discontinuous change in treatment. That
    first stage must be demonstrated in the data within a predeclared risk set.

@@ -71,6 +71,30 @@ Individual covariate tests are not interpreted as independent design verdicts.
 The same adjustments are also reported across the six placebo cutoffs within
 each treatment horizon.
 
+## Graphical presentation protocol
+
+The running-variable diagnostic is presented in two complementary figures.
+The first is an equal-width histogram with bins aligned at the B--C cutoff.
+The second reports separate local-quadratic density estimates and pointwise
+95% confidence intervals on each side. Both display the formal `rddensity`
+statistic and p-value, use the conservative rounding-band branch, and state
+that a smooth-looking graph cannot establish absence of manipulation when the
+recorded score has repeated mass points.
+
+Each of the 17 substantive core or timing-sensitive covariates is also shown
+in its own RD plot. The figures use quantile-spaced, variance-mimicking binned
+means, 95% bin-mean intervals, and separate local-linear fits within the
+outcome-specific MSE-optimal bandwidth. Their subtitles report the associated
+robust bias-corrected `rdrobust` p-value under district CR2 inference. Raw
+units are used for interpretation; standardized estimates and within-family
+BH and Holm corrections remain authoritative in the table and CSV.
+
+Linkage-availability indicators are deliberately table-only. They are formal
+diagnostics of whether data construction changes at the cutoff, not
+substantive predetermined characteristics. A single forest plot retains the
+joint visual overview, but it does not replace the separate plots or the
+multiplicity-adjusted formal results.
+
 ## Prespecified sensitivity values
 
 Fixed bandwidths are 0.005, 0.010, 0.015, 0.020, 0.030, and 0.050 index units.
@@ -104,6 +128,14 @@ variable guidance in Cattaneo, Idrobo, and Titiunik's *Extensions* volume is
 especially important: the number and spacing of mass points determine whether
 continuity-based approximations are credible, and local randomization is an
 alternative only when a defensible window has adequate support.
+
+The graphical choices follow Cattaneo, Idrobo, and Titiunik's *Foundations*
+guidance to pair a score histogram and estimated density with a formal density
+test, and to analyze predetermined covariates as falsification outcomes using
+the same local-polynomial logic as the main outcome. Quantile-spaced
+variance-mimicking bins emphasize raw-data variability; lower-order local
+polynomials are used for the fit. Global high-order polynomials are not used
+for estimation or graphical smoothing.
 
 NotebookLM may be used to discover and synthesize relevant project sources,
 but every manuscript citation and claim must be checked against the underlying

@@ -7,6 +7,7 @@
 |                   covariates, linkage, and specification sensitivity at B--C.  |
 |                                                                                |
 | Date created:     10 August 2026                                               |
+| Date updated:     11 August 2026                                               |
 | Stata version:    19                                                           |
 *-------------------------------------------------------------------------------*/
 
@@ -99,7 +100,26 @@ local output_paths ///
     output/figures/rd_validation/fig_rd_validation_04_treatment_2016.png ///
     output/figures/rd_validation/fig_rd_validation_05_covariate_continuity.png ///
     output/figures/rd_validation/fig_rd_validation_06_bandwidth_donut.png ///
-    output/figures/rd_validation/fig_rd_validation_07_placebo_cutoffs.png
+    output/figures/rd_validation/fig_rd_validation_07_placebo_cutoffs.png ///
+    output/figures/rd_validation/fig_rd_validation_08_running_variable_histogram.png ///
+    output/figures/rd_validation/fig_rd_validation_09_running_variable_density.png ///
+    output/figures/rd_validation/fig_rd_validation_10_covariate_01_altitude.png ///
+    output/figures/rd_validation/fig_rd_validation_11_covariate_02_distance_district_capital.png ///
+    output/figures/rd_validation/fig_rd_validation_12_covariate_03_district_gdp_2006.png ///
+    output/figures/rd_validation/fig_rd_validation_13_covariate_04_district_gdp_growth_1993_2006.png ///
+    output/figures/rd_validation/fig_rd_validation_14_covariate_05_district_gdp_concentration_2006.png ///
+    output/figures/rd_validation/fig_rd_validation_15_covariate_06_municipal_turnout_2002.png ///
+    output/figures/rd_validation/fig_rd_validation_16_covariate_07_municipal_margin_2002.png ///
+    output/figures/rd_validation/fig_rd_validation_17_covariate_08_effective_lists_2002.png ///
+    output/figures/rd_validation/fig_rd_validation_18_covariate_09_municipal_turnout_2006.png ///
+    output/figures/rd_validation/fig_rd_validation_19_covariate_10_municipal_margin_2006.png ///
+    output/figures/rd_validation/fig_rd_validation_20_covariate_11_apra_mayor_2006.png ///
+    output/figures/rd_validation/fig_rd_validation_21_covariate_12_population_2007.png ///
+    output/figures/rd_validation/fig_rd_validation_22_covariate_13_wellbeing_2007.png ///
+    output/figures/rd_validation/fig_rd_validation_23_covariate_14_indigenous_language_2007.png ///
+    output/figures/rd_validation/fig_rd_validation_24_covariate_15_literacy_2007.png ///
+    output/figures/rd_validation/fig_rd_validation_25_covariate_16_female_share_2007.png ///
+    output/figures/rd_validation/fig_rd_validation_26_covariate_17_urban_2007.png
 
 foreach output_path of local output_paths {
     capture erase "${project_root}/`output_path'"
@@ -652,21 +672,25 @@ use "`rd_results'", clear
 
 egen long placebo_family = group(outcome_var) ///
     if family == "placebo_cutoff"
-sort placebo_family pvalue
+generate byte placebo_p_missing = missing(pvalue)
+sort placebo_family placebo_p_missing pvalue ///
+    spec_id cutoff tuning_value outcome_var
 by placebo_family: egen int placebo_m = total(pvalue < .) ///
     if placebo_family < .
 by placebo_family: generate int placebo_rank = sum(pvalue < .) ///
-    if placebo_family < .
+    if placebo_family < . & pvalue < .
 
 generate double placebo_q_bh = ///
     min(1, pvalue * placebo_m / placebo_rank) ///
     if placebo_family < . & pvalue < .
-gsort placebo_family -placebo_rank
+gsort placebo_family placebo_p_missing -placebo_rank ///
+    spec_id cutoff tuning_value outcome_var
 by placebo_family: replace placebo_q_bh = ///
     min(placebo_q_bh, placebo_q_bh[_n - 1]) ///
     if _n > 1 & placebo_family < . & placebo_q_bh < .
 
-sort placebo_family placebo_rank
+sort placebo_family placebo_p_missing placebo_rank ///
+    spec_id cutoff tuning_value outcome_var
 generate double placebo_p_holm = ///
     min(1, pvalue * (placebo_m - placebo_rank + 1)) ///
     if placebo_family < . & pvalue < .
@@ -674,7 +698,8 @@ by placebo_family: replace placebo_p_holm = ///
     max(placebo_p_holm, placebo_p_holm[_n - 1]) ///
     if _n > 1 & placebo_family < . & placebo_p_holm < .
 
-drop placebo_family placebo_m placebo_rank
+drop placebo_family placebo_p_missing placebo_m placebo_rank
+sort result_kind family outcome_var spec_id cutoff tuning_value vce
 save "`rd_results'", replace
 restore
 
@@ -813,23 +838,26 @@ preserve
 use "`covariate_results'", clear
 
 egen long correction_family = group(family vce)
-sort correction_family pvalue
+generate byte p_missing = missing(pvalue)
+sort correction_family p_missing pvalue outcome_var spec_id
 by correction_family: egen int family_m = total(pvalue < .)
-by correction_family: generate int p_rank = sum(pvalue < .)
+by correction_family: generate int p_rank = sum(pvalue < .) ///
+    if pvalue < .
 
 generate double q_bh = ///
     min(1, pvalue * family_m / p_rank) if pvalue < .
-gsort correction_family -p_rank
+gsort correction_family p_missing -p_rank outcome_var spec_id
 by correction_family: replace q_bh = ///
     min(q_bh, q_bh[_n - 1]) if _n > 1 & q_bh < .
 
-sort correction_family p_rank
+sort correction_family p_missing p_rank outcome_var spec_id
 generate double p_holm = ///
     min(1, pvalue * (family_m - p_rank + 1)) if pvalue < .
 by correction_family: replace p_holm = ///
     max(p_holm, p_holm[_n - 1]) if _n > 1 & p_holm < .
 
-drop correction_family family_m p_rank
+drop correction_family p_missing family_m p_rank
+sort result_kind family outcome_var spec_id vce
 save "`covariate_results'", replace
 restore
 
@@ -946,30 +974,47 @@ postclose `local_randomization_post'
 
 preserve
 use "`support_results'", clear
+sort sample_rule
 export delimited using ///
     "`table_dir'/rd_validation_support.csv", replace
 restore
 
 preserve
 use "`density_results'", clear
+sort sample_rule
 export delimited using ///
     "`table_dir'/rd_validation_density.csv", replace
 restore
 
 preserve
 use "`rd_results'", clear
+sort result_kind family outcome_var spec_id cutoff tuning_value vce
+foreach result_variable in ///
+    cutoff tuning_value estimate estimate_conventional standard_error ///
+    pvalue ci_low ci_high h_left h_right placebo_q_bh placebo_p_holm {
+    replace `result_variable' = round(`result_variable', 1e-10) ///
+        if `result_variable' < .
+}
 export delimited using ///
     "`table_dir'/rd_validation_first_stage.csv", replace
 restore
 
 preserve
 use "`covariate_results'", clear
+sort result_kind family outcome_var spec_id vce
+foreach result_variable in ///
+    cutoff tuning_value estimate estimate_conventional standard_error ///
+    pvalue ci_low ci_high h_left h_right q_bh p_holm {
+    replace `result_variable' = round(`result_variable', 1e-10) ///
+        if `result_variable' < .
+}
 export delimited using ///
     "`table_dir'/rd_validation_covariates.csv", replace
 restore
 
 preserve
 use "`local_randomization_results'", clear
+sort method outcome_var
 export delimited using ///
     "`table_dir'/rd_validation_local_randomization.csv", replace
 restore
@@ -1237,6 +1282,328 @@ graph export ///
     width(3200) replace
 restore
 
+/*
+Pair the formal manipulation test with the two textbook graphical objects: an
+equal-width histogram and a local-polynomial density estimate. Repeated
+scores make both diagnostics informative but not definitive evidence about
+manipulation.
+*/
+
+preserve
+use "`density_results'", clear
+quietly summarize statistic if sample_rule == "drop_rounding_band", meanonly
+local density_t = r(mean)
+quietly summarize pvalue if sample_rule == "drop_rounding_band", meanonly
+local density_p = r(mean)
+restore
+
+local density_t_text : display %5.2f `density_t'
+local density_p_text : display %5.3f `density_p'
+if `density_p' < .001 local density_p_text "< 0.001"
+
+preserve
+keep if rd_bc_drop_band & abs(running_bc) <= .02
+
+twoway ///
+    (histogram running_bc if running_bc < 0, ///
+        start(-.02) width(.001) frequency ///
+        fcolor(navy%48) lcolor(navy%72) lwidth(vthin)) ///
+    (histogram running_bc if running_bc >= 0, ///
+        start(0) width(.001) frequency ///
+        fcolor(maroon%48) lcolor(maroon%72) lwidth(vthin)), ///
+    xline(0, lcolor(black) lpattern(dash) lwidth(thin)) ///
+    xlabel(-.02(.005).02, format(%6.3f) ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    ylabel(, angle(0) grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    xtitle("Victimization index centered at the B-C cutoff", size(small)) ///
+    ytitle("Number of communities", size(small)) ///
+    title("Distribution of the assignment score at B-C", ///
+        size(medium) color(black)) ///
+    subtitle("Equal-width 0.001 bins; formal density test: T = `density_t_text', p = `density_p_text'", ///
+        size(small) color(gs5)) ///
+    legend(order(1 "Below cutoff" 2 "At or above cutoff") ///
+        rows(1) position(6) size(small) region(lcolor(none))) ///
+    note( ///
+        "Notes: Unit is an RUV centro poblado in the selected geography and category B or C, within 0.02 index units of B-C." ///
+        "Bars report community counts in bins aligned at the cutoff; scores within 0.00005 of B-C are excluded." ///
+        "The subtitle reports the robust local-polynomial rddensity test. Repeated score values limit what smoothness alone can establish." ///
+        "Source: RUV victimization register.", ///
+        size(vsmall) color(gs5) span) ///
+    xsize(10) ysize(7) ///
+    graphregion(color(white)) plotregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_rd_validation_08_running_variable_histogram.png", ///
+    width(3000) replace
+restore
+
+capture drop rd_density_*
+rddensity running_bc if rd_bc_drop_band, ///
+    c(0) p(2) q(3) ///
+    fitselect(unrestricted) ///
+    kernel(triangular) ///
+    bwselect(comb) ///
+    vce(jackknife) ///
+    plot nohistogram ///
+    plot_range(-.02 .02) ///
+    plot_n(80 80) ///
+    plot_grid(es) ///
+    genvars(rd_density) ///
+    graph_opt(name(_vrd_density_source, replace) nodraw legend(off))
+
+capture graph drop _vrd_density_source
+
+twoway ///
+    (rarea rd_density_cil rd_density_cir rd_density_grid ///
+        if rd_density_group == 0, ///
+        sort color(navy%28) lcolor(none)) ///
+    (line rd_density_cil rd_density_grid if rd_density_group == 0, ///
+        sort lcolor(navy%42) lwidth(vthin) lpattern(shortdash)) ///
+    (line rd_density_cir rd_density_grid if rd_density_group == 0, ///
+        sort lcolor(navy%42) lwidth(vthin) lpattern(shortdash)) ///
+    (line rd_density_f rd_density_grid if rd_density_group == 0, ///
+        sort lcolor(navy) lwidth(medthick) lpattern(solid)) ///
+    (rarea rd_density_cil rd_density_cir rd_density_grid ///
+        if rd_density_group == 1, ///
+        sort color(maroon%28) lcolor(none)) ///
+    (line rd_density_cil rd_density_grid if rd_density_group == 1, ///
+        sort lcolor(maroon%42) lwidth(vthin) lpattern(shortdash)) ///
+    (line rd_density_cir rd_density_grid if rd_density_group == 1, ///
+        sort lcolor(maroon%42) lwidth(vthin) lpattern(shortdash)) ///
+    (line rd_density_f rd_density_grid if rd_density_group == 1, ///
+        sort lcolor(maroon) lwidth(medthick) lpattern(solid)), ///
+    xline(0, lcolor(black) lpattern(dash) lwidth(thin)) ///
+    xlabel(-.02(.005).02, format(%6.3f) ///
+        grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    ylabel(, angle(0) grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+    xtitle("Victimization index centered at the B-C cutoff", size(small)) ///
+    ytitle("Estimated density", size(small)) ///
+    title("Local-polynomial density at the B-C cutoff", ///
+        size(medium) color(black)) ///
+    subtitle("Local-quadratic estimates with pointwise 95% intervals; T = `density_t_text', p = `density_p_text'", ///
+        size(small) color(gs5)) ///
+    legend(order(4 "Below cutoff" 8 "At or above cutoff") ///
+        rows(1) position(6) size(small) region(lcolor(none))) ///
+    note( ///
+        "Notes: Unit is an RUV centro poblado in the selected geography and category B or C. Solid curves are separate local-quadratic density estimates;" ///
+        "thin dashed curves bound pointwise 95% confidence intervals. The formal rddensity statistic uses local-cubic bias correction and triangular kernels," ///
+        "jackknife inference, automatic bandwidth selection, mass-point adjustment, and excludes scores within 0.00005 of B-C." ///
+        "The rounded, repeated running variable warrants caution: this is a sorting diagnostic, not proof of no manipulation. Source: RUV.", ///
+        size(vsmall) color(gs5) span) ///
+    xsize(10) ysize(7) ///
+    graphregion(color(white)) plotregion(color(white))
+
+graph export ///
+    "`figure_dir'/fig_rd_validation_09_running_variable_density.png", ///
+    width(3000) replace
+drop rd_density_*
+
+/*
+Create one graphical falsification test for each substantive covariate. The
+plots use raw, interpretable units. Formal multiplicity-adjusted decisions
+remain in the standardized table and CSV; linkage indicators remain table-only
+because they diagnose data availability rather than substantive balance.
+*/
+
+local graph_vars ///
+    altitude_m_2017 ///
+    ln1p_dist_near_dist_cap ///
+    ihs_gdp_dist_2006 ///
+    gdp_dist_aagr_9306 ///
+    gdp_dist_hhi_2006 ///
+    elect_turnout_2002 ///
+    elect_margin_2002 ///
+    elect_nep_2002 ///
+    elect_turnout_2006 ///
+    elect_margin_2006 ///
+    mayor_apra_2006 ///
+    ln_population_2007 ///
+    wellbeing_core_2007 ///
+    share_indigenous_language_2007 ///
+    share_literate_2007 ///
+    share_female_2007 ///
+    urban_2007
+
+local graph_title_1  "Altitude"
+local graph_title_2  "Distance to the nearest district capital"
+local graph_title_3  "District GDP in 2006"
+local graph_title_4  "District GDP growth, 1993-2006"
+local graph_title_5  "District GDP concentration in 2006"
+local graph_title_6  "Municipal turnout in 2002"
+local graph_title_7  "Municipal victory margin in 2002"
+local graph_title_8  "Effective municipal lists in 2002"
+local graph_title_9  "Municipal turnout in 2006"
+local graph_title_10 "Municipal victory margin in 2006"
+local graph_title_11 "APRA mayor status in 2006"
+local graph_title_12 "Centro-poblado population in 2007"
+local graph_title_13 "Centro-poblado wellbeing in 2007"
+local graph_title_14 "Indigenous first-language share in 2007"
+local graph_title_15 "Literacy share in 2007"
+local graph_title_16 "Female population share in 2007"
+local graph_title_17 "Urban status in 2007"
+
+local graph_ytitle_1  "Meters above sea level"
+local graph_ytitle_2  "Log(1 + km)"
+local graph_ytitle_3  "Inverse hyperbolic sine of district GDP"
+local graph_ytitle_4  "Annual growth rate"
+local graph_ytitle_5  "Herfindahl-Hirschman index"
+local graph_ytitle_6  "Turnout share"
+local graph_ytitle_7  "Valid-vote share margin"
+local graph_ytitle_8  "Effective number of lists"
+local graph_ytitle_9  "Turnout share"
+local graph_ytitle_10 "Valid-vote share margin"
+local graph_ytitle_11 "Share with APRA mayor"
+local graph_ytitle_12 "Log population"
+local graph_ytitle_13 "Equal-domain wellbeing score"
+local graph_ytitle_14 "Population share"
+local graph_ytitle_15 "Population share"
+local graph_ytitle_16 "Population share"
+local graph_ytitle_17 "Share classified as urban"
+
+local graph_format_1  "%9.0fc"
+local graph_format_2  "%4.1f"
+local graph_format_3  "%4.1f"
+local graph_format_4  "%5.2f"
+local graph_format_5  "%4.2f"
+local graph_format_6  "%4.2f"
+local graph_format_7  "%4.2f"
+local graph_format_8  "%4.1f"
+local graph_format_9  "%4.2f"
+local graph_format_10 "%4.2f"
+local graph_format_11 "%4.2f"
+local graph_format_12 "%4.1f"
+local graph_format_13 "%4.2f"
+local graph_format_14 "%4.2f"
+local graph_format_15 "%4.2f"
+local graph_format_16 "%4.2f"
+local graph_format_17 "%4.2f"
+
+local graph_file_1  "covariate_01_altitude"
+local graph_file_2  "covariate_02_distance_district_capital"
+local graph_file_3  "covariate_03_district_gdp_2006"
+local graph_file_4  "covariate_04_district_gdp_growth_1993_2006"
+local graph_file_5  "covariate_05_district_gdp_concentration_2006"
+local graph_file_6  "covariate_06_municipal_turnout_2002"
+local graph_file_7  "covariate_07_municipal_margin_2002"
+local graph_file_8  "covariate_08_effective_lists_2002"
+local graph_file_9  "covariate_09_municipal_turnout_2006"
+local graph_file_10 "covariate_10_municipal_margin_2006"
+local graph_file_11 "covariate_11_apra_mayor_2006"
+local graph_file_12 "covariate_12_population_2007"
+local graph_file_13 "covariate_13_wellbeing_2007"
+local graph_file_14 "covariate_14_indigenous_language_2007"
+local graph_file_15 "covariate_15_literacy_2007"
+local graph_file_16 "covariate_16_female_share_2007"
+local graph_file_17 "covariate_17_urban_2007"
+
+forvalues graph_index = 1/17 {
+    local graph_var : word `graph_index' of `graph_vars'
+    local graph_title "`graph_title_`graph_index''"
+    local graph_ytitle "`graph_ytitle_`graph_index''"
+    local graph_format "`graph_format_`graph_index''"
+    local graph_file "`graph_file_`graph_index''"
+    local figure_number = `graph_index' + 9
+    local figure_number : display %02.0f `figure_number'
+    local figure_number = strtrim("`figure_number'")
+
+    quietly rdrobust ///
+        `graph_var' running_bc if rd_bc_drop_band, ///
+        c(0) p(1) q(2) ///
+        bwselect(mserd) ///
+        kernel(triangular) ///
+        vce(cr2 cluster_dist) ///
+        masspoints(adjust)
+
+    local graph_h_left = e(h_l)
+    local graph_h_right = e(h_r)
+    local graph_p = e(pv_rb)
+    local graph_n_eff = e(N_h_l) + e(N_h_r)
+    local graph_h_text : display %6.4f max(`graph_h_left', `graph_h_right')
+    local graph_p_text : display %5.3f `graph_p'
+    if `graph_p' < .001 local graph_p_text "< 0.001"
+
+    capture drop rdplot_* rdplot_bin_tag
+    quietly rdplot ///
+        `graph_var' running_bc if ///
+            rd_bc_drop_band & ///
+            running_bc >= -`graph_h_left' & ///
+            running_bc <= `graph_h_right', ///
+        c(0) p(1) ///
+        h(`graph_h_left' `graph_h_right') ///
+        kernel(triangular) ///
+        binselect(qsmv) ///
+        masspoints(adjust) ///
+        ci(95) genvars hide
+
+    egen byte rdplot_bin_tag = tag(rdplot_id) if !missing(rdplot_id)
+
+    local timing_note ///
+        "The measure is pre-treatment or fixed before rollout."
+    local graph_source ///
+        "INEI geospatial centro-poblado records"
+    if inrange(`graph_index', 3, 5) {
+        local graph_source "Seminario-Palomino nightlights GDP estimates"
+    }
+    if inrange(`graph_index', 6, 11) {
+        local graph_source "ONPE and JNE municipal-election records"
+    }
+    if `graph_index' >= 12 {
+        local timing_note ///
+            "The 2007 measure is timing-sensitive because the Census may overlap the first program year."
+        local graph_source "INEI 2007 Population Census"
+    }
+
+    twoway ///
+        (rcap rdplot_ci_l rdplot_ci_r rdplot_mean_x ///
+            if rdplot_bin_tag & rdplot_mean_x < 0, ///
+            lcolor(navy%48) lwidth(vthin)) ///
+        (scatter rdplot_mean_y rdplot_mean_x ///
+            if rdplot_bin_tag & rdplot_mean_x < 0, ///
+            mcolor(navy) msymbol(O) msize(small)) ///
+        (line rdplot_hat_y running_bc if ///
+            rd_bc_drop_band & !missing(`graph_var') & ///
+            running_bc < 0 & running_bc >= -`graph_h_left', ///
+            sort lcolor(navy) lwidth(medthick) lpattern(solid)) ///
+        (rcap rdplot_ci_l rdplot_ci_r rdplot_mean_x ///
+            if rdplot_bin_tag & rdplot_mean_x >= 0, ///
+            lcolor(maroon%48) lwidth(vthin)) ///
+        (scatter rdplot_mean_y rdplot_mean_x ///
+            if rdplot_bin_tag & rdplot_mean_x >= 0, ///
+            mcolor(maroon) msymbol(D) msize(small)) ///
+        (line rdplot_hat_y running_bc if ///
+            rd_bc_drop_band & !missing(`graph_var') & ///
+            running_bc >= 0 & running_bc <= `graph_h_right', ///
+            sort lcolor(maroon) lwidth(medthick) lpattern(solid)), ///
+        xline(0, lcolor(black) lpattern(dash) lwidth(thin)) ///
+        xlabel(, format(%6.3f) ///
+            grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+        ylabel(, format(`graph_format') angle(0) ///
+            grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
+        xtitle("Victimization index centered at the B-C cutoff", size(small)) ///
+        ytitle("`graph_ytitle'", size(small)) ///
+        title("Continuity of `graph_title' at B-C", ///
+            size(medium) color(black)) ///
+        subtitle("Robust bias-corrected district-CR2 test: p = `graph_p_text'; effective N = `graph_n_eff'", ///
+            size(small) color(gs5)) ///
+        legend(order(2 "Below cutoff" 5 "At or above cutoff" 3 "Local-linear fits") ///
+            rows(1) position(6) size(small) region(lcolor(none))) ///
+        note( ///
+            "Notes: Unit is an RUV centro poblado in the selected B/C geography." ///
+            "Points are quantile-spaced, variance-mimicking binned means; bars are 95% confidence intervals." ///
+            "Lines are triangular-kernel local-linear fits in the outcome-specific MSE bandwidth (maximum h = `graph_h_text')." ///
+            "The subtitle reports robust bias-corrected rdrobust inference with district CR2, mass-point adjustment, and rounding-band exclusion." ///
+            "`timing_note' Sources: RUV and `graph_source'.", ///
+            size(vsmall) color(gs5) span) ///
+        xsize(10) ysize(7) ///
+        graphregion(color(white)) plotregion(color(white))
+
+    graph export ///
+        "`figure_dir'/fig_rd_validation_`figure_number'_`graph_file'.png", ///
+        width(3000) replace
+
+    drop rdplot_* rdplot_bin_tag
+}
+
 /* Compact LaTeX support and density table. */
 tempname support_table
 file open `support_table' using ///
@@ -1362,6 +1729,7 @@ file write `covariate_table' "\midrule" _n
 preserve
 use "`covariate_results'", clear
 keep if spec_id == "vce_cr2" & estimation_rc == 0
+sort family outcome_var
 
 foreach family in core timing linkage {
     if "`family'" == "core" local family_label "Predetermined measures"
@@ -1423,6 +1791,7 @@ preserve
 use "`rd_results'", clear
 keep if inlist(family, "score_support", "inference", "estimator")
 keep if estimation_rc == 0
+sort family spec_id outcome_var
 
 forvalues row = 1/`=_N' {
     local family_label = subinstr(family[`row'], "_", " ", .)
@@ -1465,6 +1834,7 @@ file write `local_randomization_table' "\midrule" _n
 
 preserve
 use "`local_randomization_results'", clear
+sort method outcome_var
 
 forvalues row = 1/`=_N' {
     local method_label = subinstr(method[`row'], "_", " ", .)

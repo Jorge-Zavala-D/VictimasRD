@@ -7,9 +7,9 @@
 \toprule
 Method & Outcome & Status & Window & N & Left & Right \\
 \midrule
-rdwinselect & predetermined covariates & recommended window recorded & [-0.00042, 0.00028] & 5 & 3 & 2 \\
 rdrandinf & treat 12 & not run insufficient window support & [-0.00042, 0.00028] & 5 & 3 & 2 \\
 rdrandinf & treat 16 & not run insufficient window support & [-0.00042, 0.00028] & 5 & 3 & 2 \\
+rdwinselect & predetermined covariates & recommended window recorded & [-0.00042, 0.00028] & 5 & 3 & 2 \\
 \bottomrule
 \end{tabular}
 \parbox{0.97\linewidth}{\footnotesize \textit{Notes:} \texttt{rdwinselect} uses altitude, distance to the nearest district capital, 2006 district GDP, 1993--2006 GDP growth, and 2002 turnout and victory margin. Windows respect score mass points; missing covariates are dropped. Randomization inference is prespecified to run only with at least 20 observations and 10 on each side. The selected window contains only five observations, so \texttt{rdrandinf} is correctly not run. Source: RUV, INEI, Seminario-Palomino, ONPE, and JNE.}

@@ -515,9 +515,10 @@ Future literature, theory, interpretation, and manuscript tasks must consult
 that notebook. A NotebookLM answer is not a citable source and cannot by itself
 support a manuscript claim. Exact metadata and the supporting passage or
 result must be checked in the underlying PDF or official document before use.
-The notebook is not authoritative for official CMAN/RUV rules or records and
-does not contain a sufficient modern RD methods corpus; those require separate
-official and methodological sources.
+The notebook is not authoritative for official CMAN/RUV rules or records. It
+now contains relevant modern RD-methods sources, but specifications and
+manuscript claims must still be verified against the underlying papers,
+official software documentation, and project evidence.
 
 ## Critical research decisions
 
