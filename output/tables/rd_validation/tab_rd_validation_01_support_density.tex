@@ -1,0 +1,17 @@
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Running-variable support and density diagnostics at B--C}
+\label{tab:rd_validation_support_density}
+\begin{tabular}{lrrrrrrr}
+\toprule
+Score branch & N & Left & Right & Unique left & Unique right & Density \(T\) & \(p\)-value \\
+\midrule
+score as recorded & 549 & 294 & 255 & 160 & 212 & -0.472 & 0.637 \\
+drop sign conflicts & 549 & 294 & 255 & 160 & 212 & -0.472 & 0.637 \\
+drop rounding band & 549 & 294 & 255 & 160 & 212 & -0.472 & 0.637 \\
+full support drop band & 1,162 & 622 & 540 & 220 & 471 & -0.117 & 0.907 \\
+\bottomrule
+\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The unit is an RUV centro poblado in the research-team-selected geography. The first three branches use categories B and C; the final branch retains the selected geography's full score support. Density statistics are robust local-polynomial \texttt{rddensity} tests with triangular kernels, mass-point adjustment, and jackknife variance. The recorded score is rounded and repeated, so the density test is a sorting diagnostic rather than definitive evidence of manipulation or its absence. Source: RUV victimization register.}
+\end{table}

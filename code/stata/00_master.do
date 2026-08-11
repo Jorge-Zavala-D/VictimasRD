@@ -7,7 +7,7 @@
 |                   dependencies, and optionally run the ordered pipeline.      |
 |                                                                               |
 | Date created:     27 July 2026                                                |
-| Last updated:     29 July 2026                                                |
+| Last updated:     10 August 2026                                              |
 | Stata version:    19                                                          |
 *-------------------------------------------------------------------------------*/
 
@@ -426,9 +426,7 @@ Each adjacent pair is:
 */
 
 local ssc_package_command_pairs ///
-    rddensity   rddensity ///
     lpdensity   lpdensity ///
-    rdpower     rdpower ///
     reclink     reclink ///
     freqindex   freqindex ///
     matchit     matchit ///
@@ -490,6 +488,8 @@ their authors' repositories rather than SSC.
 
 local net_specs ///
     rdrobust rdrobust     https://raw.githubusercontent.com/rdpackages/rdrobust/main/stata ///
+    rddensity rddensity   https://raw.githubusercontent.com/rdpackages/rddensity/main/stata ///
+    rdpower   rdmde       https://raw.githubusercontent.com/rdpackages/rdpower/main/stata ///
     rdmulti   rdmc        https://raw.githubusercontent.com/rdpackages/rdmulti/main/stata ///
     rdlocrand rdwinselect https://raw.githubusercontent.com/rdpackages/rdlocrand/main/stata ///
     binsreg   binsreg     https://raw.githubusercontent.com/nppackages/binsreg/main/stata
@@ -601,6 +601,15 @@ capture quietly rdrobust ///
     vce(cluster smoke_cluster) ///
     masspoints(off)
 local rdrobust_smoke_rc = _rc
+
+capture quietly rddensity ///
+    smoke_x, ///
+    c(0) p(2) q(3) ///
+    fitselect(unrestricted) ///
+    kernel(triangular) ///
+    bwselect(comb) ///
+    vce(jackknife)
+local rddensity_smoke_rc = _rc
 clear
 
 if `rdrobust_smoke_rc' {
@@ -609,6 +618,14 @@ if `rdrobust_smoke_rc' {
     display as error "Stata return code: `rdrobust_smoke_rc'"
     log close victimasrd_master
     exit `rdrobust_smoke_rc'
+}
+
+if `rddensity_smoke_rc' {
+    display as error "Project-local rddensity failed its cold-session smoke test."
+    display as error "Reinstall from the official rdpackages source and rerun."
+    display as error "Stata return code: `rddensity_smoke_rc'"
+    log close victimasrd_master
+    exit `rddensity_smoke_rc'
 }
 
 display as result "Project paths and user-written dependencies verified."
@@ -631,6 +648,7 @@ until their treatment timing, tie rule, and estimands are approved.
 local run_all                         0
 local run_01_data_preparation         0
 local run_02_describe_data            0
+local run_03_validate_rd_assumptions  0
 local run_04_estimate_main_effects    0
 local run_05_run_robustness           0
 local run_06_analyze_mechanisms       0
@@ -641,6 +659,7 @@ local pipeline_switches ///
     run_all ///
     run_01_data_preparation ///
     run_02_describe_data ///
+    run_03_validate_rd_assumptions ///
     run_04_estimate_main_effects ///
     run_05_run_robustness ///
     run_06_analyze_mechanisms ///
@@ -698,6 +717,12 @@ if `run_all' | `run_02_describe_data' {
         label("Descriptive analysis")
 }
 
+if `run_all' | `run_03_validate_rd_assumptions' {
+    victimasrd_run_step, ///
+        file("${pipeline_root}/03b_validate_rd_assumptions.do") ///
+        label("Selected-sample RD validity and falsification diagnostics")
+}
+
 /*
 The exhaustive search is preserved but deliberately bracketed out of every
 push-button master run, including run_all. Regenerate it only as an explicit
@@ -748,6 +773,7 @@ if `run_all' | `run_08_run_release_checks' {
 if !`run_all' & ///
    !`run_01_data_preparation' & ///
    !`run_02_describe_data' & ///
+   !`run_03_validate_rd_assumptions' & ///
    !`run_04_estimate_main_effects' & ///
    !`run_05_run_robustness' & ///
    !`run_06_analyze_mechanisms' & ///

@@ -8,11 +8,12 @@ The expected modules are:
 1. `01_data_preparation.do`
 2. `02_describe_data.do`
 3. `03_validate_rd_design.do`
-4. `04_estimate_main_effects.do`
-5. `05_run_robustness.do`
-6. `06_analyze_migration_mechanisms.do`
-7. `07_build_tables_figures.do`
-8. `08_run_release_checks.do`
+4. `03b_validate_rd_assumptions.do`
+5. `04_estimate_main_effects.do`
+6. `05_run_robustness.do`
+7. `06_analyze_migration_mechanisms.do`
+8. `07_build_tables_figures.do`
+9. `08_run_release_checks.do`
 
 `01_data_preparation.do` is the single authoritative Stata preparation
 program. It is organized internally by source family and performs source
@@ -75,6 +76,20 @@ and
 Because the audit is computationally intensive, its master invocation is
 commented out, including under `run_all`; regeneration is an explicit
 standalone Stata MCP task.
+
+`03b_validate_rd_assumptions.do` is the routine, selected-sample validity and
+falsification module. It does not repeat the geographic search. It evaluates
+the fixed `sample_main_rd` geography at B--C using score-support and rounding
+branches, density diagnostics appropriate to a repeated score, annual first
+stages, predetermined and timing-sensitive covariate continuity, linkage
+continuity, multiple-testing adjustments, local-randomization feasibility,
+and prespecified bandwidth, kernel, polynomial, donut, placebo-cutoff,
+parametric, and inference sensitivity. It writes reviewer-facing CSV, LaTeX,
+and figure outputs under `output/` and records them in
+`metadata/rd-validation-output-manifest.csv`. Its design contract and deferred
+outcome-dependent tests are documented in
+[`docs/RD_VALIDATION_PROTOCOL.md`](../../../docs/RD_VALIDATION_PROTOCOL.md).
+Unlike the exhaustive search, this bounded module is eligible for `run_all`.
 
 Modules will be added sequentially. They must:
 

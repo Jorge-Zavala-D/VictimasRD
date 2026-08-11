@@ -1,0 +1,16 @@
+\begin{table}[!htbp]
+\centering
+\small
+\caption{Selected-sample B--C first-stage discontinuities}
+\label{tab:rd_validation_first_stage}
+\begin{tabular}{lrrrrrr}
+\toprule
+Horizon & Estimate & Robust SE & 95\% CI & \(p\)-value & Effective N & Districts \\
+\midrule
+2012 & 0.768 & 0.226 & [0.325, 1.211] & 0.001 & 70 & 48 \\
+2016 & 0.956 & 0.206 & [0.553, 1.360] & 0.000 & 62 & 44 \\
+2023 & 0.060 & 0.168 & [-0.269, 0.389] & 0.720 & 122 & 68 \\
+\bottomrule
+\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt by the listed year. The unit is an RUV centro poblado in the selected geography and category B or C. Bias-corrected local-linear triangular-kernel estimates use MSE-optimal bandwidths, robust inference, mass-point adjustment, district CR2 variance, and exclusion of scores within 0.00005 of B--C. Effective N is the sum inside the left and right bandwidths. Conventional point estimates are retained in the CSV. No treatment horizon is selected by this table. Source: RUV and CMAN through 2023.}
+\end{table}

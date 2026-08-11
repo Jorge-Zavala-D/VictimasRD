@@ -1,0 +1,42 @@
+\begin{table}[!htbp]
+\centering
+\scriptsize
+\caption{Continuity of predetermined, near-baseline, and linkage measures}
+\label{tab:rd_validation_covariates}
+\begin{tabular}{lrrrr}
+\toprule
+Measure & Estimate & 95\% CI & Raw \(p\) & BH \(q\) \\
+\midrule
+\multicolumn{5}{l}{\textit{Predetermined measures}} \\
+IHS district GDP, 2006 & -0.868 & [-1.629, -0.106] & 0.026 & 0.231 \\
+Effective municipal lists, 2002 & -0.708 & [-1.390, -0.026] & 0.042 & 0.231 \\
+District GDP annual growth, 1993-2006 & -0.687 & [-1.456, 0.082] & 0.080 & 0.293 \\
+Altitude (meters) & -0.549 & [-1.391, 0.293] & 0.201 & 0.553 \\
+Municipal victory margin, 2006 & 0.738 & [-0.624, 2.100] & 0.288 & 0.634 \\
+Municipal turnout, 2006 & -0.515 & [-1.786, 0.757] & 0.427 & 0.738 \\
+District GDP concentration, 2006 & -0.218 & [-0.807, 0.372] & 0.469 & 0.738 \\
+Municipal victory margin, 2002 & 0.212 & [-0.521, 0.945] & 0.571 & 0.785 \\
+Municipal turnout, 2002 & 0.134 & [-0.885, 1.154] & 0.796 & 0.924 \\
+APRA mayor elected in 2006 & -0.168 & [-1.804, 1.467] & 0.840 & 0.924 \\
+Log distance to nearest district capital & -0.020 & [-0.936, 0.895] & 0.965 & 0.965 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{2007 timing-sensitive measures}} \\
+Urban community, 2007 & -0.291 & [-1.091, 0.509] & 0.475 & 0.970 \\
+Log population, 2007 & 0.093 & [-0.878, 1.065] & 0.851 & 0.970 \\
+Indigenous-language share, 2007 & 0.095 & [-0.911, 1.100] & 0.853 & 0.970 \\
+Core wellbeing score, 2007 & -0.081 & [-1.091, 0.929] & 0.875 & 0.970 \\
+Female population share, 2007 & -0.056 & [-1.113, 1.000] & 0.917 & 0.970 \\
+Literacy share, 2007 & 0.023 & [-1.147, 1.193] & 0.970 & 0.970 \\
+\addlinespace
+\multicolumn{5}{l}{\textit{Linkage and availability measures}} \\
+Linked to CCPP GDP & -0.081 & [-0.278, 0.117] & 0.423 & 0.905 \\
+Linked to 2007 Census & -0.053 & [-0.252, 0.147] & 0.603 & 0.905 \\
+Linked to district GDP & 0.000 & [0.000, 0.000] & -- & -- \\
+Linked to geospatial spine & -0.009 & [-0.210, 0.192] & 0.930 & 0.930 \\
+Municipal data available, 2006 & 0.000 & [0.000, 0.000] & -- & -- \\
+Municipal data available, 2002 & 0.000 & [0.000, 0.000] & -- & -- \\
+\addlinespace
+\bottomrule
+\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Each row is a separate bias-corrected local-linear triangular-kernel \texttt{rdrobust} continuity test at B--C in the selected geography. Core and 2007 measures are standardized within the B--C sample; linkage rows are probability differences. Models use MSE-optimal bandwidths, mass-point adjustment, district CR2 inference, and rounding-band exclusion. BH q-values control the false discovery rate within family; Holm-adjusted values and NN, HC3, CR1, CR2, and CR3 branches are in the CSV. The 2007 Census may overlap the first program year. Source: RUV, INEI, Seminario-Palomino, ONPE, and JNE.}
+\end{table}

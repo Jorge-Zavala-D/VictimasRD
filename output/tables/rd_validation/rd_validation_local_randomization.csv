@@ -1,0 +1,4 @@
+method,outcome_var,status,window_left,window_right,n_total,n_left,n_right,statistic,pvalue,estimation_rc
+rdwinselect,predetermined_covariates,recommended_window_recorded,-.00042,.00028000001,5,3,2,,.4084084,0
+rdrandinf,treat_12,not_run_insufficient_window_support,-.00042,.00028000001,5,3,2,,,
+rdrandinf,treat_16,not_run_insufficient_window_support,-.00042,.00028000001,5,3,2,,,

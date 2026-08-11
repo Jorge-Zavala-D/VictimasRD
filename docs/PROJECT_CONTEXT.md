@@ -472,6 +472,37 @@ named candidate, cutoff, and year. The protocol, decision gate, specification
 grid, and output contract are documented in
 `docs/RD_DESIGN_AUDIT_PROTOCOL.md`.
 
+## Selected-sample RD validation implementation
+
+On August 10, 2026, the project added a routine validity module for the fixed
+legacy geography and B--C boundary. It is distinct from the opt-in 96,524-cell
+geographic search: it does not select geography, cutoff, treatment horizon, or
+reported specification. The current registry already contains the main
+pre-treatment inputs needed for this stage: RUV/CMAN treatment history,
+geography and altitude, 1993/2006 CCPP GDP, 2002/2006 municipal elections, and
+2007 Census measures whose timing is explicitly flagged. MINEDU and MINSA
+district aggregates may later enrich the institutional analysis, but are not
+prerequisites for evaluating this design.
+
+`03b_validate_rd_assumptions.do` now reports score support and mass points,
+density diagnostics, annual first stages, covariate and linkage continuity,
+within-family BH and Holm corrections, local-randomization feasibility, and
+prespecified sensitivity to support, variance estimator, bandwidth selector,
+kernel, polynomial order, fixed bandwidth, donut radius, placebo cutoff, and
+transparent parametric local-linear models. The routine writes disclosure-safe
+CSV files, LaTeX tables, academic figures, and a checksum manifest to Git; all
+are marked `generated_unreviewed`.
+
+The implementation does not settle causal validity. Preliminary diagnostics
+show meaningful 2012 and 2016 B--C first stages but no 2023 discontinuity,
+limited support for local-randomization inference, and sensitivity in some
+bandwidth, donut, and same-side placebo branches. No covariate imbalance
+survives the prespecified within-family multiplicity adjustment. These findings
+must be reviewed together with the unresolved assignment-regime, treatment-
+timing, score-tie, risk-set, estimand, and inference decisions before outcome
+estimation. The complete specification and interpretation rules are recorded
+in `docs/RD_VALIDATION_PROTOCOL.md`.
+
 ## Recorded literature and NotebookLM decision
 
 The project literature notebook `IE Collective Reparations Peru` is the
