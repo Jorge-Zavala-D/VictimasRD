@@ -72,7 +72,8 @@ or unreviewed archival outputs belong in Git.
 The authoritative pipeline now prepares the RUV victimization registry, CMAN
 collective-reparation treatment history through 2023, selected 2007 Census
 baseline covariates, 2017 CCPP geospatial attributes and capital-distance
-measures, Seminario-Palomino pre-treatment CCPP and district GDP context, and
+measures, Seminario-Palomino pre-treatment GDP context and model-based 2013/
+2017 CCPP GDP outcome candidates, and
 2002/2006 municipal political and electoral context from JNE/INFOgob and ONPE.
 It also prepares the national SISFOH 2012-2013 person and household files,
 constructs person-, household-, and CCPP-level outcomes, and links them to the
@@ -92,7 +93,8 @@ Data products remain outside Git:
 - the all-row registry with 2017 geospatial attributes and geodesic distance
   measures is written to Dropbox Coded as
   `06_community_registry_geospatial.dta`;
-- the all-row registry with compact CCPP and district GDP covariates is
+- the all-row registry with compact CCPP and district GDP context plus 2013/
+  2017 CCPP GDP outcome candidates is
   written to Dropbox Coded as `07_community_registry_gdp.dta`; and
 - the all-row analytical registry with municipal-election covariates is written
   to Dropbox Coded as `08_community_registry_elections.dta`;
@@ -117,6 +119,8 @@ linkage rules are documented in
 [`docs/CENSUS_2017_PREPARATION.md`](docs/CENSUS_2017_PREPARATION.md). The
 historical Census and Ana Maria Dumez workflow comparison is in
 [`docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md`](docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md).
+The dataset-by-dataset readiness assessment is in
+[`docs/ANALYSIS_READINESS_AUDIT_2026-08-14.md`](docs/ANALYSIS_READINESS_AUDIT_2026-08-14.md).
 
 ## Current release status
 

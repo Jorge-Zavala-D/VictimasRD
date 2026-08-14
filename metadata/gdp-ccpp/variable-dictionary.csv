@@ -4,7 +4,14 @@ gdp_ccpp_link_method,category,Highest-priority accepted CCPP GDP link method,Cur
 gdp_ccpp_ubigeo,identifier,Ten-digit code used in the GDP-source link,Seminario-Palomino workbook,Source-vintage code that does not replace RUV ubigeo_ccpp
 gdp_ccpp_1993,source-scale GDP,Estimated CCPP GDP in 1993,Seminario-Palomino workbook,Workbook cells are retained without rescaling
 gdp_ccpp_2006,source-scale GDP,Estimated CCPP GDP in 2006,Seminario-Palomino workbook,Last strictly pre-program annual level
+gdp_ccpp_2013,source-scale GDP,Estimated CCPP GDP in 2013,Seminario-Palomino workbook,Model-based outcome allocated from district GDP using a fixed 2007 CCPP population share
+gdp_ccpp_2017,source-scale GDP,Estimated CCPP GDP in 2017,Seminario-Palomino workbook,Model-based outcome allocated from district GDP using a fixed 2007 CCPP population share
+ln_gdp_ccpp_2006,transformed GDP,Natural log of estimated CCPP GDP in 2006,ln of gdp_ccpp_2006 for positive values,Missing for source zeros and retained as a transform-matched baseline covariate
+ln_gdp_ccpp_2013,transformed GDP,Natural log of estimated CCPP GDP in 2013,ln of gdp_ccpp_2013 for positive values,Missing for source zeros and inherits district growth
+ln_gdp_ccpp_2017,transformed GDP,Natural log of estimated CCPP GDP in 2017,ln of gdp_ccpp_2017 for positive values,Missing for source zeros and inherits district growth
 ihs_gdp_ccpp_2006,transformed GDP,Inverse hyperbolic sine of estimated CCPP GDP in 2006,asinh of gdp_ccpp_2006,Zero-safe log-like transformation whose scale follows the source
+ihs_gdp_ccpp_2013,transformed GDP,Inverse hyperbolic sine of estimated CCPP GDP in 2013,asinh of gdp_ccpp_2013,Zero-inclusive sensitivity transform that inherits district growth and depends on the unconfirmed source unit
+ihs_gdp_ccpp_2017,transformed GDP,Inverse hyperbolic sine of estimated CCPP GDP in 2017,asinh of gdp_ccpp_2017,Zero-inclusive sensitivity transform that inherits district growth and depends on the unconfirmed source unit
 gdp_ccpp_zero_9318,indicator,Estimated CCPP GDP equals zero in every source year from 1993 through 2018,Row maximum across the annual source series,Source zero may reflect the estimation procedure rather than no economic activity
 gdp_dist_linked,indicator,RUV row linked to a district represented in the GDP source,Source CCPP district then exact district-code and name passes,Does not imply a CCPP-level GDP link
 gdp_dist_link_method,category,Highest-priority accepted GDP-district link method,Deterministic district linkage,No fuzzy match is accepted

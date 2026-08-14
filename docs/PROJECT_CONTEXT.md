@@ -311,16 +311,18 @@ workbook was designated as the current source for pre-treatment local economic
 context. Its 98,011 unique CCPP rows, 1,833 districts, annual nonnegative
 values, and national totals are validated against the locked workbook
 checksum. The complete annual source and district aggregation remain in
-Dropbox Working; the all-row analytical registry retains only compact 1993 and
-2006 levels, inverse-hyperbolic-sine 2006 transformations, 1993--2006 district
-annualized growth, and district settlement-concentration measures.
+Dropbox Working; the all-row analytical registry retains compact 1993 and
+2006 context plus 2013 and 2017 CCPP level, natural-log, and inverse-
+hyperbolic-sine outcome candidates.
 
 The source allocates district GDP across CCPPs using 2007 population shares
 and applies district growth to the community series. Community growth is
 therefore not treated as independent local growth. The district HHI and
 largest-settlement share describe concentration of estimated source activity
 across CCPPs; they must not be labeled income inequality, poverty, welfare, or
-a Gini coefficient. The source workbook is not rescaled because its embedded
+a Gini coefficient. Post-2006 CCPP growth and distribution outcomes are not
+constructed because the source applies district growth to fixed within-
+district CCPP shares. The source workbook is not rescaled because its embedded
 sheet does not independently label the numeric display unit.
 
 GDP linkage never overwrites the verified RUV code. It prioritizes exact
@@ -432,6 +434,25 @@ presence in the data does not identify a causal mediation effect. Full source,
 linkage, aggregation, wellbeing, NBI, disclosure, and interpretation rules are
 in `docs/CENSUS_2017_PREPARATION.md`; the historical code and independent
 thesis comparison is in `docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md`.
+
+## Recorded analysis-readiness assessment
+
+On August 14, 2026, the project determined that the prepared data are
+sufficient to begin building and testing the outcome-estimation modules, but
+not to label any estimate as the paper's primary causal result. The binding
+remaining work is an approved outcome and specification registry covering the
+dated treatment event and risk set, score-tie/support rule, ITT and fuzzy-RD
+estimands, clustering and weak-first-stage inference, Census linkage
+selection, outcome families and multiplicity, and the mechanism/mediation
+boundary.
+
+The 2013 and 2017 person and household analyses do not share one observational
+universe. Files 09 and 10 retain the full RUV-linked SISFOH samples; files 12
+and 13 retain the restricted INEI-assisted Census source cohort. The latter
+must not silently replace the former for 2013 outcome analysis. MINEDU, MINSA,
+CENAGRO, ENDES, Juntos, public-expenditure, and later-election sources may add
+named extensions, but they are not prerequisites for the current core RD.
+Full details are in `docs/ANALYSIS_READINESS_AUDIT_2026-08-14.md`.
 
 ## Recorded descriptive-analysis boundary
 

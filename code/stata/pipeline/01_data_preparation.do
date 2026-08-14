@@ -5422,9 +5422,10 @@ cd "`geospatial_prior_directory'"
 The source estimates real GDP for a fixed 2007 CCPP universe from 1993 to
 2018. District GDP is allocated across CCPPs using 2007 population shares, and
 the community series then inherits district growth. The full annual source is
-kept in Dropbox Working. The analytical registry retains only two
-pre-treatment levels, a zero-safe transformation, district pre-treatment
-growth, and transparent settlement-concentration measures.
+kept in Dropbox Working. The analytical registry retains compact pre-treatment
+context plus 2013 and 2017 model-based CCPP activity outcomes. Natural logs
+are defined only for positive estimates; inverse-hyperbolic-sine transforms
+retain the source's zero-valued rows.
 
 The concentration measures are not income or household-welfare inequality.
 They summarize how the source allocates estimated district activity across
@@ -5959,11 +5960,31 @@ merge m:1 gdp_ccpp_ubigeo using `gdp_ccpp_source', ///
     keepusing( ///
         gdp_ccpp_1993 ///
         gdp_ccpp_2006 ///
+        gdp_ccpp_2013 ///
+        gdp_ccpp_2017 ///
         gdp_ccpp_zero_9318) ///
     nogen
-generate double ihs_gdp_ccpp_2006 = asinh(gdp_ccpp_2006)
-label variable ihs_gdp_ccpp_2006 ///
-    "Inverse-hyperbolic-sine estimated CCPP GDP, 2006"
+
+foreach outcome_year in 2006 2013 2017 {
+    generate double ln_gdp_ccpp_`outcome_year' = ///
+        ln(gdp_ccpp_`outcome_year') ///
+        if gdp_ccpp_`outcome_year' > 0 & ///
+           !missing(gdp_ccpp_`outcome_year')
+    generate double ihs_gdp_ccpp_`outcome_year' = ///
+        asinh(gdp_ccpp_`outcome_year')
+
+    assert missing(ln_gdp_ccpp_`outcome_year') ///
+        if missing(gdp_ccpp_`outcome_year') | ///
+           gdp_ccpp_`outcome_year' == 0
+    assert !missing(ln_gdp_ccpp_`outcome_year') ///
+        if gdp_ccpp_`outcome_year' > 0 & ///
+           !missing(gdp_ccpp_`outcome_year')
+
+    label variable ln_gdp_ccpp_`outcome_year' ///
+        "Natural log estimated CCPP GDP, `outcome_year'; positive values"
+    label variable ihs_gdp_ccpp_`outcome_year' ///
+        "Inverse-hyperbolic-sine estimated CCPP GDP, `outcome_year'"
+}
 isid ruv_id
 save `gdp_link_values'
 
@@ -6021,6 +6042,10 @@ label variable gdp_ccpp_1993 ///
     "Estimated CCPP GDP, source units, 1993"
 label variable gdp_ccpp_2006 ///
     "Estimated CCPP GDP, source units, 2006"
+label variable gdp_ccpp_2013 ///
+    "Estimated CCPP GDP, source units, 2013"
+label variable gdp_ccpp_2017 ///
+    "Estimated CCPP GDP, source units, 2017"
 label variable gdp_ccpp_zero_9318 ///
     "Estimated CCPP GDP equals zero in every source year, 1993-2018"
 
@@ -6188,7 +6213,14 @@ local gdp_release_vars ///
     gdp_ccpp_ubigeo ///
     gdp_ccpp_1993 ///
     gdp_ccpp_2006 ///
+    gdp_ccpp_2013 ///
+    gdp_ccpp_2017 ///
+    ln_gdp_ccpp_2006 ///
+    ln_gdp_ccpp_2013 ///
+    ln_gdp_ccpp_2017 ///
     ihs_gdp_ccpp_2006 ///
+    ihs_gdp_ccpp_2013 ///
+    ihs_gdp_ccpp_2017 ///
     gdp_ccpp_zero_9318 ///
     gdp_dist_linked ///
     gdp_dist_link_method ///

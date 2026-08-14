@@ -9,8 +9,9 @@ prepares the estimated CCPP GDP series supplied in:
 
 The source is immutable. The pipeline preserves its complete annual series in
 Dropbox Working, constructs transparent district aggregates, and merges a
-compact set of pre-treatment economic-context variables into the complete RUV
-registry. No RUV observation is dropped because a GDP link is unavailable.
+compact set of pre-treatment economic-context variables and model-based 2013
+and 2017 outcome candidates into the complete RUV registry. No RUV
+observation is dropped because a GDP link is unavailable.
 
 ## Provenance and source audit
 
@@ -52,11 +53,16 @@ The full annual CCPP and district sources are retained outside Git as:
 - `12_ccpp_gdp_1993_2018.dta`; and
 - `13_district_gdp_1993_2018.dta`.
 
-The final registry retains 1993 and 2006 levels. The latter is the final
-strictly pre-program annual value. Because 12,141 source CCPPs have zero in
-every annual column, the preferred log-like transform is the inverse
-hyperbolic sine rather than an undefined natural logarithm. District
-pre-treatment growth is the annualized compound change from 1993 through 2006:
+The final registry retains 1993 and 2006 levels as pre-treatment context and
+2013 and 2017 levels as model-based outcome candidates. The 2006 value is the
+final strictly pre-program annual value. Because 12,141 source CCPPs have zero
+in every annual column, each analysis year includes both a natural log defined
+only for positive estimates and an inverse-hyperbolic-sine transform that
+retains zeros. The natural log is invariant to a multiplicative source-unit
+rescaling, whereas the inverse hyperbolic sine is not; the latter is therefore
+a zero-inclusive sensitivity transform until the workbook display unit is
+confirmed. District pre-treatment growth is the annualized compound change
+from 1993 through 2006:
 
 `(GDP_2006 / GDP_1993)^(1/13) - 1`.
 
@@ -66,6 +72,13 @@ useful measures of settlement primacy or activity concentration. They are not
 Gini coefficients, income inequality, poverty, household welfare, or evidence
 about within-community distribution. A Gini is deliberately not constructed
 from these aggregate CCPP totals.
+
+No post-2006 CCPP growth, HHI, largest-settlement share, or other distribution
+outcome is added. The source applies a common district growth path to every
+CCPP and holds within-district CCPP shares fixed up to numerical precision.
+Those derived variables would therefore relabel district growth or repeat a
+mechanically time-invariant allocation rather than measure local growth or a
+change in inequality.
 
 ## Deterministic RUV linkage
 
@@ -106,14 +119,18 @@ Aggregate linkage and retention counts are regenerated into
 ## Interpretation limits
 
 These are model-based activity estimates rather than administrative production
-records. They should be treated as contextual covariates and subjected to
-sensitivity analysis, not described as observed community income. The 2007
-population allocation can mechanically correlate community GDP with baseline
-population. Models should avoid simultaneously treating highly collinear
-population, community GDP, and district totals as independent constructs
-without a stated purpose.
+records. The 1993 and 2006 measures are contextual covariates; the 2013 and
+2017 measures are explicitly marked as outcome candidates, never as baseline
+controls. All require sensitivity analysis and must not be described as
+observed community income. The 2007 population allocation can mechanically
+correlate community GDP with baseline population, while all post-2006 change
+comes from the district series. Models should avoid simultaneously treating
+highly collinear population, community GDP, and district totals as independent
+constructs without a stated purpose.
 
-Post-2006 annual values are preserved in the Working source for future
-descriptive or robustness work but are not released as baseline covariates.
-Their use as outcomes would require a separate timing, estimand, and
-post-treatment-bias decision.
+The natural-log outcomes exclude the 13 linked RUV communities whose estimates
+are zero in every source year, including four in `sample_main_rd`. The
+inverse-hyperbolic-sine outcomes retain them but remain sensitive to the
+unconfirmed source display unit. Any causal use still requires a locked
+treatment horizon, administrative risk set, estimand, clustering rule, and
+interpretation of the district-generated outcome before estimation.
