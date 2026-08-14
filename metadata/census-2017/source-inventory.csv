@@ -1,0 +1,7 @@
+source_id,logical_source,source_role,geographic_resolution,immutable_dropbox_location,implemented_use,redistribution_status
+cpv2017_public_person,Official Census 2017 person module,national schema and count validation,district,16 Censo 2017/1-pob.dta,validate row count and anonymous module keys,not for Git
+cpv2017_public_household,Official Census 2017 household module,national schema and count validation,district,16 Censo 2017/2-hog.dta,validate row count and anonymous module keys,not for Git
+cpv2017_public_dwelling,Official Census 2017 dwelling module,national schema and count validation,district,16 Censo 2017/3-viv.dta,validate row count and anonymous module keys,not for Git
+cpv2017_inei_linked,INEI-assisted SISFOH to Census linkage,restricted analytical source,source and destination CCPP,16 Censo 2017/CCPP_SISFOH_CPV_ENTREGAOKA.dta,construct linked cohort outcomes and migration,restricted and not for Git
+cpv2017_inei_handoff,INEI technical linkage handoff,methodological provenance,not applicable,16 Censo 2017/EnlaceCCPP-SISFOH_CPV.docx,document linkage stages and limitations,restricted and not for Git
+

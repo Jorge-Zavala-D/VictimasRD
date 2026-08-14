@@ -3,10 +3,11 @@
 ## Status and purpose
 
 This document defines the harmonization contract for census-based wellbeing
-measures in Victimas RD. The first implementation is the 2007 CCPP aggregate
-workbook in `code/stata/pipeline/01_data_preparation.do`. The same definitions
-should be used, where the source questions permit, when the SISFOH 2013 and
-Census 2017 blocks are rebuilt.
+measures in Victimas RD. The authoritative data-preparation pipeline now
+implements the contract for the 2007 CCPP aggregate workbook, SISFOH
+2012--2013 household microdata, and the INEI-assisted Census 2017 linked
+cohort. Round-specific differences remain explicit rather than being hidden
+inside a common variable name.
 
 The measures are intended for:
 
@@ -138,9 +139,9 @@ The score is constructed at CCPP level. Descriptive estimates for people,
 households, or dwellings must use an explicit, substantively appropriate
 weight; the pipeline does not embed a population weight in the score itself.
 
-## Cross-round harmonization rule
+## Cross-round implementation
 
-The 2013 and 2017 implementations must:
+Every round must:
 
 1. preserve the same direction, domains, indicators, and equal weights;
 2. use equivalent question wording and analytical universes where possible;
@@ -153,6 +154,22 @@ If a component cannot be reconstructed comparably in a later round, the team
 must choose and document either a common reduced index for all rounds or a
 round-specific supplementary score. The canonical definition must not change
 silently.
+
+The SISFOH services domain is named
+`wellbeing_services_proxy_2013` because the source identifies a public or
+pylon water source but does not reproduce the 2007 daily-availability
+condition exactly. The corresponding core and deprivation measures retain the
+same `_proxy_2013` qualification. This is a transparent approximation, not an
+exactly harmonized replacement.
+
+The 2017 person and source-household files retain the component domains and a
+level-appropriate core. In the source-CCPP file, housing, services, and energy
+are source-household-weighted, while human capital is person-weighted among
+eligible linked cohort members. The four resulting domain means receive equal
+weight in `wellbeing_core_2017`; `deprivation_core_2017` is its exact reverse.
+Person-weighted household-condition exposure and a household-weighted
+alternative core remain separately named diagnostics. These measures describe
+the assisted linked cohort, not the complete 2017 population of each CCPP.
 
 ## Methodological anchors
 

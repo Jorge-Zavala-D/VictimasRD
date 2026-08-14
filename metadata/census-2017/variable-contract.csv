@@ -1,0 +1,32 @@
+variable,level,universe,direction_or_definition,analytical_role,missingness_rule
+census2017_linked,person,all 193376 source-cohort people,one when INEI attached a stage 0-3 Census record,linkage outcome,never infer migration from zero
+census2017_not_linked,person,all 193376 source-cohort people,complement of census2017_linked,attrition indicator,retained explicitly
+census2017_person_key_linked,person,all 193376 source-cohort people,one when a canonical de-identified SISFOH person ID is recovered,linkage QA,937 unresolved people retained
+census2017_hh_key_conflict,person and source household,all source-cohort records,one for 5 source households whose members imply multiple SISFOH household IDs,quarantine flag,household ID is missing for all 25 affected people
+moved_ccpp_2013_2017,person,linked people with valid source and destination CCPP,destination CCPP differs from canonical source RUV CCPP,migration outcome,missing when either code or link is unavailable
+moved_district_2013_2017,person,linked people with valid source and destination CCPP,destination district differs from source district,migration outcome,missing when CCPP migration is unobserved
+moved_province_2013_2017,person,linked people with valid source and destination CCPP,destination province differs from source province,migration outcome,missing when CCPP migration is unobserved
+moved_department_2013_2017,person,linked people with valid source and destination CCPP,destination department differs from source department,migration outcome,missing when CCPP migration is unobserved
+moved_district_2012_2017,person,linked Census respondents age five or older,Census reports residence in another district five years earlier,supplementary mobility outcome,missing outside question universe
+moved_or_not_linked_sens_2017,person,all source-cohort people,one for observed CCPP migration or non-linkage,sensitivity outcome only,not a migration measure
+internet_2017,person and destination household,linked people with valid current-household module,current household has internet,post-treatment outcome or descriptive mechanism,missing without valid household item
+employed_2017,person,linked Census respondents age five or older,worked or retained a job business farm or unpaid family activity in reference week,labor outcome,missing outside valid labor universe
+labor_force_2017,person,linked Census respondents age five or older,employed or actively seeking work,labor denominator,missing without valid employment and search status
+unemployed_laborforce_2017,person,linked Census respondents age 14 or older in the labor force,one when unemployed,labor outcome,missing outside the labor force
+nbi_count_2017,destination household and linked people,complete internally consistent destination rosters,sum of five INEI-compatible NBI components,deprivation outcome,missing unless all five components are valid
+wellbeing_housing_2017,person source household and source CCPP,linked records with valid floor item,one minus earth-floor indicator; source-household mean at CCPP,harmonized domain,missing without valid floor item
+wellbeing_services_2017,person source household and source CCPP,linked records with valid water and sanitation items,equal mean of public or pylon daily water and sanitation facility; source-household mean at CCPP,harmonized domain,missing unless both components are valid
+wellbeing_energy_2017,person source household and source CCPP,linked records with valid electricity and cooking items,equal mean of electricity and clean cooking; source-household mean at CCPP,harmonized domain,missing unless both components are valid
+wellbeing_humancapital_2017,person and source household,linked people age 14 or older,equal mean of literacy and secondary-or-higher education,harmonized domain,missing unless both components are valid
+wellbeing_human_capital_2017,source CCPP,represented communities with eligible linked people,person-weighted mean of wellbeing_humancapital_2017,harmonized domain,missing without eligible linked people
+wellbeing_core_2017,person source household and source CCPP,records with all four domains,equal mean of housing services energy and human capital,harmonized outcome,complete domains required
+deprivation_core_2017,person source household and source CCPP,records with wellbeing_core_2017,one minus wellbeing_core_2017,harmonized outcome,missing when core wellbeing is missing
+share_age_0_14_2017,source CCPP,represented communities with valid linked ages,share of linked people age 0 to 14,demographic outcome,missing outside represented cohort
+share_age_15_29_2017,source CCPP,represented communities with valid linked ages,share of linked people age 15 to 29,demographic outcome,missing outside represented cohort
+share_age_30_44_2017,source CCPP,represented communities with valid linked ages,share of linked people age 30 to 44,demographic outcome,missing outside represented cohort
+share_age_45_64_2017,source CCPP,represented communities with valid linked ages,share of linked people age 45 to 64,demographic outcome,missing outside represented cohort
+share_age_65plus_2017,source CCPP,represented communities with valid linked ages,share of linked people age 65 or older,demographic outcome,missing outside represented cohort
+cpv2017_unemployment_rate,source CCPP,represented communities with linked labor-force members,mean unemployment among linked people age 14 or older in the labor force,labor outcome,missing without eligible labor-force members
+baseline_split_destination_2017,source household,all 58021 source households,one when members map to multiple destination households,migration structure,zero includes no or one observed destination
+cpv2017_link_rate,source CCPP,803 represented RUV communities,linked people divided by source-cohort people,selection diagnostic,missing outside represented cohort
+census2017_cohort_covered,source CCPP,all 5712 RUV rows,one for an RUV row represented in the assisted cohort,sample-flow flag,Census outcomes remain missing when zero

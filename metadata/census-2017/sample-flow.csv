@@ -1,0 +1,35 @@
+metric,value,status,note
+census2017_public_person_rows,29381884,validated,Official national public Census person-module rows; district geography only
+census2017_public_household_rows,8283285,validated,Official national public Census household-module rows; district geography only
+census2017_public_dwelling_rows,10133850,validated,Official national public Census dwelling-module rows; district geography only
+census2017_source_ccpp_codes,807,validated,INEI-assisted source CCPP codes accepted in the frozen crosswalk
+census2017_source_ruv_rows,803,validated,Canonical RUV communities represented by the 807 source codes
+census2017_cohort_rows,193376,validated,All people in the INEI-assisted SISFOH-to-Census cohort retained
+census2017_linked_rows,150864,validated,Cohort people linked by INEI to a 2017 Census record
+census2017_not_linked_rows,42512,retained_missing,Cohort people retained with Census outcomes missing; never coded as migration
+census2017_link_stage_0,128908,validated,INEI linkage-stage count reproduced from the technical handoff
+census2017_link_stage_1,7433,validated,INEI linkage-stage count reproduced from the technical handoff
+census2017_link_stage_2,10530,validated,INEI linkage-stage count reproduced from the technical handoff
+census2017_link_stage_3,3993,validated,INEI linkage-stage count reproduced from the technical handoff
+census2017_person_key_source,191832,validated,Canonical SISFOH persons recovered by source CCPP and roster coordinates
+census2017_person_key_inei,442,validated,Additional persons recovered by INEI CCPP and roster coordinates
+census2017_person_key_district,165,validated,Additional persons recovered by a unique district-roster-age-sex key
+census2017_person_key_unresolved,937,retained_unresolved,Cohort people retained without a forced canonical SISFOH person match
+census2017_household_key_conflicts,5,quarantined,Source households whose recovered members imply multiple canonical SISFOH households
+census2017_household_conflict_persons,25,quarantined,People in source households with conflicting canonical SISFOH household IDs
+census2017_sisfoh_age_disagreements,13,diagnostic,Recovered SISFOH person keys whose source and canonical ages differ
+census2017_sisfoh_sex_disagreements,3,diagnostic,Recovered SISFOH person keys whose source and canonical sex values differ
+census2017_baseline_households,58021,validated,De-identified 2013 source households in the INEI-assisted cohort
+census2017_sisfoh_households_recovered,57740,validated,Source households recovered in the canonical SISFOH household file
+census2017_destination_households,66436,validated,Distinct 2017 destination households represented by linked people
+census2017_destination_roster_complete,27276,validated,Destination households whose full Census roster is present in the delivery
+census2017_destination_roster_partial,37933,restricted,Destination households represented by only part of their Census roster
+census2017_destination_roster_missing,1223,restricted,Destination household IDs without a reported Census household size
+census2017_destination_roster_overfull,4,quarantined,Destination households with delivery rows exceeding the reported roster
+census2017_migration_observed,146410,validated,Linked people with valid source and destination CCPP codes
+census2017_moved_ccpp_rows,45695,descriptive,Linked people living in a different CCPP in 2017
+census2017_moved_district_rows,33067,descriptive,Linked people living in a different district in 2017
+census2017_individual_analysis_rows,193376,validated,All source-cohort people in the coded individual analysis file
+census2017_household_analysis_rows,58021,validated,All source households in the coded household analysis file
+census2017_main_sample_covered,803,validated,Selected main-RD sample communities represented in the linked cohort
+census2017_registry_rows,5712,validated,All RUV rows retained after adding linked-cohort Census outcomes

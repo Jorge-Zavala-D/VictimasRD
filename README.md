@@ -76,7 +76,10 @@ measures, Seminario-Palomino pre-treatment CCPP and district GDP context, and
 2002/2006 municipal political and electoral context from JNE/INFOgob and ONPE.
 It also prepares the national SISFOH 2012-2013 person and household files,
 constructs person-, household-, and CCPP-level outcomes, and links them to the
-RUV community universe without dropping unmatched RUV rows.
+RUV community universe without dropping unmatched RUV rows. The pipeline now
+also integrates the INEI-assisted Census 2017 cohort at individual,
+source-household, and source-CCPP levels while keeping Census non-linkage
+distinct from observed migration.
 Run `code/stata/00_master.do` after configuring
 `config/paths.local.do`.
 
@@ -97,7 +100,12 @@ Data products remain outside Git:
   as `09_sisfoh_2013_individual_analysis.dta` and
   `10_sisfoh_2013_household_analysis.dta`; and
 - the current 5,712-row CCPP registry with SISFOH aggregates is written to
-  Dropbox Coded as `11_community_registry_sisfoh_2013.dta`.
+  Dropbox Coded as `11_community_registry_sisfoh_2013.dta`;
+- the complete 193,376-person Census source cohort and 58,021 source households
+  are written as `12_census_2017_individual_analysis.dta` and
+  `13_census_2017_household_analysis.dta`; and
+- the all-row RUV registry with Census linked-cohort outcomes is written as
+  `14_community_registry_census_2017.dta`.
 
 The Census, geospatial, GDP, municipal-election, and SISFOH source audits and
 linkage rules are documented in
@@ -105,18 +113,25 @@ linkage rules are documented in
 [`docs/GEOSPATIAL_2017_PREPARATION.md`](docs/GEOSPATIAL_2017_PREPARATION.md),
 [`docs/CCPP_GDP_PREPARATION.md`](docs/CCPP_GDP_PREPARATION.md),
 [`docs/MUNICIPAL_ELECTIONS_PREPARATION.md`](docs/MUNICIPAL_ELECTIONS_PREPARATION.md),
-and [`docs/SISFOH_2013_PREPARATION.md`](docs/SISFOH_2013_PREPARATION.md).
+[`docs/SISFOH_2013_PREPARATION.md`](docs/SISFOH_2013_PREPARATION.md), and
+[`docs/CENSUS_2017_PREPARATION.md`](docs/CENSUS_2017_PREPARATION.md). The
+historical Census and Ana Maria Dumez workflow comparison is in
+[`docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md`](docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md).
 
 ## Current release status
 
 This repository is not yet an authoritative replication package. Before a
 release, the research team must at minimum:
 
-- define the canonical geographic sample;
-- reconcile the official and manuscript victimization-index cutoffs;
-- define the treatment event and whether the main date is 2012 or 2013;
+- reconcile the approved legacy geography with the assignment regime and
+  estimand used in the manuscript;
+- address score rounding and mass points at the official victimization-index
+  cutoffs;
+- define analysis-specific treatment timing from the recorded CMAN treatment
+  year;
 - identify canonical community, household, and individual data snapshots;
-- document the migration/linkage definition and sample flow;
+- assess differential Census linkage and reconcile the documented cohort with
+  manuscript sample counts;
 - map every live manuscript input to its producing specification and canonical
   Git output;
 - regenerate paper outputs through a single versioned pipeline; and

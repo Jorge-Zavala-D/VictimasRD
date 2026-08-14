@@ -393,6 +393,46 @@ decision rather than a data-cleaning recode. Full construction, linkage,
 confidentiality, and interpretation rules are in
 `docs/SISFOH_2013_PREPARATION.md`.
 
+## Recorded Census 2017 preparation decision
+
+On August 13, 2026, the pipeline integrated the 2017 Population and Housing
+Census through two deliberately separate source roles. The official national
+person, household, and dwelling modules validate the public schema and row
+counts but identify geography only to district. They cannot support a CCPP
+merge. CCPP outcomes instead come from the restricted INEI-assisted linkage
+that begins with the project's SISFOH source cohort. The outputs therefore
+describe that cohort and must never be presented as complete CCPP population
+tabulations.
+
+The assisted source contains 193,376 people in 58,021 source households and
+807 historical source CCPP codes. A reviewed exact crosswalk maps those codes
+to 803 canonical RUV communities, all within the fixed main RD geography. INEI
+linked 150,864 people to Census records and did not link 42,512. Non-linkage is
+retained as missing Census outcomes and is not coded as migration. Deterministic
+roster recovery attaches 192,439 people to canonical SISFOH person IDs; 937
+remain unresolved. Five source households containing 25 people imply
+conflicting SISFOH household IDs and are retained with the household link
+quarantined.
+
+The individual and source-household analytical files retain all 193,376 people
+and all 58,021 source households. The community output preserves all 5,712 RUV
+rows and leaves Census measures missing outside the 803 represented
+communities. Migration compares valid linked 2017 destination CCPP codes with
+the canonical source RUV CCPP and is observed for 146,410 people; non-linkage
+never enters that definition. NBI measures that require a full destination
+household roster are constructed only for the 27,276 complete rosters, not for
+the 37,933 partial, 1,223 unknown-size, or four overfull destination
+households.
+
+The block integrates the analytically useful parts of Ana Maria Dumez's thesis
+workflow while separating linkage, migration, employment, internet access,
+transfer exposure, and household dispersion. Employment and internet access
+in 2017 are post-treatment or contemporaneous mechanism variables; their
+presence in the data does not identify a causal mediation effect. Full source,
+linkage, aggregation, wellbeing, NBI, disclosure, and interpretation rules are
+in `docs/CENSUS_2017_PREPARATION.md`; the historical code and independent
+thesis comparison is in `docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md`.
+
 ## Recorded descriptive-analysis boundary
 
 On July 28, 2026, the canonical descriptive module was separated from
@@ -569,12 +609,14 @@ be resolved by the research team before an authoritative release:
    and specifications.
 4. **Canonical datasets:** several base, modified, SAT/PBI, and conflict-copy
    variants coexist without a complete lineage map.
-5. **Downstream sample flow:** the foundational RUV universe rule is now
-   recorded, but community counts after later census linkages and the linked
-   individual analytical sample still differ across code, data, and manuscript.
-6. **Migration measurement:** absence from a later linked record may reflect
-   migration, death, linkage failure, code changes, coverage, or enumeration
-   differences.
+5. **Downstream sample flow:** the current pipeline now fixes the Census 2017
+   cohort at 193,376 people, 58,021 source households, and 803 of the 1,162
+   selected-geography communities. The manuscript's historical counts and
+   estimands still need to be reconciled to this documented cohort.
+6. **Migration and linkage selection:** migration is now defined only for
+   linked people with valid source and destination CCPP codes; non-linkage is a
+   separate outcome. Differential linkage and the interpretation of the 42,512
+   unlinked people remain identification risks requiring explicit analysis.
 7. **Output provenance:** current manuscript claims appear to rely on older,
    multi-specification workbooks that may include manual selection or edits.
 8. **Fuzzy matches:** community-name matching and manual corrections need a

@@ -36,3 +36,9 @@ and documentation inventory and checksums, the aggregate contest and RUV
 linkage flow, and the 52-variable analytical contract. Mesa-level returns,
 contest-level reconciliations, and row-level RUV linkage records remain in
 Dropbox Working.
+
+The `census-2017/` subdirectory records the public-module and assisted-linkage
+source roles, the reviewed 807-source-code to 803-RUV crosswalk, the analytical
+variable contract, and the aggregate sample flow. Person-, household-, and
+row-level linkage QA remain in Dropbox Working; all analytical observations
+remain in Dropbox Coded.

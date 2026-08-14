@@ -7,7 +7,7 @@
 |                   dependencies, and optionally run the ordered pipeline.      |
 |                                                                               |
 | Date created:     27 July 2026                                                |
-| Last updated:     11 August 2026                                              |
+| Last updated:     13 August 2026                                              |
 | Stata version:    19                                                          |
 *-------------------------------------------------------------------------------*/
 

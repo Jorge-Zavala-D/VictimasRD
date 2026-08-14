@@ -2,7 +2,8 @@
 Project:       Victimas RD
 Program:       01_data_preparation.do
 Purpose:       Authoritative end-to-end data-preparation program
-Current scope: Foundational, Census 2007, spatial, GDP, electoral, and SISFOH
+Current scope: Foundational, Census 2007, spatial, GDP, electoral, SISFOH, and
+               Census 2017
 
 This file is the only canonical Stata data-preparation program. New source
 families will be added as clearly delimited sections here so that the master
@@ -18,6 +19,7 @@ Current source families:
     7. Seminario-Palomino estimated CCPP GDP, 1993--2018
     8. JNE/INFOgob and ONPE municipal elections, 2002--2007
     9. INEI SISFOH district enumeration, 2012--2013
+    10. INEI 2017 Census public modules and assisted SISFOH--Census linkage
 
 Dropbox Raw inputs are immutable. Persistent intermediates and row-level QA
 products are written under Dropbox Working; final analytical datasets are
@@ -174,7 +176,6 @@ program define victimasrd_score_name_pairs
         .10 * `prefix'_token + ///
         .05 * `prefix'_soundex
 end
-
 
 *===============================================================================
 **# 1. Validate the frozen CMAN 2023 extracted table
@@ -8221,7 +8222,8 @@ tempfile ///
     sisfoh_used_source_codes ///
     sisfoh_name_links ///
     sisfoh_ruv_links ///
-    sisfoh_ccpp_linked
+    sisfoh_ccpp_linked ///
+    sisfoh_person_link_keys
 
 
 *-------------------------------------------------------------------------------
@@ -8407,6 +8409,35 @@ rename NRO sisfoh_person_number
 generate str10 ubigeo_ccpp_sisfoh = ///
     DPTO + PROV + DIST + CODCCPP_N
 assert regexm(ubigeo_ccpp_sisfoh, "^[0-9]{10}$")
+
+/*
+The INEI-assisted Census linkage retained the source roster coordinates but
+not the pipeline's de-identified SISFOH IDs. This restricted Working key spine
+allows the Census cohort to recover those IDs without persisting names,
+document numbers, or open text.
+*/
+preserve
+keep ///
+    DPTO PROV DIST NROVIV NHOGAR ///
+    ubigeo_ccpp_sisfoh sisfoh_person_number ///
+    EDAD01 SEXO01 sisfoh_pid sisfoh_hhid
+rename NROVIV sisfoh_dwelling_number
+rename NHOGAR sisfoh_household_number
+rename EDAD01 sisfoh_age_key
+rename SEXO01 sisfoh_sex_key
+generate str6 ubigeo_district_sisfoh = ///
+    DPTO + PROV + DIST
+drop DPTO PROV DIST
+isid ///
+    ubigeo_ccpp_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number
+save `sisfoh_person_link_keys'
+save ///
+    "${intermediate_root}/25_sisfoh_2013_person_linkage_keys.dta", ///
+    replace
+restore
 
 generate byte sisfoh_area_2013 = AREA if inlist(AREA, 1, 2)
 generate str2 sisfoh_ccpp_category_2013 = CATEG1
@@ -9703,9 +9734,1481 @@ save ///
     "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
     replace
 
+*===============================================================================
+**# 13. Prepare Census 2017 at person, household, and CCPP levels
+*===============================================================================
+
+local census2017_person_public ///
+    "${raw_root}/16 Censo 2017/1-pob.dta"
+local census2017_household_public ///
+    "${raw_root}/16 Censo 2017/2-hog.dta"
+local census2017_dwelling_public ///
+    "${raw_root}/16 Censo 2017/3-viv.dta"
+local census2017_linked_raw ///
+    "${raw_root}/16 Censo 2017/CCPP_SISFOH_CPV_ENTREGAOKA.dta"
+local census2017_source_crosswalk ///
+    "${metadata_root}/census-2017/source-ccpp-crosswalk.csv"
+
+foreach census2017_source in ///
+    "`census2017_person_public'" ///
+    "`census2017_household_public'" ///
+    "`census2017_dwelling_public'" ///
+    "`census2017_linked_raw'" ///
+    "`census2017_source_crosswalk'" {
+
+    capture confirm file "`census2017_source'"
+    if _rc {
+        display as error "Required Census 2017 source is unavailable:"
+        display as error "  `census2017_source'"
+        exit 601
+    }
+}
+
+tempfile ///
+    census2017_source_links ///
+    census2017_person_key_map ///
+    census2017_district_key_map ///
+    census2017_person_clean ///
+    census2017_household_keys ///
+    census2017_household_clean ///
+    census2017_ccpp_person ///
+    census2017_ccpp_household ///
+    census2017_ccpp_linked
+
+
+*-------------------------------------------------------------------------------
+**# 13.1 Validate the national public modules and their geography limit
+*-------------------------------------------------------------------------------
+
+quietly describe using "`census2017_person_public'"
+local census2017_public_person_rows = r(N)
+local census2017_public_person_vars = r(k)
+assert `census2017_public_person_rows' == 29381884
+assert `census2017_public_person_vars' == 74
+capture quietly describe ///
+    poblacio_ref_id hogar_ref_id ///
+    using "`census2017_person_public'"
+if _rc {
+    display as error "The public Census person-module key contract changed."
+    exit 459
+}
+
+quietly describe using "`census2017_household_public'"
+local census2017_public_hh_rows = r(N)
+local census2017_public_hh_vars = r(k)
+assert `census2017_public_hh_rows' == 8283285
+assert `census2017_public_hh_vars' == 36
+capture quietly describe ///
+    hogar_ref_id vivienda_ref_id ///
+    using "`census2017_household_public'"
+if _rc {
+    display as error "The public Census household-module key contract changed."
+    exit 459
+}
+
+quietly describe using "`census2017_dwelling_public'"
+local cpv2017_public_dwelling_rows = r(N)
+local census2017_public_dwelling_vars = r(k)
+assert `cpv2017_public_dwelling_rows' == 10133850
+assert `census2017_public_dwelling_vars' == 22
+capture quietly describe ///
+    vivienda_ref_id distrito_ref_id ///
+    using "`census2017_dwelling_public'"
+if _rc {
+    display as error "The public Census dwelling-module key contract changed."
+    exit 459
+}
+
+/*
+The national public modules identify districts but not source CCPPs. They
+therefore validate official national schemas and counts but cannot replace the
+INEI-assisted CCPP linkage used below.
+*/
+
+
+*-------------------------------------------------------------------------------
+**# 13.2 Validate the frozen source-CCPP-to-RUV crosswalk
+*-------------------------------------------------------------------------------
+
+import delimited ///
+    using "`census2017_source_crosswalk'", ///
+    varnames(1) ///
+    stringcols(_all) ///
+    encoding(utf8) ///
+    clear
+
+keep source_ccpp_code ruv_id match_method validation review_status
+assert regexm(source_ccpp_code, "^[0-9]{10}$")
+assert regexm(ruv_id, "^S[0-9]{8}$")
+assert review_status == "accepted"
+assert validation != ""
+isid source_ccpp_code
+
+count
+local census2017_source_ccpp_rows = r(N)
+assert `census2017_source_ccpp_rows' == 807
+
+egen byte census2017_ruv_tag = tag(ruv_id)
+count if census2017_ruv_tag
+local census2017_source_ruv_rows = r(N)
+assert `census2017_source_ruv_rows' == 803
+drop census2017_ruv_tag review_status validation
+rename match_method census2017_ccpp_link_method
+save `census2017_source_links'
+
+
+*-------------------------------------------------------------------------------
+**# 13.3 Recover canonical SISFOH person and household keys
+*-------------------------------------------------------------------------------
+
+use ///
+    ubigeo_ccpp idccpp_sisfoh idccpp2019 etapa ///
+    id_hogar_m nroviv3 nhogar nro llave ///
+    id_viv_imp_f id_hog_imp_f id_pob_imp_f ///
+    edad01 ptes01 sexo01 gesta01 esta01 ///
+    segu01_1-segu01_6 ///
+    idioma01 lee01 niv01 ult01 era01 sect01 ///
+    disca01_1-disca01_6 prog01_1-prog01_11 ///
+    c5_p1 c5_p2 c5_p4_1 c5_p5 c5_p6 ///
+    c5_p8_1-c5_p8_6 c5_p9_1-c5_p9_7 ///
+    c5_p11 c5_p12 ///
+    c5_p13_niv c5_p13_gra ///
+    c5_p13_anio_pri c5_p13_anio_sec ///
+    c5_p14 c5_p16 c5_p17 c5_p18 ///
+    c5_p19_cod c5_p20_cod c5_p21 c5_p22 ///
+    c5_p24 c5_p25_i_mc ///
+    c2_p1 c2_p3 c2_p4 c2_p5 c2_p6 c2_p7 ///
+    c2_p10 c2_p11 c2_p12 c2_p13 t_c4_p1 ///
+    c3_p1_1-c3_p1_8 c3_p2_1-c3_p2_16 ///
+    c3_p3 c3_p3a c4_p1 ///
+    using "`census2017_linked_raw'", clear
+
+count
+local census2017_cohort_rows = r(N)
+assert `census2017_cohort_rows' == 193376
+isid llave
+
+rename ubigeo_ccpp source_ccpp_code
+rename idccpp_sisfoh source_ccpp_inei
+rename idccpp2019 destination_ccpp_code
+rename etapa census2017_link_stage
+rename nroviv3 sisfoh_dwelling_number
+rename nhogar sisfoh_household_number
+rename nro sisfoh_person_number
+
+foreach string_key in ///
+    source_ccpp_code ///
+    source_ccpp_inei ///
+    sisfoh_dwelling_number {
+    replace `string_key' = ustrtrim(`string_key')
+}
+destring ///
+    sisfoh_household_number sisfoh_person_number, ///
+    replace
+
+replace source_ccpp_code = ///
+    string(real(source_ccpp_code), "%010.0f") ///
+    if source_ccpp_code != ""
+replace source_ccpp_inei = ///
+    string(real(source_ccpp_inei), "%010.0f") ///
+    if source_ccpp_inei != ""
+replace destination_ccpp_code = ///
+    string(real(destination_ccpp_code), "%010.0f") ///
+    if destination_ccpp_code != ""
+
+assert regexm(source_ccpp_code, "^[0-9]{10}$")
+assert regexm(source_ccpp_inei, "^[0-9]{10}$")
+assert regexm(destination_ccpp_code, "^[0-9]{10}$") | ///
+    destination_ccpp_code == ""
+
+sort llave
+generate long census2017_cohort_pid = _n
+egen long census2017_baseline_hhid = group(id_hogar_m)
+egen long cpv2017_destination_hhid = group(id_hog_imp_f) ///
+    if !missing(id_hog_imp_f)
+
+egen byte census2017_baseline_hh_tag = ///
+    tag(census2017_baseline_hhid)
+count if census2017_baseline_hh_tag
+local census2017_baseline_hh_rows = r(N)
+assert `census2017_baseline_hh_rows' == 58021
+drop census2017_baseline_hh_tag
+
+generate byte census2017_linked = ///
+    inrange(census2017_link_stage, 0, 3) & ///
+    destination_ccpp_code != ""
+assert census2017_linked == (destination_ccpp_code != "")
+generate byte census2017_not_linked = !census2017_linked
+
+count if census2017_linked
+local census2017_linked_rows = r(N)
+assert `census2017_linked_rows' == 150864
+count if census2017_not_linked
+local census2017_not_linked_rows = r(N)
+assert `census2017_not_linked_rows' == 42512
+
+forvalues stage = 0/3 {
+    count if census2017_link_stage == `stage'
+    local census2017_stage`stage'_rows = r(N)
+}
+assert `census2017_stage0_rows' == 128908
+assert `census2017_stage1_rows' == 7433
+assert `census2017_stage2_rows' == 10530
+assert `census2017_stage3_rows' == 3993
+
+merge m:1 source_ccpp_code using `census2017_source_links'
+assert _merge == 3
+drop _merge
+
+merge m:1 ruv_id using ///
+    "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
+    keep(master match) ///
+    keepusing(ubigeo_ccpp)
+assert _merge == 3
+drop _merge
+
+use ///
+    "${intermediate_root}/25_sisfoh_2013_person_linkage_keys.dta", ///
+    clear
+keep ///
+    ubigeo_ccpp_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    sisfoh_pid sisfoh_hhid
+rename sisfoh_pid sisfoh_pid_candidate
+rename sisfoh_hhid sisfoh_hhid_candidate
+isid ///
+    ubigeo_ccpp_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number
+save `census2017_person_key_map'
+
+use ///
+    "${intermediate_root}/25_sisfoh_2013_person_linkage_keys.dta", ///
+    clear
+keep ///
+    ubigeo_district_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    sisfoh_age_key sisfoh_sex_key ///
+    sisfoh_pid sisfoh_hhid
+drop if missing(sisfoh_age_key, sisfoh_sex_key)
+bysort ///
+    ubigeo_district_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    sisfoh_age_key sisfoh_sex_key: ///
+    generate byte district_key_count = _N
+keep if district_key_count == 1
+drop district_key_count
+rename sisfoh_pid sisfoh_pid_candidate
+rename sisfoh_hhid sisfoh_hhid_candidate
+isid ///
+    ubigeo_district_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    sisfoh_age_key sisfoh_sex_key
+save `census2017_district_key_map'
+
+use "`census2017_linked_raw'", clear
+keep ///
+    ubigeo_ccpp idccpp_sisfoh idccpp2019 etapa ///
+    id_hogar_m nroviv3 nhogar nro llave ///
+    id_viv_imp_f id_hog_imp_f id_pob_imp_f ///
+    edad01 ptes01 sexo01 gesta01 esta01 ///
+    segu01_1-segu01_6 ///
+    idioma01 lee01 niv01 ult01 era01 sect01 ///
+    disca01_1-disca01_6 prog01_1-prog01_11 ///
+    c5_p1 c5_p2 c5_p4_1 c5_p5 c5_p6 ///
+    c5_p8_1-c5_p8_6 c5_p9_1-c5_p9_7 ///
+    c5_p11 c5_p12 ///
+    c5_p13_niv c5_p13_gra ///
+    c5_p13_anio_pri c5_p13_anio_sec ///
+    c5_p14 c5_p16 c5_p17 c5_p18 ///
+    c5_p19_cod c5_p20_cod c5_p21 c5_p22 ///
+    c5_p24 c5_p25_i_mc ///
+    c2_p1 c2_p3 c2_p4 c2_p5 c2_p6 c2_p7 ///
+    c2_p10 c2_p11 c2_p12 c2_p13 t_c4_p1 ///
+    c3_p1_1-c3_p1_8 c3_p2_1-c3_p2_16 ///
+    c3_p3 c3_p3a c4_p1
+
+rename ubigeo_ccpp source_ccpp_code
+rename idccpp_sisfoh source_ccpp_inei
+rename idccpp2019 destination_ccpp_code
+rename etapa census2017_link_stage
+rename nroviv3 sisfoh_dwelling_number
+rename nhogar sisfoh_household_number
+rename nro sisfoh_person_number
+
+foreach string_key in ///
+    source_ccpp_code ///
+    source_ccpp_inei ///
+    sisfoh_dwelling_number {
+    replace `string_key' = ustrtrim(`string_key')
+}
+destring ///
+    sisfoh_household_number sisfoh_person_number, ///
+    replace
+
+replace source_ccpp_code = ///
+    string(real(source_ccpp_code), "%010.0f") ///
+    if source_ccpp_code != ""
+replace source_ccpp_inei = ///
+    string(real(source_ccpp_inei), "%010.0f") ///
+    if source_ccpp_inei != ""
+replace destination_ccpp_code = ///
+    string(real(destination_ccpp_code), "%010.0f") ///
+    if destination_ccpp_code != ""
+
+sort llave
+generate long census2017_cohort_pid = _n
+egen long census2017_baseline_hhid = group(id_hogar_m)
+egen long cpv2017_destination_hhid = group(id_hog_imp_f) ///
+    if !missing(id_hog_imp_f)
+generate byte census2017_linked = ///
+    inrange(census2017_link_stage, 0, 3) & ///
+    destination_ccpp_code != ""
+generate byte census2017_not_linked = !census2017_linked
+
+merge m:1 source_ccpp_code using `census2017_source_links'
+assert _merge == 3
+drop _merge
+merge m:1 ruv_id using ///
+    "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
+    keep(master match) ///
+    keepusing(ubigeo_ccpp)
+assert _merge == 3
+drop _merge
+
+generate str10 ubigeo_ccpp_sisfoh = source_ccpp_code
+merge m:1 ///
+    ubigeo_ccpp_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    using `census2017_person_key_map', ///
+    keep(master match)
+generate long sisfoh_pid = sisfoh_pid_candidate if _merge == 3
+generate long sisfoh_hhid = sisfoh_hhid_candidate if _merge == 3
+generate str28 census2017_person_link_method = ///
+    "source_ccpp_roster_exact" if _merge == 3
+count if _merge == 3
+local census2017_person_key_source = r(N)
+assert `census2017_person_key_source' == 191832
+drop _merge sisfoh_pid_candidate sisfoh_hhid_candidate
+
+replace ubigeo_ccpp_sisfoh = source_ccpp_inei
+merge m:1 ///
+    ubigeo_ccpp_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    using `census2017_person_key_map', ///
+    keep(master match)
+count if missing(sisfoh_pid) & _merge == 3
+local census2017_person_key_inei = r(N)
+assert `census2017_person_key_inei' == 442
+replace sisfoh_pid = sisfoh_pid_candidate ///
+    if missing(sisfoh_pid) & _merge == 3
+replace sisfoh_hhid = sisfoh_hhid_candidate ///
+    if missing(sisfoh_hhid) & _merge == 3
+replace census2017_person_link_method = ///
+    "inei_ccpp_roster_exact" ///
+    if census2017_person_link_method == "" & _merge == 3
+drop _merge sisfoh_pid_candidate sisfoh_hhid_candidate
+
+generate str6 ubigeo_district_sisfoh = substr(source_ccpp_inei, 1, 6)
+generate byte sisfoh_age_key = edad01
+generate byte sisfoh_sex_key = sexo01
+merge m:1 ///
+    ubigeo_district_sisfoh ///
+    sisfoh_dwelling_number ///
+    sisfoh_household_number ///
+    sisfoh_person_number ///
+    sisfoh_age_key sisfoh_sex_key ///
+    using `census2017_district_key_map', ///
+    keep(master match)
+count if missing(sisfoh_pid) & _merge == 3
+local census2017_person_key_district = r(N)
+assert `census2017_person_key_district' == 165
+replace sisfoh_pid = sisfoh_pid_candidate ///
+    if missing(sisfoh_pid) & _merge == 3
+replace sisfoh_hhid = sisfoh_hhid_candidate ///
+    if missing(sisfoh_hhid) & _merge == 3
+replace census2017_person_link_method = ///
+    "unique_district_roster_demo" ///
+    if census2017_person_link_method == "" & _merge == 3
+drop _merge sisfoh_pid_candidate sisfoh_hhid_candidate
+
+generate byte census2017_person_key_linked = !missing(sisfoh_pid)
+count if !census2017_person_key_linked
+local cpv2017_person_key_unresolved = r(N)
+assert `cpv2017_person_key_unresolved' == 937
+
+bysort census2017_baseline_hhid: ///
+    egen long sisfoh_hhid_min = min(sisfoh_hhid)
+bysort census2017_baseline_hhid: ///
+    egen long sisfoh_hhid_max = max(sisfoh_hhid)
+count if ///
+    !missing(sisfoh_hhid_min) & ///
+    sisfoh_hhid_min != sisfoh_hhid_max
+local cpv2017_hh_conflict_persons = r(N)
+assert `cpv2017_hh_conflict_persons' == 25
+generate byte census2017_hh_key_conflict = ///
+    !missing(sisfoh_hhid_min, sisfoh_hhid_max) & ///
+    sisfoh_hhid_min != sisfoh_hhid_max
+egen byte census2017_hh_conflict_tag = ///
+    tag(census2017_baseline_hhid) ///
+    if census2017_hh_key_conflict
+count if census2017_hh_conflict_tag
+local cpv2017_hh_key_conflicts = r(N)
+assert `cpv2017_hh_key_conflicts' == 5
+replace sisfoh_hhid = . if census2017_hh_key_conflict
+replace sisfoh_hhid = sisfoh_hhid_min ///
+    if missing(sisfoh_hhid) & !census2017_hh_key_conflict
+drop ///
+    sisfoh_hhid_min sisfoh_hhid_max ///
+    census2017_hh_conflict_tag
+generate byte census2017_hh_key_linked = !missing(sisfoh_hhid)
+
+preserve
+keep if !census2017_person_key_linked
+keep ///
+    census2017_cohort_pid census2017_baseline_hhid ///
+    ruv_id census2017_ccpp_link_method ///
+    census2017_person_link_method
+sort ruv_id census2017_cohort_pid
+save ///
+    "${qa_data_root}/census2017_person_key_unresolved.dta", ///
+    replace
+restore
+
+merge m:1 sisfoh_pid using ///
+    "${intermediate_root}/18_sisfoh_2013_person_clean.dta", ///
+    keep(master match)
+generate byte cpv2017_sisfoh_person_match = _merge == 3
+count if ///
+    cpv2017_sisfoh_person_match & ///
+    !missing(age_2013, edad01) & age_2013 != edad01
+local cpv2017_sisfoh_age_disagree = r(N)
+count if ///
+    cpv2017_sisfoh_person_match & ///
+    !missing(female_2013, sexo01) & ///
+    female_2013 != (sexo01 == 2)
+local cpv2017_sisfoh_sex_disagree = r(N)
+drop _merge
+
+replace age_2013 = edad01 ///
+    if missing(age_2013) & inrange(edad01, 0, 120)
+replace female_2013 = sexo01 == 2 ///
+    if missing(female_2013) & inlist(sexo01, 1, 2)
+replace household_head_2013 = ptes01 == 1 ///
+    if missing(household_head_2013) & inrange(ptes01, 1, 14)
+replace relation_head_2013 = ptes01 ///
+    if missing(relation_head_2013) & inrange(ptes01, 1, 14)
+replace language_childhood_2013 = idioma01 ///
+    if missing(language_childhood_2013) & ///
+       age_2013 >= 3 & inrange(idioma01, 1, 7)
+replace spanish_childhood_2013 = language_childhood_2013 == 4 ///
+    if missing(spanish_childhood_2013) & ///
+       !missing(language_childhood_2013)
+replace named_indigenous_language_2013 = ///
+    inlist(language_childhood_2013, 1, 2, 3) ///
+    if missing(named_indigenous_language_2013) & ///
+       !missing(language_childhood_2013)
+replace nonspanish_language_2013 = language_childhood_2013 != 4 ///
+    if missing(nonspanish_language_2013) & ///
+       !missing(language_childhood_2013)
+replace literate_2013 = lee01 == 1 ///
+    if missing(literate_2013) & age_2013 >= 3 & inlist(lee01, 1, 2)
+replace education_level_2013 = niv01 ///
+    if missing(education_level_2013) & ///
+       age_2013 >= 3 & inrange(niv01, 1, 7)
+replace last_grade_2013 = ult01 ///
+    if missing(last_grade_2013) & ///
+       inrange(education_level_2013, 3, 7) & ///
+       inrange(ult01, 1, 6)
+replace secondaryplus_2013 = education_level_2013 >= 4 ///
+    if missing(secondaryplus_2013) & !missing(education_level_2013)
+replace primary_complete_2013 = 0 ///
+    if missing(primary_complete_2013) & ///
+       inlist(education_level_2013, 1, 2)
+replace primary_complete_2013 = last_grade_2013 == 6 ///
+    if missing(primary_complete_2013) & ///
+       education_level_2013 == 3 & !missing(last_grade_2013)
+replace primary_complete_2013 = 1 ///
+    if missing(primary_complete_2013) & ///
+       inrange(education_level_2013, 4, 7)
+replace labor_status_2013 = era01 ///
+    if missing(labor_status_2013) & ///
+       age_2013 >= 6 & inrange(era01, 1, 10)
+replace employed_2013 = inrange(labor_status_2013, 1, 5) ///
+    if missing(employed_2013) & !missing(labor_status_2013)
+replace labor_force_2013 = inrange(labor_status_2013, 1, 6) ///
+    if missing(labor_force_2013) & !missing(labor_status_2013)
+replace unemployed_2013 = labor_status_2013 == 6 ///
+    if missing(unemployed_2013) & !missing(labor_status_2013)
+replace employment_sector_2013 = sect01 ///
+    if missing(employment_sector_2013) & ///
+       employed_2013 == 1 & inrange(sect01, 1, 10)
+
+
+*-------------------------------------------------------------------------------
+**# 13.4 Construct linked-person and migration measures
+*-------------------------------------------------------------------------------
+
+egen byte source_insurance_count_aux = ///
+    anycount(segu01_1-segu01_5), values(1 2 3 4 5)
+replace insurance_any_2013 = source_insurance_count_aux > 0 ///
+    if missing(insurance_any_2013) & ///
+       (source_insurance_count_aux > 0 | segu01_6 == 6)
+replace insurance_essalud_2013 = segu01_1 == 1 ///
+    if missing(insurance_essalud_2013) & ///
+       (source_insurance_count_aux > 0 | segu01_6 == 6)
+replace insurance_private_2013 = segu01_3 == 3 ///
+    if missing(insurance_private_2013) & ///
+       (source_insurance_count_aux > 0 | segu01_6 == 6)
+replace insurance_sis_2013 = segu01_4 == 4 ///
+    if missing(insurance_sis_2013) & ///
+       (source_insurance_count_aux > 0 | segu01_6 == 6)
+
+egen byte source_disability_count_aux = ///
+    anycount(disca01_1-disca01_5), values(1 2 3 4 5)
+replace disability_any_2013 = source_disability_count_aux > 0 ///
+    if missing(disability_any_2013) & ///
+       (source_disability_count_aux > 0 | disca01_6 == 6)
+
+egen byte source_program_count_aux = ///
+    anycount(prog01_1-prog01_10), ///
+    values(1 2 3 4 5 6 7 8 9 10)
+replace program_any_2013 = source_program_count_aux > 0 ///
+    if missing(program_any_2013) & ///
+       (source_program_count_aux > 0 | prog01_11 == 11)
+replace program_juntos_2013 = prog01_6 == 6 ///
+    if missing(program_juntos_2013) & ///
+       (source_program_count_aux > 0 | prog01_11 == 11)
+replace program_pension65_2013 = prog01_8 == 8 ///
+    if missing(program_pension65_2013) & ///
+       (source_program_count_aux > 0 | prog01_11 == 11)
+
+generate int age_2017 = c5_p4_1 ///
+    if census2017_linked & inrange(c5_p4_1, 0, 120)
+generate byte female_2017 = c5_p2 == 2 ///
+    if census2017_linked & inlist(c5_p2, 1, 2)
+generate byte age_0_14_2017 = inrange(age_2017, 0, 14) ///
+    if !missing(age_2017)
+generate byte age_15_29_2017 = inrange(age_2017, 15, 29) ///
+    if !missing(age_2017)
+generate byte age_30_44_2017 = inrange(age_2017, 30, 44) ///
+    if !missing(age_2017)
+generate byte age_45_64_2017 = inrange(age_2017, 45, 64) ///
+    if !missing(age_2017)
+generate byte age_65plus_2017 = age_2017 >= 65 ///
+    if !missing(age_2017)
+generate byte household_head_2017 = c5_p1 == 1 ///
+    if census2017_linked & inrange(c5_p1, 1, 11)
+generate byte relation_head_2017 = c5_p1 ///
+    if census2017_linked & inrange(c5_p1, 1, 11)
+generate byte permanent_district_2017 = c5_p5 == 1 ///
+    if census2017_linked & inlist(c5_p5, 1, 2)
+generate byte moved_district_2012_2017 = c5_p6 == 3 ///
+    if age_2017 >= 5 & inlist(c5_p6, 2, 3)
+
+egen byte insurance_count_2017_aux = ///
+    rowtotal(c5_p8_1-c5_p8_5)
+egen byte insurance_valid_2017_aux = ///
+    rownonmiss(c5_p8_1-c5_p8_5)
+generate byte insurance_any_2017 = insurance_count_2017_aux > 0 ///
+    if census2017_linked & insurance_valid_2017_aux == 5
+generate byte insurance_sis_2017 = c5_p8_1 == 1 ///
+    if census2017_linked & inlist(c5_p8_1, 0, 1)
+generate byte insurance_essalud_2017 = c5_p8_2 == 1 ///
+    if census2017_linked & inlist(c5_p8_2, 0, 1)
+generate byte insurance_armed_forces_2017 = c5_p8_3 == 1 ///
+    if census2017_linked & inlist(c5_p8_3, 0, 1)
+generate byte insurance_private_2017 = c5_p8_4 == 1 ///
+    if census2017_linked & inlist(c5_p8_4, 0, 1)
+generate byte insurance_other_2017 = c5_p8_5 == 1 ///
+    if census2017_linked & inlist(c5_p8_5, 0, 1)
+
+egen byte disability_count_2017_aux = ///
+    rowtotal(c5_p9_1-c5_p9_6)
+egen byte disability_valid_2017_aux = ///
+    rownonmiss(c5_p9_1-c5_p9_6)
+generate byte disability_any_2017 = disability_count_2017_aux > 0 ///
+    if census2017_linked & disability_valid_2017_aux == 6
+generate byte disability_visual_2017 = c5_p9_1 == 1 ///
+    if census2017_linked & inlist(c5_p9_1, 0, 1)
+generate byte disability_hearing_2017 = c5_p9_2 == 1 ///
+    if census2017_linked & inlist(c5_p9_2, 0, 1)
+generate byte disability_speech_2017 = c5_p9_3 == 1 ///
+    if census2017_linked & inlist(c5_p9_3, 0, 1)
+generate byte disability_mobility_2017 = c5_p9_4 == 1 ///
+    if census2017_linked & inlist(c5_p9_4, 0, 1)
+generate byte disability_cognitive_2017 = c5_p9_5 == 1 ///
+    if census2017_linked & inlist(c5_p9_5, 0, 1)
+generate byte disability_social_2017 = c5_p9_6 == 1 ///
+    if census2017_linked & inlist(c5_p9_6, 0, 1)
+
+generate byte language_childhood_2017 = c5_p11 ///
+    if age_2017 >= 3 & inrange(c5_p11, 1, 46)
+generate byte spanish_childhood_2017 = c5_p11 == 10 ///
+    if age_2017 >= 3 & inrange(c5_p11, 1, 45)
+generate byte indigenous_language_2017 = ///
+    (inrange(c5_p11, 1, 9) | inrange(c5_p11, 15, 45)) ///
+    if age_2017 >= 3 & inrange(c5_p11, 1, 45)
+generate byte literate_2017 = c5_p12 == 1 ///
+    if age_2017 >= 3 & inlist(c5_p12, 1, 2)
+generate byte education_level_2017 = c5_p13_niv ///
+    if age_2017 >= 3 & inrange(c5_p13_niv, 1, 10)
+generate byte primary_grade_2017 = c5_p13_gra ///
+    if education_level_2017 == 3 & inrange(c5_p13_gra, 1, 6)
+replace primary_grade_2017 = c5_p13_anio_pri ///
+    if education_level_2017 == 3 & ///
+       missing(primary_grade_2017) & ///
+       inrange(c5_p13_anio_pri, 1, 6)
+generate byte primary_complete_2017 = 0 ///
+    if inlist(education_level_2017, 1, 2)
+replace primary_complete_2017 = primary_grade_2017 == 6 ///
+    if education_level_2017 == 3 & !missing(primary_grade_2017)
+replace primary_complete_2017 = 1 ///
+    if inlist(education_level_2017, 4, 6, 7, 8, 9, 10)
+generate byte secondaryplus_2017 = ///
+    inlist(education_level_2017, 4, 6, 7, 8, 9, 10) ///
+    if !missing(education_level_2017)
+generate byte attending_education_2017 = c5_p14 == 1 ///
+    if age_2017 >= 3 & inlist(c5_p14, 1, 2)
+generate byte literate_age14_2017 = literate_2017 ///
+    if age_2017 >= 14
+generate byte primary_complete_age14_2017 = primary_complete_2017 ///
+    if age_2017 >= 14
+generate byte secondaryplus_age14_2017 = secondaryplus_2017 ///
+    if age_2017 >= 14
+generate byte attending_age6_17_2017 = attending_education_2017 ///
+    if inrange(age_2017, 6, 17)
+
+generate byte education_years_approx_2017 = .
+replace education_years_approx_2017 = 0 ///
+    if inlist(education_level_2017, 1, 2)
+replace education_years_approx_2017 = primary_grade_2017 ///
+    if education_level_2017 == 3
+replace education_years_approx_2017 = 6 + c5_p13_anio_sec ///
+    if education_level_2017 == 4 & inrange(c5_p13_anio_sec, 1, 5)
+replace education_years_approx_2017 = 11 ///
+    if inlist(education_level_2017, 6, 8)
+replace education_years_approx_2017 = 14 ///
+    if education_level_2017 == 7
+replace education_years_approx_2017 = 16 ///
+    if education_level_2017 == 9
+replace education_years_approx_2017 = 18 ///
+    if education_level_2017 == 10
+
+generate byte employed_2017 = .
+replace employed_2017 = 1 ///
+    if age_2017 >= 5 & ///
+       (c5_p16 == 1 | inrange(c5_p17, 1, 5))
+replace employed_2017 = 0 ///
+    if age_2017 >= 5 & c5_p16 == 2 & inlist(c5_p17, 6, 7)
+generate byte unemployed_2017 = .
+replace unemployed_2017 = 0 if employed_2017 == 1
+replace unemployed_2017 = c5_p18 == 1 ///
+    if employed_2017 == 0 & inlist(c5_p18, 1, 2)
+generate byte labor_force_2017 = ///
+    employed_2017 == 1 | unemployed_2017 == 1 ///
+    if !missing(employed_2017, unemployed_2017)
+generate byte employed_age14_2017 = employed_2017 ///
+    if age_2017 >= 14
+generate byte labor_force_age14_2017 = labor_force_2017 ///
+    if age_2017 >= 14
+generate byte unemployed_laborforce_2017 = unemployed_2017 ///
+    if age_2017 >= 14 & labor_force_2017 == 1
+generate byte employment_position_2017 = c5_p21 ///
+    if employed_2017 == 1 & inrange(c5_p21, 1, 7)
+generate str4 occupation_code_2017 = c5_p19_cod ///
+    if employed_2017 == 1 & c5_p19_cod != ""
+generate str4 industry_code_2017 = c5_p20_cod ///
+    if employed_2017 == 1 & c5_p20_cod != ""
+generate byte marital_status_2017 = c5_p24 ///
+    if age_2017 >= 12 & inrange(c5_p24, 1, 6)
+generate byte indigenous_selfid_2017 = ///
+    inlist(c5_p25_i_mc, 1, 2, 3, 4, 11, 12, 13) ///
+    if age_2017 >= 12 & inrange(c5_p25_i_mc, 1, 16) & ///
+       c5_p25_i_mc != 9
+
+generate byte moved_ccpp_2013_2017 = ///
+    destination_ccpp_code != ubigeo_ccpp ///
+    if census2017_linked & ///
+       regexm(destination_ccpp_code, "^[0-9]{10}$") & ///
+       regexm(ubigeo_ccpp, "^[0-9]{10}$")
+generate byte moved_district_2013_2017 = ///
+    substr(destination_ccpp_code, 1, 6) != ///
+    substr(ubigeo_ccpp, 1, 6) ///
+    if !missing(moved_ccpp_2013_2017)
+generate byte moved_province_2013_2017 = ///
+    substr(destination_ccpp_code, 1, 4) != ///
+    substr(ubigeo_ccpp, 1, 4) ///
+    if !missing(moved_ccpp_2013_2017)
+generate byte moved_department_2013_2017 = ///
+    substr(destination_ccpp_code, 1, 2) != ///
+    substr(ubigeo_ccpp, 1, 2) ///
+    if !missing(moved_ccpp_2013_2017)
+generate byte moved_or_not_linked_sens_2017 = ///
+    census2017_not_linked | moved_ccpp_2013_2017 == 1
+
+bysort census2017_baseline_hhid cpv2017_destination_hhid: ///
+    generate byte baseline_dest_hh_tag_aux = ///
+    _n == 1 if !missing(cpv2017_destination_hhid)
+bysort census2017_baseline_hhid: ///
+    egen int baseline_dest_hh_count_2017 = ///
+    total(baseline_dest_hh_tag_aux)
+bysort census2017_baseline_hhid destination_ccpp_code: ///
+    generate byte baseline_dest_ccpp_tag_aux = ///
+    _n == 1 if destination_ccpp_code != ""
+bysort census2017_baseline_hhid: ///
+    egen int baseline_dest_ccpp_count_2017 = ///
+    total(baseline_dest_ccpp_tag_aux)
+generate byte baseline_split_destination_2017 = ///
+    baseline_dest_hh_count_2017 > 1
+
+
+*-------------------------------------------------------------------------------
+**# 13.5 Construct current-household conditions and official NBI diagnostics
+*-------------------------------------------------------------------------------
+
+generate byte dwelling_type_2017 = c2_p1 ///
+    if inrange(c2_p1, 1, 18) & !missing(cpv2017_destination_hhid)
+generate byte wall_material_2017 = c2_p3 ///
+    if inrange(c2_p3, 1, 9) & !missing(cpv2017_destination_hhid)
+generate byte roof_material_2017 = c2_p4 ///
+    if inrange(c2_p4, 1, 8) & !missing(cpv2017_destination_hhid)
+generate byte floor_material_2017 = c2_p5 ///
+    if inrange(c2_p5, 1, 7) & !missing(cpv2017_destination_hhid)
+generate byte water_source_2017 = c2_p6 ///
+    if inrange(c2_p6, 1, 10) & c2_p6 != 9 & ///
+       !missing(cpv2017_destination_hhid)
+generate byte water_daily_2017 = c2_p7 == 1 ///
+    if inlist(c2_p7, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte sanitation_type_2017 = c2_p10 ///
+    if inrange(c2_p10, 1, 8) & !missing(cpv2017_destination_hhid)
+generate byte electricity_2017 = c2_p11 == 1 ///
+    if inlist(c2_p11, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte rooms_2017 = c2_p12 ///
+    if inrange(c2_p12, 1, 15) & !missing(cpv2017_destination_hhid)
+generate byte housing_tenure_2017 = c2_p13 ///
+    if inrange(c2_p13, 1, 5) & !missing(cpv2017_destination_hhid)
+
+egen byte clean_cooking_2017_aux = ///
+    rowmax(c3_p1_1 c3_p1_2 c3_p1_3)
+generate byte clean_cooking_2017 = clean_cooking_2017_aux ///
+    if inlist(clean_cooking_2017_aux, 0, 1) & ///
+       !missing(cpv2017_destination_hhid)
+generate byte cooks_with_wood_2017 = c3_p1_5 == 1 ///
+    if inlist(c3_p1_5, 0, 1) & !missing(cpv2017_destination_hhid)
+generate byte cooks_with_dung_2017 = c3_p1_6 == 1 ///
+    if inlist(c3_p1_6, 0, 1) & !missing(cpv2017_destination_hhid)
+
+generate byte asset_tv_2017 = c3_p2_2 == 1 ///
+    if inlist(c3_p2_2, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte asset_refrigerator_2017 = c3_p2_4 == 1 ///
+    if inlist(c3_p2_4, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte asset_washing_machine_2017 = c3_p2_5 == 1 ///
+    if inlist(c3_p2_5, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte asset_computer_2017 = c3_p2_9 == 1 ///
+    if inlist(c3_p2_9, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte mobile_phone_2017 = c3_p2_10 == 1 ///
+    if inlist(c3_p2_10, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte fixed_phone_2017 = c3_p2_11 == 1 ///
+    if inlist(c3_p2_11, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte cable_tv_2017 = c3_p2_12 == 1 ///
+    if inlist(c3_p2_12, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte internet_2017 = c3_p2_13 == 1 ///
+    if inlist(c3_p2_13, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte car_2017 = c3_p2_14 == 1 ///
+    if inlist(c3_p2_14, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte motorcycle_2017 = c3_p2_15 == 1 ///
+    if inlist(c3_p2_15, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte motorboat_2017 = c3_p2_16 == 1 ///
+    if inlist(c3_p2_16, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte household_member_abroad_2017 = c3_p3 == 1 ///
+    if inlist(c3_p3, 1, 2) & !missing(cpv2017_destination_hhid)
+generate byte household_members_abroad_2017 = c3_p3a ///
+    if household_member_abroad_2017 == 1 & inrange(c3_p3a, 1, 30)
+replace household_members_abroad_2017 = 0 ///
+    if household_member_abroad_2017 == 0
+
+local census2017_hh_constant_vars ///
+    c4_p1 c2_p1 c2_p3 c2_p4 c2_p5 c2_p6 c2_p7 ///
+    c2_p10 c2_p11 c2_p12 c2_p13 ///
+    c3_p1_1 c3_p1_2 c3_p1_3 c3_p1_4 ///
+    c3_p1_5 c3_p1_6 c3_p1_7 c3_p1_8 ///
+    c3_p2_1 c3_p2_2 c3_p2_3 c3_p2_4 ///
+    c3_p2_5 c3_p2_6 c3_p2_7 c3_p2_8 ///
+    c3_p2_9 c3_p2_10 c3_p2_11 c3_p2_12 ///
+    c3_p2_13 c3_p2_14 c3_p2_15 c3_p2_16
+
+foreach household_var of local census2017_hh_constant_vars {
+    bysort cpv2017_destination_hhid: ///
+        egen double `household_var'_min_aux = min(`household_var')
+    bysort cpv2017_destination_hhid: ///
+        egen double `household_var'_max_aux = max(`household_var')
+    count if ///
+        !missing(cpv2017_destination_hhid) & ///
+        `household_var'_min_aux != `household_var'_max_aux
+    assert r(N) == 0
+    drop `household_var'_min_aux `household_var'_max_aux
+}
+
+bysort cpv2017_destination_hhid: ///
+    generate int cpv2017_delivery_members = _N ///
+    if !missing(cpv2017_destination_hhid)
+generate byte cpv2017_roster_complete = ///
+    cpv2017_delivery_members == c4_p1 ///
+    if !missing(cpv2017_destination_hhid, c4_p1)
+
+egen byte cpv2017_dest_hh_tag_aux = ///
+    tag(cpv2017_destination_hhid)
+replace cpv2017_dest_hh_tag_aux = 0 ///
+    if missing(cpv2017_destination_hhid)
+count if cpv2017_dest_hh_tag_aux
+local census2017_destination_hh_rows = r(N)
+assert `census2017_destination_hh_rows' == 66436
+count if cpv2017_dest_hh_tag_aux & missing(c4_p1)
+local cpv2017_dest_hh_no_roster = r(N)
+assert `cpv2017_dest_hh_no_roster' == 1223
+count if ///
+    cpv2017_dest_hh_tag_aux & ///
+    cpv2017_delivery_members < c4_p1 & !missing(c4_p1)
+local cpv2017_dest_hh_partial = r(N)
+assert `cpv2017_dest_hh_partial' == 37933
+count if ///
+    cpv2017_dest_hh_tag_aux & cpv2017_roster_complete == 1
+local cpv2017_dest_hh_complete = r(N)
+assert `cpv2017_dest_hh_complete' == 27276
+count if ///
+    cpv2017_dest_hh_tag_aux & ///
+    cpv2017_delivery_members > c4_p1 & !missing(c4_p1)
+local cpv2017_dest_hh_overfull = r(N)
+assert `cpv2017_dest_hh_overfull' == 4
+
+generate byte nbi_inadequate_housing_2017 = 1 ///
+    if !missing(cpv2017_destination_hhid) & ///
+       (inlist(c2_p1, 6, 7) | c2_p3 == 8 | ///
+       (inlist(c2_p3, 5, 6, 7, 9) & c2_p5 == 6))
+replace nbi_inadequate_housing_2017 = 0 ///
+    if missing(nbi_inadequate_housing_2017) & ///
+       !missing(cpv2017_destination_hhid, c2_p1, c2_p3, c2_p5)
+generate byte nbi_overcrowding_2017 = ///
+    c4_p1 / c2_p12 > 3.4 ///
+    if !missing(cpv2017_destination_hhid, c4_p1, c2_p12) & ///
+       c2_p12 > 0
+generate byte nbi_no_sanitation_2017 = ///
+    inlist(c2_p10, 6, 7, 8) ///
+    if !missing(cpv2017_destination_hhid) & inrange(c2_p10, 1, 8)
+
+generate byte child_6_12_aux = inrange(age_2017, 6, 12)
+generate byte child_not_attending_aux = ///
+    child_6_12_aux & attending_education_2017 == 0
+generate byte child_attendance_missing_aux = ///
+    child_6_12_aux & missing(attending_education_2017)
+bysort cpv2017_destination_hhid: ///
+    egen byte cpv2017_child_not_attend_aux = ///
+    max(child_not_attending_aux)
+bysort cpv2017_destination_hhid: ///
+    egen byte cpv2017_child_attend_miss_aux = ///
+    max(child_attendance_missing_aux)
+generate byte nbi_child_not_school_2017 = ///
+    cpv2017_child_not_attend_aux ///
+    if cpv2017_roster_complete == 1 & ///
+       cpv2017_child_attend_miss_aux == 0
+
+generate byte head_primary2less_aux = .
+replace head_primary2less_aux = 1 ///
+    if household_head_2017 == 1 & ///
+       inlist(education_level_2017, 1, 2)
+replace head_primary2less_aux = 1 ///
+    if household_head_2017 == 1 & ///
+       education_level_2017 == 3 & ///
+       inrange(primary_grade_2017, 1, 2)
+replace head_primary2less_aux = 0 ///
+    if household_head_2017 == 1 & ///
+       education_level_2017 == 3 & ///
+       inrange(primary_grade_2017, 3, 6)
+replace head_primary2less_aux = 0 ///
+    if household_head_2017 == 1 & ///
+       inlist(education_level_2017, 4, 6, 7, 8, 9, 10)
+generate byte employed_count_aux = employed_2017 == 1
+generate byte labor_unknown_aux = ///
+    age_2017 >= 5 & missing(employed_2017)
+bysort cpv2017_destination_hhid: ///
+    egen byte cpv2017_head_count_aux = total(household_head_2017 == 1)
+bysort cpv2017_destination_hhid: ///
+    egen byte cpv2017_head_lowedu_aux = max(head_primary2less_aux)
+bysort cpv2017_destination_hhid: ///
+    egen int cpv2017_employed_aux = total(employed_count_aux)
+bysort cpv2017_destination_hhid: ///
+    egen byte cpv2017_labor_unknown_aux = max(labor_unknown_aux)
+generate double dependency_ratio_2017 = ///
+    c4_p1 / cpv2017_employed_aux ///
+    if cpv2017_employed_aux > 0 & !missing(c4_p1)
+generate byte nbi_high_dependency_2017 = 0 ///
+    if cpv2017_roster_complete == 1 & ///
+       cpv2017_head_count_aux == 1 & ///
+       cpv2017_labor_unknown_aux == 0 & ///
+       !missing(cpv2017_head_lowedu_aux)
+replace nbi_high_dependency_2017 = 1 ///
+    if cpv2017_roster_complete == 1 & ///
+       cpv2017_head_count_aux == 1 & ///
+       cpv2017_labor_unknown_aux == 0 & ///
+       cpv2017_head_lowedu_aux == 1 & ///
+       (cpv2017_employed_aux == 0 | dependency_ratio_2017 >= 4)
+
+egen byte nbi_count_2017 = rowtotal( ///
+    nbi_inadequate_housing_2017 ///
+    nbi_overcrowding_2017 ///
+    nbi_no_sanitation_2017 ///
+    nbi_child_not_school_2017 ///
+    nbi_high_dependency_2017)
+egen byte nbi_components_valid_2017 = rownonmiss( ///
+    nbi_inadequate_housing_2017 ///
+    nbi_overcrowding_2017 ///
+    nbi_no_sanitation_2017 ///
+    nbi_child_not_school_2017 ///
+    nbi_high_dependency_2017)
+replace nbi_count_2017 = . if nbi_components_valid_2017 != 5
+generate byte nbi_any_2017 = nbi_count_2017 >= 1 ///
+    if !missing(nbi_count_2017)
+generate byte nbi_two_plus_2017 = nbi_count_2017 >= 2 ///
+    if !missing(nbi_count_2017)
+
+generate byte water_public_daily_2017 = ///
+    inlist(c2_p6, 1, 2, 3) & c2_p7 == 1 ///
+    if !missing(c2_p6, c2_p7) & !missing(cpv2017_destination_hhid)
+generate byte sanitation_facility_2017 = ///
+    inrange(c2_p10, 1, 4) ///
+    if inrange(c2_p10, 1, 8) & !missing(cpv2017_destination_hhid)
+generate double wellbeing_housing_2017 = 1 - (c2_p5 == 6) ///
+    if inrange(c2_p5, 1, 7) & !missing(cpv2017_destination_hhid)
+generate double wellbeing_services_2017 = ///
+    (water_public_daily_2017 + sanitation_facility_2017) / 2 ///
+    if !missing(water_public_daily_2017, sanitation_facility_2017)
+generate double wellbeing_energy_2017 = ///
+    (electricity_2017 + clean_cooking_2017) / 2 ///
+    if !missing(electricity_2017, clean_cooking_2017)
+
+egen byte asset_count_2017 = rowtotal( ///
+    asset_tv_2017 asset_washing_machine_2017 ///
+    asset_refrigerator_2017 asset_computer_2017)
+egen byte asset_valid_2017_aux = rownonmiss( ///
+    asset_tv_2017 asset_washing_machine_2017 ///
+    asset_refrigerator_2017 asset_computer_2017)
+replace asset_count_2017 = . if asset_valid_2017_aux != 4
+generate double wellbeing_assets_2017 = asset_count_2017 / 4 ///
+    if !missing(asset_count_2017)
+
+egen byte connectivity_count_2017 = rowtotal( ///
+    mobile_phone_2017 internet_2017 cable_tv_2017)
+egen byte connectivity_valid_2017_aux = rownonmiss( ///
+    mobile_phone_2017 internet_2017 cable_tv_2017)
+replace connectivity_count_2017 = . ///
+    if connectivity_valid_2017_aux != 3
+generate double wellbeing_connectivity_2017 = ///
+    connectivity_count_2017 / 3 ///
+    if !missing(connectivity_count_2017)
+
+generate double wellbeing_humancapital_2017 = ///
+    (literate_2017 + secondaryplus_2017) / 2 ///
+    if age_2017 >= 14 & !missing(literate_2017, secondaryplus_2017)
+generate double wellbeing_core_2017 = ///
+    (wellbeing_housing_2017 + wellbeing_services_2017 + ///
+     wellbeing_energy_2017 + wellbeing_humancapital_2017) / 4 ///
+    if !missing( ///
+        wellbeing_housing_2017, ///
+        wellbeing_services_2017, ///
+        wellbeing_energy_2017, ///
+        wellbeing_humancapital_2017)
+generate double deprivation_core_2017 = 1 - wellbeing_core_2017 ///
+    if !missing(wellbeing_core_2017)
+
+preserve
+keep if !missing(cpv2017_destination_hhid)
+keep ///
+    cpv2017_destination_hhid ///
+    cpv2017_delivery_members cpv2017_roster_complete ///
+    dwelling_type_2017 wall_material_2017 roof_material_2017 ///
+    floor_material_2017 water_source_2017 water_daily_2017 ///
+    sanitation_type_2017 electricity_2017 rooms_2017 ///
+    housing_tenure_2017 clean_cooking_2017 ///
+    cooks_with_wood_2017 cooks_with_dung_2017 ///
+    asset_tv_2017 asset_refrigerator_2017 ///
+    asset_washing_machine_2017 asset_computer_2017 ///
+    mobile_phone_2017 fixed_phone_2017 cable_tv_2017 ///
+    internet_2017 car_2017 motorcycle_2017 motorboat_2017 ///
+    household_member_abroad_2017 household_members_abroad_2017 ///
+    nbi_inadequate_housing_2017 nbi_overcrowding_2017 ///
+    nbi_no_sanitation_2017 nbi_child_not_school_2017 ///
+    nbi_high_dependency_2017 nbi_count_2017 ///
+    nbi_components_valid_2017 nbi_any_2017 nbi_two_plus_2017 ///
+    dependency_ratio_2017 ///
+    wellbeing_housing_2017 wellbeing_services_2017 ///
+    wellbeing_energy_2017 wellbeing_assets_2017 ///
+    wellbeing_connectivity_2017
+bysort cpv2017_destination_hhid: keep if _n == 1
+isid cpv2017_destination_hhid
+count
+assert r(N) == `census2017_destination_hh_rows'
+compress
+save ///
+    "${intermediate_root}/26_census_2017_destination_household.dta", ///
+    replace
+restore
+
+preserve
+keep if ///
+    cpv2017_dest_hh_tag_aux & ///
+    cpv2017_delivery_members > c4_p1 & !missing(c4_p1)
+keep ///
+    cpv2017_destination_hhid ///
+    cpv2017_delivery_members c4_p1
+rename c4_p1 cpv2017_reported_members
+save ///
+    "${qa_data_root}/census2017_destination_household_overfull.dta", ///
+    replace
+restore
+
+label variable census2017_cohort_pid ///
+    "De-identified person ID in the INEI-assisted cohort"
+label variable census2017_baseline_hhid ///
+    "De-identified 2013 source-household ID"
+label variable cpv2017_destination_hhid ///
+    "De-identified 2017 destination-household ID"
+label variable census2017_linked ///
+    "Person linked by INEI to a 2017 Census record"
+label variable census2017_not_linked ///
+    "Person not linked to a 2017 Census record; not migration"
+label variable census2017_person_key_linked ///
+    "Cohort record linked to the canonical SISFOH person key"
+label variable census2017_hh_key_conflict ///
+    "Source household has conflicting recovered SISFOH household IDs"
+label variable age_2017 "Age at the 2017 Census"
+label variable age_0_14_2017 "Age 0 to 14 at the 2017 Census"
+label variable age_15_29_2017 "Age 15 to 29 at the 2017 Census"
+label variable age_30_44_2017 "Age 30 to 44 at the 2017 Census"
+label variable age_45_64_2017 "Age 45 to 64 at the 2017 Census"
+label variable age_65plus_2017 "Age 65 or older at the 2017 Census"
+label variable moved_ccpp_2013_2017 ///
+    "Linked person lives in a different CCPP in 2017"
+label variable moved_or_not_linked_sens_2017 ///
+    "Sensitivity only: moved CCPP or not linked"
+label variable moved_district_2012_2017 ///
+    "Census respondent lived in another district five years earlier"
+label variable internet_2017 ///
+    "Current 2017 Census household has internet"
+label variable nbi_count_2017 ///
+    "Official-compatible NBI count; complete destination rosters only"
+label variable wellbeing_core_2017 ///
+    "Equal-weight harmonized wellbeing score, 0-1"
+label variable deprivation_core_2017 ///
+    "Reverse-coded harmonized wellbeing score, 0-1"
+
+drop ///
+    llave id_hogar_m id_viv_imp_f id_hog_imp_f id_pob_imp_f ///
+    source_ccpp_code source_ccpp_inei destination_ccpp_code ///
+    ubigeo_ccpp_sisfoh ubigeo_district_sisfoh ///
+    sisfoh_dwelling_number sisfoh_household_number ///
+    sisfoh_age_key sisfoh_sex_key ///
+    edad01 ptes01 sexo01 gesta01 esta01 ///
+    segu01_1-segu01_6 idioma01 lee01 niv01 ult01 era01 sect01 ///
+    disca01_1-disca01_6 prog01_1-prog01_11 ///
+    c5_p1 c5_p2 c5_p4_1 c5_p5 c5_p6 ///
+    c5_p8_1-c5_p8_6 c5_p9_1-c5_p9_7 ///
+    c5_p11 c5_p12 c5_p13_niv c5_p13_gra ///
+    c5_p13_anio_pri c5_p13_anio_sec ///
+    c5_p14 c5_p16 c5_p17 c5_p18 ///
+    c5_p19_cod c5_p20_cod c5_p21 c5_p22 c5_p24 c5_p25_i_mc ///
+    c2_p1 c2_p3 c2_p4 c2_p5 c2_p6 c2_p7 ///
+    c2_p10 c2_p11 c2_p12 c2_p13 t_c4_p1 ///
+    c3_p1_1-c3_p1_8 c3_p2_1-c3_p2_16 c3_p3 c3_p3a c4_p1
+capture drop *_aux
+
+compress
+sort census2017_cohort_pid
+isid census2017_cohort_pid
+count
+assert r(N) == `census2017_cohort_rows'
+save `census2017_person_clean'
+
+merge m:1 ruv_id using ///
+    "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
+    keep(match)
+assert _merge == 3
+drop _merge
+compress
+sort census2017_cohort_pid
+isid census2017_cohort_pid
+count
+local census2017_person_analysis_rows = r(N)
+assert `census2017_person_analysis_rows' == 193376
+save ///
+    "${analysis_data_root}/12_census_2017_individual_analysis.dta", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 13.6 Aggregate the source cohort to baseline households
+*-------------------------------------------------------------------------------
+
+use `census2017_person_clean', clear
+bysort census2017_baseline_hhid: assert ruv_id == ruv_id[1]
+bysort census2017_baseline_hhid: assert sisfoh_hhid == sisfoh_hhid[1]
+
+preserve
+keep ///
+    census2017_baseline_hhid ruv_id sisfoh_hhid ///
+    census2017_hh_key_conflict ///
+    baseline_dest_hh_count_2017 ///
+    baseline_dest_ccpp_count_2017 ///
+    baseline_split_destination_2017
+bysort census2017_baseline_hhid: keep if _n == 1
+isid census2017_baseline_hhid
+save `census2017_household_keys'
+restore
+
+generate byte cohort_member_aux = 1
+generate byte linked_member_aux = census2017_linked
+generate byte person_key_member_aux = census2017_person_key_linked
+generate byte migration_observed_aux = !missing(moved_ccpp_2013_2017)
+generate byte moved_ccpp_aux = moved_ccpp_2013_2017 == 1 ///
+    if !missing(moved_ccpp_2013_2017)
+generate byte moved_district_aux = moved_district_2013_2017 == 1 ///
+    if !missing(moved_district_2013_2017)
+generate byte moved_province_aux = moved_province_2013_2017 == 1 ///
+    if !missing(moved_province_2013_2017)
+generate byte moved_department_aux = moved_department_2013_2017 == 1 ///
+    if !missing(moved_department_2013_2017)
+generate byte internet_observed_aux = !missing(internet_2017)
+generate byte employed_observed_aux = !missing(employed_2017)
+generate byte nbi_observed_aux = !missing(nbi_any_2017)
+
+collapse ///
+    (sum) ///
+        census2017_cohort_members=cohort_member_aux ///
+        hh_linked_members_2017=linked_member_aux ///
+        hh_person_keys_2013=person_key_member_aux ///
+        hh_migration_observed_2017=migration_observed_aux ///
+        hh_moved_ccpp_count_2017=moved_ccpp_aux ///
+        hh_moved_district_count_2017=moved_district_aux ///
+        hh_moved_province_count_2017=moved_province_aux ///
+        hh_moved_department_count_2017=moved_department_aux ///
+        hh_internet_observed_2017=internet_observed_aux ///
+        hh_employed_observed_2017=employed_observed_aux ///
+        hh_nbi_observed_2017=nbi_observed_aux ///
+    (mean) ///
+        hh_mean_age_2017=age_2017 ///
+        hh_share_female_2017=female_2017 ///
+        hh_share_age_0_14_2017=age_0_14_2017 ///
+        hh_share_age_15_29_2017=age_15_29_2017 ///
+        hh_share_age_30_44_2017=age_30_44_2017 ///
+        hh_share_age_45_64_2017=age_45_64_2017 ///
+        hh_share_age_65plus_2017=age_65plus_2017 ///
+        hh_share_literate_2017=literate_2017 ///
+        hh_share_secondaryplus_2017=secondaryplus_2017 ///
+        hh_share_literate_age14_2017=literate_age14_2017 ///
+        hh_share_primary_age14_2017=primary_complete_age14_2017 ///
+        hh_share_secondary_age14_2017=secondaryplus_age14_2017 ///
+        hh_share_attending_6_17_2017=attending_age6_17_2017 ///
+        hh_share_employed_2017=employed_2017 ///
+        hh_share_labor_force_2017=labor_force_2017 ///
+        hh_share_employed_age14_2017=employed_age14_2017 ///
+        hh_share_laborforce_age14_2017=labor_force_age14_2017 ///
+        hh_unemployment_rate_2017=unemployed_laborforce_2017 ///
+        hh_share_insured_2017=insurance_any_2017 ///
+        hh_share_insurance_sis_2017=insurance_sis_2017 ///
+        hh_share_insurance_essalud_2017=insurance_essalud_2017 ///
+        hh_share_disability_2017=disability_any_2017 ///
+        hh_share_indig_language_2017=indigenous_language_2017 ///
+        hh_share_moved_five_years_2017=moved_district_2012_2017 ///
+        hh_share_internet_2017=internet_2017 ///
+        hh_member_share_nbi_2017=nbi_any_2017 ///
+        hh_wellbeing_housing_2017=wellbeing_housing_2017 ///
+        hh_wellbeing_services_2017=wellbeing_services_2017 ///
+        hh_wellbeing_energy_2017=wellbeing_energy_2017 ///
+        hh_wellbeing_humancap_2017=wellbeing_humancapital_2017 ///
+        hh_wellbeing_assets_2017=wellbeing_assets_2017 ///
+        hh_wellbeing_connect_2017=wellbeing_connectivity_2017 ///
+    (max) ///
+        hh_single_dest_internet_2017=internet_2017 ///
+        hh_single_dest_nbi_any_2017=nbi_any_2017, ///
+    by(census2017_baseline_hhid)
+
+generate double hh_wellbeing_core_2017 = ///
+    (hh_wellbeing_housing_2017 + hh_wellbeing_services_2017 + ///
+     hh_wellbeing_energy_2017 + hh_wellbeing_humancap_2017) / 4 ///
+    if !missing( ///
+        hh_wellbeing_housing_2017, ///
+        hh_wellbeing_services_2017, ///
+        hh_wellbeing_energy_2017, ///
+        hh_wellbeing_humancap_2017)
+generate double hh_deprivation_core_2017 = ///
+    1 - hh_wellbeing_core_2017 ///
+    if !missing(hh_wellbeing_core_2017)
+
+merge 1:1 census2017_baseline_hhid using ///
+    `census2017_household_keys'
+assert _merge == 3
+drop _merge
+
+generate double hh_link_rate_2017 = ///
+    hh_linked_members_2017 / census2017_cohort_members
+generate double hh_person_key_rate_2013 = ///
+    hh_person_keys_2013 / census2017_cohort_members
+generate double hh_share_moved_ccpp_2017 = ///
+    hh_moved_ccpp_count_2017 / hh_migration_observed_2017 ///
+    if hh_migration_observed_2017 > 0
+generate double hh_share_moved_district_2017 = ///
+    hh_moved_district_count_2017 / hh_migration_observed_2017 ///
+    if hh_migration_observed_2017 > 0
+generate double hh_share_moved_province_2017 = ///
+    hh_moved_province_count_2017 / hh_migration_observed_2017 ///
+    if hh_migration_observed_2017 > 0
+generate double hh_share_moved_department_2017 = ///
+    hh_moved_department_count_2017 / hh_migration_observed_2017 ///
+    if hh_migration_observed_2017 > 0
+replace hh_single_dest_internet_2017 = . ///
+    if baseline_dest_hh_count_2017 != 1
+replace hh_single_dest_nbi_any_2017 = . ///
+    if baseline_dest_hh_count_2017 != 1
+
+label variable hh_link_rate_2017 ///
+    "Share of source-household members linked to Census 2017"
+label variable hh_share_moved_ccpp_2017 ///
+    "Share of linked members living in another CCPP in 2017"
+label variable baseline_split_destination_2017 ///
+    "Source household links to multiple 2017 destination households"
+label variable hh_share_internet_2017 ///
+    "Share of linked members in a household with internet"
+label variable hh_member_share_nbi_2017 ///
+    "Share of linked members in a destination household with any NBI"
+
+merge m:1 sisfoh_hhid using ///
+    "${intermediate_root}/21_sisfoh_2013_household_clean.dta", ///
+    keep(master match)
+generate byte census2017_sisfoh_hh_recovered = _merge == 3
+drop _merge
+count if census2017_sisfoh_hh_recovered
+local census2017_sisfoh_hh_rows = r(N)
+assert `census2017_sisfoh_hh_rows' == 57740
+
+compress
+sort census2017_baseline_hhid
+isid census2017_baseline_hhid
+count
+local census2017_household_rows = r(N)
+assert `census2017_household_rows' == 58021
+save `census2017_household_clean'
+
+merge m:1 ruv_id using ///
+    "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
+    keep(match)
+assert _merge == 3
+drop _merge
+compress
+sort census2017_baseline_hhid
+isid census2017_baseline_hhid
+save ///
+    "${analysis_data_root}/13_census_2017_household_analysis.dta", ///
+    replace
+
+
+*-------------------------------------------------------------------------------
+**# 13.7 Aggregate cohort outcomes to source CCPPs
+*-------------------------------------------------------------------------------
+
+use `census2017_person_clean', clear
+generate byte cohort_person_aux = 1
+generate byte linked_person_aux = census2017_linked
+generate byte migration_observed_aux = !missing(moved_ccpp_2013_2017)
+generate byte moved_ccpp_aux = moved_ccpp_2013_2017 == 1 ///
+    if !missing(moved_ccpp_2013_2017)
+generate byte moved_district_aux = moved_district_2013_2017 == 1 ///
+    if !missing(moved_district_2013_2017)
+generate byte moved_province_aux = moved_province_2013_2017 == 1 ///
+    if !missing(moved_province_2013_2017)
+generate byte moved_department_aux = moved_department_2013_2017 == 1 ///
+    if !missing(moved_department_2013_2017)
+generate byte internet_observed_aux = !missing(internet_2017)
+generate byte nbi_observed_aux = !missing(nbi_any_2017)
+
+collapse ///
+    (sum) ///
+        cpv2017_cohort_persons=cohort_person_aux ///
+        cpv2017_linked_persons=linked_person_aux ///
+        cpv2017_migration_observed=migration_observed_aux ///
+        cpv2017_moved_ccpp_count=moved_ccpp_aux ///
+        cpv2017_moved_district_count=moved_district_aux ///
+        cpv2017_moved_province_count=moved_province_aux ///
+        cpv2017_moved_dept_count=moved_department_aux ///
+        cpv2017_internet_observed=internet_observed_aux ///
+        cpv2017_nbi_observed=nbi_observed_aux ///
+    (mean) ///
+        cpv2017_mean_age=age_2017 ///
+        cpv2017_share_female=female_2017 ///
+        share_age_0_14_2017=age_0_14_2017 ///
+        share_age_15_29_2017=age_15_29_2017 ///
+        share_age_30_44_2017=age_30_44_2017 ///
+        share_age_45_64_2017=age_45_64_2017 ///
+        share_age_65plus_2017=age_65plus_2017 ///
+        cpv2017_share_literate=literate_2017 ///
+        cpv2017_share_secondary=secondaryplus_2017 ///
+        cpv2017_share_literate_age14=literate_age14_2017 ///
+        cpv2017_share_primary_age14=primary_complete_age14_2017 ///
+        cpv2017_share_secondary_age14=secondaryplus_age14_2017 ///
+        cpv2017_share_attending_6_17=attending_age6_17_2017 ///
+        cpv2017_share_employed=employed_2017 ///
+        cpv2017_share_labor_force=labor_force_2017 ///
+        cpv2017_share_employed_age14=employed_age14_2017 ///
+        cpv2017_share_laborforce_age14=labor_force_age14_2017 ///
+        cpv2017_unemployment_rate=unemployed_laborforce_2017 ///
+        cpv2017_share_insured=insurance_any_2017 ///
+        cpv2017_share_insurance_sis=insurance_sis_2017 ///
+        cpv2017_share_insurance_essalud=insurance_essalud_2017 ///
+        cpv2017_share_disability=disability_any_2017 ///
+        cpv2017_share_indig_lang=indigenous_language_2017 ///
+        cpv2017_share_moved_five_years=moved_district_2012_2017 ///
+        cpv2017_share_internet=internet_2017 ///
+        cpv2017_share_nbi_any=nbi_any_2017 ///
+        cpv2017_member_wb_housing=wellbeing_housing_2017 ///
+        cpv2017_member_wb_services=wellbeing_services_2017 ///
+        cpv2017_member_wb_energy=wellbeing_energy_2017 ///
+        wellbeing_human_capital_2017=wellbeing_humancapital_2017 ///
+        cpv2017_member_wb_assets=wellbeing_assets_2017 ///
+        cpv2017_member_wb_connect=wellbeing_connectivity_2017 ///
+        cpv2017_member_wb_core=wellbeing_core_2017, ///
+    by(ruv_id)
+
+generate double cpv2017_link_rate = ///
+    cpv2017_linked_persons / cpv2017_cohort_persons
+generate double cpv2017_share_moved_ccpp = ///
+    cpv2017_moved_ccpp_count / cpv2017_migration_observed ///
+    if cpv2017_migration_observed > 0
+generate double cpv2017_share_moved_district = ///
+    cpv2017_moved_district_count / cpv2017_migration_observed ///
+    if cpv2017_migration_observed > 0
+generate double cpv2017_share_moved_province = ///
+    cpv2017_moved_province_count / cpv2017_migration_observed ///
+    if cpv2017_migration_observed > 0
+generate double cpv2017_share_moved_dept = ///
+    cpv2017_moved_dept_count / cpv2017_migration_observed ///
+    if cpv2017_migration_observed > 0
+
+label variable cpv2017_cohort_persons ///
+    "People in the 2013 source cohort"
+label variable cpv2017_linked_persons ///
+    "Source-cohort people linked to Census 2017"
+label variable cpv2017_link_rate ///
+    "Share of source-cohort people linked to Census 2017"
+label variable cpv2017_share_moved_ccpp ///
+    "Share of linked source-cohort people living in another CCPP"
+label variable cpv2017_member_wb_core ///
+    "Person-weighted linked-cohort wellbeing score, 0-1"
+
+isid ruv_id
+count
+assert r(N) == `census2017_source_ruv_rows'
+save `census2017_ccpp_person'
+
+use `census2017_household_clean', clear
+generate byte source_household_aux = 1
+collapse ///
+    (sum) ///
+        cpv2017_source_households=source_household_aux ///
+    (mean) ///
+        cpv2017_hh_mean_link_rate=hh_link_rate_2017 ///
+        cpv2017_hh_share_split=baseline_split_destination_2017 ///
+        cpv2017_hh_share_moved=hh_share_moved_ccpp_2017 ///
+        cpv2017_hh_share_internet=hh_share_internet_2017 ///
+        cpv2017_hh_share_nbi=hh_member_share_nbi_2017 ///
+        wellbeing_housing_2017=hh_wellbeing_housing_2017 ///
+        wellbeing_services_2017=hh_wellbeing_services_2017 ///
+        wellbeing_energy_2017=hh_wellbeing_energy_2017 ///
+        wellbeing_assets_2017=hh_wellbeing_assets_2017 ///
+        wellbeing_connectivity_2017=hh_wellbeing_connect_2017 ///
+        cpv2017_hh_wellbeing_core=hh_wellbeing_core_2017 ///
+        cpv2017_hh_deprivation_core=hh_deprivation_core_2017, ///
+    by(ruv_id)
+isid ruv_id
+count
+assert r(N) == `census2017_source_ruv_rows'
+save `census2017_ccpp_household'
+
+use `census2017_ccpp_person', clear
+merge 1:1 ruv_id using `census2017_ccpp_household'
+assert _merge == 3
+drop _merge
+
+generate double wellbeing_core_2017 = ///
+    (wellbeing_housing_2017 + wellbeing_services_2017 + ///
+     wellbeing_energy_2017 + wellbeing_human_capital_2017) / 4 ///
+    if !missing( ///
+        wellbeing_housing_2017, ///
+        wellbeing_services_2017, ///
+        wellbeing_energy_2017, ///
+        wellbeing_human_capital_2017)
+generate double deprivation_core_2017 = 1 - wellbeing_core_2017 ///
+    if !missing(wellbeing_core_2017)
+assert inrange(wellbeing_core_2017, 0, 1) ///
+    if !missing(wellbeing_core_2017)
+save `census2017_ccpp_linked'
+
+use ///
+    "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
+    clear
+merge 1:1 ruv_id using `census2017_ccpp_linked'
+generate byte census2017_cohort_covered = _merge == 3
+drop _merge
+
+count if census2017_cohort_covered
+local census2017_ccpp_covered = r(N)
+assert `census2017_ccpp_covered' == `census2017_source_ruv_rows'
+count if sample_main_rd & census2017_cohort_covered
+local census2017_main_sample_covered = r(N)
+
+quietly summarize cpv2017_migration_observed, meanonly
+local cpv2017_migration_observed = r(sum)
+quietly summarize cpv2017_moved_ccpp_count, meanonly
+local cpv2017_moved_ccpp_rows = r(sum)
+quietly summarize cpv2017_moved_district_count, meanonly
+local cpv2017_moved_district_rows = r(sum)
+
+label variable census2017_cohort_covered ///
+    "RUV community represented in the INEI-assisted Census cohort"
+label variable cpv2017_hh_share_split ///
+    "Share of source households split across 2017 households"
+label variable cpv2017_hh_share_internet ///
+    "Mean member-weighted internet exposure across source households"
+label variable wellbeing_core_2017 ///
+    "Harmonized linked-cohort CCPP wellbeing score, 0-1"
+label variable deprivation_core_2017 ///
+    "Reverse-coded linked-cohort CCPP wellbeing score, 0-1"
+
+compress
+sort ruv_id
+isid ruv_id
+count
+local census2017_registry_rows = r(N)
+assert `census2017_registry_rows' == `sisfoh2013_registry_rows'
+assert `census2017_registry_rows' == 5712
+save ///
+    "${analysis_data_root}/14_community_registry_census_2017.dta", ///
+    replace
+
 
 *===============================================================================
-**# 13. Write aggregate QA metrics and close
+**# 14. Write aggregate QA metrics and close
 *===============================================================================
 
 tempname qa_post
@@ -10692,6 +12195,194 @@ post `qa_post' ///
     ("validated") ///
     ("All RUV rows retained after adding CCPP-level SISFOH outcomes")
 
+post `qa_post' ///
+    ("census2017_public_person_rows") ///
+    (`census2017_public_person_rows') ///
+    ("validated") ///
+    ("Official national public Census person-module rows; district geography only")
+
+post `qa_post' ///
+    ("census2017_public_household_rows") ///
+    (`census2017_public_hh_rows') ///
+    ("validated") ///
+    ("Official national public Census household-module rows; district geography only")
+
+post `qa_post' ///
+    ("census2017_public_dwelling_rows") ///
+    (`cpv2017_public_dwelling_rows') ///
+    ("validated") ///
+    ("Official national public Census dwelling-module rows; district geography only")
+
+post `qa_post' ///
+    ("census2017_source_ccpp_codes") ///
+    (`census2017_source_ccpp_rows') ///
+    ("validated") ///
+    ("INEI-assisted source CCPP codes accepted in the frozen crosswalk")
+
+post `qa_post' ///
+    ("census2017_source_ruv_rows") ///
+    (`census2017_source_ruv_rows') ///
+    ("validated") ///
+    ("Canonical RUV communities represented by the 807 source codes")
+
+post `qa_post' ///
+    ("census2017_cohort_rows") ///
+    (`census2017_cohort_rows') ///
+    ("validated") ///
+    ("All people in the INEI-assisted SISFOH-to-Census cohort retained")
+
+post `qa_post' ///
+    ("census2017_linked_rows") ///
+    (`census2017_linked_rows') ///
+    ("validated") ///
+    ("Cohort people linked by INEI to a 2017 Census record")
+
+post `qa_post' ///
+    ("census2017_not_linked_rows") ///
+    (`census2017_not_linked_rows') ///
+    ("retained_missing") ///
+    ("Cohort people retained with Census outcomes missing; never coded as migration")
+
+forvalues stage = 0/3 {
+    post `qa_post' ///
+        ("census2017_link_stage_`stage'") ///
+        (`census2017_stage`stage'_rows') ///
+        ("validated") ///
+        ("INEI linkage-stage count reproduced from the technical handoff")
+}
+
+post `qa_post' ///
+    ("census2017_person_key_source") ///
+    (`census2017_person_key_source') ///
+    ("validated") ///
+    ("Canonical SISFOH persons recovered by source CCPP and roster coordinates")
+
+post `qa_post' ///
+    ("census2017_person_key_inei") ///
+    (`census2017_person_key_inei') ///
+    ("validated") ///
+    ("Additional persons recovered by INEI CCPP and roster coordinates")
+
+post `qa_post' ///
+    ("census2017_person_key_district") ///
+    (`census2017_person_key_district') ///
+    ("validated") ///
+    ("Additional persons recovered by a unique district-roster-age-sex key")
+
+post `qa_post' ///
+    ("census2017_person_key_unresolved") ///
+    (`cpv2017_person_key_unresolved') ///
+    ("retained_unresolved") ///
+    ("Cohort people retained without a forced canonical SISFOH person match")
+
+post `qa_post' ///
+    ("census2017_household_key_conflicts") ///
+    (`cpv2017_hh_key_conflicts') ///
+    ("quarantined") ///
+    ("Source households whose recovered members imply multiple canonical SISFOH households")
+
+post `qa_post' ///
+    ("census2017_household_conflict_persons") ///
+    (`cpv2017_hh_conflict_persons') ///
+    ("quarantined") ///
+    ("People in source households with conflicting canonical SISFOH household IDs")
+
+post `qa_post' ///
+    ("census2017_sisfoh_age_disagreements") ///
+    (`cpv2017_sisfoh_age_disagree') ///
+    ("diagnostic") ///
+    ("Recovered SISFOH person keys whose source and canonical ages differ")
+
+post `qa_post' ///
+    ("census2017_sisfoh_sex_disagreements") ///
+    (`cpv2017_sisfoh_sex_disagree') ///
+    ("diagnostic") ///
+    ("Recovered SISFOH person keys whose source and canonical sex values differ")
+
+post `qa_post' ///
+    ("census2017_baseline_households") ///
+    (`census2017_baseline_hh_rows') ///
+    ("validated") ///
+    ("De-identified 2013 source households in the INEI-assisted cohort")
+
+post `qa_post' ///
+    ("census2017_sisfoh_households_recovered") ///
+    (`census2017_sisfoh_hh_rows') ///
+    ("validated") ///
+    ("Source households recovered in the canonical SISFOH household file")
+
+post `qa_post' ///
+    ("census2017_destination_households") ///
+    (`census2017_destination_hh_rows') ///
+    ("validated") ///
+    ("Distinct 2017 destination households represented by linked people")
+
+post `qa_post' ///
+    ("census2017_destination_roster_complete") ///
+    (`cpv2017_dest_hh_complete') ///
+    ("validated") ///
+    ("Destination households whose full Census roster is present in the delivery")
+
+post `qa_post' ///
+    ("census2017_destination_roster_partial") ///
+    (`cpv2017_dest_hh_partial') ///
+    ("restricted") ///
+    ("Destination households represented by only part of their Census roster")
+
+post `qa_post' ///
+    ("census2017_destination_roster_missing") ///
+    (`cpv2017_dest_hh_no_roster') ///
+    ("restricted") ///
+    ("Destination household IDs without a reported Census household size")
+
+post `qa_post' ///
+    ("census2017_destination_roster_overfull") ///
+    (`cpv2017_dest_hh_overfull') ///
+    ("quarantined") ///
+    ("Destination households with delivery rows exceeding the reported roster")
+
+post `qa_post' ///
+    ("census2017_migration_observed") ///
+    (`cpv2017_migration_observed') ///
+    ("validated") ///
+    ("Linked people with valid source and destination CCPP codes")
+
+post `qa_post' ///
+    ("census2017_moved_ccpp_rows") ///
+    (`cpv2017_moved_ccpp_rows') ///
+    ("descriptive") ///
+    ("Linked people living in a different CCPP in 2017")
+
+post `qa_post' ///
+    ("census2017_moved_district_rows") ///
+    (`cpv2017_moved_district_rows') ///
+    ("descriptive") ///
+    ("Linked people living in a different district in 2017")
+
+post `qa_post' ///
+    ("census2017_individual_analysis_rows") ///
+    (`census2017_person_analysis_rows') ///
+    ("validated") ///
+    ("All source-cohort people in the coded individual analysis file")
+
+post `qa_post' ///
+    ("census2017_household_analysis_rows") ///
+    (`census2017_household_rows') ///
+    ("validated") ///
+    ("All source households in the coded household analysis file")
+
+post `qa_post' ///
+    ("census2017_main_sample_covered") ///
+    (`census2017_main_sample_covered') ///
+    ("validated") ///
+    ("Selected main-RD sample communities represented in the linked cohort")
+
+post `qa_post' ///
+    ("census2017_registry_rows") ///
+    (`census2017_registry_rows') ///
+    ("validated") ///
+    ("All RUV rows retained after adding linked-cohort Census outcomes")
+
 postclose `qa_post'
 
 use `qa_metrics', clear
@@ -10757,6 +12448,13 @@ export delimited ///
 restore
 
 preserve
+keep if strpos(metric, "census2017_") == 1
+export delimited ///
+    "${metadata_root}/census-2017/sample-flow.csv", ///
+    replace
+restore
+
+preserve
 keep if inlist( ///
     metric, ///
     "victimization_rows", ///
@@ -10817,6 +12515,12 @@ display as text   "RUV rows linked to SISFOH:       `sisfoh2013_ruv_linked'"
 display as text   "RUV rows without SISFOH link:    `sisfoh2013_ruv_unmatched'"
 display as text   "SISFOH individual analysis rows: `sisfoh2013_indiv_rows'"
 display as text   "SISFOH household analysis rows:  `sisfoh2013_hh_analysis_rows'"
+display as text   "Census 2017 source-cohort rows:   `census2017_cohort_rows'"
+display as text   "Census-linked cohort rows:        `census2017_linked_rows'"
+display as text   "Census-unlinked rows retained:    `census2017_not_linked_rows'"
+display as text   "Census source households:         `census2017_household_rows'"
+display as text   "Census cohort RUV communities:    `census2017_ccpp_covered'"
+display as text   "Census CCPP registry rows:         `census2017_registry_rows'"
 display as text   "All RUV rows retained with complete treatment status."
 
 capture program drop victimasrd_normalize_name
