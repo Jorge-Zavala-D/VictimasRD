@@ -91,7 +91,22 @@ outcome-dependent tests are documented in
 [`docs/RD_VALIDATION_PROTOCOL.md`](../../../docs/RD_VALIDATION_PROTOCOL.md).
 Unlike the exhaustive search, this bounded module is eligible for `run_all`.
 
-Modules will be added sequentially. They must:
+`04_estimate_main_effects.do` is the outcome-analysis orchestrator. It loads
+the versioned common contract, validates commands and inputs, and calls the
+wave-by-level modules in a fixed order. The first implemented module,
+`04a_sisfoh2013_ccpp.do`, analyzes 2013 SISFOH outcomes at CCPP level using
+the selected legacy geography, adjacent B/C support, and cumulative treatment
+through 2012. Its main branch uses a treatment-design bandwidth of 0.0075 and
+bias bandwidth of 0.0135 for every registered primary outcome. It reports the
+first stage, reduced form, fuzzy-RD ratio, outcome-specific bandwidth and
+fixed-window sensitivities, a local-linear 2SLS analogue, weak-instrument
+diagnostics, and family-wise multiplicity adjustments. The module never tunes
+the sample or bandwidth to pass the prespecified first-stage gate. Its
+contract is documented in
+[`docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md`](../../../docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md),
+and its 51-outcome registry is stored under `metadata/rd-outcomes/`.
+
+Remaining modules will be added sequentially. They must:
 
 - read machine-specific roots from the master-loaded local path configuration;
 - treat Dropbox Raw and dated archives as immutable;

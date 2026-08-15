@@ -2,11 +2,12 @@
 
 ## Bottom line
 
-The current pipeline is ready to support construction and testing of the
-outcome-estimation programs. It is not yet ready for any estimate to be called
-the primary causal result of the paper. The remaining binding work is mostly a
-research-design and specification lock, not another broad round of data
-acquisition.
+The current pipeline now supports the first versioned outcome-estimation
+module at the 2013 CCPP level. It is not yet ready for any fuzzy-RD estimate to
+be called the primary causal result of the paper: the implemented common-window
+first stage does not pass the conservative strength gate. The remaining work is
+mostly interpretation, selection/linkage sensitivity, and additional
+wave-by-level modules, not another broad round of data acquisition.
 
 The correct architecture is not literally one file per analytical level.
 `14_community_registry_census_2017.dta` is the complete RUV community spine,
@@ -54,6 +55,30 @@ downstream data are never recoded as observed zero outcomes.
   feasibility, multiplicity, and prespecified sensitivity branches.
 
 ## Binding decisions before primary outcome estimation
+
+### Decisions locked for the 2013 CCPP module
+
+The research team has approved adjacent B/C support in the selected legacy
+geography, `treat_12` for SISFOH 2013 outcomes, the fuzzy-RD LATE as the target
+effect accompanied by the first stage and assignment reduced form, and a
+common treatment-design bandwidth of 0.0075 with bias bandwidth 0.0135. The
+main CCPP estimator uses local-linear triangular kernels, robust bias
+correction, mass-point adjustment, and district CR2 inference. A compact
+51-outcome registry fixes transformations, denominators, reporting tiers, and
+multiplicity families. The common window is derived from the treatment design
+and is never searched to maximize outcome significance or first-stage
+strength.
+
+The linked primary sample produces a robust first-stage statistic of
+approximately 11.35, and the common-window parametric analogue produces a
+Kleibergen--Paap F statistic of approximately 10.49. Both are below the
+prespecified interpretation gate of 20. Consequently, fuzzy LATE estimates are
+retained for diagnosis but must be presented with reduced forms and
+weak-instrument-robust Anderson--Rubin inference. This status cannot be changed
+by selecting a more favorable bandwidth after seeing the results.
+
+The remaining subsections document the broader decisions that must be carried
+forward or resolved for later person-, household-, and 2017 modules.
 
 ### 1. Dated treatment and eligible risk set
 
@@ -183,10 +208,10 @@ the binding identification issues.
 
 ## Readiness verdict
 
-No additional broad source family is required before coding the analysis
-modules. The current data are sufficient to begin that work and to reproduce
-the full sample-flow, validity, linkage, reduced-form, and fuzzy-RD workflow.
-They are not yet sufficient for an authoritative primary causal claim because
-the dated assignment regime, outcome-specific treatment horizon, risk set,
-score-tie/support rule, estimand, clustering plan, Census selection strategy,
-and outcome/multiplicity registry remain unresolved team decisions.
+No additional broad source family is required before coding the remaining
+analysis modules. The 2013 CCPP contract now locks the treatment horizon,
+adjacent B/C support, estimand hierarchy, common bandwidth, CCPP-level
+inference, and outcome/multiplicity registry. It is not yet sufficient for an
+authoritative fuzzy-RD causal claim because its first stage is below the
+conservative strength gate. Census selection correction and denominator rules,
+plus the person-, household-, and 2017 wave contracts, remain to be completed.

@@ -1,0 +1,12 @@
+metric,value,status,interpretation
+"support","adjacent B/C","approved","Selected legacy geography and recorded RUV categories B or C"
+"treatment","treat_12","approved","Cumulative collective reparations through 2012 for 2013 outcomes"
+"common_h","0.0075","approved","Treatment-design bandwidth used by every main 2013 outcome"
+"common_b","0.0135","approved","Common bias bandwidth for robust bias correction"
+"selector_h",".0074356901389622","validated","MSE bandwidth selected from treat_12 in the B/C design universe"
+"selector_b",".0134814612817637","validated","Bias bandwidth selected from treat_12 in the B/C design universe"
+"first_stage_f","11.35186189130568","warning","Squared robust first-stage z statistic in the linked primary sample"
+"parametric_kp_f","10.48660291101745","warning","Cluster-robust Kleibergen-Paap F in the common local-linear IV model"
+"weak_f_gate","20","approved","Conservative interpretation gate; bandwidth is never tuned to pass"
+"primary_vce","district CR2","approved","One row per CCPP with municipal implementation and common shocks"
+"primary_covariates","altitude_m_2017 ln_population_2007 wellbeing_core_2007","sensitivity","Fixed predetermined precision set; unadjusted model remains primary"

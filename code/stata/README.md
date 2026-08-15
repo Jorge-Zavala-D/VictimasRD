@@ -54,9 +54,17 @@ treatment effects.
 non-selective first-stage audit. It writes aggregate diagnostics but never
 defines or changes `sample_main_rd`. The research-team-selected legacy
 geography is created in data preparation. The exhaustive audit call is
-bracketed out of the master, including `run_all`; outcome estimation,
-robustness, and mechanism switches remain disabled while their specifications
-are open.
+bracketed out of the master, including `run_all`.
+
+`pipeline/03b_validate_rd_assumptions.do` and
+`pipeline/04_estimate_main_effects.do` are implemented as bounded routine
+modules. The outcome orchestrator currently calls
+`pipeline/04a_sisfoh2013_ccpp.do`, which implements the approved 2013 CCPP
+contract using adjacent B/C support, `treat_12`, a common treatment-design
+bandwidth, district-aware inference, weak-first-stage safeguards, and the
+versioned outcome registry. These modules remain switch-controlled; later
+person-, household-, 2017-, robustness-, and mechanism modules are not yet
+implemented.
 
 The CMAN PDF table and ReporteCCPP HTML tables are one-time source-ingestion
 products shared through Dropbox Working. Their CSVs and extraction manifests
