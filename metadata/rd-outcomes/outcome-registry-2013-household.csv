@@ -1,0 +1,54 @@
+paper_order,outcome_id,outcome_var,outcome_label,family,tier,multiplicity_family,transform,scale,denominator,source,paper_role,file_stub
+1,H01,hh_members_2013,Rostered household members,demography,primary,primary_2013_household,count,1,Linked household person roster,SISFOH 2012-2013,main,household_members
+2,H02,hh_share_female_2013,Female household members,demography,primary,primary_2013_household,share,100,Rostered household members,SISFOH 2012-2013,main,female_members
+3,H03,hh_employment_rate_outcome,Employed working-age members,labor,primary,primary_2013_household,share,100,Members age 14 or older with valid labor status,SISFOH 2012-2013,main,employment_rate
+4,H04,hh_any_program_outcome,Household has a social-program participant,social_protection,primary,primary_2013_household,binary,100,Households with validated member program responses,SISFOH 2012-2013,main,any_program
+5,H05,wellbeing_core_proxy_2013,Core wellbeing proxy,wellbeing,primary,primary_2013_household,index_0_1,100,Households with all four core domains,SISFOH 2012-2013,main,wellbeing_core
+6,H06,nbi_any_2013,Household has any unmet basic need,deprivation,primary,primary_2013_household,binary,100,Households with all five NBI components,SISFOH 2012-2013,main,nbi_any
+7,H07,wellbeing_assets_2013,Durable-assets wellbeing domain,assets,primary,primary_2013_household,index_0_1,100,Households with validated asset responses,SISFOH 2012-2013,main,assets_domain
+8,H08,hh_share_secondaryplus_2013,Members with secondary education or higher,human_capital,primary,primary_2013_household,share,100,Members age 14 or older with valid education,SISFOH 2012-2013,main,secondary_education
+9,S01,hh_age_share_0_14,Members age 0-14,demography,secondary,demography_2013_household,share,100,Rostered members with valid age,SISFOH 2012-2013,appendix,age_0_14
+10,S02,hh_age_share_15_29,Members age 15-29,demography,secondary,demography_2013_household,share,100,Rostered members with valid age,SISFOH 2012-2013,appendix,age_15_29
+11,S03,hh_age_share_30_44,Members age 30-44,demography,secondary,demography_2013_household,share,100,Rostered members with valid age,SISFOH 2012-2013,appendix,age_30_44
+12,S04,hh_age_share_45_64,Members age 45-64,demography,secondary,demography_2013_household,share,100,Rostered members with valid age,SISFOH 2012-2013,appendix,age_45_64
+13,S05,hh_age_share_65p,Members age 65 or older,demography,secondary,demography_2013_household,share,100,Rostered members with valid age,SISFOH 2012-2013,appendix,age_65p
+14,S06,hh_head_female_2013,Female-headed household,demography,secondary,demography_2013_household,binary,100,Households with an identified head,SISFOH 2012-2013,appendix,female_head
+15,S07,hh_share_literate_2013,Literate working-age members,human_capital,secondary,human_capital_2013_household,share,100,Members age 14 or older with valid literacy,SISFOH 2012-2013,appendix,literacy
+16,S08,hh_share_nonspanish_2013,Members with non-Spanish mother tongue,human_capital,secondary,human_capital_2013_household,share,100,Members age 3 or older with valid language,SISFOH 2012-2013,appendix,nonspanish_language
+17,S09,hh_share_indigenous_2013,Members with a named Indigenous mother tongue,human_capital,secondary,human_capital_2013_household,share,100,Members age 3 or older with valid language,SISFOH 2012-2013,appendix,indigenous_language
+18,S10,hh_share_insured_2013,Members with health insurance,health,secondary,health_2013_household,share,100,Rostered members with validated insurance responses,SISFOH 2012-2013,appendix,insured_members
+19,S11,hh_any_insured_outcome,Household has an insured member,health,secondary,health_2013_household,binary,100,Households with validated member insurance responses,SISFOH 2012-2013,appendix,any_insured
+20,S12,hh_share_disability_2013,Members reporting a disability,health,secondary,health_2013_household,share,100,Rostered members with validated disability responses,SISFOH 2012-2013,appendix,disability_share
+21,S13,hh_any_disability_outcome,Household has a member reporting disability,health,secondary,health_2013_household,binary,100,Households with validated member disability responses,SISFOH 2012-2013,appendix,any_disability
+22,S14,hh_any_juntos_outcome,Household has a Juntos participant,social_protection,secondary,social_protection_2013_household,binary,100,Households with validated member program responses,SISFOH 2012-2013,appendix,juntos
+23,S15,hh_share_program_any_2013,Members in any social program,social_protection,secondary,social_protection_2013_household,share,100,Rostered members with validated program responses,SISFOH 2012-2013,appendix,program_share
+24,S16,hh_lfp_outcome,Working-age members in the labor force,labor,secondary,labor_2013_household,share,100,Members age 14 or older with valid labor status,SISFOH 2012-2013,appendix,labor_force
+25,S17,hh_unemployment_rate_outcome,Unemployed household labor-force members,labor,secondary,labor_2013_household,share,100,Household labor-force members age 14 or older,SISFOH 2012-2013,appendix,unemployment
+26,S18,hh_any_agriculture_outcome,Household has an agricultural worker,labor_sector,secondary,labor_sector_2013_household,binary,100,Households with linked member labor records,SISFOH 2012-2013,appendix,agriculture
+27,S19,hh_any_livestock_outcome,Household has a livestock worker,labor_sector,secondary,labor_sector_2013_household,binary,100,Households with linked member labor records,SISFOH 2012-2013,appendix,livestock
+28,S20,hh_any_services_outcome,Household has a services worker,labor_sector,secondary,labor_sector_2013_household,binary,100,Households with linked member labor records,SISFOH 2012-2013,appendix,services
+29,S21,hh_any_government_outcome,Household has a government worker,labor_sector,secondary,labor_sector_2013_household,binary,100,Households with linked member labor records,SISFOH 2012-2013,appendix,government
+30,S22,nbi_two_plus_2013,Household has two or more unmet basic needs,deprivation,secondary,deprivation_2013_household,binary,100,Households with all five NBI components,SISFOH 2012-2013,appendix,nbi_two_plus
+31,S23,nbi1_housing_2013,NBI inadequate housing,deprivation,secondary,deprivation_2013_household,binary,100,Households with required dwelling materials,SISFOH 2012-2013,appendix,nbi_housing
+32,S24,nbi2_overcrowding_2013,NBI overcrowding,deprivation,secondary,deprivation_2013_household,binary,100,Households with a positive occupied-room count,SISFOH 2012-2013,appendix,nbi_overcrowding
+33,S25,nbi3_sanitation_2013,NBI inadequate sanitation,deprivation,secondary,deprivation_2013_household,binary,100,Households with valid sanitation source,SISFOH 2012-2013,appendix,nbi_sanitation
+34,S26,nbi4_school_proxy_2013,NBI school-attendance proxy,deprivation,secondary,deprivation_2013_household,binary,100,Households with an assessable child roster,SISFOH 2012-2013,appendix,nbi_school
+35,S27,nbi5_dependency_2013,NBI high economic dependency,deprivation,secondary,deprivation_2013_household,binary,100,Households with valid head education and labor roster,SISFOH 2012-2013,appendix,nbi_dependency
+36,S28,nbi_count_2013,Number of unmet basic needs,deprivation,secondary,deprivation_2013_household,count,1,Households with all five NBI components,SISFOH 2012-2013,appendix,nbi_count
+37,S29,wellbeing_housing_2013,Housing wellbeing domain,wellbeing,secondary,wellbeing_2013_household,index_0_1,100,Households with valid floor material,SISFOH 2012-2013,appendix,wellbeing_housing
+38,S30,wellbeing_services_proxy_2013,Services wellbeing proxy,wellbeing,secondary,wellbeing_2013_household,index_0_1,100,Households with valid water and sanitation items,SISFOH 2012-2013,appendix,wellbeing_services
+39,S31,wellbeing_energy_2013,Energy wellbeing domain,wellbeing,secondary,wellbeing_2013_household,index_0_1,100,Households with valid lighting and cooking fuel,SISFOH 2012-2013,appendix,wellbeing_energy
+40,S32,wellbeing_humancapital_2013,Human-capital wellbeing domain,wellbeing,secondary,wellbeing_2013_household,index_0_1,100,Households with valid literacy and education shares,SISFOH 2012-2013,appendix,wellbeing_humancapital
+41,S33,earth_floor_2013,Dwelling has an earth floor,housing_services,secondary,housing_services_2013_household,binary,100,Households with valid floor material,SISFOH 2012-2013,appendix,earth_floor
+42,S34,public_pylon_water_2013,Water from a public network or pylon,housing_services,secondary,housing_services_2013_household,binary,100,Households with valid water source,SISFOH 2012-2013,appendix,public_water
+43,S35,improved_sanitation_2013,Household has improved sanitation,housing_services,secondary,housing_services_2013_household,binary,100,Households with valid sanitation source,SISFOH 2012-2013,appendix,improved_sanitation
+44,S36,electricity_2013,Dwelling has electric lighting,housing_services,secondary,housing_services_2013_household,binary,100,Households with valid lighting source,SISFOH 2012-2013,appendix,electricity
+45,S37,clean_cooking_2013,Household uses cleaner cooking fuel,housing_services,secondary,housing_services_2013_household,binary,100,Households with valid cooking fuel,SISFOH 2012-2013,appendix,clean_cooking
+46,S38,asset_tv_2013,Household owns a television,assets,secondary,assets_2013_household,binary,100,Households with validated asset responses,SISFOH 2012-2013,appendix,asset_tv
+47,S39,asset_refrigerator_2013,Household owns a refrigerator,assets,secondary,assets_2013_household,binary,100,Households with validated asset responses,SISFOH 2012-2013,appendix,asset_refrigerator
+48,S40,asset_washing_machine_2013,Household owns a washing machine,assets,secondary,assets_2013_household,binary,100,Households with validated asset responses,SISFOH 2012-2013,appendix,asset_washing_machine
+49,S41,asset_computer_2013,Household owns a computer,assets,secondary,assets_2013_household,binary,100,Households with validated asset responses,SISFOH 2012-2013,appendix,asset_computer
+50,S42,asset_mobile_2013,Household owns a mobile phone,assets,secondary,assets_2013_household,binary,100,Households with validated asset responses,SISFOH 2012-2013,appendix,asset_mobile
+51,M01,wellbeing_connectivity_2013,Connectivity wellbeing domain,connectivity,mechanism,mechanism_2013_household,index_0_1,100,Households with validated connectivity responses,SISFOH 2012-2013,mechanism,connectivity_domain
+52,M02,asset_internet_2013,Household has internet access,connectivity,mechanism,mechanism_2013_household,binary,100,Households with validated connectivity responses,SISFOH 2012-2013,mechanism,internet
+53,M03,asset_cable_2013,Household has cable service,connectivity,mechanism,mechanism_2013_household,binary,100,Households with validated connectivity responses,SISFOH 2012-2013,mechanism,cable

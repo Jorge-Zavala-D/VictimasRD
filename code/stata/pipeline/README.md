@@ -93,18 +93,22 @@ Unlike the exhaustive search, this bounded module is eligible for `run_all`.
 
 `04_estimate_main_effects.do` is the outcome-analysis orchestrator. It loads
 the versioned common contract, validates commands and inputs, and calls the
-wave-by-level modules in a fixed order. The first implemented module,
-`04a_sisfoh2013_ccpp.do`, analyzes 2013 SISFOH outcomes at CCPP level using
-the selected legacy geography, adjacent B/C support, and cumulative treatment
-through 2012. Its main branch uses a treatment-design bandwidth of 0.0075 and
-bias bandwidth of 0.0135 for every registered primary outcome. It reports the
-first stage, reduced form, fuzzy-RD ratio, outcome-specific bandwidth and
-fixed-window sensitivities, a local-linear 2SLS analogue, weak-instrument
-diagnostics, and family-wise multiplicity adjustments. The module never tunes
-the sample or bandwidth to pass the prespecified first-stage gate. Its
-contract is documented in
+wave-by-level modules in a fixed order. `04a_sisfoh2013_ccpp.do` analyzes 2013
+SISFOH outcomes at CCPP level; `04b_sisfoh2013_household.do` analyzes the
+linked household file. Both use the selected legacy geography, adjacent B/C
+support, cumulative treatment through 2012, a treatment-design bandwidth of
+0.0075, and bias bandwidth of 0.0135 for every registered primary outcome.
+They report the first stage, reduced form, fuzzy-RD ratio, outcome-specific
+bandwidth and fixed-window sensitivities, local-linear 2SLS analogues,
+weak-instrument diagnostics, and multiplicity adjustments. The household
+module gives each RUV community equal total weight in its primary estimand,
+clusters by `ruv_id`, and reports household-equal, district, and score-mass-
+point sensitivities. Neither module tunes a sample, weighting rule, or
+bandwidth to pass the prespecified first-stage gate. Their contract is
+documented in
 [`docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md`](../../../docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md),
-and its 51-outcome registry is stored under `metadata/rd-outcomes/`.
+and their 51-outcome CCPP and 53-outcome household registries are stored under
+`metadata/rd-outcomes/`.
 
 Remaining modules will be added sequentially. They must:
 

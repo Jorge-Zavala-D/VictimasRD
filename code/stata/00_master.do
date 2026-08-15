@@ -663,12 +663,12 @@ display as text   "Default graph scheme: ${graph_scheme}"
 *-----------------------------------*
 
 /*
-The implemented data-preparation and national/main-sample descriptive modules are
-enabled for push-button reproduction. The main RD geography is now constructed
-in data preparation. The exhaustive RD-design search remains available as a
-standalone audit but is intentionally excluded from the master because its
-96,524-cell grid is computationally intensive. Outcome modules remain disabled
-until their treatment timing, tie rule, and estimands are approved.
+Data preparation, descriptives, RD validation, and the 2013 SISFOH CCPP and
+household outcome modules are available for push-button reproduction. The main
+RD geography is constructed in data preparation. The exhaustive RD-design
+search remains a standalone audit and is excluded from the master because its
+96,524-cell grid is computationally intensive. Switches default to zero so a
+researcher explicitly chooses the requested pipeline scope.
 */
 
 local run_all                         0
