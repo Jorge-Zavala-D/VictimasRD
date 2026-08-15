@@ -58,14 +58,15 @@ bracketed out of the master, including `run_all`.
 
 `pipeline/03b_validate_rd_assumptions.do` and
 `pipeline/04_estimate_main_effects.do` are implemented as bounded routine
-modules. The outcome orchestrator calls `pipeline/04a_sisfoh2013_ccpp.do` and
-`pipeline/04b_sisfoh2013_household.do`. Both inherit adjacent B/C support,
+modules. The outcome orchestrator calls `pipeline/04a_sisfoh2013_ccpp.do`,
+`pipeline/04b_sisfoh2013_household.do`, and
+`pipeline/04c_sisfoh2013_individual.do`. All inherit adjacent B/C support,
 `treat_12`, a common treatment-design bandwidth, weak-first-stage safeguards,
 and versioned outcome registries. The CCPP module uses district-aware
-inference; the household module gives each assignment community equal total
-weight, clusters by complete RUV community ID, and reports household-equal,
-district, and score-mass-point sensitivities. These modules remain
-switch-controlled; later person-, 2017-, dedicated robustness-, and mechanism
+inference; the household and individual modules give each assignment community
+equal total weight, cluster by complete RUV community ID, and report
+observation-equal, district, and score-mass-point sensitivities. These modules
+remain switch-controlled; later 2017, dedicated robustness, and mechanism
 modules are not yet implemented.
 
 The CMAN PDF table and ReporteCCPP HTML tables are one-time source-ingestion

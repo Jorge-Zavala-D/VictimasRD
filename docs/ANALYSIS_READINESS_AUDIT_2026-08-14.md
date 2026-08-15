@@ -2,12 +2,13 @@
 
 ## Bottom line
 
-The current pipeline now supports the first versioned outcome-estimation
-module at the 2013 CCPP level. It is not yet ready for any fuzzy-RD estimate to
-be called the primary causal result of the paper: the implemented common-window
-first stage does not pass the conservative strength gate. The remaining work is
-mostly interpretation, selection/linkage sensitivity, and additional
-wave-by-level modules, not another broad round of data acquisition.
+The current pipeline now supports versioned 2013 outcome-estimation modules at
+the CCPP, household, and individual levels. It is not yet ready for any
+fuzzy-RD estimate to be called the primary causal result of the paper: the
+implemented common-window first stages do not pass the conservative strength
+gate. The remaining work is mostly interpretation, selection/linkage
+sensitivity, and the 2017 wave-by-level modules, not another broad round of
+data acquisition.
 
 The correct architecture is not literally one file per analytical level.
 `14_community_registry_census_2017.dta` is the complete RUV community spine,
@@ -54,9 +55,9 @@ downstream data are never recoded as observed zero outcomes.
   first stages, covariate and linkage continuity, local-randomization
   feasibility, multiplicity, and prespecified sensitivity branches.
 
-## Binding decisions before primary outcome estimation
+## Locked decisions and remaining 2017 requirements
 
-### Decisions locked for the 2013 CCPP module
+### Decisions locked for the 2013 modules
 
 The research team has approved adjacent B/C support in the selected legacy
 geography, `treat_12` for SISFOH 2013 outcomes, the fuzzy-RD LATE as the target
@@ -78,15 +79,26 @@ weak-instrument-robust Anderson--Rubin inference. This status cannot be changed
 by selecting a more favorable bandwidth after seeing the results.
 
 The remaining subsections document the broader decisions that must be carried
-forward or resolved for later person-, household-, and 2017 modules.
+forward or resolved for the 2017 person, household, and CCPP modules.
+
+The household and individual modules carry the same design contract into the
+correct SISFOH files. Both give each eligible RUV community total weight one,
+cluster primarily by complete RUV community ID, and report observation-equal,
+district, and exact-score sensitivities. The complete individual primary
+sample contains 98,005 people age 14 or older in 487 communities; its common
+window contains 8,870 people in 65 communities. The individual first-stage
+statistic is approximately 11.11 and the parametric Kleibergen--Paap statistic
+is approximately 11.10, so individual LATEs remain diagnostic under the same
+gate.
 
 ### 1. Dated treatment and eligible risk set
 
-The CMAN year is the authoritative available treatment event, but the project
-still lacks exact approval, start, completion, and delivery dates. The team
-must approve, for each outcome date, whether treatment means funding by the
-prior calendar year, treatment before the observed interview, or another
-event. Same-year treatment is ambiguous when only the year is observed.
+The CMAN year is the authoritative available treatment event. SISFOH outcomes
+use cumulative funding through 2012 (`treat_12`) and Census 2017 outcomes will
+use cumulative funding through 2016 (`treat_16`); the team treats those
+variables as materialized in 2013 and 2017, respectively. Exact approval,
+start, completion, and delivery dates remain unavailable, so interview-date
+and same-year alternatives are not competing primary definitions.
 
 The analysis must also define the annual eligible untreated risk set and how
 to handle inherited technical files, later-treated communities, and policy
@@ -95,16 +107,17 @@ first stage.
 
 ### 2. RD estimand and score rule
 
-The team must designate the primary score-support branch and tie rule. The RUV
-score is rounded to four decimals while the official cutoffs use six, so the
-source category and numeric running variable can disagree at the boundary.
-The current validation code reports adjacent-category, conflict-exclusion,
-rounding-band, and full-support branches; none is yet primary.
+The adjacent recorded B/C categories in the selected geography are the primary
+support, and the numerical score centered at the official B--C cutoff defines
+distance from the threshold. The pipeline fails if recorded category and score
+sign conflict within that branch. Full support, rounding-band, and conflict
+exclusions remain diagnostics rather than alternative main results.
 
-The primary target must be named explicitly: assignment ITT, treatment-receipt
-fuzzy-RD LATE for compliers, or both in a declared hierarchy. Fuzzy outcome
-estimation also requires a weak-first-stage plan rather than relying only on a
-conventional Wald ratio.
+The treatment-receipt fuzzy-RD LATE for compliers is the target effect, but it
+is always reported beside the assignment reduced form and first stage. A
+prespecified F-statistic gate of 20 governs interpretation; below the gate,
+LATEs remain diagnostic and Anderson--Rubin and reduced-form evidence take
+priority.
 
 ### 3. Inference at the assignment level
 
@@ -137,8 +150,9 @@ sample.
 
 ### 5. Outcome hierarchy and multiplicity
 
-Every retained variable is not automatically an outcome. Before estimation,
-the team must approve a compact outcome registry containing:
+Every retained variable is not automatically an outcome. The 2013 CCPP,
+household, and individual modules now use compact versioned registries
+containing:
 
 1. primary families and one preferred measure or index per family;
 2. secondary outcomes;
@@ -146,10 +160,12 @@ the team must approve a compact outcome registry containing:
 4. exploratory heterogeneity; and
 5. placebo outcomes.
 
-The registry must define eligibility, missingness, direction, transformation,
-wave, treatment horizon, preferred estimator, covariates, clustering, and the
-within- and across-family multiplicity rule. The historical hundreds of model
-variants cannot be inherited as a confirmatory analysis plan.
+Each registry defines eligibility, missingness, transformation, scale, wave,
+treatment horizon, paper role, and multiplicity family; the shared protocol
+fixes the preferred estimator, covariates, weighting, and clustering. An
+equivalent registry remains required before the 2017 modules are estimated.
+The historical hundreds of model variants cannot be inherited as a
+confirmatory analysis plan.
 
 ### 6. Mechanism and mediation boundary
 
@@ -192,15 +208,14 @@ the binding identification issues.
 
 ## Recommended next implementation sequence
 
-1. Create a versioned outcome and specification registry and obtain explicit
-   team approval for the treatment horizon, risk set, score rule, estimand,
-   clustering, and multiplicity decisions.
-2. Build the outcome module first around sample flow, treatment timing, and
+1. Lock the 2017 outcome registries and the linkage-selection estimand before
+   estimating Census outcomes.
+2. Build the 2017 modules first around sample flow, treatment timing, and
    linkage/attrition effects; do not begin with a large coefficient table.
-3. Estimate community-level ITT and first-stage/reduced-form results, then
-   fuzzy effects with weak-first-stage-aware sensitivity.
-4. Add household and individual models using the correct wave-specific files
-   and CCPP-level inference.
+3. Estimate 2017 assignment reduced forms first, then fuzzy effects with the
+   same weak-first-stage-aware interpretation safeguards.
+4. Preserve the completed household and individual modules using the correct
+   wave-specific files and CCPP-level inference.
 5. Add robustness, placebo outcomes, heterogeneity, and exploratory mechanisms
    only after the primary registry is frozen.
 6. Map every reviewed output to the live paper through the existing manifest
@@ -209,9 +224,10 @@ the binding identification issues.
 ## Readiness verdict
 
 No additional broad source family is required before coding the remaining
-analysis modules. The 2013 CCPP contract now locks the treatment horizon,
-adjacent B/C support, estimand hierarchy, common bandwidth, CCPP-level
-inference, and outcome/multiplicity registry. It is not yet sufficient for an
-authoritative fuzzy-RD causal claim because its first stage is below the
-conservative strength gate. Census selection correction and denominator rules,
-plus the person-, household-, and 2017 wave contracts, remain to be completed.
+analysis modules. The 2013 CCPP, household, and individual contracts now lock
+the treatment horizon, adjacent B/C support, estimand hierarchy, common
+bandwidth, assignment-level inference, weighting, and outcome/multiplicity
+registries. They are not yet sufficient for an authoritative fuzzy-RD causal
+claim because their first stages are below the conservative strength gate.
+Census selection correction and denominator rules, plus the 2017 wave
+contracts, remain to be completed.

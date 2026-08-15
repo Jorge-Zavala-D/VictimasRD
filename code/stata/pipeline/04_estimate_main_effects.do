@@ -28,25 +28,34 @@ local input_ccpp ///
     "${analysis_data_root}/11_community_registry_sisfoh_2013.dta"
 local input_household ///
     "${analysis_data_root}/10_sisfoh_2013_household_analysis.dta"
+local input_individual ///
+    "${analysis_data_root}/09_sisfoh_2013_individual_analysis.dta"
 local outcome_registry_ccpp ///
     "${metadata_root}/rd-outcomes/outcome-registry.csv"
 local outcome_registry_household ///
     "${metadata_root}/rd-outcomes/outcome-registry-2013-household.csv"
+local outcome_registry_individual ///
+    "${metadata_root}/rd-outcomes/outcome-registry-2013-individual.csv"
 local protocol ///
     "${project_root}/docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md"
 local outcome_module_ccpp ///
     "${pipeline_root}/04a_sisfoh2013_ccpp.do"
 local outcome_module_household ///
     "${pipeline_root}/04b_sisfoh2013_household.do"
+local outcome_module_individual ///
+    "${pipeline_root}/04c_sisfoh2013_individual.do"
 
 foreach required_file in ///
     "`input_ccpp'" ///
     "`input_household'" ///
+    "`input_individual'" ///
     "`outcome_registry_ccpp'" ///
     "`outcome_registry_household'" ///
+    "`outcome_registry_individual'" ///
     "`protocol'" ///
     "`outcome_module_ccpp'" ///
-    "`outcome_module_household'" {
+    "`outcome_module_household'" ///
+    "`outcome_module_individual'" {
 
     capture confirm file "`required_file'"
     if _rc {
@@ -79,15 +88,20 @@ variance. Outcome-specific selectors are sensitivity branches only.
 
 global rd_input_2013_ccpp       "`input_ccpp'"
 global rd_input_2013_household  "`input_household'"
+global rd_input_2013_individual "`input_individual'"
 global rd_outcome_registry      "`outcome_registry_ccpp'"
 global rd_household_outcome_registry ///
     "`outcome_registry_household'"
+global rd_individual_outcome_registry ///
+    "`outcome_registry_individual'"
 global rd_figure_dir            "${figures_root}/rd_outcomes"
 global rd_table_dir             "${tables_root}/rd_outcomes"
 global rd_manifest              ///
     "${metadata_root}/rd-outcome-output-manifest.csv"
 global rd_household_manifest    ///
     "${metadata_root}/rd-outcome-output-manifest-2013-household.csv"
+global rd_individual_manifest   ///
+    "${metadata_root}/rd-outcome-output-manifest-2013-individual.csv"
 
 global rd_running          "running_bc"
 global rd_treatment_2013   "treat_12"
@@ -137,6 +151,14 @@ if _rc {
     exit _rc
 }
 
+display as result "Starting SISFOH 2013 individual outcome analysis."
+do "`outcome_module_individual'"
+
+if _rc {
+    display as error "SISFOH 2013 individual outcome module failed."
+    exit _rc
+}
+
 tempfile ccpp_output_manifest
 import delimited using "${rd_manifest}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
@@ -145,8 +167,14 @@ save "`ccpp_output_manifest'", replace
 import delimited using "${rd_household_manifest}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
 append using "`ccpp_output_manifest'"
+tempfile ccpp_household_output_manifest
+save "`ccpp_household_output_manifest'", replace
+
+import delimited using "${rd_individual_manifest}", ///
+    clear varnames(1) bindquote(strict) encoding(utf8)
+append using "`ccpp_household_output_manifest'"
 isid path
-assert _N == 38
+assert _N == 57
 sort path
 export delimited using "${rd_manifest}", replace nolabel
 
@@ -178,7 +206,19 @@ foreach required_output in ///
     "${rd_figure_dir}/fig_rd_outcomes_06_primary_panels_2013_household.png" ///
     "${rd_figure_dir}/fig_rd_outcomes_07_late_forest_2013_household.png" ///
     "${rd_figure_dir}/fig_rd_outcomes_08_bandwidth_sensitivity_2013_household.png" ///
+    "${rd_table_dir}/rd_2013_individual_results.csv" ///
+    "${rd_table_dir}/rd_2013_individual_analysis_contract.csv" ///
+    "${rd_table_dir}/tab_rd_outcomes_11_registry_2013_individual.tex" ///
+    "${rd_table_dir}/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex" ///
+    "${rd_table_dir}/tab_rd_outcomes_13_main_2013_individual.tex" ///
+    "${rd_table_dir}/tab_rd_outcomes_14_secondary_2013_individual.tex" ///
+    "${rd_table_dir}/tab_rd_outcomes_15_robustness_2013_individual.tex" ///
+    "${rd_figure_dir}/fig_rd_outcomes_09_first_stage_2012_individual.png" ///
+    "${rd_figure_dir}/fig_rd_outcomes_10_primary_panels_2013_individual.png" ///
+    "${rd_figure_dir}/fig_rd_outcomes_11_late_forest_2013_individual.png" ///
+    "${rd_figure_dir}/fig_rd_outcomes_12_bandwidth_sensitivity_2013_individual.png" ///
     "${rd_household_manifest}" ///
+    "${rd_individual_manifest}" ///
     "${rd_manifest}" {
 
     capture confirm file "`required_output'"
@@ -189,7 +229,7 @@ foreach required_output in ///
     }
 }
 
-display as result "Completed SISFOH 2013 CCPP and household outcome analysis."
+display as result "Completed SISFOH 2013 CCPP, household, and individual outcome analysis."
 display as text "Tables:  ${rd_table_dir}"
 display as text "Figures: ${rd_figure_dir}"
 display as text "Manifest: ${rd_manifest}"

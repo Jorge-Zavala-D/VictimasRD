@@ -1477,3 +1477,4 @@ display as text "Parametric Kleibergen-Paap F: `kp_f_main'"
 display as text "Review status: generated_unreviewed"
 
 log close victimasrd_rd_2013_ccpp
+exit 0

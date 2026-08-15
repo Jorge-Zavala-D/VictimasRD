@@ -3,8 +3,8 @@
 ## Status and scope
 
 This protocol records the research-team decisions governing the canonical
-2013 SISFOH CCPP and household outcome modules. It supplies defaults that
-later person- and 2017-level modules must either inherit explicitly or
+2013 SISFOH CCPP, household, and individual outcome modules. It supplies
+defaults that later 2017-level modules must either inherit explicitly or
 supersede in a documented decision. It does not change the geography selected
 in data preparation.
 
@@ -94,6 +94,33 @@ estimate may be selected. The complete eight-outcome primary sample contains
 39,074 households in 487 RUV communities; the common window contains 3,810
 households in 65 communities.
 
+## Individual estimand and weighting
+
+The compact primary individual family describes linked SISFOH persons age 14
+or older with complete age, education, labor-status, insurance, and program
+responses. It contains 98,005 people in 487 RUV communities; the common window
+contains 8,870 people in 65 communities. This common adolescent/adult universe
+keeps the eight main outcomes directly comparable while retaining the legacy
+paper's substantive focus on demographic composition, human capital, labor,
+health coverage, and social protection.
+
+The primary individual estimand gives every eligible RUV community total
+weight one and weights eligible people equally within community. This targets
+the average assignment-community mean among linked SISFOH people age 14 or
+older and prevents community size or enumeration intensity from determining
+its contribution. A person-equal branch is required and explicitly labeled as
+a different population-weighted estimand.
+
+Secondary outcomes use the denominator appropriate to the source question:
+valid-age rosters for age composition, females age 12--49 for pregnancy,
+children age 7--12 with valid attainment for the schooling-deprivation proxy,
+people age 14 or older for education and labor status, labor-force members for
+unemployment, people age 65 or older for Pension 65, and children age 0--3 for
+Cuna Mas. CCPP-equal weights are recomputed after applying each outcome's
+eligibility and missing-data rule. The SISFOH source does not observe current
+school enrollment, so the child measure is labeled an attainment-based proxy
+and cannot be described as observed non-enrollment.
+
 ## Estimation and inference
 
 - The continuity-based primary estimator is bias-corrected local linear
@@ -107,16 +134,16 @@ households in 65 communities.
 - Household-level models cluster by complete `ruv_id` in their primary CR2
   specifications because treatment is assigned at CCPP and three selected B/C
   communities lack a current ten-digit `ubigeo_ccpp`. District and exact-score
-  mass-point clustering are required sensitivities. Person-level models must
-  inherit the same assignment-level rule unless a later documented decision
-  supersedes it.
+  mass-point clustering are required sensitivities. Person-level models
+  inherit the same CCPP-equal primary weighting and `ruv_id` CR2 rule, with
+  person-equal, district, and score-mass-point sensitivities.
 - A transparent local-linear triangular-weighted 2SLS model estimates the
   parametric analogue within the same window. It includes separate running-
   variable slopes on each side, instruments `treat_12` with cutoff assignment,
   and clusters by district in the CCPP module and by RUV community in the
-  household module. It reports the Kleibergen--Paap F statistic,
-  underidentification test, Anderson--Rubin p-value, and wild-cluster-bootstrap
-  p-value.
+  household and individual modules. It reports the Kleibergen--Paap F
+  statistic, underidentification test, Anderson--Rubin p-value, and
+  wild-cluster-bootstrap p-value.
 - A conservative first-stage gate is Kleibergen--Paap F at least 20. This is a
   reporting and interpretation safeguard, not a device for selecting a
   bandwidth. Stock--Yogo critical values are not treated as exact under
@@ -155,10 +182,12 @@ to redefine the primary narrative.
 ## Reproducible implementation
 
 The orchestrator is `code/stata/pipeline/04_estimate_main_effects.do`. The
-implemented modules are `code/stata/pipeline/04a_sisfoh2013_ccpp.do` and
-`code/stata/pipeline/04b_sisfoh2013_household.do`; their registries are
-`metadata/rd-outcomes/outcome-registry.csv` and
-`metadata/rd-outcomes/outcome-registry-2013-household.csv`.
+implemented modules are `code/stata/pipeline/04a_sisfoh2013_ccpp.do`,
+`code/stata/pipeline/04b_sisfoh2013_household.do`, and
+`code/stata/pipeline/04c_sisfoh2013_individual.do`; their registries are
+`metadata/rd-outcomes/outcome-registry.csv`,
+`metadata/rd-outcomes/outcome-registry-2013-household.csv`, and
+`metadata/rd-outcomes/outcome-registry-2013-individual.csv`.
 Machine-readable results, LaTeX tables, and figures are written under
 `output/tables/rd_outcomes` and `output/figures/rd_outcomes`, with checksums and
 review status recorded in `metadata/rd-outcome-output-manifest.csv`.

@@ -1,110 +1,165 @@
 /*
 Project: Victimas RD
-Purpose: Estimate 2013 household reduced-form and fuzzy-RD effects
-Unit:    SISFOH household linked to an RUV centro poblado
-Input:   10_sisfoh_2013_household_analysis.dta (Dropbox Coded)
+Purpose: Estimate 2013 person-level reduced-form and fuzzy-RD effects
+Unit:    SISFOH person linked to an RUV centro poblado
+Input:   09_sisfoh_2013_individual_analysis.dta (Dropbox Coded)
 Output:  Aggregate CSV/LaTeX results and publication-formatted figures in Git
 */
 
 version 19
 set more off
 
-capture log close victimasrd_rd_2013_household
-log using "${logs_root}/rd_2013_household_${rd_run_id}.smcl", ///
-    name(victimasrd_rd_2013_household) replace
+capture log close victimasrd_rd_2013_individual
+log using "${logs_root}/rd_2013_individual_${rd_run_id}.smcl", ///
+    name(victimasrd_rd_2013_individual) replace
 
 
 *-----------------------------------*
 **# 1. Input, constructed outcomes, and registry validation
 *-----------------------------------*
 
-capture program drop _vrd_prepare_household_outcomes
+capture program drop _vrd_prepare_individual_outcomes
 
-program define _vrd_prepare_household_outcomes
+program define _vrd_prepare_individual_outcomes
     version 19
 
-    generate double hh_employment_rate_outcome = ///
-        hh_employed_age14_2013 / hh_labor_valid_2013 ///
-        if hh_labor_valid_2013 > 0
-    generate byte hh_any_program_outcome = ///
-        hh_program_any_2013 > 0 if hh_members_2013 > 0
+    * Demographic outcomes use transparent age and sex universes.
+    generate byte age_0_14_outcome = ///
+        inrange(age_2013, 0, 14) if !missing(age_2013)
+    generate byte age_15_19_outcome = ///
+        inrange(age_2013, 15, 19) if !missing(age_2013)
+    generate byte age_20_24_outcome = ///
+        inrange(age_2013, 20, 24) if !missing(age_2013)
+    generate byte age_25_29_outcome = ///
+        inrange(age_2013, 25, 29) if !missing(age_2013)
+    generate byte age_15_29_outcome = ///
+        inrange(age_2013, 15, 29) if !missing(age_2013)
+    generate byte age_30_44_outcome = ///
+        inrange(age_2013, 30, 44) if !missing(age_2013)
+    generate byte age_45_64_outcome = ///
+        inrange(age_2013, 45, 64) if !missing(age_2013)
+    generate byte age_65p_outcome = ///
+        age_2013 >= 65 if !missing(age_2013)
 
-    generate double hh_age_share_0_14 = ///
-        hh_age_0_14_2013 / hh_age_valid_2013 ///
-        if hh_age_valid_2013 > 0
-    generate double hh_age_share_15_29 = ///
-        hh_age_15_29_2013 / hh_age_valid_2013 ///
-        if hh_age_valid_2013 > 0
-    generate double hh_age_share_30_44 = ///
-        hh_age_30_44_2013 / hh_age_valid_2013 ///
-        if hh_age_valid_2013 > 0
-    generate double hh_age_share_45_64 = ///
-        hh_age_45_64_2013 / hh_age_valid_2013 ///
-        if hh_age_valid_2013 > 0
-    generate double hh_age_share_65p = ///
-        hh_age_65p_2013 / hh_age_valid_2013 ///
-        if hh_age_valid_2013 > 0
-    generate double hh_share_indigenous_2013 = ///
-        hh_named_indigenous_2013 / hh_language_valid_2013 ///
-        if hh_language_valid_2013 > 0
+    generate byte pregnant_reproductive_2013 = pregnant_2013 ///
+        if female_2013 == 1 & inrange(age_2013, 12, 49)
+    generate byte partnered_2013 = ///
+        inlist(marital_status_2013, 2, 3) ///
+        if age_2013 >= 12 & !missing(marital_status_2013)
 
-    generate byte hh_any_insured_outcome = ///
-        hh_insured_2013 > 0 if hh_members_2013 > 0
-    generate byte hh_any_disability_outcome = ///
-        hh_disability_2013 > 0 if hh_members_2013 > 0
-    generate byte hh_any_juntos_outcome = ///
-        hh_juntos_2013 > 0 if hh_members_2013 > 0
+    * Human-capital outcomes follow the age universes used in preparation.
+    generate byte school_deprivation_proxy_2013 = ///
+        inlist(education_level_2013, 1, 2) ///
+        if inrange(age_2013, 7, 12) & ///
+           !missing(education_level_2013)
+    generate byte literate_age14_2013 = literate_2013 ///
+        if age_2013 >= 14 & !missing(literate_2013)
+    generate byte primary_complete_age14_2013 = ///
+        primary_complete_2013 ///
+        if age_2013 >= 14 & !missing(primary_complete_2013)
+    generate byte education_years_age14_2013 = ///
+        education_years_approx_2013 ///
+        if age_2013 >= 14 & !missing(education_years_approx_2013)
+    generate byte indigenous_language_age3_2013 = ///
+        named_indigenous_language_2013 ///
+        if age_2013 >= 3 & !missing(named_indigenous_language_2013)
+    generate byte nonspanish_language_age3_2013 = ///
+        nonspanish_language_2013 ///
+        if age_2013 >= 3 & !missing(nonspanish_language_2013)
 
-    generate double hh_lfp_outcome = ///
-        hh_labor_force_2013 / hh_labor_valid_2013 ///
-        if hh_labor_valid_2013 > 0
-    generate double hh_unemployment_rate_outcome = ///
-        hh_unemployed_age14_2013 / hh_labor_force_2013 ///
-        if hh_labor_force_2013 > 0
+    * Program counts preserve multiple responses; narrow programs use age rules.
+    egen byte program_count_2013 = rowtotal( ///
+        program_milk_2013 program_soup_kitchen_2013 ///
+        program_school_meal_2013 program_supplement_2013 ///
+        program_food_basket_2013 program_juntos_2013 ///
+        program_housing_2013 program_pension65_2013 ///
+        program_cunamas_2013 program_other_2013)
+    generate byte program_pension65_elderly_2013 = ///
+        program_pension65_2013 if age_2013 >= 65 & !missing(age_2013)
+    generate byte program_cunamas_child_2013 = ///
+        program_cunamas_2013 if inrange(age_2013, 0, 3)
 
-    foreach sector in agriculture livestock services government {
-        generate byte hh_any_`sector'_outcome = ///
-            hh_sector_`sector'_2013 > 0 ///
-            if hh_labor_valid_2013 > 0
+    * Labor outcomes are coded only for their defensible analysis universes.
+    generate byte labor_force_age14_2013 = labor_force_2013 ///
+        if age_2013 >= 14 & !missing(labor_status_2013)
+    generate byte unemployed_lf_2013 = unemployed_2013 ///
+        if age_2013 >= 14 & labor_force_2013 == 1
+
+    local labor_status_outcomes ///
+        dependent 1 ///
+        independent 2 ///
+        employer 3 ///
+        domestic 4 ///
+        unpaid_family 5 ///
+        home_duties 7 ///
+        student 8
+    local labor_pair_count : word count `labor_status_outcomes'
+
+    forvalues pair_index = 1(2)`labor_pair_count' {
+        local code_index = `pair_index' + 1
+        local status_name : word `pair_index' of `labor_status_outcomes'
+        local status_code : word `code_index' of `labor_status_outcomes'
+        generate byte worker_`status_name'_2013 = ///
+            labor_status_2013 == `status_code' ///
+            if age_2013 >= 14 & !missing(labor_status_2013)
+    }
+    rename worker_home_duties_2013 home_duties_2013
+    rename worker_student_2013 student_age14_2013
+
+    local sector_outcomes ///
+        agriculture 1 ///
+        livestock 2 ///
+        forestry 3 ///
+        fishing 4 ///
+        mining 5 ///
+        handicraft 6 ///
+        commerce 7 ///
+        services 8 ///
+        other 9 ///
+        government 10
+    local sector_pair_count : word count `sector_outcomes'
+
+    forvalues pair_index = 1(2)`sector_pair_count' {
+        local code_index = `pair_index' + 1
+        local sector_name : word `pair_index' of `sector_outcomes'
+        local sector_code : word `code_index' of `sector_outcomes'
+        generate byte sector_`sector_name'_age14_2013 = ///
+            employment_sector_2013 == `sector_code' ///
+            if age_2013 >= 14 & !missing(labor_status_2013)
     }
 end
 
-use "${rd_input_2013_household}", clear
+use "${rd_input_2013_individual}", clear
 quietly datasignature
 local input_datasignature "`r(datasignature)'"
 
-assert _N == 415007
-isid sisfoh_hhid
+assert _N == 1425575
+isid sisfoh_pid
 
 local required_vars ///
-    sisfoh_hhid ruv_id ubigeo_dist ubigeo_ccpp ///
+    sisfoh_pid sisfoh_hhid ruv_id ubigeo_dist ubigeo_ccpp ///
     sample_main_rd victimization_level_source ///
     ${rd_running} ${rd_treatment_2013} ///
-    hh_members_2013 hh_age_valid_2013 hh_female_2013 ///
-    hh_age_0_14_2013 hh_age_15_29_2013 ///
-    hh_age_30_44_2013 hh_age_45_64_2013 hh_age_65p_2013 ///
-    hh_literacy_valid_2013 hh_literate_2013 ///
-    hh_education_valid_2013 hh_secondaryplus_2013 ///
-    hh_language_valid_2013 hh_nonspanish_2013 ///
-    hh_named_indigenous_2013 hh_insured_2013 ///
-    hh_disability_2013 hh_program_any_2013 hh_juntos_2013 ///
-    hh_labor_valid_2013 hh_labor_force_2013 ///
-    hh_employed_age14_2013 hh_unemployed_age14_2013 ///
-    hh_sector_agriculture_2013 hh_sector_livestock_2013 ///
-    hh_sector_services_2013 hh_sector_government_2013 ///
-    hh_head_female_2013 nbi_any_2013 nbi_two_plus_2013 ///
-    nbi1_housing_2013 nbi2_overcrowding_2013 ///
-    nbi3_sanitation_2013 nbi4_school_proxy_2013 ///
-    nbi5_dependency_2013 nbi_count_2013 ///
-    wellbeing_housing_2013 wellbeing_services_proxy_2013 ///
-    wellbeing_energy_2013 wellbeing_humancapital_2013 ///
-    wellbeing_assets_2013 wellbeing_connectivity_2013 ///
-    wellbeing_core_proxy_2013 ///
-    earth_floor_2013 public_pylon_water_2013 ///
-    improved_sanitation_2013 electricity_2013 ///
-    clean_cooking_2013 asset_tv_2013 asset_refrigerator_2013 ///
-    asset_washing_machine_2013 asset_computer_2013 ///
-    asset_mobile_2013 asset_internet_2013 asset_cable_2013 ///
+    age_2013 female_2013 household_head_2013 ///
+    pregnant_2013 marital_status_2013 ///
+    literate_2013 education_level_2013 ///
+    education_years_approx_2013 primary_complete_2013 ///
+    secondaryplus_2013 named_indigenous_language_2013 ///
+    nonspanish_language_2013 ///
+    insurance_any_2013 insurance_essalud_2013 ///
+    insurance_armed_forces_2013 insurance_private_2013 ///
+    insurance_sis_2013 insurance_other_2013 ///
+    labor_status_2013 employed_2013 labor_force_2013 ///
+    unemployed_2013 employment_sector_2013 ///
+    disability_any_2013 disability_visual_2013 ///
+    disability_hearing_2013 disability_speech_2013 ///
+    disability_mobility_2013 disability_cognitive_2013 ///
+    program_any_2013 program_milk_2013 ///
+    program_soup_kitchen_2013 program_school_meal_2013 ///
+    program_supplement_2013 program_food_basket_2013 ///
+    program_juntos_2013 program_housing_2013 ///
+    program_pension65_2013 program_cunamas_2013 ///
+    program_other_2013 ///
     ${rd_primary_covariates}
 
 foreach required_var of local required_vars {
@@ -115,14 +170,14 @@ assert regexm(ruv_id, "^S[0-9]{8}$")
 assert inlist(${rd_treatment_2013}, 0, 1) ///
     if !missing(${rd_treatment_2013})
 
-_vrd_prepare_household_outcomes
+_vrd_prepare_individual_outcomes
 
 generate byte rd_bc_design = ///
     sample_main_rd == 1 & ///
     inlist(victimization_level_source, "B", "C")
 
 quietly count if rd_bc_design
-assert r(N) == 42355
+assert r(N) == 141679
 
 quietly count if rd_bc_design & ///
     ((victimization_level_source == "B" & ${rd_running} < 0) | ///
@@ -147,47 +202,46 @@ quietly count if rd_ruv_tag
 assert r(N) == 487
 
 local primary_outcomes ///
-    hh_members_2013 ///
-    hh_share_female_2013 ///
-    hh_employment_rate_outcome ///
-    hh_any_program_outcome ///
-    wellbeing_core_proxy_2013 ///
-    nbi_any_2013 ///
-    wellbeing_assets_2013 ///
-    hh_share_secondaryplus_2013
+    female_2013 age_15_29_outcome ///
+    secondaryplus_2013 employed_2013 ///
+    worker_independent_2013 insurance_any_2013 ///
+    program_any_2013 program_juntos_2013
 
 egen byte primary_missing = rowmiss(`primary_outcomes') ///
     if rd_bc_design
 generate byte rd_primary_sample = ///
-    rd_bc_design & primary_missing == 0
+    rd_bc_design & age_2013 >= 14 & primary_missing == 0
 
 quietly count if rd_primary_sample
-assert r(N) == 39074
+assert r(N) == 98005
 egen byte rd_primary_ruv_tag = tag(ruv_id) if rd_primary_sample
 quietly count if rd_primary_ruv_tag
 assert r(N) == 487
 
 quietly count if rd_primary_sample & ///
     abs(${rd_running}) <= ${rd_common_h}
-assert r(N) == 3810
+assert r(N) == 8870
 egen byte rd_window_ruv_tag = tag(ruv_id) if ///
     rd_primary_sample & abs(${rd_running}) <= ${rd_common_h}
 quietly count if rd_window_ruv_tag
 assert r(N) == 65
 
 preserve
-import delimited using "${rd_household_outcome_registry}", ///
+import delimited using "${rd_individual_outcome_registry}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
 
 isid outcome_id
 isid paper_order
-assert inlist(tier, "primary", "secondary", "mechanism")
+assert inlist(tier, "primary", "secondary")
 assert inlist(scale, 1, 100)
 sort paper_order
 
 quietly count
 local outcome_count = r(N)
-assert `outcome_count' == 53
+assert `outcome_count' == 63
+
+quietly count if tier == "primary"
+assert r(N) == 8
 
 forvalues outcome_index = 1/`outcome_count' {
     local o_order_`outcome_index' = paper_order[`outcome_index']
@@ -226,7 +280,7 @@ forvalues outcome_index = 1/`outcome_count' {
 * B/C design branch. This reduces repeated computation without changing any
 * sample rule, weight, bandwidth, or estimand.
 keep if rd_bc_design
-assert _N == 42355
+assert _N == 141679
 
 
 *-----------------------------------*
@@ -234,10 +288,11 @@ assert _N == 42355
 *-----------------------------------*
 
 generate byte rd_primary_eligible = rd_primary_sample
-bysort cluster_ruv: egen long rd_primary_hh = ///
+bysort cluster_ruv: egen long rd_primary_persons = ///
     total(rd_primary_eligible)
 generate double rd_weight_ccpp_primary = ///
-    rd_primary_eligible / rd_primary_hh if rd_primary_hh > 0
+    rd_primary_eligible / rd_primary_persons ///
+    if rd_primary_persons > 0
 
 quietly rdrobust ///
     ${rd_treatment_2013} ${rd_running} if rd_primary_sample, ///
@@ -256,7 +311,7 @@ local first_stage_gate = `main_first_stage_f' >= ${rd_weak_f_gate}
 
 if !`first_stage_gate' {
     display as error ///
-        "WARNING: the household-sample first stage does not meet the gate."
+        "WARNING: the person-sample first stage does not meet the gate."
     display as error ///
         "Fuzzy LATEs remain diagnostic; reduced forms and weak-IV inference are required."
 }
@@ -266,9 +321,9 @@ if !`first_stage_gate' {
 **# 3. Reusable weighted continuity-based estimator
 *-----------------------------------*
 
-capture program drop _vrd_post_household_rd
+capture program drop _vrd_post_individual_rd
 
-program define _vrd_post_household_rd
+program define _vrd_post_individual_rd
     version 19
     syntax, ///
         POSTHandle(name) ///
@@ -294,7 +349,7 @@ program define _vrd_post_household_rd
     if "`vcetype'" == "" local vcetype "cr2 cluster_ruv"
     if "`clustervar'" == "" local clustervar "cluster_ruv"
     if "`bwselect'" == "" local bwselect "mserd"
-    if "`samplerule'" == "" local samplerule "selected_bc_household"
+    if "`samplerule'" == "" local samplerule "selected_bc_individual"
     if `tuning' == -999 local tuning .
 
     local fuzzy_option
@@ -326,11 +381,11 @@ program define _vrd_post_household_rd
             `eligible' / `eligible_count' if `eligible_count' > 0
         local weight_option "weights(`analysis_weight')"
     }
-    else if "`weighting'" == "household_equal" {
+    else if "`weighting'" == "person_equal" {
         generate double `analysis_weight' = 1 if `eligible'
     }
     else {
-        display as error "Unknown household weighting rule: `weighting'"
+        display as error "Unknown person weighting rule: `weighting'"
         exit 198
     }
 
@@ -490,19 +545,19 @@ postfile `rd_post' ///
     int estimation_rc ///
     using "`rd_results_raw'", replace
 
-_vrd_post_household_rd, ///
+_vrd_post_individual_rd, ///
     posthandle(`rd_post') ///
     outvar(${rd_treatment_2013}) ///
     outcomeid("D01") ///
-    outlabel("Treatment through 2012: linked household universe") ///
+    outlabel("Treatment through 2012: linked person universe") ///
     family("design") tier("design") multiplicity("design") ///
     paperorder(-4) specid("common_h_ccpp_equal") ///
     estimand("first_stage") usevar(rd_bc_design) scale(1) ///
     weighting("ccpp_equal") ///
     hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-    samplerule("selected_bc_household")
+    samplerule("selected_bc_individual")
 
-_vrd_post_household_rd, ///
+_vrd_post_individual_rd, ///
     posthandle(`rd_post') ///
     outvar(${rd_treatment_2013}) ///
     outcomeid("D02") ///
@@ -512,21 +567,21 @@ _vrd_post_household_rd, ///
     estimand("first_stage") usevar(rd_primary_sample) scale(1) ///
     weighting("ccpp_equal") ///
     hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-    samplerule("selected_bc_primary_household")
+    samplerule("selected_bc_primary_individual")
 
-_vrd_post_household_rd, ///
+_vrd_post_individual_rd, ///
     posthandle(`rd_post') ///
     outvar(${rd_treatment_2013}) ///
     outcomeid("D03") ///
-    outlabel("Treatment through 2012: household-equal sensitivity") ///
+    outlabel("Treatment through 2012: person-equal sensitivity") ///
     family("design") tier("design") multiplicity("design") ///
-    paperorder(-2) specid("common_h_primary_household_equal") ///
+    paperorder(-2) specid("common_h_primary_person_equal") ///
     estimand("first_stage") usevar(rd_primary_sample) scale(1) ///
-    weighting("household_equal") ///
+    weighting("person_equal") ///
     hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-    samplerule("selected_bc_primary_household")
+    samplerule("selected_bc_primary_individual")
 
-_vrd_post_household_rd, ///
+_vrd_post_individual_rd, ///
     posthandle(`rd_post') ///
     outvar(${rd_treatment_2013}) ///
     outcomeid("D04") ///
@@ -535,7 +590,7 @@ _vrd_post_household_rd, ///
     paperorder(-1) specid("mserd_primary_ccpp_equal") ///
     estimand("first_stage") usevar(rd_primary_sample) scale(1) ///
     weighting("ccpp_equal") bwselect("mserd") ///
-    samplerule("selected_bc_primary_household")
+    samplerule("selected_bc_primary_individual")
 
 generate byte rd_primary_donut_005 = ///
     rd_primary_sample & abs(${rd_running}) > .00005
@@ -553,10 +608,10 @@ forvalues outcome_index = 1/`outcome_count' {
     local outcome_order = `o_order_`outcome_index''
 
     local outcome_sample "rd_bc_design"
-    local sample_rule "selected_bc_household"
+    local sample_rule "selected_bc_individual"
     if "`outcome_tier'" == "primary" {
         local outcome_sample "rd_primary_sample"
-        local sample_rule "selected_bc_primary_household"
+        local sample_rule "selected_bc_primary_individual"
     }
 
     foreach estimand_spec in reduced_form fuzzy {
@@ -567,7 +622,7 @@ forvalues outcome_index = 1/`outcome_count' {
             local estimand_name "fuzzy_late"
         }
 
-        _vrd_post_household_rd, ///
+        _vrd_post_individual_rd, ///
             posthandle(`rd_post') outvar(`outcome_var') ///
             outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
             family("`outcome_family'") tier("`outcome_tier'") ///
@@ -581,7 +636,7 @@ forvalues outcome_index = 1/`outcome_count' {
     }
 
     foreach selector in mserd cerrd {
-        _vrd_post_household_rd, ///
+        _vrd_post_individual_rd, ///
             posthandle(`rd_post') outvar(`outcome_var') ///
             outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
             family("`outcome_family'") tier("`outcome_tier'") ///
@@ -594,7 +649,7 @@ forvalues outcome_index = 1/`outcome_count' {
     }
 
     if "`outcome_tier'" == "primary" {
-        _vrd_post_household_rd, ///
+        _vrd_post_individual_rd, ///
             posthandle(`rd_post') outvar(`outcome_var') ///
             outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
             family("`outcome_family'") tier("`outcome_tier'") ///
@@ -604,7 +659,7 @@ forvalues outcome_index = 1/`outcome_count' {
             weighting("ccpp_equal") fuzzy ///
             covariates(${rd_primary_covariates}) ///
             hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-            samplerule("selected_bc_primary_household")
+            samplerule("selected_bc_primary_individual")
 
         foreach fixed_window in 005 010 {
             local h_value = ${rd_small_h}
@@ -614,7 +669,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 local b_value = ${rd_large_b}
             }
 
-            _vrd_post_household_rd, ///
+            _vrd_post_individual_rd, ///
                 posthandle(`rd_post') outvar(`outcome_var') ///
                 outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
                 family("`outcome_family'") tier("`outcome_tier'") ///
@@ -625,23 +680,23 @@ forvalues outcome_index = 1/`outcome_count' {
                 usevar(rd_primary_sample) scale(`outcome_scale') ///
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(`h_value') bvalue(`b_value') tuning(`h_value') ///
-                samplerule("selected_bc_primary_household")
+                samplerule("selected_bc_primary_individual")
         }
 
-        _vrd_post_household_rd, ///
+        _vrd_post_individual_rd, ///
             posthandle(`rd_post') outvar(`outcome_var') ///
             outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
             family("`outcome_family'") tier("`outcome_tier'") ///
             multiplicity("`outcome_mult'") paperorder(`outcome_order') ///
-            specid("common_h_household_equal") ///
+            specid("common_h_person_equal") ///
             estimand("fuzzy_late") ///
             usevar(rd_primary_sample) scale(`outcome_scale') ///
-            weighting("household_equal") fuzzy ///
+            weighting("person_equal") fuzzy ///
             hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-            samplerule("selected_bc_primary_household")
+            samplerule("selected_bc_primary_individual")
 
         foreach inference_spec in cr1 cr3 {
-            _vrd_post_household_rd, ///
+            _vrd_post_individual_rd, ///
                 posthandle(`rd_post') outvar(`outcome_var') ///
                 outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
                 family("`outcome_family'") tier("`outcome_tier'") ///
@@ -654,7 +709,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 vcetype("`inference_spec' cluster_ruv") ///
                 clustervar(cluster_ruv) ///
-                samplerule("selected_bc_primary_household")
+                samplerule("selected_bc_primary_individual")
         }
 
         foreach cluster_level in district score {
@@ -662,7 +717,7 @@ forvalues outcome_index = 1/`outcome_count' {
             if "`cluster_level'" == "score" ///
                 local cluster_var "cluster_score"
 
-            _vrd_post_household_rd, ///
+            _vrd_post_individual_rd, ///
                 posthandle(`rd_post') outvar(`outcome_var') ///
                 outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
                 family("`outcome_family'") tier("`outcome_tier'") ///
@@ -675,11 +730,11 @@ forvalues outcome_index = 1/`outcome_count' {
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 vcetype("cr2 `cluster_var'") ///
                 clustervar(`cluster_var') ///
-                samplerule("selected_bc_primary_household")
+                samplerule("selected_bc_primary_individual")
         }
 
         foreach kernel_id in uniform epanechnikov {
-            _vrd_post_household_rd, ///
+            _vrd_post_individual_rd, ///
                 posthandle(`rd_post') outvar(`outcome_var') ///
                 outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
                 family("`outcome_family'") tier("`outcome_tier'") ///
@@ -691,10 +746,10 @@ forvalues outcome_index = 1/`outcome_count' {
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 kernel("`kernel_id'") ///
-                samplerule("selected_bc_primary_household")
+                samplerule("selected_bc_primary_individual")
         }
 
-        _vrd_post_household_rd, ///
+        _vrd_post_individual_rd, ///
             posthandle(`rd_post') outvar(`outcome_var') ///
             outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
             family("`outcome_family'") tier("`outcome_tier'") ///
@@ -703,14 +758,14 @@ forvalues outcome_index = 1/`outcome_count' {
             usevar(rd_primary_sample) scale(`outcome_scale') ///
             weighting("ccpp_equal") fuzzy ///
             polyorder(2) biasorder(3) bwselect("mserd") ///
-            samplerule("selected_bc_primary_household")
+            samplerule("selected_bc_primary_individual")
 
         foreach donut_id in 005 025 {
             local donut_sample "rd_primary_donut_`donut_id'"
             local donut_value = .00005
             if "`donut_id'" == "025" local donut_value = .00025
 
-            _vrd_post_household_rd, ///
+            _vrd_post_individual_rd, ///
                 posthandle(`rd_post') outvar(`outcome_var') ///
                 outcomeid("`outcome_id'") outlabel("`outcome_label'") ///
                 family("`outcome_family'") tier("`outcome_tier'") ///
@@ -721,7 +776,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 tuning(`donut_value') ///
-                samplerule("selected_bc_primary_household")
+                samplerule("selected_bc_primary_individual")
         }
     }
 }
@@ -750,7 +805,7 @@ forvalues outcome_index = 1/`outcome_count' {
             parametric_common_h ///
             parametric_covariates ///
             parametric_district ///
-            parametric_household_equal {
+            parametric_person_equal {
 
             local parametric_covariates
             local parametric_cluster "cluster_ruv"
@@ -765,8 +820,8 @@ forvalues outcome_index = 1/`outcome_count' {
                 local parametric_cluster "cluster_dist"
                 local parametric_vce "cr1 cluster_dist"
             }
-            if "`parametric_spec'" == "parametric_household_equal" {
-                local parametric_weighting "household_equal"
+            if "`parametric_spec'" == "parametric_person_equal" {
+                local parametric_weighting "person_equal"
             }
 
             tempvar parametric_eligible parametric_count ///
@@ -897,7 +952,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 ("`outcome_label'") ("`outcome_family'") ///
                 ("primary") ("`outcome_mult'") (`outcome_order') ///
                 ("`parametric_spec'") ("parametric_late") ///
-                ("ivreg2") ("selected_bc_primary_household") ///
+                ("ivreg2") ("selected_bc_primary_individual") ///
                 ("`parametric_weighting'") ("`parametric_vce'") ///
                 (1) (2) ("triangular") ("manual") ///
                 (${rd_common_h}) ///
@@ -924,6 +979,13 @@ postclose `rd_post'
 *-----------------------------------*
 
 use "`rd_results_raw'", clear
+
+* Four design rows, four common rows for every registered outcome, and
+* seventeen additional robustness rows for each of eight primary outcomes.
+assert _N == 392
+quietly count if tier == "primary" & ///
+    inlist(spec_id, "common_h_reduced_form", "common_h_fuzzy")
+assert r(N) == 16
 
 generate double p_holm = .
 generate double q_bh = .
@@ -958,7 +1020,7 @@ sort paper_order spec_id estimand
 save "`rd_results_final'", replace
 
 export delimited using ///
-    "${rd_table_dir}/rd_2013_household_results.csv", ///
+    "${rd_table_dir}/rd_2013_individual_results.csv", ///
     replace nolabel
 
 
@@ -972,33 +1034,33 @@ local kp_status = cond(`kp_f_main' >= ${rd_weak_f_gate}, ///
     "pass", "warning")
 
 file open `contract_file' using ///
-    "${rd_table_dir}/rd_2013_household_analysis_contract.csv", ///
+    "${rd_table_dir}/rd_2013_individual_analysis_contract.csv", ///
     write replace text
 
 file write `contract_file' ///
     "metric,value,status,interpretation" _n
 file write `contract_file' ///
-    `""unit","household","approved","One SISFOH household linked deterministically to one RUV centro poblado""' _n
+    `""unit","individual","approved","One de-identified SISFOH person linked deterministically to one RUV centro poblado""' _n
 file write `contract_file' ///
     `""support","adjacent B/C","approved","Selected legacy geography and recorded RUV categories B or C""' _n
 file write `contract_file' ///
     `""treatment","treat_12","approved","Cumulative collective reparations through 2012 for 2013 outcomes""' _n
 file write `contract_file' ///
-    `""main_weighting","CCPP equal","approved","Each eligible RUV community contributes total weight one; households are equal within community""' _n
+    `""main_weighting","CCPP equal","approved","Each eligible RUV community contributes total weight one; persons are equal within community""' _n
 file write `contract_file' ///
-    `""weighting_sensitivity","household equal","required","Shows sensitivity to informative SISFOH household counts and changes the population-weighted estimand""' _n
+    `""weighting_sensitivity","person equal","required","Shows sensitivity to informative SISFOH person counts and changes the population-weighted estimand""' _n
 file write `contract_file' ///
     `""common_h","${rd_common_h}","approved","Treatment-design bandwidth used by every main 2013 outcome""' _n
 file write `contract_file' ///
     `""common_b","${rd_common_b}","approved","Common bias bandwidth for robust bias correction""' _n
 file write `contract_file' ///
-    `""linked_households","42355","validated","Selected B/C households before complete-primary restriction""' _n
+    `""linked_persons","141679","validated","Selected B/C linked persons before the age and item-valid primary restriction""' _n
 file write `contract_file' ///
-    `""primary_households","39074","validated","Complete eight-outcome primary household sample""' _n
+    `""primary_persons","98005","validated","Complete eight-outcome sample of persons age 14 or older""' _n
 file write `contract_file' ///
     `""primary_ccpp","487","validated","RUV communities represented in the complete primary sample""' _n
 file write `contract_file' ///
-    `""window_households","3810","validated","Complete-primary households inside the common fixed window""' _n
+    `""window_persons","8870","validated","Complete-primary persons inside the common fixed window""' _n
 file write `contract_file' ///
     `""window_ccpp","65","validated","RUV communities inside the common fixed window""' _n
 file write `contract_file' ///
@@ -1014,24 +1076,24 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""primary_covariates","${rd_primary_covariates}","sensitivity","Fixed predetermined precision set; unadjusted model remains primary""' _n
 file write `contract_file' ///
-    `""selection_scope","linked SISFOH households","limitation","Estimates do not automatically generalize to households absent from SISFOH or unmatched communities""' _n
+    `""selection_scope","linked SISFOH persons","limitation","Estimates do not automatically generalize to persons absent from SISFOH or unmatched communities""' _n
 file close `contract_file'
 
 
 *-----------------------------------*
-**# 8. LaTeX household outcome registry
+**# 8. LaTeX individual outcome registry
 *-----------------------------------*
 
 tempname registry_table
 file open `registry_table' using ///
-    "${rd_table_dir}/tab_rd_outcomes_06_registry_2013_household.tex", ///
+    "${rd_table_dir}/tab_rd_outcomes_11_registry_2013_individual.tex", ///
     write replace text
 
 file write `registry_table' "\begingroup" _n
 file write `registry_table' "\small" _n
 file write `registry_table' "\begin{longtable}{p{0.10\linewidth}p{0.18\linewidth}p{0.24\linewidth}p{0.33\linewidth}}" _n
-file write `registry_table' "\caption{Registered SISFOH 2013 household outcomes and construction rules}" _n
-file write `registry_table' "\label{tab:rd_outcome_registry_2013_household} \\" _n
+file write `registry_table' "\caption{Registered SISFOH 2013 individual outcomes and construction rules}" _n
+file write `registry_table' "\label{tab:rd_outcome_registry_2013_individual} \\" _n
 file write `registry_table' "\toprule" _n
 file write `registry_table' "Tier & Family & Outcome & Denominator or construction universe \\" _n
 file write `registry_table' "\midrule" _n
@@ -1055,28 +1117,28 @@ forvalues outcome_index = 1/`outcome_count' {
 
 file write `registry_table' "\bottomrule" _n
 file write `registry_table' "\end{longtable}" _n
-file write `registry_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The unit is a linked SISFOH household. Primary outcomes form one prespecified family; secondary outcomes are adjusted within the declared substantive family. Shares, binary outcomes, and zero-to-one indices are displayed in percentage points. Household aggregates use the explicitly reported roster denominator. The equal-domain wellbeing proxy is transparent but is not an official poverty index. Connectivity outcomes are registered as mechanisms and are not ordinary controls. Source: SISFOH 2012--2013.\end{minipage}" _n
+file write `registry_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The unit is a de-identified linked SISFOH person. The eight primary outcomes use one complete sample of persons age 14 or older; secondary outcomes use the age, sex, labor-force, or item-valid universe declared in the final column. Binary outcomes are displayed in percentage points and counts remain in natural units. SISFOH is a de jure poverty-targeting registry collected from February 2012 through September 2013 without an INEI expansion factor; estimates therefore describe linked enumerated persons rather than national population totals. Source: SISFOH 2012--2013.\end{minipage}" _n
 file write `registry_table' "\endgroup" _n
 file close `registry_table'
 
 
 *-----------------------------------*
-**# 9. LaTeX first-stage and main household tables
+**# 9. LaTeX first-stage and main individual tables
 *-----------------------------------*
 
 tempname first_stage_table
 file open `first_stage_table' using ///
-    "${rd_table_dir}/tab_rd_outcomes_07_sample_first_stage_2013_household.tex", ///
+    "${rd_table_dir}/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex", ///
     write replace text
 
 file write `first_stage_table' "\begin{table}[!htbp]" _n
 file write `first_stage_table' "\centering" _n
 file write `first_stage_table' "\scriptsize" _n
-file write `first_stage_table' "\caption{Household analysis sample and first-stage discontinuity}" _n
-file write `first_stage_table' "\label{tab:rd_outcomes_first_stage_2013_household}" _n
+file write `first_stage_table' "\caption{Individual analysis sample and first-stage discontinuity}" _n
+file write `first_stage_table' "\label{tab:rd_outcomes_first_stage_2013_individual}" _n
 file write `first_stage_table' "\begin{tabular}{p{0.31\linewidth}lrrrrrr}" _n
 file write `first_stage_table' "\toprule" _n
-file write `first_stage_table' "Analysis sample & Weighting & Estimate & Robust SE & 95\% CI & Households & CCPP & \(F_z\) \\" _n
+file write `first_stage_table' "Analysis sample & Weighting & Estimate & Robust SE & 95\% CI & Persons & CCPP & \(F_z\) \\" _n
 file write `first_stage_table' "\midrule" _n
 
 preserve
@@ -1087,8 +1149,8 @@ sort paper_order
 forvalues result_row = 1/`=_N' {
     local row_label = outcome_label[`result_row']
     local row_weight "CCPP-equal"
-    if weighting[`result_row'] == "household_equal" ///
-        local row_weight "Household-equal"
+    if weighting[`result_row'] == "person_equal" ///
+        local row_weight "Person-equal"
     local row_estimate : display %6.3f estimate_bc[`result_row']
     local row_se : display %6.3f standard_error[`result_row']
     local row_ci_low : display %6.3f ci_low[`result_row']
@@ -1114,23 +1176,23 @@ restore
 
 file write `first_stage_table' "\bottomrule" _n
 file write `first_stage_table' "\end{tabular}" _n
-file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2012. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment. The common window is \(h=0.0075\), \(b=0.0135\); the final row uses the treatment-based MSE selector. CCPP-equal weights give each RUV community total weight one and are primary because treatment is assigned at that level; household-equal weights change the target population and are a required sensitivity. Inference is CR2 by complete RUV community ID. \(F_z\) is the squared robust \(z\) statistic and is compared with the conservative gate of 20. The primary statistic is below that gate, so LATEs remain interpretation-gated. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
+file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2012. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment. The common window is \(h=0.0075\), \(b=0.0135\); the final row uses the treatment-based MSE selector. CCPP-equal weights give each RUV community total weight one and are primary because treatment is assigned at that level; person-equal weights change the target population and are a required sensitivity. Inference is CR2 by complete RUV community ID. \(F_z\) is the squared robust \(z\) statistic and is compared with the conservative gate of 20. The primary statistic is below that gate, so LATEs remain interpretation-gated. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
 file write `first_stage_table' "\end{table}" _n
 file close `first_stage_table'
 
 tempname main_table
 file open `main_table' using ///
-    "${rd_table_dir}/tab_rd_outcomes_08_main_2013_household.tex", ///
+    "${rd_table_dir}/tab_rd_outcomes_13_main_2013_individual.tex", ///
     write replace text
 
 file write `main_table' "\begin{table}[!htbp]" _n
 file write `main_table' "\centering" _n
 file write `main_table' "\scriptsize" _n
-file write `main_table' "\caption{Collective reparations and registered SISFOH 2013 household outcomes}" _n
-file write `main_table' "\label{tab:rd_outcomes_main_2013_household}" _n
+file write `main_table' "\caption{Collective reparations and registered SISFOH 2013 individual outcomes}" _n
+file write `main_table' "\label{tab:rd_outcomes_main_2013_individual}" _n
 file write `main_table' "\begin{tabular}{p{0.28\linewidth}rrrrrrr}" _n
 file write `main_table' "\toprule" _n
-file write `main_table' "Outcome & Control mean & Reduced form & Fuzzy LATE & 95\% robust CI & Holm \(p\) & Households & CCPP \\" _n
+file write `main_table' "Outcome & Control mean & Reduced form & Fuzzy LATE & 95\% robust CI & Holm \(p\) & Persons & CCPP \\" _n
 file write `main_table' "\midrule" _n
 
 forvalues outcome_order = 1/8 {
@@ -1190,7 +1252,7 @@ file write `main_table' ///
     "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 65 \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
-file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome household sample before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with households equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. Binary, share, and zero-to-one index effects are percentage points; household size is in members. Holm values adjust across the eight primary outcomes. The local first stage does not pass the conservative \(F\geq20\) gate, so the LATE column is diagnostic and must be read with reduced forms and Anderson--Rubin inference. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
+file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome sample of persons age 14 or older before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with persons equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. All reported effects are percentage points. Holm values adjust across the eight primary outcomes. The local first stage does not pass the conservative \(F\geq20\) gate, so the LATE column is diagnostic and must be read with reduced forms and Anderson--Rubin inference. SISFOH has no population expansion factor. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
 file write `main_table' "\end{table}" _n
 file close `main_table'
 
@@ -1201,21 +1263,21 @@ file close `main_table'
 
 tempname secondary_table
 file open `secondary_table' using ///
-    "${rd_table_dir}/tab_rd_outcomes_09_secondary_2013_household.tex", ///
+    "${rd_table_dir}/tab_rd_outcomes_14_secondary_2013_individual.tex", ///
     write replace text
 
 file write `secondary_table' "\begingroup" _n
 file write `secondary_table' "\scriptsize" _n
 file write `secondary_table' "\begin{longtable}{p{0.16\linewidth}p{0.29\linewidth}rrrrrr}" _n
-file write `secondary_table' "\caption{Secondary and mechanism SISFOH 2013 household fuzzy-RD outcomes}" _n
-file write `secondary_table' "\label{tab:rd_outcomes_secondary_2013_household} \\" _n
+file write `secondary_table' "\caption{Secondary SISFOH 2013 individual fuzzy-RD outcomes}" _n
+file write `secondary_table' "\label{tab:rd_outcomes_secondary_2013_individual} \\" _n
 file write `secondary_table' "\toprule" _n
-file write `secondary_table' "Family & Outcome & Estimate & 95\% robust CI & Raw \(p\) & BH \(q\) & Households & CCPP \\" _n
+file write `secondary_table' "Family & Outcome & Estimate & 95\% robust CI & Raw \(p\) & BH \(q\) & Persons & CCPP \\" _n
 file write `secondary_table' "\midrule" _n
 file write `secondary_table' "\endfirsthead" _n
 file write `secondary_table' "\multicolumn{8}{c}{\tablename\ \thetable{} -- continued} \\" _n
 file write `secondary_table' "\toprule" _n
-file write `secondary_table' "Family & Outcome & Estimate & 95\% robust CI & Raw \(p\) & BH \(q\) & Households & CCPP \\" _n
+file write `secondary_table' "Family & Outcome & Estimate & 95\% robust CI & Raw \(p\) & BH \(q\) & Persons & CCPP \\" _n
 file write `secondary_table' "\midrule" _n
 file write `secondary_table' "\endhead" _n
 
@@ -1250,28 +1312,28 @@ restore
 
 file write `secondary_table' "\bottomrule" _n
 file write `secondary_table' "\end{longtable}" _n
-file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with CCPP-equal weights, local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference. BH values control the false discovery rate within each declared outcome family. Connectivity rows are exploratory mechanisms and are never ordinary controls. Denominators and eligibility rules are reported in Table~\ref{tab:rd_outcome_registry_2013_household}. The weak-first-stage warning applies to every LATE. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}" _n
+file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with CCPP-equal weights, local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference. Weights are recomputed after applying the outcome-specific eligibility and missing-data rule, so each represented RUV community contributes total weight one. BH values control the false discovery rate within each declared outcome family. Denominators and eligibility rules are reported in Table~\ref{tab:rd_outcome_registry_2013_individual}. The schooling measure is an attainment-based proxy and not observed current enrollment. The weak-first-stage warning applies to every LATE. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}" _n
 file write `secondary_table' "\endgroup" _n
 file close `secondary_table'
 
 tempname robustness_table
 file open `robustness_table' using ///
-    "${rd_table_dir}/tab_rd_outcomes_10_robustness_2013_household.tex", ///
+    "${rd_table_dir}/tab_rd_outcomes_15_robustness_2013_individual.tex", ///
     write replace text
 
 file write `robustness_table' "\begingroup" _n
 file write `robustness_table' "\scriptsize" _n
 file write `robustness_table' "\setlength{\tabcolsep}{2.5pt}" _n
 file write `robustness_table' "\begin{longtable}{p{0.18\linewidth}p{0.15\linewidth}p{0.10\linewidth}rrrrr}" _n
-file write `robustness_table' "\caption{Primary household outcome specification and weighting sensitivity}" _n
-file write `robustness_table' "\label{tab:rd_outcomes_robustness_2013_household} \\" _n
+file write `robustness_table' "\caption{Primary individual outcome specification and weighting sensitivity}" _n
+file write `robustness_table' "\label{tab:rd_outcomes_robustness_2013_individual} \\" _n
 file write `robustness_table' "\toprule" _n
-file write `robustness_table' "Outcome & Specification & Weighting & Estimate & 95\% CI & \(h\) & Robust/AR \(p\) & Households \\" _n
+file write `robustness_table' "Outcome & Specification & Weighting & Estimate & 95\% CI & \(h\) & Robust/AR \(p\) & Persons \\" _n
 file write `robustness_table' "\midrule" _n
 file write `robustness_table' "\endfirsthead" _n
 file write `robustness_table' "\multicolumn{8}{c}{\tablename\ \thetable{} -- continued} \\" _n
 file write `robustness_table' "\toprule" _n
-file write `robustness_table' "Outcome & Specification & Weighting & Estimate & 95\% CI & \(h\) & Robust/AR \(p\) & Households \\" _n
+file write `robustness_table' "Outcome & Specification & Weighting & Estimate & 95\% CI & \(h\) & Robust/AR \(p\) & Persons \\" _n
 file write `robustness_table' "\midrule" _n
 file write `robustness_table' "\endhead" _n
 
@@ -1279,14 +1341,14 @@ preserve
 use "`rd_results_final'", clear
 keep if tier == "primary" & inlist(spec_id, ///
     "common_h_fuzzy", "common_h_covariates", ///
-    "common_h_household_equal", ///
+    "common_h_person_equal", ///
     "outcome_mserd_fuzzy", "outcome_cerrd_fuzzy", ///
     "fixed_h_005", "fixed_h_010", ///
     "parametric_common_h", "parametric_district")
 generate byte specification_order = .
 replace specification_order = 1 if spec_id == "common_h_fuzzy"
 replace specification_order = 2 if spec_id == "common_h_covariates"
-replace specification_order = 3 if spec_id == "common_h_household_equal"
+replace specification_order = 3 if spec_id == "common_h_person_equal"
 replace specification_order = 4 if spec_id == "fixed_h_005"
 replace specification_order = 5 if spec_id == "fixed_h_010"
 replace specification_order = 6 if spec_id == "outcome_mserd_fuzzy"
@@ -1301,8 +1363,8 @@ forvalues result_row = 1/`=_N' {
     local row_spec "Common window"
     if spec_id[`result_row'] == "common_h_covariates" ///
         local row_spec "Common + covariates"
-    if spec_id[`result_row'] == "common_h_household_equal" ///
-        local row_spec "Common, household weights"
+    if spec_id[`result_row'] == "common_h_person_equal" ///
+        local row_spec "Common, person weights"
     if spec_id[`result_row'] == "fixed_h_005" ///
         local row_spec "Fixed (h=0.0050)"
     if spec_id[`result_row'] == "fixed_h_010" ///
@@ -1317,8 +1379,8 @@ forvalues result_row = 1/`=_N' {
         local row_spec "2SLS, district SE"
 
     local row_weight "CCPP-equal"
-    if weighting[`result_row'] == "household_equal" ///
-        local row_weight "Household-equal"
+    if weighting[`result_row'] == "person_equal" ///
+        local row_weight "Person-equal"
     local row_estimate : display %7.2f estimate_bc[`result_row']
     local row_ci_low : display %7.2f ci_low[`result_row']
     local row_ci_high : display %7.2f ci_high[`result_row']
@@ -1346,7 +1408,7 @@ restore
 
 file write `robustness_table' "\bottomrule" _n
 file write `robustness_table' "\end{longtable}" _n
-file write `robustness_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The common-window CCPP-equal row is primary. Sensitivities add the fixed predetermined covariate set; change to household-equal weighting; use outcome-specific MSE and coverage-error selectors; narrow or widen the fixed window; and fit triangular-weighted local-linear 2SLS analogues. Continuity-based rows report robust bias-corrected inference. Parametric rows report cluster-robust Anderson--Rubin \(p\)-values when available. The machine-readable CSV additionally contains CCPP CR1/CR3, district and score-mass-point CR2, alternative kernels, local quadratic, donut, Kleibergen--Paap, underidentification, and wild-cluster-bootstrap diagnostics. No specification is selected by statistical significance. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}" _n
+file write `robustness_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The common-window CCPP-equal row is primary. Sensitivities add the fixed predetermined covariate set; change to person-equal weighting; use outcome-specific MSE and coverage-error selectors; narrow or widen the fixed window; and fit triangular-weighted local-linear 2SLS analogues. Continuity-based rows report robust bias-corrected inference. Parametric rows report cluster-robust Anderson--Rubin \(p\)-values when available. The machine-readable CSV additionally contains CCPP CR1/CR3, district and score-mass-point CR2, alternative kernels, local quadratic, donut, Kleibergen--Paap, underidentification, and wild-cluster-bootstrap diagnostics. No specification is selected by statistical significance. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}" _n
 file write `robustness_table' "\endgroup" _n
 file close `robustness_table'
 
@@ -1355,8 +1417,8 @@ file close `robustness_table'
 **# 11. Weighted first-stage and primary-outcome RD plots
 *-----------------------------------*
 
-use "${rd_input_2013_household}", clear
-_vrd_prepare_household_outcomes
+use "${rd_input_2013_individual}", clear
+_vrd_prepare_individual_outcomes
 
 generate byte rd_bc_design = ///
     sample_main_rd == 1 & ///
@@ -1364,13 +1426,13 @@ generate byte rd_bc_design = ///
 egen byte primary_missing = rowmiss(`primary_outcomes') ///
     if rd_bc_design
 generate byte rd_primary_sample = ///
-    rd_bc_design & primary_missing == 0
+    rd_bc_design & age_2013 >= 14 & primary_missing == 0
 keep if rd_bc_design
 encode ruv_id, generate(cluster_ruv)
 
-capture program drop _vrd_make_household_rdplot
+capture program drop _vrd_make_individual_rdplot
 
-program define _vrd_make_household_rdplot
+program define _vrd_make_individual_rdplot
     version 19
     syntax, ///
         OUTVAR(name) ///
@@ -1471,10 +1533,10 @@ program define _vrd_make_household_rdplot
             3 "Local-linear fits") rows(1) position(6) ///
             size(small) region(lcolor(none))) ///
         note( ///
-            "Notes: Unit is a linked SISFOH household in the selected B/C geography; each RUV community has total weight one." ///
+            "Notes: Unit is a de-identified SISFOH person age 14 or older in the selected B/C geography; each RUV community has total weight one." ///
             "Points are weighted quantile-spaced binned means; bars are 95% bin confidence intervals." ///
             "Lines are triangular-kernel local-linear fits within h = 0.0075; the subtitle reports the robust bias-corrected `graph_effect_label'." ///
-            "Inference is CR2 by RUV community with mass-point adjustment (effective households = `graph_n')." ///
+            "Inference is CR2 by RUV community with mass-point adjustment (effective persons = `graph_n')." ///
             "Fuzzy LATE and weak-first-stage diagnostics are reported in the tables. Sources: RUV, CMAN, and SISFOH 2012--2013.", ///
             size(vsmall) color(gs5) span) ///
         xsize(10) ysize(7) ///
@@ -1523,13 +1585,13 @@ program define _vrd_make_household_rdplot
     drop rdplot_*
 end
 
-_vrd_make_household_rdplot, ///
+_vrd_make_individual_rdplot, ///
     outvar(${rd_treatment_2013}) ///
     outlabel("Treatment through 2012") ///
     ytitle("Treatment probability") ///
     scale(1) samplevar(rd_primary_sample) ///
-    graphname(rd_hh_panel_1) ///
-    figure("${rd_figure_dir}/fig_rd_outcomes_05_first_stage_2012_household.png") ///
+    graphname(rd_ind_panel_1) ///
+    figure("${rd_figure_dir}/fig_rd_outcomes_09_first_stage_2012_individual.png") ///
     firststage
 
 forvalues outcome_index = 1/8 {
@@ -1538,43 +1600,39 @@ forvalues outcome_index = 1/8 {
     local outcome_scale = `o_scale_`outcome_index''
     local outcome_stub "`o_stub_`outcome_index''"
     local panel_number = `outcome_index' + 1
-    local figure_number = `outcome_index' + 19
+    local figure_number = `outcome_index' + 29
     local figure_number : display %02.0f `figure_number'
     local figure_number = strtrim("`figure_number'")
-    local outcome_ytitle "Household outcome"
-    if `outcome_scale' == 100 ///
-        local outcome_ytitle "Percent or index points"
-    if "`outcome_var'" == "hh_members_2013" ///
-        local outcome_ytitle "Household members"
+    local outcome_ytitle "Percentage points"
 
-    _vrd_make_household_rdplot, ///
+    _vrd_make_individual_rdplot, ///
         outvar(`outcome_var') ///
         outlabel("`outcome_label'") ///
         ytitle("`outcome_ytitle'") ///
         scale(`outcome_scale') samplevar(rd_primary_sample) ///
-        graphname(rd_hh_panel_`panel_number') ///
-        figure("${rd_figure_dir}/fig_rd_outcomes_`figure_number'_`outcome_stub'_household.png")
+        graphname(rd_ind_panel_`panel_number') ///
+        figure("${rd_figure_dir}/fig_rd_outcomes_`figure_number'_`outcome_stub'_individual.png")
 }
 
 graph combine ///
-    rd_hh_panel_1 rd_hh_panel_2 rd_hh_panel_3 ///
-    rd_hh_panel_4 rd_hh_panel_5 rd_hh_panel_6 ///
-    rd_hh_panel_7 rd_hh_panel_8 rd_hh_panel_9, ///
+    rd_ind_panel_1 rd_ind_panel_2 rd_ind_panel_3 ///
+    rd_ind_panel_4 rd_ind_panel_5 rd_ind_panel_6 ///
+    rd_ind_panel_7 rd_ind_panel_8 rd_ind_panel_9, ///
     rows(3) imargin(tiny) ///
-    title("Treatment assignment and primary SISFOH 2013 household outcomes", ///
+    title("Treatment assignment and primary SISFOH 2013 individual outcomes", ///
         size(medsmall) color(black)) ///
     subtitle("Common B-C design window; CCPP-equal reduced-form fits", ///
         size(small) color(gs5)) ///
     note( ///
-        "Notes: Unit is a linked SISFOH household in the selected B/C geography; every RUV community receives total weight one." ///
-        "All panels use the complete primary sample, h = 0.0075, triangular kernels, and mass-point adjustment." ///
+        "Notes: Unit is a de-identified SISFOH person age 14 or older in the selected B/C geography; every RUV community receives total weight one." ///
+        "All panels use the complete eight-outcome primary sample, h = 0.0075, triangular kernels, and mass-point adjustment." ///
         "Panel subtitles report robust bias-corrected reduced forms with CCPP CR2 inference; binned points include 95% intervals." ///
         "Fuzzy LATE and weak-instrument diagnostics appear in the tables. Sources: RUV, CMAN, and SISFOH 2012--2013.", ///
         size(tiny) color(gs5) span) ///
     xsize(12) ysize(11) graphregion(color(white))
 
 graph export ///
-    "${rd_figure_dir}/fig_rd_outcomes_06_primary_panels_2013_household.png", ///
+    "${rd_figure_dir}/fig_rd_outcomes_10_primary_panels_2013_individual.png", ///
     width(3600) replace
 
 
@@ -1589,23 +1647,23 @@ sort paper_order
 assert _N == 8
 generate byte plot_order = 9 - paper_order
 
-capture label drop rd_household_primary_axis
+capture label drop rd_individual_primary_axis
 forvalues result_row = 1/`=_N' {
     local axis_value = plot_order[`result_row']
     local axis_outcome = outcome_id[`result_row']
-    local axis_label "Household members"
-    if "`axis_outcome'" == "H02" local axis_label "Female share"
-    if "`axis_outcome'" == "H03" local axis_label "Employment rate"
-    if "`axis_outcome'" == "H04" local axis_label "Any social program"
-    if "`axis_outcome'" == "H05" local axis_label "Core wellbeing"
-    if "`axis_outcome'" == "H06" local axis_label "Any unmet basic need"
-    if "`axis_outcome'" == "H07" local axis_label "Asset wellbeing"
-    if "`axis_outcome'" == "H08" ///
+    local axis_label "Female"
+    if "`axis_outcome'" == "I02" local axis_label "Age 15-29"
+    if "`axis_outcome'" == "I03" ///
         local axis_label "Secondary education or higher"
-    label define rd_household_primary_axis ///
+    if "`axis_outcome'" == "I04" local axis_label "Employed"
+    if "`axis_outcome'" == "I05" local axis_label "Independent worker"
+    if "`axis_outcome'" == "I06" local axis_label "Any health insurance"
+    if "`axis_outcome'" == "I07" local axis_label "Any social program"
+    if "`axis_outcome'" == "I08" local axis_label "Juntos"
+    label define rd_individual_primary_axis ///
         `axis_value' "`axis_label'", add
 }
-label values plot_order rd_household_primary_axis
+label values plot_order rd_individual_primary_axis
 
 twoway ///
     (rcap standardized_ci_low standardized_ci_high plot_order, ///
@@ -1618,13 +1676,13 @@ twoway ///
     xtitle("Bias-corrected fuzzy-RD effect (control-side SD units)", ///
         size(small)) ///
     ytitle("") ///
-    title("Primary household fuzzy-RD effects", ///
+    title("Primary individual fuzzy-RD effects", ///
         size(medium) color(black)) ///
     subtitle("CCPP-equal estimates; common h = 0.0075; robust 95% intervals", ///
         size(small) color(gs5)) ///
     legend(off) ///
     note( ///
-        "Notes: Unit is a linked SISFOH household in the selected B/C geography; each RUV community receives total weight one." ///
+        "Notes: Unit is a linked SISFOH person in the selected B/C geography; each RUV community receives total weight one." ///
         "Effects are scaled by the weighted below-cutoff outcome SD and estimated with local-linear triangular-kernel fuzzy RD." ///
         "Intervals use robust bias correction, mass-point adjustment, and CCPP CR2 inference." ///
         "The first stage is below the conservative F >= 20 gate; LATEs are diagnostic and must be read with reduced forms and Anderson-Rubin inference." ///
@@ -1634,7 +1692,7 @@ twoway ///
     graphregion(color(white)) plotregion(color(white))
 
 graph export ///
-    "${rd_figure_dir}/fig_rd_outcomes_07_late_forest_2013_household.png", ///
+    "${rd_figure_dir}/fig_rd_outcomes_11_late_forest_2013_individual.png", ///
     width(3000) replace
 
 use "`rd_results_final'", clear
@@ -1649,25 +1707,25 @@ generate double plot_position = plot_order
 replace plot_position = plot_order - .18 if spec_id == "fixed_h_005"
 replace plot_position = plot_order + .18 if spec_id == "fixed_h_010"
 
-capture label drop rd_household_bandwidth_axis
+capture label drop rd_individual_bandwidth_axis
 sort paper_order bandwidth
 forvalues result_row = 1/`=_N' {
     local axis_value = plot_order[`result_row']
     local axis_outcome = outcome_id[`result_row']
-    local axis_label "Household members"
-    if "`axis_outcome'" == "H02" local axis_label "Female share"
-    if "`axis_outcome'" == "H03" local axis_label "Employment rate"
-    if "`axis_outcome'" == "H04" local axis_label "Any social program"
-    if "`axis_outcome'" == "H05" local axis_label "Core wellbeing"
-    if "`axis_outcome'" == "H06" local axis_label "Any unmet basic need"
-    if "`axis_outcome'" == "H07" local axis_label "Asset wellbeing"
-    if "`axis_outcome'" == "H08" ///
+    local axis_label "Female"
+    if "`axis_outcome'" == "I02" local axis_label "Age 15-29"
+    if "`axis_outcome'" == "I03" ///
         local axis_label "Secondary education or higher"
-    capture label define rd_household_bandwidth_axis ///
+    if "`axis_outcome'" == "I04" local axis_label "Employed"
+    if "`axis_outcome'" == "I05" local axis_label "Independent worker"
+    if "`axis_outcome'" == "I06" local axis_label "Any health insurance"
+    if "`axis_outcome'" == "I07" local axis_label "Any social program"
+    if "`axis_outcome'" == "I08" local axis_label "Juntos"
+    capture label define rd_individual_bandwidth_axis ///
         `axis_value' "`axis_label'", add
 }
-label values plot_order rd_household_bandwidth_axis
-label values plot_position rd_household_bandwidth_axis
+label values plot_order rd_individual_bandwidth_axis
+label values plot_position rd_individual_bandwidth_axis
 
 twoway ///
     (rcap standardized_ci_low standardized_ci_high plot_position ///
@@ -1693,7 +1751,7 @@ twoway ///
     ylabel(1(1)8, valuelabel angle(0) labsize(small) nogrid) ///
     xtitle("Fuzzy-RD effect (control-side SD units)", size(small)) ///
     ytitle("") ///
-    title("Bandwidth sensitivity of primary household outcomes", ///
+    title("Bandwidth sensitivity of primary individual outcomes", ///
         size(medium) color(black)) ///
     subtitle("CCPP-equal estimates with prespecified fixed bandwidths", ///
         size(small) color(gs5)) ///
@@ -1701,7 +1759,7 @@ twoway ///
         6 "h = 0.0100") rows(1) position(6) size(small) ///
         region(lcolor(none))) ///
     note( ///
-        "Notes: Unit is a linked SISFOH household; each RUV community receives total weight one." ///
+        "Notes: Unit is a linked SISFOH person; each RUV community receives total weight one." ///
         "All models use local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference." ///
         "The center point is the common design window; flanking points are prespecified sensitivities." ///
         "No window is selected by an outcome estimate. Sources: RUV, CMAN, and SISFOH 2012--2013.", ///
@@ -1710,37 +1768,37 @@ twoway ///
     graphregion(color(white)) plotregion(color(white))
 
 graph export ///
-    "${rd_figure_dir}/fig_rd_outcomes_08_bandwidth_sensitivity_2013_household.png", ///
+    "${rd_figure_dir}/fig_rd_outcomes_12_bandwidth_sensitivity_2013_individual.png", ///
     width(3600) replace
 
 
 *-----------------------------------*
-**# 13. Household output manifest and closeout
+**# 13. Individual output manifest and closeout
 *-----------------------------------*
 
 local output_paths ///
-    output/tables/rd_outcomes/rd_2013_household_results.csv ///
-    output/tables/rd_outcomes/rd_2013_household_analysis_contract.csv ///
-    output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex ///
-    output/tables/rd_outcomes/tab_rd_outcomes_07_sample_first_stage_2013_household.tex ///
-    output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex ///
-    output/tables/rd_outcomes/tab_rd_outcomes_09_secondary_2013_household.tex ///
-    output/tables/rd_outcomes/tab_rd_outcomes_10_robustness_2013_household.tex ///
-    output/figures/rd_outcomes/fig_rd_outcomes_05_first_stage_2012_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_06_primary_panels_2013_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_07_late_forest_2013_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_08_bandwidth_sensitivity_2013_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_20_household_members_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_21_female_members_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_22_employment_rate_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_23_any_program_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_24_wellbeing_core_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_25_nbi_any_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_26_assets_domain_household.png ///
-    output/figures/rd_outcomes/fig_rd_outcomes_27_secondary_education_household.png
+    output/tables/rd_outcomes/rd_2013_individual_results.csv ///
+    output/tables/rd_outcomes/rd_2013_individual_analysis_contract.csv ///
+    output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex ///
+    output/tables/rd_outcomes/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex ///
+    output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex ///
+    output/tables/rd_outcomes/tab_rd_outcomes_14_secondary_2013_individual.tex ///
+    output/tables/rd_outcomes/tab_rd_outcomes_15_robustness_2013_individual.tex ///
+    output/figures/rd_outcomes/fig_rd_outcomes_09_first_stage_2012_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_10_primary_panels_2013_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_11_late_forest_2013_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_12_bandwidth_sensitivity_2013_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_30_female_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_31_age_15_29_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_32_secondary_education_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_33_employed_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_34_independent_worker_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_35_any_insurance_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_36_any_program_individual.png ///
+    output/figures/rd_outcomes/fig_rd_outcomes_37_juntos_individual.png
 
 tempname manifest_file
-file open `manifest_file' using "${rd_household_manifest}", ///
+file open `manifest_file' using "${rd_individual_manifest}", ///
     write replace text
 file write `manifest_file' ///
     "path,artifact_type,input_data,input_datasignature,generator,run_id,checksum,review_status" _n
@@ -1749,10 +1807,10 @@ foreach output_path of local output_paths {
     local absolute_output "${project_root}/`output_path'"
     capture confirm file "`absolute_output'"
     if _rc {
-        display as error "Expected 2013 household output was not created:"
+        display as error "Expected 2013 individual output was not created:"
         display as error "  `absolute_output'"
         file close `manifest_file'
-        log close victimasrd_rd_2013_household
+        log close victimasrd_rd_2013_individual
         exit 603
     }
 
@@ -1768,23 +1826,23 @@ foreach output_path of local output_paths {
     }
 
     file write `manifest_file' ///
-        `""`output_path'","`artifact_type'","10_sisfoh_2013_household_analysis.dta","`input_datasignature'","code/stata/pipeline/04b_sisfoh2013_household.do","${rd_run_id}","`output_checksum'","generated_unreviewed""' _n
+        `""`output_path'","`artifact_type'","09_sisfoh_2013_individual_analysis.dta","`input_datasignature'","code/stata/pipeline/04c_sisfoh2013_individual.do","${rd_run_id}","`output_checksum'","generated_unreviewed""' _n
 }
 
 file close `manifest_file'
 
-capture program drop _vrd_prepare_household_outcomes
-capture program drop _vrd_post_household_rd
-capture program drop _vrd_make_household_rdplot
+capture program drop _vrd_prepare_individual_outcomes
+capture program drop _vrd_post_individual_rd
+capture program drop _vrd_make_individual_rdplot
 
-display as result "SISFOH 2013 household outcome module completed."
+display as result "SISFOH 2013 individual outcome module completed."
 display as text "Registered outcomes: `outcome_count'"
-display as text "Complete primary households: 39074"
+display as text "Complete primary persons: 98005"
 display as text "Primary linked RUV communities: 487"
-display as text "Common fixed-window households: `main_first_stage_n'"
+display as text "Common fixed-window persons: `main_first_stage_n'"
 display as text "Robust first-stage F_z: `main_first_stage_f'"
 display as text "Parametric Kleibergen-Paap F: `kp_f_main'"
 display as text "Review status: generated_unreviewed"
 
-log close victimasrd_rd_2013_household
+log close victimasrd_rd_2013_individual
 exit 0

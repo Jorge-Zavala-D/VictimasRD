@@ -1,0 +1,91 @@
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\begin{longtable}{p{0.18\linewidth}p{0.15\linewidth}p{0.10\linewidth}rrrrr}
+\caption{Primary individual outcome specification and weighting sensitivity}
+\label{tab:rd_outcomes_robustness_2013_individual} \\
+\toprule
+Outcome & Specification & Weighting & Estimate & 95\% CI & \(h\) & Robust/AR \(p\) & Persons \\
+\midrule
+\endfirsthead
+\multicolumn{8}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule
+Outcome & Specification & Weighting & Estimate & 95\% CI & \(h\) & Robust/AR \(p\) & Persons \\
+\midrule
+\endhead
+Female & Common window & CCPP-equal & -4.03 & [-21.59, 13.53] & 0.0075 & 0.653 & 8,870 \\
+Female & Common + covariates & CCPP-equal & -1.21 & [-14.32, 11.90] & 0.0075 & 0.856 & 8,564 \\
+Female & Common, person weights & Person-equal & -0.19 & [-19.36, 18.97] & 0.0075 & 0.984 & 8,870 \\
+Female & Fixed (h=0.0050) & CCPP-equal & -9.46 & [-36.80, 17.88] & 0.0050 & 0.498 & 6,992 \\
+Female & Fixed (h=0.0100) & CCPP-equal & -0.87 & [-18.31, 16.57] & 0.0100 & 0.922 & 22,927 \\
+Female & Outcome-specific MSE & CCPP-equal & -1.33 & [-20.76, 18.10] & 0.0122 & 0.893 & 28,342 \\
+Female & Outcome-specific CER & CCPP-equal & -1.73 & [-17.05, 13.60] & 0.0090 & 0.825 & 10,507 \\
+Female & 2SLS, CCPP SE & CCPP-equal & -4.06 & [-18.70, 10.58] & 0.0075 & 0.578 & 8,870 \\
+Female & 2SLS, district SE & CCPP-equal & -4.06 & [-18.62, 10.50] & 0.0075 & 0.578 & 8,870 \\
+Age 15-29 & Common window & CCPP-equal & -23.21 & [-53.86, 7.43] & 0.0075 & 0.138 & 8,870 \\
+Age 15-29 & Common + covariates & CCPP-equal & -29.26 & [-61.83, 3.31] & 0.0075 & 0.078 & 8,564 \\
+Age 15-29 & Common, person weights & Person-equal & -27.15 & [-59.62, 5.32] & 0.0075 & 0.101 & 8,870 \\
+Age 15-29 & Fixed (h=0.0050) & CCPP-equal & -28.39 & [-73.01, 16.24] & 0.0050 & 0.212 & 6,992 \\
+Age 15-29 & Fixed (h=0.0100) & CCPP-equal & -26.22 & [-59.94, 7.50] & 0.0100 & 0.127 & 22,927 \\
+Age 15-29 & Outcome-specific MSE & CCPP-equal & -23.38 & [-52.52, 5.76] & 0.0077 & 0.116 & 9,256 \\
+Age 15-29 & Outcome-specific CER & CCPP-equal & -28.21 & [-67.68, 11.25] & 0.0057 & 0.161 & 7,744 \\
+Age 15-29 & 2SLS, CCPP SE & CCPP-equal & -23.14 & [-49.28, 3.00] & 0.0075 & 0.062 & 8,870 \\
+Age 15-29 & 2SLS, district SE & CCPP-equal & -23.14 & [-46.55, 0.27] & 0.0075 & 0.055 & 8,870 \\
+Secondary education or higher & Common window & CCPP-equal & -15.14 & [-45.76, 15.49] & 0.0075 & 0.333 & 8,870 \\
+Secondary education or higher & Common + covariates & CCPP-equal & -11.56 & [-40.97, 17.86] & 0.0075 & 0.441 & 8,564 \\
+Secondary education or higher & Common, person weights & Person-equal & -62.19 & [-158.41, 34.03] & 0.0075 & 0.205 & 8,870 \\
+Secondary education or higher & Fixed (h=0.0050) & CCPP-equal & -16.53 & [-59.00, 25.93] & 0.0050 & 0.445 & 6,992 \\
+Secondary education or higher & Fixed (h=0.0100) & CCPP-equal & -18.45 & [-53.76, 16.86] & 0.0100 & 0.306 & 22,927 \\
+Secondary education or higher & Outcome-specific MSE & CCPP-equal & -20.53 & [-64.56, 23.50] & 0.0141 & 0.361 & 32,710 \\
+Secondary education or higher & Outcome-specific CER & CCPP-equal & -19.61 & [-55.09, 15.86] & 0.0103 & 0.279 & 23,030 \\
+Secondary education or higher & 2SLS, CCPP SE & CCPP-equal & -15.12 & [-40.97, 10.72] & 0.0075 & 0.234 & 8,870 \\
+Secondary education or higher & 2SLS, district SE & CCPP-equal & -15.12 & [-42.37, 12.13] & 0.0075 & 0.268 & 8,870 \\
+Employed in the preceding month & Common window & CCPP-equal & 13.55 & [-10.41, 37.52] & 0.0075 & 0.268 & 8,870 \\
+Employed in the preceding month & Common + covariates & CCPP-equal & 10.10 & [-12.88, 33.09] & 0.0075 & 0.389 & 8,564 \\
+Employed in the preceding month & Common, person weights & Person-equal & 24.77 & [-24.54, 74.08] & 0.0075 & 0.325 & 8,870 \\
+Employed in the preceding month & Fixed (h=0.0050) & CCPP-equal & 16.90 & [-18.82, 52.61] & 0.0050 & 0.354 & 6,992 \\
+Employed in the preceding month & Fixed (h=0.0100) & CCPP-equal & 11.96 & [-14.68, 38.61] & 0.0100 & 0.379 & 22,927 \\
+Employed in the preceding month & Outcome-specific MSE & CCPP-equal & 7.69 & [-28.38, 43.76] & 0.0168 & 0.676 & 36,945 \\
+Employed in the preceding month & Outcome-specific CER & CCPP-equal & 9.93 & [-20.16, 40.01] & 0.0123 & 0.518 & 28,375 \\
+Employed in the preceding month & 2SLS, CCPP SE & CCPP-equal & 10.89 & [-9.17, 30.94] & 0.0075 & 0.283 & 8,870 \\
+Employed in the preceding month & 2SLS, district SE & CCPP-equal & 10.89 & [-10.47, 32.24] & 0.0075 & 0.302 & 8,870 \\
+Independent worker & Common window & CCPP-equal & 5.90 & [-23.10, 34.90] & 0.0075 & 0.690 & 8,870 \\
+Independent worker & Common + covariates & CCPP-equal & 6.09 & [-19.23, 31.40] & 0.0075 & 0.637 & 8,564 \\
+Independent worker & Common, person weights & Person-equal & 40.67 & [-37.86, 119.21] & 0.0075 & 0.310 & 8,870 \\
+Independent worker & Fixed (h=0.0050) & CCPP-equal & 8.89 & [-33.02, 50.80] & 0.0050 & 0.678 & 6,992 \\
+Independent worker & Fixed (h=0.0100) & CCPP-equal & 5.77 & [-25.11, 36.64] & 0.0100 & 0.714 & 22,927 \\
+Independent worker & Outcome-specific MSE & CCPP-equal & 4.24 & [-34.83, 43.30] & 0.0161 & 0.832 & 35,780 \\
+Independent worker & Outcome-specific CER & CCPP-equal & 5.87 & [-27.30, 39.04] & 0.0118 & 0.729 & 28,235 \\
+Independent worker & 2SLS, CCPP SE & CCPP-equal & 4.36 & [-20.01, 28.74] & 0.0075 & 0.725 & 8,870 \\
+Independent worker & 2SLS, district SE & CCPP-equal & 4.36 & [-20.40, 29.13] & 0.0075 & 0.730 & 8,870 \\
+Any health insurance & Common window & CCPP-equal & -17.11 & [-70.78, 36.57] & 0.0075 & 0.532 & 8,870 \\
+Any health insurance & Common + covariates & CCPP-equal & -19.23 & [-64.83, 26.36] & 0.0075 & 0.408 & 8,564 \\
+Any health insurance & Common, person weights & Person-equal & 42.33 & [-107.60, 192.27] & 0.0075 & 0.580 & 8,870 \\
+Any health insurance & Fixed (h=0.0050) & CCPP-equal & -10.61 & [-76.22, 55.01] & 0.0050 & 0.751 & 6,992 \\
+Any health insurance & Fixed (h=0.0100) & CCPP-equal & -22.43 & [-80.41, 35.55] & 0.0100 & 0.448 & 22,927 \\
+Any health insurance & Outcome-specific MSE & CCPP-equal & -24.52 & [-97.96, 48.92] & 0.0139 & 0.513 & 32,710 \\
+Any health insurance & Outcome-specific CER & CCPP-equal & -22.41 & [-79.53, 34.71] & 0.0102 & 0.442 & 23,010 \\
+Any health insurance & 2SLS, CCPP SE & CCPP-equal & -18.90 & [-62.99, 25.20] & 0.0075 & 0.308 & 8,870 \\
+Any health insurance & 2SLS, district SE & CCPP-equal & -18.90 & [-60.45, 22.66] & 0.0075 & 0.276 & 8,870 \\
+Any listed social program & Common window & CCPP-equal & 10.70 & [-17.84, 39.24] & 0.0075 & 0.462 & 8,870 \\
+Any listed social program & Common + covariates & CCPP-equal & 15.65 & [-11.09, 42.39] & 0.0075 & 0.251 & 8,564 \\
+Any listed social program & Common, person weights & Person-equal & 12.62 & [-45.13, 70.36] & 0.0075 & 0.668 & 8,870 \\
+Any listed social program & Fixed (h=0.0050) & CCPP-equal & 19.26 & [-21.39, 59.92] & 0.0050 & 0.353 & 6,992 \\
+Any listed social program & Fixed (h=0.0100) & CCPP-equal & 14.43 & [-10.56, 39.41] & 0.0100 & 0.258 & 22,927 \\
+Any listed social program & Outcome-specific MSE & CCPP-equal & 12.41 & [-12.94, 37.75] & 0.0094 & 0.337 & 22,346 \\
+Any listed social program & Outcome-specific CER & CCPP-equal & 12.93 & [-16.03, 41.88] & 0.0069 & 0.382 & 8,268 \\
+Any listed social program & 2SLS, CCPP SE & CCPP-equal & 11.65 & [-10.02, 33.33] & 0.0075 & 0.361 & 8,870 \\
+Any listed social program & 2SLS, district SE & CCPP-equal & 11.65 & [-10.16, 33.46] & 0.0075 & 0.368 & 8,870 \\
+Juntos participation & Common window & CCPP-equal & 6.14 & [-10.92, 23.19] & 0.0075 & 0.481 & 8,870 \\
+Juntos participation & Common + covariates & CCPP-equal & 10.20 & [-4.30, 24.70] & 0.0075 & 0.168 & 8,564 \\
+Juntos participation & Common, person weights & Person-equal & 7.55 & [-38.11, 53.21] & 0.0075 & 0.746 & 8,870 \\
+Juntos participation & Fixed (h=0.0050) & CCPP-equal & 14.12 & [-8.48, 36.71] & 0.0050 & 0.221 & 6,992 \\
+Juntos participation & Fixed (h=0.0100) & CCPP-equal & 4.73 & [-12.04, 21.50] & 0.0100 & 0.580 & 22,927 \\
+Juntos participation & Outcome-specific MSE & CCPP-equal & 7.15 & [-12.84, 27.13] & 0.0147 & 0.483 & 33,738 \\
+Juntos participation & Outcome-specific CER & CCPP-equal & 6.06 & [-10.88, 23.01] & 0.0108 & 0.483 & 23,030 \\
+Juntos participation & 2SLS, CCPP SE & CCPP-equal & 6.13 & [-7.40, 19.65] & 0.0075 & 0.436 & 8,870 \\
+Juntos participation & 2SLS, district SE & CCPP-equal & 6.13 & [-8.24, 20.49] & 0.0075 & 0.467 & 8,870 \\
+\bottomrule
+\end{longtable}
+\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The common-window CCPP-equal row is primary. Sensitivities add the fixed predetermined covariate set; change to person-equal weighting; use outcome-specific MSE and coverage-error selectors; narrow or widen the fixed window; and fit triangular-weighted local-linear 2SLS analogues. Continuity-based rows report robust bias-corrected inference. Parametric rows report cluster-robust Anderson--Rubin \(p\)-values when available. The machine-readable CSV additionally contains CCPP CR1/CR3, district and score-mass-point CR2, alternative kernels, local quadratic, donut, Kleibergen--Paap, underidentification, and wild-cluster-bootstrap diagnostics. No specification is selected by statistical significance. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}
+\endgroup

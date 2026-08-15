@@ -1,0 +1,64 @@
+paper_order,outcome_id,outcome_var,outcome_label,family,tier,multiplicity_family,transform,scale,denominator,source,paper_role,file_stub
+1,I01,female_2013,Female,composition,primary,primary_2013_individual,binary,100,Persons age 14 or older in the complete primary universe,SISFOH 2012-2013,main,female
+2,I02,age_15_29_outcome,Age 15-29,composition,primary,primary_2013_individual,binary,100,Persons age 14 or older in the complete primary universe,SISFOH 2012-2013,main,age_15_29
+3,I03,secondaryplus_2013,Secondary education or higher,human_capital,primary,primary_2013_individual,binary,100,Persons age 14 or older with valid education and labor status,SISFOH 2012-2013,main,secondary_education
+4,I04,employed_2013,Employed in the preceding month,labor,primary,primary_2013_individual,binary,100,Persons age 14 or older with valid education and labor status,SISFOH 2012-2013,main,employed
+5,I05,worker_independent_2013,Independent worker,labor,primary,primary_2013_individual,binary,100,Persons age 14 or older with valid education and labor status,SISFOH 2012-2013,main,independent_worker
+6,I06,insurance_any_2013,Any health insurance,health,primary,primary_2013_individual,binary,100,Persons age 14 or older in the complete primary universe,SISFOH 2012-2013,main,any_insurance
+7,I07,program_any_2013,Any listed social program,social_protection,primary,primary_2013_individual,binary,100,Persons age 14 or older in the complete primary universe,SISFOH 2012-2013,main,any_program
+8,I08,program_juntos_2013,Juntos participation,social_protection,primary,primary_2013_individual,binary,100,Persons age 14 or older in the complete primary universe,SISFOH 2012-2013,main,juntos
+9,S01,household_head_2013,Household head,composition,secondary,composition_2013_individual,binary,100,All linked rostered persons,SISFOH 2012-2013,appendix,household_head
+10,S02,age_0_14_outcome,Age 0-14,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_0_14
+11,S03,age_15_19_outcome,Age 15-19,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_15_19
+12,S04,age_20_24_outcome,Age 20-24,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_20_24
+13,S05,age_25_29_outcome,Age 25-29,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_25_29
+14,S06,age_30_44_outcome,Age 30-44,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_30_44
+15,S07,age_45_64_outcome,Age 45-64,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_45_64
+16,S08,age_65p_outcome,Age 65 or older,composition,secondary,composition_2013_individual,binary,100,Rostered persons with valid age,SISFOH 2012-2013,appendix,age_65p
+17,S09,pregnant_reproductive_2013,Pregnant,composition,secondary,composition_2013_individual,binary,100,Females age 12-49 with a valid pregnancy response,SISFOH 2012-2013,appendix,pregnant
+18,S10,partnered_2013,Married or cohabiting,composition,secondary,composition_2013_individual,binary,100,Persons age 12 or older with valid marital status,SISFOH 2012-2013,appendix,partnered
+19,S11,school_deprivation_proxy_2013,Schooling-deprivation proxy ages 7-12,human_capital,secondary,human_capital_2013_individual,binary,100,Children age 7-12 with valid highest education level,SISFOH 2012-2013,appendix,school_deprivation
+20,S12,literate_age14_2013,Literate,human_capital,secondary,human_capital_2013_individual,binary,100,Persons age 14 or older with valid literacy,SISFOH 2012-2013,appendix,literate
+21,S13,primary_complete_age14_2013,Completed primary education,human_capital,secondary,human_capital_2013_individual,binary,100,Persons age 14 or older with valid education,SISFOH 2012-2013,appendix,primary_complete
+22,S14,education_years_age14_2013,Approximate completed education years,human_capital,secondary,human_capital_2013_individual,count,1,Persons age 14 or older with valid level and grade mapping,SISFOH 2012-2013,appendix,education_years
+23,S15,indigenous_language_age3_2013,Named Indigenous childhood language,human_capital,secondary,human_capital_2013_individual,binary,100,Persons age 3 or older with valid childhood language,SISFOH 2012-2013,appendix,indigenous_language
+24,S16,nonspanish_language_age3_2013,Non-Spanish childhood language,human_capital,secondary,human_capital_2013_individual,binary,100,Persons age 3 or older with valid childhood language,SISFOH 2012-2013,appendix,nonspanish_language
+25,S17,insurance_essalud_2013,EsSalud insurance,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated insurance responses,SISFOH 2012-2013,appendix,essalud
+26,S18,insurance_sis_2013,SIS insurance,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated insurance responses,SISFOH 2012-2013,appendix,sis
+27,S19,insurance_private_2013,Private health insurance,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated insurance responses,SISFOH 2012-2013,appendix,private_insurance
+28,S20,insurance_armed_forces_2013,Armed-forces or police insurance,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated insurance responses,SISFOH 2012-2013,appendix,armed_forces_insurance
+29,S21,insurance_other_2013,Other health insurance,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated insurance responses,SISFOH 2012-2013,appendix,other_insurance
+30,S22,disability_any_2013,Any permanent limitation,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated disability responses,SISFOH 2012-2013,appendix,any_disability
+31,S23,disability_visual_2013,Visual limitation,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated disability responses,SISFOH 2012-2013,appendix,visual_disability
+32,S24,disability_hearing_2013,Hearing limitation,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated disability responses,SISFOH 2012-2013,appendix,hearing_disability
+33,S25,disability_speech_2013,Speech limitation,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated disability responses,SISFOH 2012-2013,appendix,speech_disability
+34,S26,disability_mobility_2013,Mobility limitation,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated disability responses,SISFOH 2012-2013,appendix,mobility_disability
+35,S27,disability_cognitive_2013,Cognitive limitation,health,secondary,health_2013_individual,binary,100,All linked rostered persons with validated disability responses,SISFOH 2012-2013,appendix,cognitive_disability
+36,S28,program_count_2013,Number of listed social programs,social_protection,secondary,social_protection_2013_individual,count,1,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,program_count
+37,S29,program_milk_2013,Vaso de Leche participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,milk_program
+38,S30,program_soup_kitchen_2013,Soup-kitchen participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,soup_kitchen
+39,S31,program_school_meal_2013,School-meal participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,school_meal
+40,S32,program_supplement_2013,Nutritional-supplement participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,nutrition_supplement
+41,S33,program_food_basket_2013,Food-basket participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,food_basket
+42,S34,program_housing_2013,Housing-program participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,housing_program
+43,S35,program_pension65_elderly_2013,Pension 65 participation,social_protection,secondary,social_protection_2013_individual,binary,100,Persons age 65 or older with validated program responses,SISFOH 2012-2013,appendix,pension65
+44,S36,program_cunamas_child_2013,Cuna Mas participation,social_protection,secondary,social_protection_2013_individual,binary,100,Children age 0-3 with validated program responses,SISFOH 2012-2013,appendix,cunamas
+45,S37,program_other_2013,Other social-program participation,social_protection,secondary,social_protection_2013_individual,binary,100,All linked rostered persons with validated program responses,SISFOH 2012-2013,appendix,other_program
+46,S38,labor_force_age14_2013,In the labor force,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,labor_force
+47,S39,unemployed_lf_2013,Unemployed,labor_status,secondary,labor_status_2013_individual,binary,100,Labor-force participants age 14 or older,SISFOH 2012-2013,appendix,unemployed
+48,S40,worker_dependent_2013,Dependent worker,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,dependent_worker
+49,S41,worker_employer_2013,Employer,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,employer
+50,S42,worker_domestic_2013,Domestic worker,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,domestic_worker
+51,S43,worker_unpaid_family_2013,Unpaid family worker,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,unpaid_family_worker
+52,S44,home_duties_2013,Engaged in home duties,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,home_duties
+53,S45,student_age14_2013,Student,labor_status,secondary,labor_status_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,student
+54,S46,sector_agriculture_age14_2013,Employed in agriculture,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,agriculture
+55,S47,sector_livestock_age14_2013,Employed in livestock,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,livestock
+56,S48,sector_forestry_age14_2013,Employed in forestry,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,forestry
+57,S49,sector_fishing_age14_2013,Employed in fishing,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,fishing
+58,S50,sector_mining_age14_2013,Employed in mining,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,mining
+59,S51,sector_handicraft_age14_2013,Employed in handicrafts,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,handicrafts
+60,S52,sector_commerce_age14_2013,Employed in commerce,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,commerce
+61,S53,sector_services_age14_2013,Employed in services,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,services
+62,S54,sector_other_age14_2013,Employed in another sector,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,other_sector
+63,S55,sector_government_age14_2013,Employed in government,labor_sector,secondary,labor_sector_2013_individual,binary,100,Persons age 14 or older with valid labor status,SISFOH 2012-2013,appendix,government
