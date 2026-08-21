@@ -3,10 +3,9 @@
 ## Status and scope
 
 This protocol records the research-team decisions governing the canonical
-2013 SISFOH CCPP, household, and individual outcome modules. It supplies
-defaults that later 2017-level modules must either inherit explicitly or
-supersede in a documented decision. It does not change the geography selected
-in data preparation.
+2013 SISFOH and 2017 Census CCPP, household, and individual outcome modules.
+It does not change the geography selected in data preparation and does not
+cover the separate causal-mediation or heterogeneity workflows.
 
 ## Assignment rule and analysis sample
 
@@ -25,6 +24,13 @@ in data preparation.
 - The assignment indicator is one at or above the B--C cutoff. Treatment is
   cumulative collective-reparation receipt through 2012 (`treat_12`). The
   research team treats all SISFOH variables as 2013 outcomes.
+- Census outcomes use cumulative collective-reparation receipt through 2016
+  (`treat_16`). The research team treats all Census variables as materialized
+  in 2017. This rule is fixed across CCPP, household, and person modules.
+- The INEI-assisted Census file follows a defined SISFOH source cohort rather
+  than exposing nationally identified CCPP microdata. The 2017 modules report
+  discontinuities in CCPP coverage, household outcome availability, and person
+  linkage. Non-linkage is never silently recoded as observed migration.
 
 ## Estimands and reporting hierarchy
 
@@ -49,12 +55,12 @@ reportable.
 
 ## Common design bandwidth
 
-The main 2013 family uses a common design bandwidth of 0.0075 index units and
-a common bias bandwidth of 0.0135. These rounded values come from the
-`treat_12` local-linear triangular-kernel MSE selector in the prespecified
-selected-geography B/C design universe, before inspecting substantive outcome
-estimates. They are called a **common design bandwidth**, not an optimal
-bandwidth for every outcome.
+The main 2013 and 2017 families use a common design bandwidth of 0.0075 index
+units and a common bias bandwidth of 0.0135. These rounded values are validated
+against the local-linear triangular-kernel treatment selectors for `treat_12`
+and `treat_16` in the prespecified selected-geography B/C design universe,
+before inspecting substantive outcome estimates. They are called a **common
+design bandwidth**, not an optimal bandwidth for every outcome.
 
 This distinction is essential. Continuity-based MSE and coverage-error
 selectors depend on the conditional curvature and variance of the dependent
@@ -94,6 +100,12 @@ estimate may be selected. The complete eight-outcome primary sample contains
 39,074 households in 487 RUV communities; the common window contains 3,810
 households in 65 communities.
 
+The 2017 primary household family contains 24,877 source households in 406
+RUV communities; the common window contains 2,706 households in 61
+communities. Its eight outcomes cover demographic composition, migration,
+education, employment, insurance, disability, and core wellbeing. The same
+CCPP-equal primary weighting and household-equal sensitivity apply.
+
 ## Individual estimand and weighting
 
 The compact primary individual family describes linked SISFOH persons age 14
@@ -110,6 +122,14 @@ the average assignment-community mean among linked SISFOH people age 14 or
 older and prevents community size or enumeration intensity from determining
 its contribution. A person-equal branch is required and explicitly labeled as
 a different population-weighted estimand.
+
+The 2017 primary person family contains 54,317 linked people age 14 or older
+in 406 RUV communities; the common window contains 5,453 people in 61
+communities. It adds CCPP migration, disability, and harmonized wellbeing to
+the compact main family. The primary migration variable is observed only for
+linked people. Complementary exploratory bounds code every unlinked
+source-cohort person as moved or as not moved; neither bound replaces the
+linked-cohort primary estimate.
 
 Secondary outcomes use the denominator appropriate to the source question:
 valid-age rosters for age composition, females age 12--49 for pregnancy,
@@ -139,7 +159,8 @@ and cannot be described as observed non-enrollment.
   person-equal, district, and score-mass-point sensitivities.
 - A transparent local-linear triangular-weighted 2SLS model estimates the
   parametric analogue within the same window. It includes separate running-
-  variable slopes on each side, instruments `treat_12` with cutoff assignment,
+  variable slopes on each side, instruments the wave-specific treatment
+  (`treat_12` or `treat_16`) with cutoff assignment,
   and clusters by district in the CCPP module and by RUV community in the
   household and individual modules. It reports the Kleibergen--Paap F
   statistic, underidentification test, Anderson--Rubin p-value, and
@@ -178,16 +199,26 @@ to redefine the primary narrative.
 - All generated artifacts remain `generated_unreviewed` until substantive,
   disclosure, and manuscript review. This module does not synchronize files to
   Overleaf.
+- Internet and connectivity remain mechanism outcomes. No mediation model is
+  estimated here, and no primary effect is conditioned on a post-treatment
+  mechanism.
+- Subgroup splits and treatment-by-subgroup interaction estimands belong in a
+  separate heterogeneity protocol. They are not selected or estimated in the
+  main-effect modules.
 
 ## Reproducible implementation
 
 The orchestrator is `code/stata/pipeline/04_estimate_main_effects.do`. The
 implemented modules are `code/stata/pipeline/04a_sisfoh2013_ccpp.do`,
 `code/stata/pipeline/04b_sisfoh2013_household.do`, and
-`code/stata/pipeline/04c_sisfoh2013_individual.do`; their registries are
+`code/stata/pipeline/04c_sisfoh2013_individual.do`, followed by
+`code/stata/pipeline/04d_census2017_ccpp.do`,
+`code/stata/pipeline/04e_census2017_household.do`, and
+`code/stata/pipeline/04f_census2017_individual.do`; their registries are
 `metadata/rd-outcomes/outcome-registry.csv`,
 `metadata/rd-outcomes/outcome-registry-2013-household.csv`, and
-`metadata/rd-outcomes/outcome-registry-2013-individual.csv`.
+`metadata/rd-outcomes/outcome-registry-2013-individual.csv` and the three
+`metadata/rd-outcomes/outcome-registry-2017-*.csv` files.
 Machine-readable results, LaTeX tables, and figures are written under
 `output/tables/rd_outcomes` and `output/figures/rd_outcomes`, with checksums and
 review status recorded in `metadata/rd-outcome-output-manifest.csv`.

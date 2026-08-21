@@ -1,0 +1,16 @@
+\begin{table}[!htbp]
+\centering
+\small
+\caption{First-stage discontinuity for treatment through 2016}
+\label{tab:rd_outcomes_first_stage}
+\begin{tabular}{lrrrrrr}
+\toprule
+Analysis sample & Estimate & Robust SE & 95\% CI & Effective N & \(h\) & \(F_z\) \\
+\midrule
+Treatment through 2016: full B/C design universe & 0.984 & 0.203 & [0.585, 1.382] & 71 & 0.0075 & 23.38 \\
+Treatment through 2016: complete primary sample & 1.122 & 0.153 & [0.823, 1.421] & 59 & 0.0075 & 54.13 \\
+Treatment through 2016: MSE selector & 0.956 & 0.206 & [0.553, 1.360] & 62 & 0.0067 & 21.57 \\
+\bottomrule
+\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment and district CR2 inference. The common design window is \(h=0.0075\) and bias window is \(b=0.0135\); the final row instead reports the treatment-based MSE selector. \(F_z\) is the squared robust bias-corrected \(z\) statistic and is compared with the conservative interpretation gate of 20. The linked primary-sample statistic meets that gate; fuzzy LATE estimates are nevertheless reported with reduced forms and Anderson--Rubin diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\end{table}

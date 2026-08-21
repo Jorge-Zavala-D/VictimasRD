@@ -96,20 +96,25 @@ the versioned common contract, validates commands and inputs, and calls the
 wave-by-level modules in a fixed order. `04a_sisfoh2013_ccpp.do` analyzes 2013
 SISFOH outcomes at CCPP level; `04b_sisfoh2013_household.do` analyzes the
 linked household file; and `04c_sisfoh2013_individual.do` analyzes the linked
-person file. All three use the selected legacy geography, adjacent B/C
-support, cumulative treatment through 2012, a treatment-design bandwidth of
-0.0075, and bias bandwidth of 0.0135 for every registered primary outcome.
-They report the first stage, reduced form, fuzzy-RD ratio, outcome-specific
-bandwidth and fixed-window sensitivities, local-linear 2SLS analogues,
-weak-instrument diagnostics, and multiplicity adjustments. The household and
-individual modules give each RUV community equal total weight in their primary
-estimands, cluster by `ruv_id`, and report observation-equal, district, and
-score-mass-point sensitivities. No module tunes a sample, weighting rule, or
-bandwidth to pass the prespecified first-stage gate. Their contract is
+person file. `04d_census2017_ccpp.do`, `04e_census2017_household.do`, and
+`04f_census2017_individual.do` repeat the same hierarchy for Census 2017 using
+cumulative treatment through 2016. All six use the selected legacy geography,
+adjacent B/C support, a treatment-design bandwidth of 0.0075, and bias
+bandwidth of 0.0135 for every registered primary outcome. They report the
+first stage, reduced form, fuzzy-RD ratio, outcome-specific bandwidth and
+fixed-window sensitivities, local-linear 2SLS analogues, weak-instrument
+diagnostics, and multiplicity adjustments. The 2017 modules additionally
+report discontinuities in cohort coverage or linkage and preserve two
+extreme-case non-linkage sensitivities for the CCPP-migration outcome. The
+household and individual modules give each RUV community equal total weight
+in their primary estimands, cluster by `ruv_id`, and report observation-equal,
+district, and score-mass-point sensitivities. No module tunes a sample,
+weighting rule, or bandwidth to pass the prespecified first-stage gate. Causal
+mediation and heterogeneity are intentionally excluded from these main-effect
+modules. Their contract is
 documented in
 [`docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md`](../../../docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md),
-and their 51-outcome CCPP, 53-outcome household, and 63-outcome individual
-registries are stored under `metadata/rd-outcomes/`.
+and their wave-by-level registries are stored under `metadata/rd-outcomes/`.
 
 Remaining modules will be added sequentially. They must:
 

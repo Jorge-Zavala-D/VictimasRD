@@ -1,0 +1,23 @@
+\begin{table}[!htbp]
+\centering
+\scriptsize
+\caption{Collective reparations and registered Census 2017 individual outcomes}
+\label{tab:rd_outcomes_main_2017_individual}
+\begin{tabular}{p{0.28\linewidth}rrrrrrr}
+\toprule
+Outcome & Control mean & Reduced form & Fuzzy LATE & 95\% robust CI & Holm \(p\) & Persons & CCPP \\
+\midrule
+Female & 55.23 & 7.19 & 7.55 & [-2.94, 18.05] & 1.000 & 5,453 & 61 \\
+Age 15-29 & 30.64 & 4.90 & 5.18 & [-15.08, 25.44] & 1.000 & 5,453 & 61 \\
+Lives in another CCPP & 45.49 & 43.72 & 45.62 & [-0.40, 91.64] & 0.416 & 5,453 & 61 \\
+Secondary education or higher & 48.95 & 7.34 & 7.81 & [-24.40, 40.01] & 1.000 & 5,453 & 61 \\
+Employed in the reference week & 46.08 & -12.51 & -12.98 & [-30.71, 4.76] & 1.000 & 5,453 & 61 \\
+Any health insurance & 88.41 & -3.90 & -3.95 & [-22.06, 14.16] & 1.000 & 5,453 & 61 \\
+Reports any disability & 17.57 & -10.26 & -10.71 & [-27.17, 5.76] & 1.000 & 5,453 & 61 \\
+Core wellbeing proxy & 57.61 & 12.48 & 13.03 & [-8.03, 34.09] & 1.000 & 5,453 & 61 \\
+\midrule
+Common first stage & & & 0.964 & [0.542, 1.385] & & 5,453 & 65 \\
+\bottomrule
+\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome sample of persons age 14 or older before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with persons equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. All reported effects are percentage points. Holm values adjust across the eight primary outcomes. The local first stage passes the conservative \(F\geq20\) gate; the LATE column must still be read with reduced forms and Anderson--Rubin inference. The assisted linked cohort has no analysis weight and is not the full national Census microdata. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\end{table}

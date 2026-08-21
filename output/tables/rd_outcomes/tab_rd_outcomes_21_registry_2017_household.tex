@@ -1,0 +1,54 @@
+\begingroup
+\small
+\begin{longtable}{p{0.10\linewidth}p{0.18\linewidth}p{0.24\linewidth}p{0.33\linewidth}}
+\caption{Registered Census 2017 household outcomes and construction rules}
+\label{tab:rd_outcome_registry_2017_household} \\
+\toprule
+Tier & Family & Outcome & Denominator or construction universe \\
+\midrule
+\endfirsthead
+\multicolumn{4}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule
+Tier & Family & Outcome & Denominator or construction universe \\
+\midrule
+\endhead
+Primary & Demography & Female household members & Linked source-household members with valid sex \\
+Primary & Demography & Household members age 15-29 & Linked source-household members with valid age \\
+Primary & Migration & Members living in another CCPP & Linked members with valid source and destination CCPP codes \\
+Primary & Human Capital & Members with secondary education or higher & Linked members age 14 or older with valid education \\
+Primary & Labor & Employed household members & Linked members age 14 or older with valid labor status \\
+Primary & Health & Members with health insurance & Linked members with valid insurance responses \\
+Primary & Health & Members reporting disability & Linked members with valid disability responses \\
+Primary & Wellbeing & Core household wellbeing proxy & Source households with all four harmonized domains \\
+Secondary & Demography & Mean age of linked members & Linked source-household members with valid age \\
+Secondary & Demography & Household members age 0-14 & Linked source-household members with valid age \\
+Secondary & Demography & Household members age 30-44 & Linked source-household members with valid age \\
+Secondary & Demography & Household members age 45-64 & Linked source-household members with valid age \\
+Secondary & Demography & Household members age 65 or older & Linked source-household members with valid age \\
+Secondary & Migration & Members living in another district & Linked members with valid source and destination CCPP codes \\
+Secondary & Migration & Members living in another province & Linked members with valid source and destination CCPP codes \\
+Secondary & Migration & Members living in another department & Linked members with valid source and destination CCPP codes \\
+Secondary & Migration & Source household split across destination households & All source households in the assisted cohort \\
+Secondary & Migration & Members in another district five years earlier & Linked members age five or older with a valid retrospective residence response \\
+Secondary & Human Capital & Literate household members & Linked members age 14 or older with valid literacy \\
+Secondary & Human Capital & Members completing primary education & Linked members age 14 or older with valid education \\
+Secondary & Human Capital & School attendance among children & Linked children age 6-17 with valid attendance \\
+Secondary & Labor & Labor-force participation & Linked members age 14 or older with valid labor status \\
+Secondary & Labor & Unemployment rate & Linked household labor-force members age 14 or older \\
+Secondary & Health & Members with SIS insurance & Linked members with valid insurance responses \\
+Secondary & Health & Members with EsSalud insurance & Linked members with valid insurance responses \\
+Secondary & Human Capital & Members with an Indigenous childhood language & Linked members age three or older with valid language \\
+Secondary & Deprivation & Members exposed to any unmet basic need & Linked members in complete destination-household rosters with all NBI components \\
+Secondary & Deprivation & Single-destination household has any unmet basic need & Source households linked to exactly one destination household with complete NBI inputs \\
+Secondary & Wellbeing & Housing wellbeing domain & Source households with valid linked floor material \\
+Secondary & Wellbeing & Services wellbeing domain & Source households with valid linked water and sanitation items \\
+Secondary & Wellbeing & Energy wellbeing domain & Source households with valid linked electricity and cooking fuel \\
+Secondary & Wellbeing & Durable-assets wellbeing domain & Source households with all four linked asset responses \\
+Secondary & Deprivation & Core household deprivation proxy & Source households with the core wellbeing score \\
+Mechanism & Connectivity & Members exposed to household internet & Linked members with a valid destination-household internet response \\
+Mechanism & Connectivity & Single-destination household has internet & Source households linked to exactly one destination household with valid internet response \\
+Mechanism & Connectivity & Connectivity wellbeing domain & Source households with valid linked phone internet and cable responses \\
+\bottomrule
+\end{longtable}
+\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The unit is a linked Census household. Primary outcomes form one prespecified family; secondary outcomes are adjusted within the declared substantive family. Shares, binary outcomes, and zero-to-one indices are displayed in percentage points. Household aggregates use the explicitly reported roster denominator. The equal-domain wellbeing proxy is transparent but is not an official poverty index. Connectivity outcomes are registered as mechanisms and are not ordinary controls. Source: INEI-assisted Census 2017.\end{minipage}
+\endgroup
