@@ -1,0 +1,121 @@
+outcome_id,outcome_label,paper_order,moderator_id,moderator_label,moderator_tier,value_label,raw_value,standardized_value,estimate,standard_error,pvalue,ci_low,ci_high,gate_pass,gate_status
+P01,Log rostered population,1,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,.15741785,.13622043,.24784026,-.1095693,.42440498,0,underidentified
+P01,Log rostered population,1,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,-.093038201,.18144771,.60812283,-.4486692,.26259279,0,underidentified
+P01,Log rostered population,1,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,-.3239578,.27369544,.23655425,-.86039102,.2124754,0,underidentified
+P02,Log rostered households,2,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,.0963028,.19723217,.62535769,-.29026514,.48287073,0,underidentified
+P02,Log rostered households,2,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,-.072659917,.27434137,.79112333,-.61035913,.46503928,0,underidentified
+P02,Log rostered households,2,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,-.22844297,.40617317,.57382482,-1.0245278,.56764185,0,underidentified
+P03,Residents age 15-29,3,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,-28.769726,15.769125,.068086512,-59.676643,2.137192,0,underidentified
+P03,Residents age 15-29,3,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,-1.7082916,17.466553,.92208827,-35.942104,32.52552,0,underidentified
+P03,Residents age 15-29,3,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,23.242258,30.969345,.45295823,-37.456543,83.941055,0,underidentified
+P04,Residents in any social program,4,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,9.0128784,16.591419,.58697468,-23.505705,41.531464,0,underidentified
+P04,Residents in any social program,4,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,-1.9665219,22.587469,.9306218,-46.237148,42.304104,0,underidentified
+P04,Residents in any social program,4,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,-12.089492,33.505913,.71823651,-77.759872,53.580891,0,underidentified
+P05,Core wellbeing proxy,5,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,-6.5554261,9.4200182,.48648909,-25.018322,11.90747,0,underidentified
+P05,Core wellbeing proxy,5,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,-4.7505183,12.653847,.70734745,-29.551603,20.050566,0,underidentified
+P05,Core wellbeing proxy,5,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,-3.0863998,20.394426,.87971109,-43.058739,36.885941,0,underidentified
+P06,Households with any unmet basic need,6,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,2.7934024,14.030844,.84219223,-24.706547,30.293352,0,underidentified
+P06,Households with any unmet basic need,6,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,22.143356,30.304338,.46496293,-37.252056,81.538773,0,underidentified
+P06,Households with any unmet basic need,6,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,39.983944,50.630985,.42969543,-59.250961,139.21886,0,underidentified
+P07,Labor-force participation,7,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,7.9288602,8.1421461,.33015352,-8.0294533,23.887173,0,underidentified
+P07,Labor-force participation,7,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,21.696911,16.900631,.19921438,-11.427716,54.821537,0,underidentified
+P07,Labor-force participation,7,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,34.391006,27.858624,.21702284,-20.21089,88.992905,0,underidentified
+P08,Secondary education or higher,8,M01,Log baseline CCPP population,primary,P25,4.553876891600541,-.59157062,-15.561881,12.852272,.22596163,-40.751869,9.628109,0,underidentified
+P08,Secondary education or higher,8,M01,Log baseline CCPP population,primary,P50,5.159055299214529,-.0041603837,-9.358305,17.527994,.59340644,-43.712543,24.995932,0,underidentified
+P08,Secondary education or higher,8,M01,Log baseline CCPP population,primary,P75,5.717027701406222,.53742981,-3.6386297,27.737717,.89563304,-58.003555,50.726295,0,underidentified
+P01,Log rostered population,1,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,1.1218514,1.8193343,.53748047,-2.4439783,4.6876812,0,weak_interaction_instruments
+P01,Log rostered population,1,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,1.0093496,1.2983943,.43693286,-1.5354565,3.5541558,0,weak_interaction_instruments
+P01,Log rostered population,1,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,.88435227,.87235624,.31070143,-.82543451,2.5941391,0,weak_interaction_instruments
+P02,Log rostered households,2,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,1.6812248,1.5906512,.2905384,-1.4363941,4.7988439,0,weak_interaction_instruments
+P02,Log rostered households,2,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,1.2261996,1.1268858,.27653718,-.98245597,3.4348552,0,weak_interaction_instruments
+P02,Log rostered households,2,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,.72063476,.73240507,.32515034,-.71485281,2.1561222,0,weak_interaction_instruments
+P03,Residents age 15-29,3,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,-33.47316,26.939869,.21404706,-86.27433,19.328014,0,weak_interaction_instruments
+P03,Residents age 15-29,3,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,-30.732168,19.957747,.12359408,-69.848633,8.3842945,0,weak_interaction_instruments
+P03,Residents age 15-29,3,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,-27.686735,15.000389,.064930759,-57.086956,1.7134864,0,weak_interaction_instruments
+P04,Residents in any social program,4,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,-19.610584,30.642302,.52218294,-79.668396,40.447224,0,weak_interaction_instruments
+P04,Residents in any social program,4,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,-5.18328,21.830914,.8123244,-47.971085,37.604527,0,weak_interaction_instruments
+P04,Residents in any social program,4,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,10.846467,16.459656,.50991315,-21.413864,43.106796,0,weak_interaction_instruments
+P05,Core wellbeing proxy,5,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,.81995517,16.706091,.96085459,-31.923382,33.563293,0,weak_interaction_instruments
+P05,Core wellbeing proxy,5,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,-2.1092806,12.450451,.86547101,-26.511717,22.293156,0,weak_interaction_instruments
+P05,Core wellbeing proxy,5,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,-5.3638668,8.972784,.54997814,-22.950201,12.222467,0,weak_interaction_instruments
+P06,Households with any unmet basic need,6,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,32.100204,63.838463,.61508036,-93.020882,157.2213,0,weak_interaction_instruments
+P06,Households with any unmet basic need,6,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,22.905056,42.205631,.58733541,-59.816463,105.62657,0,weak_interaction_instruments
+P06,Households with any unmet basic need,6,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,12.688602,21.127766,.54812956,-28.721058,54.098263,0,weak_interaction_instruments
+P07,Labor-force participation,7,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,37.042206,35.441452,.29594618,-32.421764,106.50617,0,weak_interaction_instruments
+P07,Labor-force participation,7,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,24.893591,24.066015,.30095494,-22.274933,72.062119,0,weak_interaction_instruments
+P07,Labor-force participation,7,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,11.395628,13.714495,.40601963,-15.484287,38.275543,0,weak_interaction_instruments
+P08,Secondary education or higher,8,S01,Baseline CCPP deprivation,secondary,P25,.6211890243902439,-.55887467,-45.96582,44.184334,.29819155,-132.56552,40.633884,0,weak_interaction_instruments
+P08,Secondary education or higher,8,S01,Baseline CCPP deprivation,secondary,P50,.6902332144979204,.042959813,-32.845169,29.870268,.27150905,-91.389816,25.699482,0,weak_interaction_instruments
+P08,Secondary education or higher,8,S01,Baseline CCPP deprivation,secondary,P75,.766946150212565,.71164012,-18.267208,17.329348,.29182807,-52.232105,15.697688,0,weak_interaction_instruments
+P01,Log rostered population,1,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-2.4703171,3.3885272,.46598706,-9.1117086,4.1710739,0,underidentified
+P01,Log rostered population,1,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,-.63901186,1.7034745,.70756924,-3.9777606,2.6997368,0,underidentified
+P01,Log rostered population,1,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,1.0135527,1.7179217,.55519891,-2.353512,4.3806171,0,underidentified
+P02,Log rostered households,2,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-2.4481461,3.0410635,.42080259,-8.4085217,3.512229,0,underidentified
+P02,Log rostered households,2,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,-.67576748,1.4821678,.64843899,-3.5807631,2.2292283,0,underidentified
+P02,Log rostered households,2,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,.92362195,1.6378814,.57281357,-2.2865665,4.1338105,0,underidentified
+P03,Residents age 15-29,3,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-53.94693,44.052536,.22072431,-140.28831,32.394455,0,underidentified
+P03,Residents age 15-29,3,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,-32.23085,24.167213,.18231526,-79.597717,15.136019,0,underidentified
+P03,Residents age 15-29,3,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,-12.634322,14.284273,.37643081,-40.630981,15.362338,0,underidentified
+P04,Residents in any social program,4,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,55.481567,48.842453,.25598618,-40.247879,151.21101,0,underidentified
+P04,Residents in any social program,4,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,23.720848,25.436975,.35106057,-26.13471,73.576408,0,underidentified
+P04,Residents in any social program,4,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,-4.9399357,23.082706,.83053905,-50.181206,40.301334,0,underidentified
+P05,Core wellbeing proxy,5,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-51.024338,38.810551,.18860982,-127.09162,25.042944,0,underidentified
+P05,Core wellbeing proxy,5,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,-21.681576,18.254866,.23494576,-57.460457,14.097304,0,underidentified
+P05,Core wellbeing proxy,5,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,4.7972493,16.763489,.774746,-28.058584,37.653084,0,underidentified
+P06,Households with any unmet basic need,6,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-11.022694,44.125423,.80273914,-97.506935,75.461548,0,underidentified
+P06,Households with any unmet basic need,6,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,2.059804,22.195959,.92606175,-41.443478,45.563084,0,underidentified
+P06,Households with any unmet basic need,6,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,13.865412,30.336191,.64762902,-45.59243,73.323257,0,underidentified
+P07,Labor-force participation,7,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-.3167522,24.063318,.98949754,-47.479992,46.846485,0,underidentified
+P07,Labor-force participation,7,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,8.3498764,13.689292,.54189038,-18.480642,35.180397,0,underidentified
+P07,Labor-force participation,7,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,16.170618,14.895605,.27765754,-13.024233,45.365467,0,underidentified
+P08,Secondary education or higher,8,S02,Distance to corresponding district capital,secondary,P25,1.053072171874275,-.62257594,-30.349222,24.569178,.21673526,-78.503929,17.805479,0,underidentified
+P08,Secondary education or higher,8,S02,Distance to corresponding district capital,secondary,P50,1.697138367819131,.071245395,-19.604748,14.987612,.19085179,-48.979927,9.7704325,0,underidentified
+P08,Secondary education or higher,8,S02,Distance to corresponding district capital,secondary,P75,2.278341839854977,.69734776,-9.9089632,12.7659,.43762758,-34.929665,15.11174,0,underidentified
+P01,Log rostered population,1,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,.090748332,.50209224,.85657138,-.89333445,1.0748311,0,underidentified
+P01,Log rostered population,1,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,-.18164957,.65786612,.7824564,-1.4710435,1.1077443,0,underidentified
+P01,Log rostered population,1,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,-.42909911,1.0240039,.67518651,-2.4361098,1.5779116,0,underidentified
+P02,Log rostered households,2,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,.0067619756,.35952213,.98499411,-.69788843,.71141243,0,underidentified
+P02,Log rostered households,2,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,-.17826369,.55159891,.74656171,-1.2593776,.90285027,0,underidentified
+P02,Log rostered households,2,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,-.34634325,.90668011,.70246834,-2.1234035,1.4307171,0,underidentified
+P03,Residents age 15-29,3,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,-22.591146,11.859991,.056803495,-45.836304,.65400916,0,underidentified
+P03,Residents age 15-29,3,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,-7.5538077,12.940437,.55939752,-32.916599,17.808985,0,underidentified
+P03,Residents age 15-29,3,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,6.1062918,21.752876,.77893138,-36.528564,48.741146,0,underidentified
+P04,Residents in any social program,4,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,9.8000984,17.072491,.56594843,-23.661369,43.261566,0,underidentified
+P04,Residents in any social program,4,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,-9.9506578,26.809546,.71051759,-62.496403,42.595085,0,underidentified
+P04,Residents in any social program,4,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,-27.892483,41.477188,.50127965,-109.18628,53.401314,0,underidentified
+P05,Core wellbeing proxy,5,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,-6.8896527,8.9379826,.44080853,-24.407778,10.628472,0,underidentified
+P05,Core wellbeing proxy,5,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,-6.4417024,14.119545,.64822751,-34.115501,21.232098,0,underidentified
+P05,Core wellbeing proxy,5,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,-6.0347791,22.83597,.79157466,-50.792458,38.722897,0,underidentified
+P06,Households with any unmet basic need,6,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,6.8085766,14.235456,.63244879,-21.092403,34.709557,0,underidentified
+P06,Households with any unmet basic need,6,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,31.340961,40.036457,.43373838,-47.129051,109.81097,0,underidentified
+P06,Households with any unmet basic need,6,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,53.626476,67.323997,.42571637,-78.326134,185.57909,0,underidentified
+P07,Labor-force participation,7,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,9.2635555,9.6494169,.33704922,-9.6489544,28.176065,0,underidentified
+P07,Labor-force participation,7,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,22.69269,19.332819,.24047872,-15.198938,60.584316,0,underidentified
+P07,Labor-force participation,7,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,34.891876,30.699835,.25572672,-25.278692,95.062447,0,underidentified
+P08,Secondary education or higher,8,S03,Baseline CCPP economic development,secondary,P25,5.218245010914716,-.53804135,-13.843551,11.293529,.22027583,-35.978458,8.291358,0,underidentified
+P08,Secondary education or higher,8,S03,Baseline CCPP economic development,secondary,P50,5.983642852094933,-.018560737,-11.718129,21.728394,.58967966,-54.304996,30.868738,0,underidentified
+P08,Secondary education or higher,8,S03,Baseline CCPP economic development,secondary,P75,6.678939482608622,.45334172,-9.7873716,35.139736,.7806077,-78.659996,59.085251,0,underidentified
+P01,Log rostered population,1,S05,CCPP altitude,secondary,P25,2995,-.22627363,3.42046,7.8842821,.66440988,-12.032449,18.873369,0,underidentified
+P01,Log rostered population,1,S05,CCPP altitude,secondary,P50,3373,.22816096,-.12409091,1.7193365,.94246364,-3.4939287,3.2457469,0,underidentified
+P01,Log rostered population,1,S05,CCPP altitude,secondary,P75,3689,.60805869,-3.0872605,7.6832118,.68781722,-18.14608,11.971559,0,underidentified
+P02,Log rostered households,2,S05,CCPP altitude,secondary,P25,2995,-.22627363,2.9603577,6.4730201,.64742815,-9.7265282,15.647243,0,underidentified
+P02,Log rostered households,2,S05,CCPP altitude,secondary,P50,3373,.22816096,-.098719716,1.4647928,.94626725,-2.9696608,2.7722213,0,underidentified
+P02,Log rostered households,2,S05,CCPP altitude,secondary,P75,3689,.60805869,-2.6560438,6.2756186,.67212588,-14.95603,9.6439428,0,underidentified
+P03,Residents age 15-29,3,S05,CCPP altitude,secondary,P25,2995,-.22627363,-56.038292,81.933014,.49400514,-216.62404,104.54746,0,underidentified
+P03,Residents age 15-29,3,S05,CCPP altitude,secondary,P50,3373,.22816096,-17.960873,15.376915,.24279009,-48.099072,12.177327,0,underidentified
+P03,Residents age 15-29,3,S05,CCPP altitude,secondary,P75,3689,.60805869,13.871044,72.857262,.84900624,-128.92656,156.66866,0,underidentified
+P04,Residents in any social program,4,S05,CCPP altitude,secondary,P25,2995,-.22627363,-42.708923,101.45006,.67376626,-241.54738,156.12953,0,underidentified
+P04,Residents in any social program,4,S05,CCPP altitude,secondary,P50,3373,.22816096,16.648636,24.316486,.49355564,-31.010801,64.308075,0,underidentified
+P04,Residents in any social program,4,S05,CCPP altitude,secondary,P75,3689,.60805869,66.270302,107.2443,.53661638,-143.92467,276.46527,0,underidentified
+P05,Core wellbeing proxy,5,S05,CCPP altitude,secondary,P25,2995,-.22627363,1.5559407,26.017387,.95231181,-49.437202,52.549084,0,underidentified
+P05,Core wellbeing proxy,5,S05,CCPP altitude,secondary,P50,3373,.22816096,-6.6369858,8.8347836,.45251212,-23.952843,10.678871,0,underidentified
+P05,Core wellbeing proxy,5,S05,CCPP altitude,secondary,P75,3689,.60805869,-13.486098,32.406017,.6772927,-77.000725,50.02853,0,underidentified
+P06,Households with any unmet basic need,6,S05,CCPP altitude,secondary,P25,2995,-.22627363,100.26348,239.19334,.67508942,-368.54688,569.07385,0,underidentified
+P06,Households with any unmet basic need,6,S05,CCPP altitude,secondary,P50,3373,.22816096,-15.034824,51.213577,.76908571,-115.41159,85.341942,0,underidentified
+P06,Households with any unmet basic need,6,S05,CCPP altitude,secondary,P75,3689,.60805869,-111.42177,234.48421,.63466001,-571.00238,348.15881,0,underidentified
+P07,Labor-force participation,7,S05,CCPP altitude,secondary,P25,2995,-.22627363,8.1423283,36.628193,.82408291,-63.647614,79.932274,0,underidentified
+P07,Labor-force participation,7,S05,CCPP altitude,secondary,P50,3373,.22816096,8.3428783,10.26007,.41613749,-11.766489,28.452246,0,underidentified
+P07,Labor-force participation,7,S05,CCPP altitude,secondary,P75,3689,.60805869,8.5105352,38.040028,.82297069,-66.046555,83.067619,0,underidentified
+P08,Secondary education or higher,8,S05,CCPP altitude,secondary,P25,2995,-.22627363,-58.62701,110.65733,.59624588,-275.51141,158.25739,0,underidentified
+P08,Secondary education or higher,8,S05,CCPP altitude,secondary,P50,3373,.22816096,-8.2969542,23.053854,.71892607,-53.481678,36.887768,0,underidentified
+P08,Secondary education or higher,8,S05,CCPP altitude,secondary,P75,3689,.60805869,33.777908,107.28558,.7528823,-176.49796,244.05377,0,underidentified

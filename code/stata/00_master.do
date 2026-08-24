@@ -488,6 +488,7 @@ their authors' repositories rather than SSC.
 local net_specs ///
     lpdensity lpdensity https://raw.githubusercontent.com/nppackages/lpdensity/main/stata ///
     rdrobust rdrobust     https://raw.githubusercontent.com/rdpackages/rdrobust/main/stata ///
+    rdhte    rdhte        https://raw.githubusercontent.com/rdpackages/rdhte/main/stata ///
     rddensity rddensity   https://raw.githubusercontent.com/rdpackages/rddensity/main/stata ///
     rdpower   rdmde       https://raw.githubusercontent.com/rdpackages/rdpower/main/stata ///
     rdmulti   rdmc        https://raw.githubusercontent.com/rdpackages/rdmulti/main/stata ///
@@ -578,6 +579,22 @@ if `"`missing_commands'"' != "" {
 }
 
 /*
+Custom PLUS directories require an explicit Mata-library index in a cold
+session. Without it, multi-endogenous ivreg2 models can fail even when
+livreg2.mlib is present and which ivreg2 succeeds.
+*/
+
+capture noisily mata: mata mlib index
+local mata_mlib_index_rc = _rc
+
+if `mata_mlib_index_rc' {
+    display as error "Project-local Mata libraries could not be indexed."
+    display as error "Stata return code: `mata_mlib_index_rc'"
+    log close victimasrd_master
+    exit `mata_mlib_index_rc'
+}
+
+/*
 Confirm that the project-local rdrobust ado and Mata files are mutually
 compatible in a cold session. A command-level check alone cannot detect a
 partially updated package.
@@ -591,6 +608,20 @@ generate double smoke_y = ///
     0.4 * (smoke_x >= 0) + ///
     0.2 * smoke_x + ///
     mod(_n, 7) / 50
+generate double smoke_z1 = sin(_n / 11)
+generate double smoke_z2 = cos(_n / 17)
+generate double smoke_d1 = ///
+    0.8 * smoke_z1 + 0.2 * smoke_z2 + mod(_n, 13) / 20
+generate double smoke_d2 = ///
+    0.2 * smoke_z1 + 0.8 * smoke_z2 + mod(_n, 19) / 25
+generate double smoke_iv_y = ///
+    smoke_d1 - 0.5 * smoke_d2 + mod(_n, 23) / 40
+
+capture quietly ivreg2 ///
+    smoke_iv_y ///
+    (smoke_d1 smoke_d2 = smoke_z1 smoke_z2), ///
+    robust
+local ivreg2_smoke_rc = _rc
 
 capture quietly rdrobust ///
     smoke_y ///
@@ -638,6 +669,14 @@ if `rdrobust_smoke_rc' {
     exit `rdrobust_smoke_rc'
 }
 
+if `ivreg2_smoke_rc' {
+    display as error "Project-local ivreg2 failed its two-endogenous-variable smoke test."
+    display as error "Reindex or reinstall ivreg2 and rerun."
+    display as error "Stata return code: `ivreg2_smoke_rc'"
+    log close victimasrd_master
+    exit `ivreg2_smoke_rc'
+}
+
 if `rddensity_smoke_rc' {
     display as error "Project-local rddensity failed its cold-session smoke test."
     display as error "Reinstall from the official rdpackages source and rerun."
@@ -676,7 +715,7 @@ local run_01_data_preparation         0
 local run_02_describe_data            0
 local run_03_validate_rd_assumptions  0
 local run_04_estimate_main_effects    0
-local run_05_run_robustness           0
+local run_05_estimate_heterogeneity   0
 local run_06_analyze_mechanisms       0
 local run_07_build_outputs            0
 local run_08_run_release_checks       0
@@ -687,7 +726,7 @@ local pipeline_switches ///
     run_02_describe_data ///
     run_03_validate_rd_assumptions ///
     run_04_estimate_main_effects ///
-    run_05_run_robustness ///
+    run_05_estimate_heterogeneity ///
     run_06_analyze_mechanisms ///
     run_07_build_outputs ///
     run_08_run_release_checks
@@ -767,10 +806,10 @@ if `run_all' | `run_04_estimate_main_effects' {
         label("Primary treatment-effect estimation")
 }
 
-if `run_all' | `run_05_run_robustness' {
+if `run_all' | `run_05_estimate_heterogeneity' {
     victimasrd_run_step, ///
-        file("${pipeline_root}/05_run_robustness.do") ///
-        label("Robustness, placebo, and sensitivity analyses")
+        file("${pipeline_root}/05_estimate_heterogeneity.do") ///
+        label("Prespecified treatment-effect heterogeneity")
 }
 
 if `run_all' | `run_06_analyze_mechanisms' {
@@ -801,7 +840,7 @@ if !`run_all' & ///
    !`run_02_describe_data' & ///
    !`run_03_validate_rd_assumptions' & ///
    !`run_04_estimate_main_effects' & ///
-   !`run_05_run_robustness' & ///
+   !`run_05_estimate_heterogeneity' & ///
    !`run_06_analyze_mechanisms' & ///
    !`run_07_build_outputs' & ///
    !`run_08_run_release_checks' {

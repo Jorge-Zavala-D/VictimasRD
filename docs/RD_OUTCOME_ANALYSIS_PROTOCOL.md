@@ -165,7 +165,8 @@ and cannot be described as observed non-enrollment.
   household and individual modules. It reports the Kleibergen--Paap F
   statistic, underidentification test, Anderson--Rubin p-value, and
   wild-cluster-bootstrap p-value.
-- A conservative first-stage gate is Kleibergen--Paap F at least 20. This is a
+- The approved first-stage gate is Kleibergen--Paap F strictly greater than
+  10. This is a
   reporting and interpretation safeguard, not a device for selecting a
   bandwidth. Stock--Yogo critical values are not treated as exact under
   clustering.

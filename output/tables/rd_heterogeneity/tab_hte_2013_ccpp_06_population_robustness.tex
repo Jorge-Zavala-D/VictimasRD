@@ -1,0 +1,46 @@
+\begin{table}[!htbp]
+\centering
+\caption{Population heterogeneity sensitivity specifications}
+\label{tab:hte-2013-ccpp-population-robustness}
+\small
+\resizebox{0.88\textwidth}{!}{%
+\begin{tabular}{llrrrrl}
+\toprule
+Outcome & Specification & Interaction & SE & Min. SW \(F\) & KP \(F\) & Gate \\
+\midrule
+Log rostered population & Predetermined covariates & -0.35 & 0.19 & 4.08 & 1.63 & underidentified \\
+Log rostered population & Common bandwidth & -0.43 & 0.22 & 2.49 & 0.89 & underidentified \\
+Log rostered population & Wide bandwidth & -0.69 & 1.29 & 0.25 & 0.11 & underidentified \\
+Log rostered population & Narrow bandwidth & -0.31 & 0.75 & 0.25 & 0.12 & underidentified \\
+Log rostered households & Predetermined covariates & -0.22 & 0.18 & 4.08 & 1.63 & underidentified \\
+Log rostered households & Common bandwidth & -0.29 & 0.30 & 2.49 & 0.89 & underidentified \\
+Log rostered households & Wide bandwidth & 0.01 & 0.93 & 0.25 & 0.11 & underidentified \\
+Log rostered households & Narrow bandwidth & 0.19 & 1.11 & 0.25 & 0.12 & underidentified \\
+Residents age 15-29 & Predetermined covariates & 36.29 & 22.44 & 4.08 & 1.63 & underidentified \\
+Residents age 15-29 & Common bandwidth & 46.07 & 31.38 & 2.49 & 0.89 & underidentified \\
+Residents age 15-29 & Wide bandwidth & 107.93 & 200.61 & 0.25 & 0.11 & underidentified \\
+Residents age 15-29 & Narrow bandwidth & 108.38 & 187.14 & 0.25 & 0.12 & underidentified \\
+Residents in any social program & Predetermined covariates & -6.61 & 10.55 & 4.08 & 1.63 & underidentified \\
+Residents in any social program & Common bandwidth & -18.69 & 25.44 & 2.49 & 0.89 & underidentified \\
+Residents in any social program & Wide bandwidth & -29.10 & 86.76 & 0.25 & 0.11 & underidentified \\
+Residents in any social program & Narrow bandwidth & -49.31 & 121.82 & 0.25 & 0.12 & underidentified \\
+Core wellbeing proxy & Predetermined covariates & 2.11 & 13.48 & 4.08 & 1.63 & underidentified \\
+Core wellbeing proxy & Common bandwidth & 3.07 & 17.63 & 2.49 & 0.89 & underidentified \\
+Core wellbeing proxy & Wide bandwidth & 9.71 & 49.99 & 0.25 & 0.11 & underidentified \\
+Core wellbeing proxy & Narrow bandwidth & 6.60 & 54.37 & 0.25 & 0.12 & underidentified \\
+Households with any unmet basic need & Predetermined covariates & 9.48 & 15.56 & 4.08 & 1.63 & underidentified \\
+Households with any unmet basic need & Common bandwidth & 32.94 & 40.03 & 2.49 & 0.89 & underidentified \\
+Households with any unmet basic need & Wide bandwidth & 76.09 & 193.23 & 0.25 & 0.11 & underidentified \\
+Households with any unmet basic need & Narrow bandwidth & 111.10 & 248.51 & 0.25 & 0.12 & underidentified \\
+Labor-force participation & Predetermined covariates & 9.33 & 10.23 & 4.08 & 1.63 & underidentified \\
+Labor-force participation & Common bandwidth & 23.44 & 21.71 & 2.49 & 0.89 & underidentified \\
+Labor-force participation & Wide bandwidth & 56.28 & 127.95 & 0.25 & 0.11 & underidentified \\
+Labor-force participation & Narrow bandwidth & 80.12 & 158.53 & 0.25 & 0.12 & underidentified \\
+Secondary education or higher & Predetermined covariates & 10.88 & 17.21 & 4.08 & 1.63 & underidentified \\
+Secondary education or higher & Common bandwidth & 10.56 & 23.27 & 2.49 & 0.89 & underidentified \\
+Secondary education or higher & Wide bandwidth & -0.39 & 65.05 & 0.25 & 0.11 & underidentified \\
+Secondary education or higher & Narrow bandwidth & 8.67 & 58.85 & 0.25 & 0.12 & underidentified \\
+\bottomrule
+\end{tabular}}
+\parbox{0.97\linewidth}{\scriptsize \textit{Notes:} The common specification is primary. Sensitivities add predetermined covariates or use fixed windows \(h=0.0050\) and \(h=0.0100\); no bandwidth is selected because it strengthens the instrument. The same pooled interaction model and district-clustered inference are used throughout. Failed rank or \(F>10\) gates preclude causal interpretation even when point estimates appear stable. Sources: RUV, CMAN, SISFOH 2012--2013, and registered baseline data.}
+\end{table}

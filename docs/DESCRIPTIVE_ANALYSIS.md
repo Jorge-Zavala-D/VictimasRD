@@ -127,8 +127,11 @@ regressions. The canonical split is:
   transparent geographic heterogeneity;
 - `04_estimate_main_effects.do`: approved primary estimands at each outcome
   level;
-- `05_run_robustness.do`: placebo cutoffs and outcomes, donut-hole,
-  bandwidth, specification, clustering, and multiplicity checks; and
+- `04_estimate_main_effects.do`: outcome-specific bandwidth, donut-hole,
+  specification, clustering, and weak-instrument sensitivities alongside the
+  fixed-window main effects;
+- `05_estimate_heterogeneity.do`: prespecified treatment-effect heterogeneity
+  and bounded implementation extensions; and
 - `06_analyze_migration_mechanisms.do`: migration and explicitly exploratory
   mechanism work.
 

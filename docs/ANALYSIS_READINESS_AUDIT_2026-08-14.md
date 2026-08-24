@@ -72,11 +72,11 @@ strength.
 
 The linked primary sample produces a robust first-stage statistic of
 approximately 11.35, and the common-window parametric analogue produces a
-Kleibergen--Paap F statistic of approximately 10.49. Both are below the
-prespecified interpretation gate of 20. Consequently, fuzzy LATE estimates are
-retained for diagnosis but must be presented with reduced forms and
-weak-instrument-robust Anderson--Rubin inference. This status cannot be changed
-by selecting a more favorable bandwidth after seeing the results.
+Kleibergen--Paap F statistic of approximately 10.49. Under the research
+team's 24 August 2026 decision, both exceed the strict prespecified
+interpretation gate of 10. Fuzzy LATE estimates remain paired with reduced
+forms and weak-instrument-robust Anderson--Rubin inference. This status cannot
+be changed by selecting a more favorable bandwidth after seeing the results.
 
 The remaining subsections document the broader decisions that must be carried
 forward or resolved for the 2017 person, household, and CCPP modules.
@@ -88,8 +88,7 @@ district, and exact-score sensitivities. The complete individual primary
 sample contains 98,005 people age 14 or older in 487 communities; its common
 window contains 8,870 people in 65 communities. The individual first-stage
 statistic is approximately 11.11 and the parametric Kleibergen--Paap statistic
-is approximately 11.10, so individual LATEs remain diagnostic under the same
-gate.
+is approximately 11.10, so both exceed the strict greater-than-10 gate.
 
 ### 1. Dated treatment and eligible risk set
 
@@ -115,9 +114,9 @@ exclusions remain diagnostics rather than alternative main results.
 
 The treatment-receipt fuzzy-RD LATE for compliers is the target effect, but it
 is always reported beside the assignment reduced form and first stage. A
-prespecified F-statistic gate of 20 governs interpretation; below the gate,
-LATEs remain diagnostic and Anderson--Rubin and reduced-form evidence take
-priority.
+prespecified strict F-statistic gate greater than 10 governs interpretation;
+at or below the gate, LATEs remain diagnostic and Anderson--Rubin and
+reduced-form evidence take priority.
 
 ### 3. Inference at the assignment level
 

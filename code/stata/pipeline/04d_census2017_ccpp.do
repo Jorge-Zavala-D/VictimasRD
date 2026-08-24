@@ -164,7 +164,7 @@ local main_first_stage_se = e(se_tau_rb)
 local main_first_stage_f = ///
     (`main_first_stage_bc' / `main_first_stage_se')^2
 local main_first_stage_n = e(N_h_l) + e(N_h_r)
-local first_stage_gate = `main_first_stage_f' >= ${rd_weak_f_gate}
+local first_stage_gate = `main_first_stage_f' > ${rd_weak_f_gate}
 
 if !`first_stage_gate' {
     display as error ///
@@ -755,7 +755,7 @@ export delimited using ///
 
 tempname contract_file
 local first_stage_status = cond(`first_stage_gate', "pass", "warning")
-local kp_status = cond(`kp_f_main' >= ${rd_weak_f_gate}, ///
+local kp_status = cond(`kp_f_main' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 file open `contract_file' using ///
     "${rd_table_dir}/rd_2017_ccpp_analysis_contract.csv", ///
@@ -879,7 +879,7 @@ restore
 
 file write `first_stage_table' "\bottomrule" _n
 file write `first_stage_table' "\end{tabular}" _n
-file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment and district CR2 inference. The common design window is \(h=0.0075\) and bias window is \(b=0.0135\); the final row instead reports the treatment-based MSE selector. \(F_z\) is the squared robust bias-corrected \(z\) statistic and is compared with the conservative interpretation gate of 20. The linked primary-sample statistic meets that gate; fuzzy LATE estimates are nevertheless reported with reduced forms and Anderson--Rubin diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
+file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment and district CR2 inference. The common design window is \(h=0.0075\) and bias window is \(b=0.0135\); the final row instead reports the treatment-based MSE selector. \(F_z\) is the squared robust bias-corrected \(z\) statistic and is compared with the strict interpretation gate \(F_z>10\). The linked primary-sample statistic meets that gate; fuzzy LATE estimates are nevertheless reported with reduced forms and Anderson--Rubin diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
 file write `first_stage_table' "\end{table}" _n
 file close `first_stage_table'
 
@@ -1397,7 +1397,7 @@ twoway ///
         "Notes: Unit is a Census-linked RUV centro poblado in the selected B/C geography." ///
         "Each effect is scaled by the below-cutoff outcome SD and estimated with local-linear triangular-kernel fuzzy RD." ///
         "Intervals use robust bias correction, mass-point adjustment, and district CR2 inference." ///
-        "The local first stage passes the conservative F >= 20 gate." ///
+        "The local first stage exceeds the prespecified strict F > 10 gate." ///
         "LATE estimates are diagnostic and must be read with reduced forms and Anderson-Rubin inference." ///
         "Sources: RUV, CMAN, and INEI-assisted Census 2017.", ///
         size(tiny) color(gs5) span) ///

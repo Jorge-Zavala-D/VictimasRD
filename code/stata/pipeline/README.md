@@ -10,7 +10,7 @@ The expected modules are:
 3. `03_validate_rd_design.do`
 4. `03b_validate_rd_assumptions.do`
 5. `04_estimate_main_effects.do`
-6. `05_run_robustness.do`
+6. `05_estimate_heterogeneity.do`
 7. `06_analyze_migration_mechanisms.do`
 8. `07_build_tables_figures.do`
 9. `08_run_release_checks.do`
@@ -115,6 +115,17 @@ modules. Their contract is
 documented in
 [`docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md`](../../../docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md),
 and their wave-by-level registries are stored under `metadata/rd-outcomes/`.
+
+`05_estimate_heterogeneity.do` is the heterogeneity orchestrator. The first
+implemented module, `05a_sisfoh2013_ccpp_heterogeneity.do`, separates sharp
+assignment-effect heterogeneity estimated with `rdhte` from pooled,
+fully-interacted fuzzy-LATE heterogeneity estimated with `ivreg2`. It uses the
+fixed adjacent-B/C sample and common bandwidth, enforces local-support and
+strict conditional-F gates, applies multiplicity corrections, and treats
+project type and financing as post-assignment implementation extensions rather
+than ordinary baseline moderators. Its contract and moderator registry are
+documented in [`docs/RD_HETEROGENEITY_PROTOCOL.md`](../../../docs/RD_HETEROGENEITY_PROTOCOL.md)
+and `metadata/rd-heterogeneity/moderator-registry.csv`.
 
 Remaining modules will be added sequentially. They must:
 

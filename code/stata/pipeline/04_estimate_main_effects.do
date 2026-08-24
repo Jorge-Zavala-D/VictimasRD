@@ -42,11 +42,11 @@ local outcome_registry_household ///
     "${metadata_root}/rd-outcomes/outcome-registry-2013-household.csv"
 local outcome_registry_individual ///
     "${metadata_root}/rd-outcomes/outcome-registry-2013-individual.csv"
-local outcome_registry_2017_ccpp ///
+local registry_2017_ccpp ///
     "${metadata_root}/rd-outcomes/outcome-registry-2017-ccpp.csv"
-local outcome_registry_2017_household ///
+local registry_2017_household ///
     "${metadata_root}/rd-outcomes/outcome-registry-2017-household.csv"
-local outcome_registry_2017_individual ///
+local registry_2017_individual ///
     "${metadata_root}/rd-outcomes/outcome-registry-2017-individual.csv"
 local protocol ///
     "${project_root}/docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md"
@@ -73,9 +73,9 @@ foreach required_file in ///
     "`outcome_registry_ccpp'" ///
     "`outcome_registry_household'" ///
     "`outcome_registry_individual'" ///
-    "`outcome_registry_2017_ccpp'" ///
-    "`outcome_registry_2017_household'" ///
-    "`outcome_registry_2017_individual'" ///
+    "`registry_2017_ccpp'" ///
+    "`registry_2017_household'" ///
+    "`registry_2017_individual'" ///
     "`protocol'" ///
     "`outcome_module_ccpp'" ///
     "`outcome_module_household'" ///
@@ -125,11 +125,11 @@ global rd_household_outcome_registry ///
 global rd_individual_outcome_registry ///
     "`outcome_registry_individual'"
 global rd_registry_2017_ccpp ///
-    "`outcome_registry_2017_ccpp'"
+    "`registry_2017_ccpp'"
 global rd_registry_2017_hh ///
-    "`outcome_registry_2017_household'"
+    "`registry_2017_household'"
 global rd_registry_2017_ind ///
-    "`outcome_registry_2017_individual'"
+    "`registry_2017_individual'"
 global rd_figure_dir            "${figures_root}/rd_outcomes"
 global rd_table_dir             "${tables_root}/rd_outcomes"
 global rd_manifest              ///
@@ -154,7 +154,7 @@ global rd_small_h          0.0050
 global rd_small_b          0.0090
 global rd_large_h          0.0100
 global rd_large_b          0.0180
-global rd_weak_f_gate      20
+global rd_weak_f_gate      10
 global rd_primary_covariates ///
     "altitude_m_2017 ln_population_2007 wellbeing_core_2007"
 

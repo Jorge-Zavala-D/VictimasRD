@@ -1,0 +1,22 @@
+\begin{table}[!htbp]
+\centering
+\caption{Exploratory IV estimates using recorded financing per resident}
+\label{tab:hte-2013-ccpp-financing-dose}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrrl}
+\toprule
+Outcome & Estimate & SE & 95\% CI low & 95\% CI high & KP \(F\) & AR \(p\) & Gate \\
+\midrule
+Log rostered population & 0.70 & 1.20 & -1.65 & 3.06 & 5.77 & 0.54 & underidentified \\
+Log rostered households & 0.64 & 1.09 & -1.50 & 2.77 & 5.77 & 0.53 & underidentified \\
+Residents age 15-29 & -23.60 & 14.77 & -52.56 & 5.36 & 5.77 & 0.09 & underidentified \\
+Residents in any social program & 6.62 & 17.96 & -28.59 & 41.82 & 5.77 & 0.73 & underidentified \\
+Core wellbeing proxy & -4.48 & 10.92 & -25.88 & 16.92 & 5.77 & 0.69 & underidentified \\
+Households with any unmet basic need & 10.31 & 24.32 & -37.35 & 57.97 & 5.77 & 0.66 & underidentified \\
+Labor-force participation & 12.47 & 13.87 & -14.71 & 39.65 & 5.77 & 0.32 & underidentified \\
+Secondary education or higher & -17.35 & 17.26 & -51.17 & 16.48 & 5.77 & 0.28 & underidentified \\
+\bottomrule
+\end{tabular}}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The endogenous dose is total nominal CMAN financing plus recorded cofinancing through 2012 divided by 2007 population and expressed in thousands of soles per resident. Cutoff assignment is the excluded instrument in a triangular-weighted local-linear model with \(h=0.0075\) and district-clustered inference. The design does not verify disbursement, execution, completion, or cofinancing realization. A linear dose response and a stronger exclusion restriction are required. Because the first stage fails the strict \(F>10\) and rank gates, all entries are exploratory diagnostics. AR denotes the Anderson--Rubin joint test. Sources: RUV, CMAN, SISFOH 2012--2013, and INEI 2007 Census tabulations.}
+\end{table}

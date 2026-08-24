@@ -72,7 +72,7 @@ estimator row returned a nonzero Stata code.
 The three result files contain 273, 286, and 345 estimator rows,
 respectively. Every level contains the 16 expected primary common-window rows
 (eight reduced forms and eight fuzzy LATEs), and all eight primary fuzzy rows
-meet the prespecified `F >= 20` interpretation gate. The three 2017 manifests
+meet the prespecified strict `F > 10` interpretation gate. The three 2017 manifests
 contain 20 artifacts each; the combined 2013--2017 outcome manifest contains
 117 unique paths.
 

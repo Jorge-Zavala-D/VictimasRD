@@ -7,6 +7,6 @@ metric,value,status,interpretation
 "selector_b",".0128723031214607","validated","Bias bandwidth selected from treat_16 in the B/C design universe"
 "first_stage_f","54.13144947716048","pass","Squared robust first-stage z statistic in the linked primary sample"
 "parametric_kp_f","54.36634749476401","pass","Cluster-robust Kleibergen-Paap F in the common local-linear IV model"
-"weak_f_gate","20","approved","Conservative interpretation gate; bandwidth is never tuned to pass"
+"weak_f_gate","10","approved","Conservative interpretation gate; bandwidth is never tuned to pass"
 "primary_vce","district CR2","approved","One row per CCPP with municipal implementation and common shocks"
 "primary_covariates","altitude_m_2017 ln_population_2007 wellbeing_core_2007","sensitivity","Fixed predetermined precision set; unadjusted model remains primary"

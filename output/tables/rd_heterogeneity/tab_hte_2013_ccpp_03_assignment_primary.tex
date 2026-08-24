@@ -1,0 +1,30 @@
+\begin{table}[!htbp]
+\centering
+\caption{Primary assignment-effect heterogeneity in SISFOH 2013 outcomes}
+\label{tab:hte-2013-ccpp-assignment-primary}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrl}
+\toprule
+Moderator & Outcome & Estimate & SE & 95\% CI low & 95\% CI high & Holm \(p\) & Support \\
+\midrule
+Log baseline CCPP population & Log rostered population & -0.10 & 0.21 & -0.52 & 0.32 & 1.000 & assignment hte supported \\
+Log baseline CCPP population & Log rostered households & 0.09 & 0.22 & -0.35 & 0.52 & 1.000 & assignment hte supported \\
+Log baseline CCPP population & Residents age 15-29 & 28.21 & 8.71 & 11.15 & 45.27 & 0.010 & assignment hte supported \\
+Log baseline CCPP population & Residents in any social program & -15.31 & 16.98 & -48.59 & 17.96 & 1.000 & assignment hte supported \\
+Log baseline CCPP population & Core wellbeing proxy & 4.81 & 10.98 & -16.71 & 26.33 & 1.000 & assignment hte supported \\
+Log baseline CCPP population & Households with any unmet basic need & 15.13 & 17.99 & -20.13 & 50.40 & 1.000 & assignment hte supported \\
+Log baseline CCPP population & Labor-force participation & 14.56 & 8.37 & -1.84 & 30.96 & 0.573 & assignment hte supported \\
+Log baseline CCPP population & Secondary education or higher & 6.83 & 12.10 & -16.88 & 30.54 & 1.000 & assignment hte supported \\
+District-capital CCPP & Log rostered population & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Log rostered households & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Residents age 15-29 & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Residents in any social program & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Core wellbeing proxy & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Households with any unmet basic need & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Labor-force participation & -- & -- & -- & -- & -- & insufficient support \\
+District-capital CCPP & Secondary education or higher & -- & -- & -- & -- & -- & insufficient support \\
+\bottomrule
+\end{tabular}}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Entries are robust bias-corrected \texttt{rdhte} slopes in the sharp assignment discontinuity, not fuzzy LATEs. Continuous moderators are measured in analysis-universe standard deviations; binary entries are differences between categories. Outcomes expressed as shares or indices are scaled to percentage points. Estimates use local-linear triangular-kernel fits, \(h=0.0075\), district-clustered inference, and the adjacent B/C sample. Multiplicity is adjusted within estimator and moderator tier. Missing district-capital estimates reflect failed prespecified local support, not a zero effect. Sources: RUV, CMAN, SISFOH 2012--2013, and registered baseline data.}
+\end{table}
