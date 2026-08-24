@@ -610,7 +610,7 @@ program define _vrd_post_hte_rdhte
         (`standardized_estimate') (`standardized_ci_low') ///
         (`standardized_ci_high') ///
         (.) (.) (.) (.) (.) (.) ///
-        (`support_pass') ("`gate_status'") (`estimation_rc')
+        (0) ("`gate_status'") (`estimation_rc')
 end
 
 
@@ -1166,7 +1166,7 @@ foreach hte_tier in primary secondary {
         write replace text
     file write `assignment_tex' "\begin{table}[!htbp]" _n
     file write `assignment_tex' "\centering" _n
-    file write `assignment_tex' "\caption{`tier_title' assignment-effect heterogeneity in SISFOH 2013 outcomes}" _n
+    file write `assignment_tex' "\caption{Secondary assignment-effect heterogeneity for `hte_tier' moderators}" _n
     file write `assignment_tex' "\label{tab:hte-2013-ccpp-assignment-`hte_tier'}" _n
     file write `assignment_tex' "\small" _n
     file write `assignment_tex' "\resizebox{\textwidth}{!}{%" _n
@@ -1209,7 +1209,7 @@ foreach hte_tier in primary secondary {
         write replace text
     file write `fuzzy_tex' "\begin{table}[!htbp]" _n
     file write `fuzzy_tex' "\centering" _n
-    file write `fuzzy_tex' "\caption{`tier_title' fuzzy-LATE interaction diagnostics for SISFOH 2013 outcomes}" _n
+    file write `fuzzy_tex' "\caption{Primary fuzzy-LATE heterogeneity for `hte_tier' moderators}" _n
     file write `fuzzy_tex' "\label{tab:hte-2013-ccpp-fuzzy-`hte_tier'}" _n
     file write `fuzzy_tex' "\small" _n
     file write `fuzzy_tex' "\resizebox{\textwidth}{!}{%" _n
@@ -1437,9 +1437,9 @@ foreach moderator_id in M01 S01 S02 S03 S05 {
         xtitle("Assignment-effect heterogeneity (control-group SDs)", ///
             size(small)) ///
         ytitle("") ///
-        title("Assignment heterogeneity: `figure_moderator'", ///
+        title("Secondary assignment heterogeneity: `figure_moderator'", ///
             size(medium) color(black)) ///
-        subtitle("rdhte estimates with 95% confidence intervals", ///
+        subtitle("rdhte reduced-form evidence with 95% confidence intervals", ///
             size(small) color(gs5)) ///
         legend(off) ///
         note( ///

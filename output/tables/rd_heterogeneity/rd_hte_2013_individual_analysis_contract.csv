@@ -1,0 +1,13 @@
+component,value,status,detail
+unit,SISFOH person age 14 or older,approved,One linked individual observation; treatment and assignment are defined at RUV CCPP level.
+sample,Selected adjacent B/C,approved,Legacy selected geography and official B-C running-variable support.
+treatment,treat_12,approved,Cumulative collective-reparation receipt through 2012 for SISFOH 2013 outcomes.
+bandwidth,h = 0.0075,approved,One common fixed bandwidth; h = 0.0050 and h = 0.0100 are prespecified sensitivities.
+primary estimator,Fully interacted local IV,approved,Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator.
+secondary estimator,rdhte assignment HTE,approved,Reduced-form assignment-effect heterogeneity only; never a substitute for fuzzy-IV identification.
+weighting,CCPP-equal,approved,Eligible observations share total weight one within each RUV community before triangular kernel weighting.
+inference,CCPP-clustered,approved,Primary IV and rdhte inference clusters by RUV community; district and score-mass clustering are sensitivities.
+identification gate,Minimum SW F > 10,approved,Also requires local support and underidentification rejection at five percent.
+multiplicity,Holm primary; BH secondary,approved,Adjusted within estimator and moderator tier for the common-window interaction family.
+post-treatment attributes,Excluded,approved,Project type and financing are not ordinary moderators in household or individual outcome models.
+identity cells,Not applicable,approved,An outcome cannot be used as its own moderator; such cells remain explicit in machine-readable results.

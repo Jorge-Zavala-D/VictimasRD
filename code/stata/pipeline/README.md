@@ -116,14 +116,23 @@ documented in
 [`docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md`](../../../docs/RD_OUTCOME_ANALYSIS_PROTOCOL.md),
 and their wave-by-level registries are stored under `metadata/rd-outcomes/`.
 
-`05_estimate_heterogeneity.do` is the heterogeneity orchestrator. The first
-implemented module, `05a_sisfoh2013_ccpp_heterogeneity.do`, separates sharp
-assignment-effect heterogeneity estimated with `rdhte` from pooled,
-fully-interacted fuzzy-LATE heterogeneity estimated with `ivreg2`. It uses the
-fixed adjacent-B/C sample and common bandwidth, enforces local-support and
-strict conditional-F gates, applies multiplicity corrections, and treats
-project type and financing as post-assignment implementation extensions rather
-than ordinary baseline moderators. Its contract and moderator registry are
+`05_estimate_heterogeneity.do` is the heterogeneity orchestrator.
+`05a_sisfoh2013_ccpp_heterogeneity.do`,
+`05b_sisfoh2013_household_heterogeneity.do`, and
+`05c_sisfoh2013_individual_heterogeneity.do` implement the full SISFOH 2013
+suite. The household and person modules share
+`_heterogeneity_level_engine.do` to enforce one estimator, weighting,
+support, multiplicity, and output contract. Pooled, fully interacted
+fuzzy-LATE heterogeneity estimated with `ivreg2` is primary; `rdhte`
+provides secondary assignment-effect heterogeneity and never substitutes for a
+weak or underidentified fuzzy interaction. All modules use the fixed
+adjacent-B/C sample and common bandwidth, enforce local-support and strict
+conditional-F gates, and preserve failed models in machine-readable outputs.
+Household and person estimands give every RUV community equal total weight and
+cluster primarily at that level, with observation-equal, district, score-mass,
+covariate, and bandwidth sensitivities. Project type and financing remain
+CCPP-level post-assignment implementation extensions rather than ordinary
+baseline moderators. The contract and moderator registry are
 documented in [`docs/RD_HETEROGENEITY_PROTOCOL.md`](../../../docs/RD_HETEROGENEITY_PROTOCOL.md)
 and `metadata/rd-heterogeneity/moderator-registry.csv`.
 

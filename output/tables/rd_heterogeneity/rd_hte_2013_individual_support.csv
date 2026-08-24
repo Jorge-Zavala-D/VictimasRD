@@ -1,0 +1,21 @@
+moderator_order,moderator_id,moderator_label,moderator_tier,moderator_type,side_label,moderator_value,category_label,observations,ccpp_clusters
+1,M01,Log baseline CCPP population,primary,continuous,Above,,All eligible,2795,22
+1,M01,Log baseline CCPP population,primary,continuous,Below,,All eligible,6075,43
+2,M02,District-capital CCPP,primary,binary,Above,0,Non-capital,2217,20
+2,M02,District-capital CCPP,primary,binary,Above,1,District capital,578,2
+2,M02,District-capital CCPP,primary,binary,Below,0,Non-capital,3246,38
+2,M02,District-capital CCPP,primary,binary,Below,1,District capital,2647,4
+3,M03,Female respondent,primary,binary,Above,0,Men,1352,22
+3,M03,Female respondent,primary,binary,Above,1,Women,1443,22
+3,M03,Female respondent,primary,binary,Below,0,Men,2904,42
+3,M03,Female respondent,primary,binary,Below,1,Women,3171,43
+4,S01,Baseline CCPP deprivation,secondary,continuous,Above,,All eligible,2795,22
+4,S01,Baseline CCPP deprivation,secondary,continuous,Below,,All eligible,6075,43
+5,S02,Distance to corresponding district capital,secondary,continuous,Above,,All eligible,2795,22
+5,S02,Distance to corresponding district capital,secondary,continuous,Below,,All eligible,6075,43
+6,S03,Baseline CCPP economic development,secondary,continuous,Above,,All eligible,2795,22
+6,S03,Baseline CCPP economic development,secondary,continuous,Below,,All eligible,6075,43
+7,S04,Respondent age,secondary,continuous,Above,,All eligible,2795,22
+7,S04,Respondent age,secondary,continuous,Below,,All eligible,6075,43
+8,S05,CCPP altitude,secondary,continuous,Above,,All eligible,2795,22
+8,S05,CCPP altitude,secondary,continuous,Below,,All eligible,6075,43
