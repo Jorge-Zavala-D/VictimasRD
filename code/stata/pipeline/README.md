@@ -120,13 +120,16 @@ and their wave-by-level registries are stored under `metadata/rd-outcomes/`.
 `05a_sisfoh2013_ccpp_heterogeneity.do`,
 `05b_sisfoh2013_household_heterogeneity.do`, and
 `05c_sisfoh2013_individual_heterogeneity.do` implement the full SISFOH 2013
-suite. The household and person modules share the wave-neutral
+suite. `05d_census2017_ccpp_heterogeneity.do` begins the Census 2017 suite at
+the community level. The household, person, and 2017 CCPP modules share the
+wave-neutral
 `_heterogeneity_level_engine.do` to enforce one estimator, weighting, support,
 multiplicity, and output contract across 2013 and 2017. Each caller supplies
-its wave-specific treatment, moderator-registry column, labels, and source
-vintage. `code/stata/tests/test_heterogeneity_engine_wave_contract.do` guards
-that interface, and every engine refactor must reproduce the validated 2013
-aggregate outputs before a new wave is added. Pooled, fully interacted
+its wave-specific treatment, moderator-registry column, primary weighting and
+clustering rules, labels, and source vintage.
+`code/stata/tests/test_heterogeneity_engine_wave_contract.do` and
+`code/stata/tests/test_census2017_ccpp_heterogeneity_contract.do` guard the
+interface. Pooled, fully interacted
 fuzzy-LATE heterogeneity estimated with `ivreg2` is primary; `rdhte`
 provides secondary assignment-effect heterogeneity and never substitutes for a
 weak or underidentified fuzzy interaction. All modules use the fixed
@@ -134,7 +137,11 @@ adjacent-B/C sample and common bandwidth, enforce local-support and strict
 conditional-F gates, and preserve failed models in machine-readable outputs.
 Household and person estimands give every RUV community equal total weight and
 cluster primarily at that level, with observation-equal, district, score-mass,
-covariate, and bandwidth sensitivities. Project type and financing remain
+covariate, and bandwidth sensitivities. CCPP estimands use one row per
+community and district-clustered primary inference, with CCPP- and score-
+clustered sensitivities. The 2017 CCPP module also reports project composition
+and project-receipt discontinuities through 2016 plus an explicitly
+exploratory recorded-financing dose IV. Project type and financing remain
 CCPP-level post-assignment implementation extensions rather than ordinary
 baseline moderators. The contract and moderator registry are
 documented in [`docs/RD_HETEROGENEITY_PROTOCOL.md`](../../../docs/RD_HETEROGENEITY_PROTOCOL.md)

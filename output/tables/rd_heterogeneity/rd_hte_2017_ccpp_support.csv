@@ -1,0 +1,15 @@
+moderator_order,moderator_id,moderator_label,moderator_tier,moderator_type,side_label,moderator_value,category_label,observations,ccpp_clusters
+1,M01,Log baseline CCPP population,primary,continuous,Above,,All eligible,21,21
+1,M01,Log baseline CCPP population,primary,continuous,Below,,All eligible,38,38
+2,M02,District-capital CCPP,primary,binary,Above,0,Non-capital,19,19
+2,M02,District-capital CCPP,primary,binary,Above,1,District capital,2,2
+2,M02,District-capital CCPP,primary,binary,Below,0,Non-capital,35,35
+2,M02,District-capital CCPP,primary,binary,Below,1,District capital,3,3
+4,S01,Baseline CCPP deprivation,secondary,continuous,Above,,All eligible,21,21
+4,S01,Baseline CCPP deprivation,secondary,continuous,Below,,All eligible,38,38
+5,S02,Distance to corresponding district capital,secondary,continuous,Above,,All eligible,21,21
+5,S02,Distance to corresponding district capital,secondary,continuous,Below,,All eligible,38,38
+6,S03,Baseline CCPP economic development,secondary,continuous,Above,,All eligible,21,21
+6,S03,Baseline CCPP economic development,secondary,continuous,Below,,All eligible,38,38
+8,S05,CCPP altitude,secondary,continuous,Above,,All eligible,21,21
+8,S05,CCPP altitude,secondary,continuous,Below,,All eligible,38,38

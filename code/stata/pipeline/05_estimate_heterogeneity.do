@@ -30,6 +30,8 @@ local input_2013_household ///
     "${analysis_data_root}/10_sisfoh_2013_household_analysis.dta"
 local input_2013_individual ///
     "${analysis_data_root}/09_sisfoh_2013_individual_analysis.dta"
+local input_2017_ccpp ///
+    "${analysis_data_root}/14_community_registry_census_2017.dta"
 local project_registry ///
     "${intermediate_root}/03_cman_projects_2023.dta"
 local outcome_registry ///
@@ -38,6 +40,8 @@ local registry_13_hh ///
     "${metadata_root}/rd-outcomes/outcome-registry-2013-household.csv"
 local registry_13_ind ///
     "${metadata_root}/rd-outcomes/outcome-registry-2013-individual.csv"
+local registry_17_ccpp ///
+    "${metadata_root}/rd-outcomes/outcome-registry-2017-ccpp.csv"
 local moderator_registry ///
     "${metadata_root}/rd-heterogeneity/moderator-registry.csv"
 local protocol ///
@@ -50,21 +54,26 @@ local module_2013_household ///
     "${pipeline_root}/05b_sisfoh2013_household_heterogeneity.do"
 local module_2013_individual ///
     "${pipeline_root}/05c_sisfoh2013_individual_heterogeneity.do"
+local module_2017_ccpp ///
+    "${pipeline_root}/05d_census2017_ccpp_heterogeneity.do"
 
 foreach required_file in ///
     "`input_2013_ccpp'" ///
     "`input_2013_household'" ///
     "`input_2013_individual'" ///
+    "`input_2017_ccpp'" ///
     "`project_registry'" ///
     "`outcome_registry'" ///
     "`registry_13_hh'" ///
     "`registry_13_ind'" ///
+    "`registry_17_ccpp'" ///
     "`moderator_registry'" ///
     "`protocol'" ///
     "`level_engine'" ///
     "`module_2013_ccpp'" ///
     "`module_2013_household'" ///
-    "`module_2013_individual'" {
+    "`module_2013_individual'" ///
+    "`module_2017_ccpp'" {
 
     capture confirm file "`required_file'"
     if _rc {
@@ -98,10 +107,12 @@ if _rc {
 global hte_input_2013_ccpp       "`input_2013_ccpp'"
 global hte_input_2013_household  "`input_2013_household'"
 global hte_input_2013_individual "`input_2013_individual'"
+global hte_input_2017_ccpp       "`input_2017_ccpp'"
 global hte_project_registry      "`project_registry'"
 global hte_outcome_registry      "`outcome_registry'"
 global hte_outcomes_13_hh  "`registry_13_hh'"
 global hte_outcomes_13_ind "`registry_13_ind'"
+global hte_outcomes_17_ccpp "`registry_17_ccpp'"
 global hte_moderator_registry    "`moderator_registry'"
 global hte_level_engine          "`level_engine'"
 global hte_figure_dir            "${figures_root}/rd_heterogeneity"
@@ -114,9 +125,14 @@ global hte_manifest_2013_individual ///
     "${metadata_root}/rd-heterogeneity-output-manifest-2013-individual.csv"
 global hte_manifest_2013 ///
     "${metadata_root}/rd-heterogeneity-output-manifest-2013.csv"
+global hte_manifest_2017_ccpp ///
+    "${metadata_root}/rd-heterogeneity-output-manifest-2017-ccpp.csv"
+global hte_manifest_all ///
+    "${metadata_root}/rd-heterogeneity-output-manifest-2013-2017.csv"
 
 global hte_running               "running_bc"
 global hte_treatment_2013        "treat_12"
+global hte_treatment_2017        "treat_16"
 global hte_common_h              0.0075
 global hte_common_b              0.0135
 global hte_small_h               0.0050
@@ -147,6 +163,9 @@ foreach output_directory in "${hte_figure_dir}" "${hte_table_dir}" {
 *-----------------------------------*
 
 display as result "Starting SISFOH 2013 CCPP heterogeneity analysis."
+capture estimates clear
+capture ereturn clear
+capture matrix drop _all
 do "`module_2013_ccpp'"
 if _rc {
     display as error "SISFOH 2013 CCPP heterogeneity module failed."
@@ -154,6 +173,9 @@ if _rc {
 }
 
 display as result "Starting SISFOH 2013 household heterogeneity analysis."
+capture estimates clear
+capture ereturn clear
+capture matrix drop _all
 do "`module_2013_household'"
 if _rc {
     display as error "SISFOH 2013 household heterogeneity module failed."
@@ -161,9 +183,22 @@ if _rc {
 }
 
 display as result "Starting SISFOH 2013 individual heterogeneity analysis."
+capture estimates clear
+capture ereturn clear
+capture matrix drop _all
 do "`module_2013_individual'"
 if _rc {
     display as error "SISFOH 2013 individual heterogeneity module failed."
+    exit _rc
+}
+
+display as result "Starting Census 2017 CCPP heterogeneity analysis."
+capture estimates clear
+capture ereturn clear
+capture matrix drop _all
+do "`module_2017_ccpp'"
+if _rc {
+    display as error "Census 2017 CCPP heterogeneity module failed."
     exit _rc
 }
 
@@ -210,6 +245,23 @@ assert r(N) == 63
 export delimited using "${hte_manifest_2013}", ///
     replace nolabel
 
-display as result "Completed SISFOH 2013 heterogeneity modules."
+capture confirm file "${hte_manifest_2017_ccpp}"
+if _rc {
+    display as error "The Census 2017 CCPP heterogeneity manifest was not created."
+    exit 603
+}
+
+import delimited using "${hte_manifest_2017_ccpp}", ///
+    clear varnames(1) bindquote(strict) encoding(utf8)
+append using `combined_manifest'
+isid path
+sort path
+quietly count
+assert r(N) == 89
+export delimited using "${hte_manifest_all}", ///
+    replace nolabel
+
+display as result "Completed SISFOH 2013 and Census 2017 CCPP heterogeneity modules."
 display as text "Instrument-strength gate: minimum conditional F > ${hte_weak_f_gate}"
 display as text "Aggregate manifest: ${hte_manifest_2013}"
+display as text "Cross-wave manifest: ${hte_manifest_all}"

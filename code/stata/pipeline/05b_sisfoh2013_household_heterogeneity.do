@@ -125,6 +125,25 @@ global hte_unit_label               "SISFOH household"
 global hte_unit_plural              "households"
 global hte_observation_weight_id    "household_equal"
 global hte_observation_weight_label "Household-equal"
+global hte_primary_weighting        "ccpp_equal"
+global hte_primary_weighting_label  "CCPP-equal"
+global hte_primary_cluster_var      "hte_cluster_ruv"
+global hte_primary_cluster_rule     "ccpp"
+global hte_primary_cluster_label    "CCPP-clustered"
+global hte_primary_sensitivity_specs ///
+    "small_h_iv large_h_iv common_h_observation_equal common_h_district_cluster common_h_score_cluster"
+global hte_primary_weighting_note ///
+    "Eligible observations share total weight one within each RUV community before triangular kernel weighting."
+global hte_primary_inference_note ///
+    "Primary IV and rdhte inference clusters by RUV community; district and score-mass clustering are sensitivities."
+global hte_primary_design_note ///
+    "Eligible observations share total weight one within each RUV community before triangular kernel weighting; primary inference clusters by RUV community."
+global hte_primary_design_note_tex ///
+    "Each community has total weight one; inference clusters by RUV community."
+global hte_sensitivity_note_tex ///
+    "Sensitivities add predetermined covariates, use smaller or larger fixed windows, give observations equal weight, or cluster by district or score mass point."
+global hte_post_treatment_detail ///
+    "Project type and financing are not ordinary moderators in household or individual outcome models."
 global hte_treatment                "${hte_treatment_2013}"
 global hte_moderator_var_column     "moderator_var_2013"
 global hte_wave_label               "SISFOH 2013"

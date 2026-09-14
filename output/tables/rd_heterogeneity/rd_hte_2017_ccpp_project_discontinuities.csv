@@ -1,0 +1,6 @@
+component_id,component_label,estimand,scale,estimate,standard_error,pvalue,ci_low,ci_high,n_left,n_right,effective_n,first_stage_f,status,estimation_rc
+group_1,Productive livelihood,assignment_discontinuity,100,61.217583,26.098053,.018992597,10.066339,112.36883,38,21,59,,estimated,0
+group_2,Social and basic services,assignment_discontinuity,100,34.798016,26.384684,.18721196,-16.915014,86.511047,38,21,59,,estimated,0
+group_3,Community and civic infrastructure,assignment_discontinuity,100,16.005875,10.64471,.13267253,-4.8573723,36.869122,38,21,59,,estimated,0
+group_4,Management and capacity support,assignment_discontinuity,100,.2085519,.62289178,.73776662,-1.0122936,1.4293973,38,21,59,,estimated,0
+financing_pc,Recorded financing per 2007 resident,assignment_discontinuity,1,1.2799838,.34774804,.0002325221,.59841019,1.9615574,38,21,59,13.548137,passes_f_gate,0

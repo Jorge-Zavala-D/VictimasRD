@@ -17,6 +17,12 @@ set more off
 local required_globals ///
     hte_level hte_level_caption hte_unit_label hte_unit_plural ///
     hte_observation_weight_id hte_observation_weight_label ///
+    hte_primary_weighting hte_primary_weighting_label ///
+    hte_primary_cluster_var hte_primary_cluster_rule ///
+    hte_primary_cluster_label hte_primary_sensitivity_specs ///
+    hte_primary_weighting_note hte_primary_inference_note ///
+    hte_primary_design_note hte_primary_design_note_tex ///
+    hte_sensitivity_note_tex hte_post_treatment_detail ///
     hte_outcome_registry_level hte_applicable_moderators ///
     hte_expected_results hte_expected_support_rows ///
     hte_input_basename hte_input_datasignature hte_module_current ///
@@ -43,6 +49,59 @@ local level_caption "${hte_level_caption}"
 local unit_label "${hte_unit_label}"
 local unit_plural "${hte_unit_plural}"
 local applicable_moderators "${hte_applicable_moderators}"
+local primary_weighting "${hte_primary_weighting}"
+local primary_cluster_var "${hte_primary_cluster_var}"
+local primary_cluster_rule "${hte_primary_cluster_rule}"
+
+* Preserve the microdata presentation contract while allowing the CCPP module
+* to state its district-clustered primary inference rule accurately.
+local diagnostics_design_tex ///
+    "Each eligible RUV community has total weight one before triangular kernel weighting."
+local fuzzy_design_tex ///
+    "Each community has total weight one; inference clusters by RUV community."
+local assignment_design_tex ///
+    "Each RUV community has total weight one, the window is \(h=0.0075\), and inference clusters by RUV community."
+local conditional_design_tex ///
+    "The common \(h=0.0075\), CCPP-equal weighting, triangular kernel, and CCPP-clustered inference are fixed across outcomes."
+local robustness_design_tex ///
+    "The common-window, CCPP-equal, CCPP-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), give observations equal weight, or cluster by district or running-score mass point."
+local fuzzy_figure_weight_note ///
+    "Notes: Unit is a `unit_label' in the selected B/C geography; each RUV community receives total weight one."
+local fuzzy_figure_inference_note ///
+    "Inference clusters by RUV community. Hollow gray estimates fail support, rank, or the minimum conditional F > 10 and are diagnostic only."
+local assignment_figure_weight_note ///
+    "Notes: Unit is a `unit_label' in the selected B/C geography; each RUV community receives total weight one."
+local assign_figure_inference_note ///
+    "Inference clusters by RUV community. This secondary evidence never substitutes for a failed fuzzy-IV gate."
+local diagnostic_figure_design_note ///
+    "Diagnostics use CCPP-equal triangular weights in h = 0.0075 with CCPP-clustered inference."
+local conditional_figure_design_note ///
+    "Each community receives total weight one; inference clusters by RUV community. Hollow gray estimates are diagnostic only."
+
+if "`level'" == "ccpp" {
+    local diagnostics_design_tex ///
+        "Each RUV community contributes one observation before triangular kernel weighting; primary inference clusters by district."
+    local fuzzy_design_tex ///
+        "Each community contributes one observation; inference clusters by district."
+    local assignment_design_tex ///
+        "Each community contributes one observation, the window is \(h=0.0075\), and inference clusters by district."
+    local conditional_design_tex ///
+        "The common \(h=0.0075\), community-equal weighting, triangular kernel, and district-clustered inference are fixed across outcomes."
+    local robustness_design_tex ///
+        "The common-window, community-equal, district-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), or cluster by RUV community or running-score mass point."
+    local fuzzy_figure_weight_note ///
+        "Notes: Unit is an RUV community in the selected B/C geography; each community contributes one observation."
+    local fuzzy_figure_inference_note ///
+        "Inference clusters by district. Hollow gray estimates fail support, rank, or the minimum conditional F > 10 and are diagnostic only."
+    local assignment_figure_weight_note ///
+        "Notes: Unit is an RUV community in the selected B/C geography; each community contributes one observation."
+    local assign_figure_inference_note ///
+        "Inference clusters by district. This secondary evidence never substitutes for a failed fuzzy-IV gate."
+    local diagnostic_figure_design_note ///
+        "Diagnostics use community-equal triangular weights in h = 0.0075 with district-clustered inference."
+    local conditional_figure_design_note ///
+        "Each community contributes one observation; inference clusters by district. Hollow gray estimates are diagnostic only."
+}
 
 preserve
 import delimited using "${hte_outcome_registry_level}", ///
@@ -292,6 +351,7 @@ program define _vrd_post_level_hte_iv
         eligible eligible_count running_right ///
         assignment_m treatment_m running_m running_right_m ///
         covariate_missing side_tag cell_tag cluster_tag
+    tempname first_stage_matrix
 
     quietly generate double `y_scaled' = `outvar' * `scale'
     quietly generate double `running_right' = ///
@@ -384,6 +444,10 @@ program define _vrd_post_level_hte_iv
 
     local estimation_rc = 2001
     if `support_pass' {
+        * ivreg2 stores first-stage estimates internally. Clear them before
+        * every fit so e(first) cannot inherit a prior outcome's diagnostics.
+        capture estimates clear
+        capture ereturn clear
         capture quietly ivreg2 ///
             `y_scaled' ///
             `modvar' ${hte_running} `running_right' ///
@@ -443,15 +507,17 @@ program define _vrd_post_level_hte_iv
         capture local underid_p = e(idp)
         capture local ar_p = e(arfp)
 
-        capture matrix hte_first = e(first)
+        capture matrix `first_stage_matrix' = e(first)
         if !_rc {
-            local sw_row = rownumb(hte_first, "SWF")
-            if `sw_row' < . {
-                local sw_f_treat = hte_first[`sw_row', 1]
-                local sw_f_interaction = hte_first[`sw_row', 2]
+            local sw_row = rownumb(`first_stage_matrix', "SWF")
+        if `sw_row' < . {
+            local sw_f_treat = `first_stage_matrix'[`sw_row', 1]
+            local sw_f_interaction = `first_stage_matrix'[`sw_row', 2]
+            if `sw_f_treat' < . & `sw_f_interaction' < . {
                 local min_sw_f = ///
                     min(`sw_f_treat', `sw_f_interaction')
             }
+        }
         }
 
         local gate_pass = ///
@@ -577,9 +643,10 @@ program define _vrd_post_level_hte_rdhte
     syntax, ///
         POSTHandle(name) OUTVAR(name) OUTCOMEID(string) ///
         OUTLABel(string) PAPEROrder(real) SCALE(real) ///
-        MODVAR(name) MODID(string) MODLABel(string) ///
-        MODOrder(real) MODTIER(string) MODTYPE(string) ///
-        HValue(real)
+    MODVAR(name) MODID(string) MODLABel(string) ///
+    MODOrder(real) MODTIER(string) MODTYPE(string) ///
+    HValue(real) WEIGHTING(string) ///
+    CLUSTERVAR(name) CLUSTERRULE(string)
 
     tempvar y_scaled eligible eligible_count unit_weight ///
         side_tag cell_tag cluster_tag
@@ -587,11 +654,18 @@ program define _vrd_post_level_hte_rdhte
     quietly generate double `y_scaled' = `outvar' * `scale'
     quietly generate byte `eligible' = ///
         abs(${hte_running}) < `hvalue' & ///
-        !missing(`y_scaled', `modvar', hte_cluster_ruv)
+        !missing(`y_scaled', `modvar', `clustervar')
 
     bysort hte_cluster_ruv: egen long `eligible_count' = total(`eligible')
-    quietly generate double `unit_weight' = ///
-        1 / `eligible_count' if `eligible' & `eligible_count' > 0
+    quietly generate double `unit_weight' = 1 if `eligible'
+    if "`weighting'" == "ccpp_equal" {
+        quietly replace `unit_weight' = 1 / `eligible_count' ///
+            if `eligible' & `eligible_count' > 0
+    }
+    else if "`weighting'" != "${hte_observation_weight_id}" {
+        display as error "Unknown rdhte weighting rule: `weighting'"
+        exit 198
+    }
 
     quietly count if `eligible' & hte_assignment == 0
     local n_left = r(N)
@@ -636,7 +710,7 @@ program define _vrd_post_level_hte_rdhte
         `min_obs_cell' >= ${hte_min_cell} & ///
         `min_cluster_cell' >= ${hte_min_cell}
 
-    quietly egen byte `cluster_tag' = tag(hte_cluster_ruv) if `eligible'
+    quietly egen byte `cluster_tag' = tag(`clustervar') if `eligible'
     quietly count if `cluster_tag'
     local clusters = r(N)
 
@@ -650,7 +724,7 @@ program define _vrd_post_level_hte_rdhte
             `y_scaled' ${hte_running} if `eligible', ///
             `hte_option' h(`hvalue') ///
             weights(`unit_weight') ///
-            vce(cluster hte_cluster_ruv)
+            vce(cluster `clustervar')
         local estimation_rc = _rc
     }
 
@@ -720,7 +794,7 @@ program define _vrd_post_level_hte_rdhte
         ("`modid'") ("`modlabel'") (`modorder') ///
         ("`modtier'") ("`modtype'") ///
         ("common_h_rdhte") ("rdhte") ("assignment_hte") ///
-        ("ccpp_equal") ("ccpp") ///
+        ("`weighting'") ("`clusterrule'") ///
         (`hvalue') (`n_left') (`n_right') ///
         (`ccpp_left') (`ccpp_right') ///
         (`min_obs_cell') (`min_cluster_cell') (`clusters') ///
@@ -834,7 +908,7 @@ forvalues moderator_index = 1/`moderator_count' {
 
         if "`moderator_tier'" == "primary" {
             local specification_list ///
-                "`specification_list' small_h_iv large_h_iv common_h_observation_equal common_h_district_cluster common_h_score_cluster"
+                "`specification_list' ${hte_primary_sensitivity_specs}"
         }
 
         local identity_cell = ///
@@ -844,9 +918,9 @@ forvalues moderator_index = 1/`moderator_count' {
             local estimator "ivreg2"
             local estimand "fuzzy_late_interaction"
             local hvalue = ${hte_common_h}
-            local weighting "ccpp_equal"
-            local cluster_var "hte_cluster_ruv"
-            local cluster_rule "ccpp"
+            local weighting "`primary_weighting'"
+            local cluster_var "`primary_cluster_var'"
+            local cluster_rule "`primary_cluster_rule'"
             local included_covariates
 
             if "`specification'" == "common_h_rdhte" {
@@ -868,6 +942,10 @@ forvalues moderator_index = 1/`moderator_count' {
             if "`specification'" == "common_h_district_cluster" {
                 local cluster_var "hte_cluster_dist"
                 local cluster_rule "district"
+            }
+            if "`specification'" == "common_h_ccpp_cluster" {
+                local cluster_var "hte_cluster_ruv"
+                local cluster_rule "ccpp"
             }
             if "`specification'" == "common_h_score_cluster" {
                 local cluster_var "hte_cluster_score"
@@ -903,7 +981,10 @@ forvalues moderator_index = 1/`moderator_count' {
                     modorder(`moderator_order') ///
                     modtier("`moderator_tier'") ///
                     modtype("`moderator_type'") ///
-                    hvalue(${hte_common_h})
+                    hvalue(${hte_common_h}) ///
+                    weighting("`primary_weighting'") ///
+                    clustervar(`primary_cluster_var') ///
+                    clusterrule("`primary_cluster_rule'")
             }
             else {
                 local covariate_option
@@ -1035,11 +1116,11 @@ post `contract_post' ///
     ("secondary estimator") ("rdhte assignment HTE") ("approved") ///
     ("Reduced-form assignment-effect heterogeneity only; never a substitute for fuzzy-IV identification.")
 post `contract_post' ///
-    ("weighting") ("CCPP-equal") ("approved") ///
-    ("Eligible observations share total weight one within each RUV community before triangular kernel weighting.")
+    ("weighting") ("${hte_primary_weighting_label}") ("approved") ///
+    ("${hte_primary_weighting_note}")
 post `contract_post' ///
-    ("inference") ("CCPP-clustered") ("approved") ///
-    ("Primary IV and rdhte inference clusters by RUV community; district and score-mass clustering are sensitivities.")
+    ("inference") ("${hte_primary_cluster_label}") ("approved") ///
+    ("${hte_primary_inference_note}")
 post `contract_post' ///
     ("identification gate") ("Minimum SW F > 10") ("approved") ///
     ("Also requires local support and underidentification rejection at five percent.")
@@ -1048,7 +1129,7 @@ post `contract_post' ///
     ("Adjusted within estimator and moderator tier for the common-window interaction family.")
 post `contract_post' ///
     ("post-treatment attributes") ("Excluded") ("approved") ///
-    ("Project type and financing are not ordinary moderators in household or individual outcome models.")
+    ("${hte_post_treatment_detail}")
 post `contract_post' ///
     ("identity cells") ("Not applicable") ("approved") ///
     ("An outcome cannot be used as its own moderator; such cells remain explicit in machine-readable results.")
@@ -1168,7 +1249,7 @@ forvalues row = 1/`=_N' {
 file write `diagnostics_tex' "\bottomrule" _n
 file write `diagnostics_tex' "\end{tabular}}" _n
 file write `diagnostics_tex' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Diagnostics come from the pooled, fully interacted local-linear 2SLS model in the fixed \(h=0.0075\) window. Each eligible RUV community has total weight one before triangular kernel weighting. CCPP left and right are unique assignment clusters. For binary moderators, Min. cell is the smallest moderator-by-side CCPP count; for continuous moderators it is the smaller side count. The causal gate requires support, underidentification rejection at five percent, and the minimum Sanderson--Windmeijer conditional \(F\) strictly above 10. The Kleibergen--Paap statistic is supplementary. Source: RUV, CMAN, and ${hte_source_note_tex}.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Diagnostics come from the pooled, fully interacted local-linear 2SLS model in the fixed \(h=0.0075\) window. `diagnostics_design_tex' CCPP left and right are unique assignment clusters. For binary moderators, Min. cell is the smallest moderator-by-side CCPP count; for continuous moderators it is the smaller side count. The causal gate requires support, underidentification rejection at five percent, and the minimum Sanderson--Windmeijer conditional \(F\) strictly above 10. The Kleibergen--Paap statistic is supplementary. Source: RUV, CMAN, and ${hte_source_note_tex}.}" _n
 file write `diagnostics_tex' "\end{table}" _n
 file close `diagnostics_tex'
 
@@ -1211,7 +1292,7 @@ foreach table_tier in primary secondary {
     file write `fuzzy_tex' "\endfoot" _n
     file write `fuzzy_tex' "\bottomrule" _n
     file write `fuzzy_tex' ///
-        "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Interaction is the coefficient on treatment by moderator in one pooled, fully interacted, triangular-weighted local-linear 2SLS model in \(h=0.0075\). Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator. Each community has total weight one; inference clusters by RUV community. Continuous interactions are per one-standard-deviation increase; binary interactions are differences from zero to one. Only rows passing the support, rank, and minimum conditional-\(F>10\) gate are interpretation-ready fuzzy-LATE heterogeneity. Failed rows are retained to disclose weak identification and must not be read causally. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
+        "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Interaction is the coefficient on treatment by moderator in one pooled, fully interacted, triangular-weighted local-linear 2SLS model in \(h=0.0075\). Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator. `fuzzy_design_tex' Continuous interactions are per one-standard-deviation increase; binary interactions are differences from zero to one. Only rows passing the support, rank, and minimum conditional-\(F>10\) gate are interpretation-ready fuzzy-LATE heterogeneity. Failed rows are retained to disclose weak identification and must not be read causally. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
     file write `fuzzy_tex' "\endlastfoot" _n
 
     forvalues row = 1/`=_N' {
@@ -1298,7 +1379,7 @@ foreach table_tier in primary secondary {
     file write `assignment_tex' "\endfoot" _n
     file write `assignment_tex' "\bottomrule" _n
     file write `assignment_tex' ///
-        "\multicolumn{7}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} These are robust local-polynomial discontinuities in the assignment effect estimated with \texttt{rdhte}, not fuzzy-RD complier effects. Each RUV community has total weight one, the window is \(h=0.0075\), and inference clusters by RUV community. Continuous coefficients are assignment-effect slopes per moderator SD; binary coefficients compare one with zero. These estimates are secondary complementary evidence and never replace a failed fuzzy-IV identification gate. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
+        "\multicolumn{7}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} These are robust local-polynomial discontinuities in the assignment effect estimated with \texttt{rdhte}, not fuzzy-RD complier effects. `assignment_design_tex' Continuous coefficients are assignment-effect slopes per moderator SD; binary coefficients compare one with zero. These estimates are secondary complementary evidence and never replace a failed fuzzy-IV identification gate. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
     file write `assignment_tex' "\endlastfoot" _n
 
     forvalues row = 1/`=_N' {
@@ -1373,7 +1454,7 @@ file write `conditional_tex' ///
 file write `conditional_tex' "\endfoot" _n
 file write `conditional_tex' "\bottomrule" _n
 file write `conditional_tex' ///
-    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Conditional effects are linear combinations from the same pooled fuzzy local-IV model, not separately estimated subgroup RDs. Continuous moderators are evaluated at their analysis-universe quartiles; binary moderators at zero and one. The common \(h=0.0075\), CCPP-equal weighting, triangular kernel, and CCPP-clustered inference are fixed across outcomes. A failed gate means the conditional effect is diagnostic only. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
+    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Conditional effects are linear combinations from the same pooled fuzzy local-IV model, not separately estimated subgroup RDs. Continuous moderators are evaluated at their analysis-universe quartiles; binary moderators at zero and one. `conditional_design_tex' A failed gate means the conditional effect is diagnostic only. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
 file write `conditional_tex' "\endlastfoot" _n
 
 forvalues row = 1/`=_N' {
@@ -1435,7 +1516,7 @@ file write `robustness_tex' ///
 file write `robustness_tex' "\endfoot" _n
 file write `robustness_tex' "\bottomrule" _n
 file write `robustness_tex' ///
-    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} The common-window, CCPP-equal, CCPP-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), give observations equal weight, or cluster by district or running-score mass point. All models retain the pooled fully interacted local-linear 2SLS specification. No result, bandwidth, weight, or inference rule is selected by statistical significance. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
+    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} `robustness_design_tex' All models retain the pooled fully interacted local-linear 2SLS specification. No result, bandwidth, weight, or inference rule is selected by statistical significance. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
 file write `robustness_tex' "\endlastfoot" _n
 
 forvalues row = 1/`=_N' {
@@ -1528,9 +1609,9 @@ twoway ///
     legend(order(2 "Passes fuzzy-IV gate" 4 "Fails fuzzy-IV gate") ///
         rows(1) position(6) size(small) region(lcolor(none))) ///
     note( ///
-        "Notes: Unit is a `unit_label' in the selected B/C geography; each RUV community receives total weight one." ///
+        "`fuzzy_figure_weight_note'" ///
         "Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator." ///
-        "Inference clusters by RUV community. Hollow gray estimates fail support, rank, or minimum conditional F > 10 and are diagnostic only." ///
+        "`fuzzy_figure_inference_note'" ///
         "Continuous interactions are per moderator SD; binary interactions compare one with zero. Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(11) ysize(8) ///
@@ -1581,9 +1662,9 @@ twoway ///
         size(small) color(gs5)) ///
     legend(off) ///
     note( ///
-        "Notes: Unit is a `unit_label' in the selected B/C geography; each RUV community receives total weight one." ///
+        "`assignment_figure_weight_note'" ///
         "These rdhte estimates describe heterogeneity in the cutoff assignment effect, not heterogeneity in the fuzzy-RD complier effect." ///
-        "Inference clusters by RUV community. This secondary evidence never substitutes for a failed fuzzy-IV gate." ///
+        "`assign_figure_inference_note'" ///
         "Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(11) ysize(8) ///
@@ -1610,6 +1691,10 @@ generate double plot_zero = 0
 generate int plot_y = _N - _n + 1
 quietly summarize plot_sw, meanonly
 local diagnostic_axis_max = max(10.5, ceil(r(max) + .5))
+local diagnostic_tick = cond(`diagnostic_axis_max' <= 20, 2, ///
+    cond(`diagnostic_axis_max' <= 40, 5, 10))
+local diagnostic_axis_max = ///
+    ceil(`diagnostic_axis_max' / `diagnostic_tick') * `diagnostic_tick'
 
 local diagnostic_ylabels
 forvalues row = 1/`=_N' {
@@ -1637,7 +1722,8 @@ twoway ///
         msymbol(X) mcolor(maroon) msize(medsmall)), ///
     xline(${hte_weak_f_gate}, lcolor(maroon) lpattern(shortdash)) ///
     xscale(range(0 `diagnostic_axis_max')) ///
-    xlabel(0(2)`diagnostic_axis_max', format(%6.1f) labsize(small)) ///
+    xlabel(0(`diagnostic_tick')`diagnostic_axis_max', ///
+        format(%6.0f) labsize(small)) ///
     ylabel(`diagnostic_ylabels', ///
         angle(horizontal) labsize(small) noticks) ///
     ytitle("") ///
@@ -1651,7 +1737,7 @@ twoway ///
     note( ///
         "Notes: The dashed line marks the prespecified strict interpretation gate F > 10." ///
         "The plotted statistic is the smaller conditional F across treatment and treatment-by-moderator equations." ///
-        "Diagnostics use CCPP-equal triangular weights in h = 0.0075 and CCPP-clustered inference." ///
+        "`diagnostic_figure_design_note'" ///
         "An unavailable value is plotted at zero with an X and is not evidence of a zero first stage. Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(10) ysize(`diagnostic_ysize') ///
@@ -1665,9 +1751,12 @@ graph export ///
 use `hte_support', clear
 keep if moderator_id == "M02"
 assert _N == 4
+capture label drop hte_capital_label
+label define hte_capital_label 0 "Non-capital" 1 "District capital"
+label values moderator_value hte_capital_label
 
 graph bar (asis) ccpp_clusters, ///
-    over(category_label, label(labsize(small))) ///
+    over(moderator_value, label(labsize(small))) ///
     over(side_label, label(labsize(small))) ///
     asyvars ///
     bar(1, color(navy%80)) bar(2, color(cranberry%80)) ///
@@ -1746,7 +1835,7 @@ twoway ///
     note( ///
         "Notes: P25, P50, and P75 are quartiles of log 2007 CCPP population among represented RUV communities." ///
         "Effects are linear combinations from one pooled model, not separately estimated subgroup RDs." ///
-        "Each community receives total weight one; inference clusters by RUV community. Hollow gray estimates are diagnostic only." ///
+        "`conditional_figure_design_note'" ///
         "Sources: RUV, CMAN, INEI 2007 Census tabulations, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(11) ysize(9) ///
@@ -1887,6 +1976,12 @@ if "`level'" == "individual" {
 
 use `hte_results_final', clear
 assert _N == ${hte_expected_results}
+assert missing(min_sw_f) if ///
+    estimator == "ivreg2" & ///
+    (missing(sw_f_treat) | missing(sw_f_interaction))
+assert gate_pass == 0 if ///
+    estimator == "ivreg2" & ///
+    (missing(sw_f_treat) | missing(sw_f_interaction))
 
 quietly count if spec_id == "common_h_iv"
 assert r(N) == `moderator_count' * `outcome_count'

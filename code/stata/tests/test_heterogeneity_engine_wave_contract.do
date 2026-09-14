@@ -38,14 +38,17 @@ void check_wave_contract(string scalar engine_path)
     forbidden = (char(36) + "{hte_treatment_2013}", ///
         "moderator_var_2013", "SISFOH 2013", "SISFOH 2012-2013", ///
         "SISFOH 2012--2013", "through 2012", "treat_12", ///
-        "SISFOH people")
+        "SISFOH people", "matrix hte_first = e(first)")
     required = (char(36) + "{hte_treatment}", ///
         char(36) + "{hte_moderator_var_column}", ///
         char(36) + "{hte_wave_label}", ///
         char(36) + "{hte_source_note}", ///
         char(36) + "{hte_source_note_tex}", ///
         char(36) + "{hte_treatment_timing_label}", ///
-        char(36) + "{hte_person_source_label}")
+        char(36) + "{hte_person_source_label}", ///
+        "tempname first_stage_matrix", ///
+        "capture estimates clear", ///
+        "assert missing(min_sw_f)")
 
     failed = 0
     for (index = 1; index <= cols(forbidden); index++) {

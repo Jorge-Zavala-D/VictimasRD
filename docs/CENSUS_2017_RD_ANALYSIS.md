@@ -5,8 +5,10 @@
 The Census 2017 outcome workflow estimates main effects at the CCPP,
 household, and individual levels. It uses cumulative collective-reparation
 receipt through 2016 (`treat_16`) and treats Census measures as 2017 outcomes.
-The workflow does not estimate causal mediation or treatment-effect
-heterogeneity; both require separate, versioned analysis contracts.
+The main-effects workflow does not estimate causal mediation or treatment-
+effect heterogeneity. Community-level heterogeneity is now implemented in the
+separate versioned module `05d_census2017_ccpp_heterogeneity.do`; household
+and individual heterogeneity and all mediation analyses remain separate.
 
 ## Canonical implementation
 
@@ -80,11 +82,11 @@ All artifacts remain `generated_unreviewed`. Numerical findings require
 substantive interpretation, disclosure review, and manuscript review before
 publication or Overleaf synchronization.
 
-## Deferred heterogeneity design
+## Heterogeneity implementation status
 
-No heterogeneity estimate is produced by the current modules. A future
-protocol should preserve the common design window and use one pooled,
-fully interacted local-linear IV model for formal comparisons. For a
+`05d_census2017_ccpp_heterogeneity.do` preserves the common design window and
+uses one pooled, fully interacted local-linear IV model for formal
+comparisons. For a
 predetermined moderator, the endogenous terms would be treatment and
 treatment-by-moderator; cutoff assignment and
 assignment-by-moderator would provide the corresponding excluded instruments.
@@ -106,4 +108,9 @@ or inserting it as an ordinary interaction would not identify causal
 heterogeneity. A defensible project-type analysis requires a separate
 estimand and identification argument--for example, a multivalued-treatment
 design with adequate excluded variation--or must be labeled descriptive.
-These choices remain for research-team approval before any code is written.
+The implemented project extension therefore reports treated implementation
+composition, assignment discontinuities in group-specific project receipt,
+and a clearly exploratory recorded-financing dose IV through 2016. It does not
+condition causal outcome estimates on realized project type. All outputs
+remain `generated_unreviewed` pending research-team interpretation,
+disclosure review, and manuscript review.

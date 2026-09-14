@@ -6,15 +6,18 @@ This protocol governs the prespecified effect-heterogeneity modules that follow
 the main SISFOH 2013 and Census 2017 outcome analyses. It fixes the estimands,
 moderators, sample, bandwidth, weighting, inference, instrument-strength gates,
 and interpretation rules before reviewing heterogeneity results. The first
-implemented module is `05a_sisfoh2013_ccpp_heterogeneity.do`.
+implemented module was `05a_sisfoh2013_ccpp_heterogeneity.do`; the first Census
+2017 module is `05d_census2017_ccpp_heterogeneity.do`.
 
 The SISFOH 2013 suite is implemented in
 `05a_sisfoh2013_ccpp_heterogeneity.do`,
 `05b_sisfoh2013_household_heterogeneity.do`, and
-`05c_sisfoh2013_individual_heterogeneity.do`. The latter two share the
+`05c_sisfoh2013_individual_heterogeneity.do`. The latter two and the Census
+2017 CCPP module share the
 versioned engine `_heterogeneity_level_engine.do` so that weighting,
 identification gates, multiplicity, and output checks cannot drift across
-levels.
+levels or waves. Each caller supplies its wave- and level-specific primary
+weighting and clustering contract.
 
 The analysis uses the selected legacy geography, adjacent B/C support,
 `running_bc`, cumulative treatment through the year preceding the outcome
@@ -121,6 +124,10 @@ interpretation-ready only when:
 - the local model has adequate rank and returns finite estimates; and
 - the moderator has prespecified local support.
 
+If the conditional F is unavailable for either endogenous equation, the
+minimum statistic remains missing and the result fails the interpretation
+gate. A statistic from the other equation is never substituted.
+
 The Kleibergen--Paap rk Wald F, underidentification p-value, equation-specific
 excluded-instrument F statistics, and joint Anderson--Rubin p-value are also
 reported. Stock--Yogo critical values are not treated as exact under
@@ -135,11 +142,14 @@ The gate may not be weakened after seeing results.
 
 ## CCPP-level conventions
 
-The CCPP module uses one RUV community per row, district-clustered inference,
-and the same complete eight-outcome SISFOH sample as the CCPP main-effects
-module. The unadjusted fully interacted model is primary. Predetermined
-covariate adjustment and fixed windows `h = 0.0050` and `h = 0.0100` are
-prespecified sensitivities; no sensitivity replaces the common-window model.
+Each CCPP module uses one RUV community per row, district-clustered inference,
+and the same complete eight-outcome sample as its wave-specific CCPP main-
+effects module. The unadjusted fully interacted model is primary.
+Predetermined covariate adjustment, fixed windows `h = 0.0050` and
+`h = 0.0100`, CCPP-clustered inference, and exact-score-mass-point clustering
+are prespecified sensitivities; no sensitivity replaces the common-window
+model. SISFOH uses `treat_12`; Census 2017 uses `treat_16` and the restricted
+INEI-assisted cohort represented in the canonical CCPP registry.
 
 ## Household- and individual-level conventions
 
@@ -188,13 +198,20 @@ Project-group outcome comparisons among treated communities are descriptive.
 One cutoff instrument cannot separately identify several endogenous project
 types, so the code does not label such comparisons causal.
 
+For Census 2017, implementation measures are censored at 2016. The exploratory
+dose family applies Benjamini--Hochberg adjustment across the eight registered
+primary CCPP outcomes. Passing its diagnostic gate does not relax the stronger
+linear-dose and exclusion assumptions.
+
 ## Shared microdata engine and invariance gate
 
-Household- and individual-level modules call the same wave-neutral engine,
+Household-, individual-, and Census 2017 CCPP-level modules call the same
+wave-neutral engine,
 `code/stata/pipeline/_heterogeneity_level_engine.do`. Each calling module must
-declare the treatment variable, moderator-registry column, wave label,
-treatment-timing statement, person-source label, and plain-text and TeX source
-labels. The shared engine must not contain wave-specific treatment names,
+declare the treatment variable, moderator-registry column, primary weighting
+and clustering rules, wave label, treatment-timing statement, person-source
+label, and plain-text and TeX source labels. The shared engine must not contain
+wave-specific treatment names,
 registry columns, titles, or source vintages. This interface permits the 2013
 and 2017 modules to share one estimator, support, inference, multiplicity, and
 output contract without silently changing the estimand across waves.

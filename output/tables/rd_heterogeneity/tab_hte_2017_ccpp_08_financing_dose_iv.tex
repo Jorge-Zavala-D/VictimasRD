@@ -1,0 +1,21 @@
+\begin{table}[!htbp]
+\centering
+\caption{Exploratory IV estimates using recorded financing per resident}
+\label{tab:hte-2017-ccpp-financing-dose}
+\small
+\begin{tabular}{lrrrrrl}
+\toprule
+Outcome & Estimate & SE & 95\% CI & BH \(q\) & KP \(F\) & Gate \\
+\midrule
+Log 2017 CCPP population & -0.72 & 0.46 & [-1.61, 0.17] & 0.427 & 13.90 & Pass \\
+Log occupied dwellings in 2017 & -0.58 & 0.41 & [-1.39, 0.23] & 0.427 & 13.90 & Pass \\
+Residents living in another CCPP & 7.86 & 9.04 & [-9.87, 25.58] & 0.770 & 13.90 & Pass \\
+Residents age 15-29 & -2.16 & 3.20 & [-8.44, 4.12] & 0.800 & 13.90 & Pass \\
+Secondary education or higher & 2.90 & 5.81 & [-8.49, 14.30] & 0.808 & 13.90 & Pass \\
+Employed residents & -13.33 & 6.29 & [-25.67, -1.00] & 0.273 & 13.90 & Pass \\
+Residents with health insurance & 0.72 & 2.62 & [-4.42, 5.86] & 0.808 & 13.90 & Pass \\
+Core wellbeing proxy & 1.16 & 4.78 & [-8.20, 10.52] & 0.808 & 13.90 & Pass \\
+\bottomrule
+\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The endogenous dose is cumulative nominal CMAN financing plus recorded cofinancing through 2016 divided by 2007 CCPP population and expressed in thousands of soles per resident. Cutoff assignment instruments the dose in a triangular-weighted local-linear model with \(h=0.0075\) and district-clustered inference. The strict diagnostic gate requires Kleibergen--Paap \(F>10\) and underidentification rejection at five percent. BH \(q\) applies Benjamini--Hochberg adjustment across the eight exploratory dose outcomes. Even a passing model is exploratory: it additionally assumes a linear dose response and that assignment affects outcomes only through recorded financing, despite unmodeled project content and unverified execution. Sources: RUV, CMAN, INEI 2007 Census, and INEI-assisted Census 2017.}
+\end{table}
