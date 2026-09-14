@@ -188,6 +188,29 @@ Project-group outcome comparisons among treated communities are descriptive.
 One cutoff instrument cannot separately identify several endogenous project
 types, so the code does not label such comparisons causal.
 
+## Shared microdata engine and invariance gate
+
+Household- and individual-level modules call the same wave-neutral engine,
+`code/stata/pipeline/_heterogeneity_level_engine.do`. Each calling module must
+declare the treatment variable, moderator-registry column, wave label,
+treatment-timing statement, person-source label, and plain-text and TeX source
+labels. The shared engine must not contain wave-specific treatment names,
+registry columns, titles, or source vintages. This interface permits the 2013
+and 2017 modules to share one estimator, support, inference, multiplicity, and
+output contract without silently changing the estimand across waves.
+
+`code/stata/tests/test_heterogeneity_engine_wave_contract.do` enforces the
+source-level contract. Any engine refactor must additionally reproduce the
+validated 2013 household and individual outputs before a new wave may use it.
+The 14 September 2026 refactor was run through `stata_run_selection` before and
+after the change. All 37 substantive aggregate artifacts--machine-readable
+results, support and contract files, LaTeX tables, and PNG figures--were
+byte-for-byte identical. The 17-row household and 20-row individual manifests
+were identical in path, artifact type, input signature, generator, checksum,
+and review status; only the expected run identifier changed. No estimator,
+sample, moderator, bandwidth, weight, cluster rule, diagnostic, or numerical
+result changed.
+
 ## Deferred work
 
 Treatment timing and years-since-treatment heterogeneity are excluded pending

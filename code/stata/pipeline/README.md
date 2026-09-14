@@ -120,9 +120,13 @@ and their wave-by-level registries are stored under `metadata/rd-outcomes/`.
 `05a_sisfoh2013_ccpp_heterogeneity.do`,
 `05b_sisfoh2013_household_heterogeneity.do`, and
 `05c_sisfoh2013_individual_heterogeneity.do` implement the full SISFOH 2013
-suite. The household and person modules share
-`_heterogeneity_level_engine.do` to enforce one estimator, weighting,
-support, multiplicity, and output contract. Pooled, fully interacted
+suite. The household and person modules share the wave-neutral
+`_heterogeneity_level_engine.do` to enforce one estimator, weighting, support,
+multiplicity, and output contract across 2013 and 2017. Each caller supplies
+its wave-specific treatment, moderator-registry column, labels, and source
+vintage. `code/stata/tests/test_heterogeneity_engine_wave_contract.do` guards
+that interface, and every engine refactor must reproduce the validated 2013
+aggregate outputs before a new wave is added. Pooled, fully interacted
 fuzzy-LATE heterogeneity estimated with `ivreg2` is primary; `rdhte`
 provides secondary assignment-effect heterogeneity and never substitutes for a
 weak or underidentified fuzzy interaction. All modules use the fixed

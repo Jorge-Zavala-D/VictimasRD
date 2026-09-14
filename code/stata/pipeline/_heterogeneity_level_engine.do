@@ -1,9 +1,9 @@
 /*
 Project: Victimas RD
-Purpose: Shared engine for household- and individual-level SISFOH 2013
+Purpose: Shared engine for household- and individual-level
          regression-discontinuity heterogeneity modules
-Note:    Called by 05b and 05c after level-specific input, outcome, sample,
-         and key validation. This is not a standalone pipeline module.
+Note:    Called after wave- and level-specific input, outcome, sample, and key
+         validation. This is not a standalone pipeline module.
 */
 
 version 19
@@ -21,9 +21,12 @@ local required_globals ///
     hte_expected_results hte_expected_support_rows ///
     hte_input_basename hte_input_datasignature hte_module_current ///
     hte_manifest_current hte_output_stub hte_primary_outcomes ///
-    hte_running hte_treatment_2013 hte_common_h hte_small_h ///
+    hte_running hte_treatment hte_common_h hte_small_h ///
     hte_large_h hte_weak_f_gate hte_min_cell ///
     hte_primary_covariates hte_moderator_registry ///
+    hte_moderator_var_column hte_wave_label ///
+    hte_source_note hte_source_note_tex ///
+    hte_treatment_timing_label hte_person_source_label ///
     hte_figure_dir hte_table_dir project_root
 
 foreach required_global of local required_globals {
@@ -92,7 +95,7 @@ forvalues moderator_index = 1/`moderator_count' {
     local m_order_`moderator_index' = paper_order[`moderator_index']
     local m_id_`moderator_index' = moderator_id[`moderator_index']
     local m_source_`moderator_index' = ///
-        moderator_var_2013[`moderator_index']
+        ${hte_moderator_var_column}[`moderator_index']
     local m_label_`moderator_index' = moderator_label[`moderator_index']
     local m_tier_`moderator_index' = tier[`moderator_index']
     local m_type_`moderator_index' = type[`moderator_index']
@@ -296,14 +299,14 @@ program define _vrd_post_level_hte_iv
     quietly generate double `assignment_m' = ///
         hte_assignment * `modvar'
     quietly generate double `treatment_m' = ///
-        ${hte_treatment_2013} * `modvar'
+        ${hte_treatment} * `modvar'
     quietly generate double `running_m' = ///
         ${hte_running} * `modvar'
     quietly generate double `running_right_m' = ///
         ${hte_running} * hte_assignment * `modvar'
 
     local estimator_sample ///
-        "abs(${hte_running}) < `hvalue' & !missing(`y_scaled', `modvar', ${hte_treatment_2013}, `clustervar')"
+        "abs(${hte_running}) < `hvalue' & !missing(`y_scaled', `modvar', ${hte_treatment}, `clustervar')"
 
     if "`covariates'" != "" {
         quietly egen byte `covariate_missing' = rowmiss(`covariates')
@@ -386,7 +389,7 @@ program define _vrd_post_level_hte_iv
             `modvar' ${hte_running} `running_right' ///
             `running_m' `running_right_m' ///
             `covariates' ///
-            (${hte_treatment_2013} `treatment_m' = ///
+            (${hte_treatment} `treatment_m' = ///
                 hte_assignment `assignment_m') ///
             [aw=`analysis_weight'] if `eligible', ///
             cluster(`clustervar') first
@@ -517,7 +520,7 @@ program define _vrd_post_level_hte_iv
             }
 
             capture quietly lincom ///
-                ${hte_treatment_2013} + ///
+                ${hte_treatment} + ///
                 `eval_value' * `treatment_m'
 
             local conditional_estimate .
@@ -1020,8 +1023,8 @@ post `contract_post' ///
     ("sample") ("Selected adjacent B/C") ("approved") ///
     ("Legacy selected geography and official B-C running-variable support.")
 post `contract_post' ///
-    ("treatment") ("treat_12") ("approved") ///
-    ("Cumulative collective-reparation receipt through 2012 for SISFOH 2013 outcomes.")
+    ("treatment") ("${hte_treatment}") ("approved") ///
+    ("${hte_treatment_timing_label}")
 post `contract_post' ///
     ("bandwidth") ("h = 0.0075") ("approved") ///
     ("One common fixed bandwidth; h = 0.0050 and h = 0.0100 are prespecified sensitivities.")
@@ -1103,7 +1106,7 @@ forvalues row = 1/`=_N' {
 file write `registry_tex' "\bottomrule" _n
 file write `registry_tex' "\end{tabular}}" _n
 file write `registry_tex' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Continuous CCPP attributes are standardized over one record per represented RUV community in the complete wave-level analysis universe. Respondent age is standardized over eligible people. Binary moderators are not standardized. The list was fixed before reviewing these heterogeneity estimates. Source: INEI 2007 Census tabulations, GeoGPS--INEI spatial data, Seminario--Palomino GDP estimates, and SISFOH 2012--2013.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Continuous CCPP attributes are standardized over one record per represented RUV community in the complete wave-level analysis universe. Respondent age is standardized over eligible people. Binary moderators are not standardized. The list was fixed before reviewing these heterogeneity estimates. Source: INEI 2007 Census tabulations, GeoGPS--INEI spatial data, Seminario--Palomino GDP estimates, and ${hte_source_note_tex}.}" _n
 file write `registry_tex' "\end{table}" _n
 file close `registry_tex'
 restore
@@ -1165,7 +1168,7 @@ forvalues row = 1/`=_N' {
 file write `diagnostics_tex' "\bottomrule" _n
 file write `diagnostics_tex' "\end{tabular}}" _n
 file write `diagnostics_tex' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Diagnostics come from the pooled, fully interacted local-linear 2SLS model in the fixed \(h=0.0075\) window. Each eligible RUV community has total weight one before triangular kernel weighting. CCPP left and right are unique assignment clusters. For binary moderators, Min. cell is the smallest moderator-by-side CCPP count; for continuous moderators it is the smaller side count. The causal gate requires support, underidentification rejection at five percent, and the minimum Sanderson--Windmeijer conditional \(F\) strictly above 10. The Kleibergen--Paap statistic is supplementary. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Diagnostics come from the pooled, fully interacted local-linear 2SLS model in the fixed \(h=0.0075\) window. Each eligible RUV community has total weight one before triangular kernel weighting. CCPP left and right are unique assignment clusters. For binary moderators, Min. cell is the smallest moderator-by-side CCPP count; for continuous moderators it is the smaller side count. The causal gate requires support, underidentification rejection at five percent, and the minimum Sanderson--Windmeijer conditional \(F\) strictly above 10. The Kleibergen--Paap statistic is supplementary. Source: RUV, CMAN, and ${hte_source_note_tex}.}" _n
 file write `diagnostics_tex' "\end{table}" _n
 file close `diagnostics_tex'
 
@@ -1208,7 +1211,7 @@ foreach table_tier in primary secondary {
     file write `fuzzy_tex' "\endfoot" _n
     file write `fuzzy_tex' "\bottomrule" _n
     file write `fuzzy_tex' ///
-        "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Interaction is the coefficient on treatment by moderator in one pooled, fully interacted, triangular-weighted local-linear 2SLS model in \(h=0.0075\). Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator. Each community has total weight one; inference clusters by RUV community. Continuous interactions are per one-standard-deviation increase; binary interactions are differences from zero to one. Only rows passing the support, rank, and minimum conditional-\(F>10\) gate are interpretation-ready fuzzy-LATE heterogeneity. Failed rows are retained to disclose weak identification and must not be read causally. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and SISFOH 2012--2013.} \\" _n
+        "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Interaction is the coefficient on treatment by moderator in one pooled, fully interacted, triangular-weighted local-linear 2SLS model in \(h=0.0075\). Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator. Each community has total weight one; inference clusters by RUV community. Continuous interactions are per one-standard-deviation increase; binary interactions are differences from zero to one. Only rows passing the support, rank, and minimum conditional-\(F>10\) gate are interpretation-ready fuzzy-LATE heterogeneity. Failed rows are retained to disclose weak identification and must not be read causally. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
     file write `fuzzy_tex' "\endlastfoot" _n
 
     forvalues row = 1/`=_N' {
@@ -1295,7 +1298,7 @@ foreach table_tier in primary secondary {
     file write `assignment_tex' "\endfoot" _n
     file write `assignment_tex' "\bottomrule" _n
     file write `assignment_tex' ///
-        "\multicolumn{7}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} These are robust local-polynomial discontinuities in the assignment effect estimated with \texttt{rdhte}, not fuzzy-RD complier effects. Each RUV community has total weight one, the window is \(h=0.0075\), and inference clusters by RUV community. Continuous coefficients are assignment-effect slopes per moderator SD; binary coefficients compare one with zero. These estimates are secondary complementary evidence and never replace a failed fuzzy-IV identification gate. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and SISFOH 2012--2013.} \\" _n
+        "\multicolumn{7}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} These are robust local-polynomial discontinuities in the assignment effect estimated with \texttt{rdhte}, not fuzzy-RD complier effects. Each RUV community has total weight one, the window is \(h=0.0075\), and inference clusters by RUV community. Continuous coefficients are assignment-effect slopes per moderator SD; binary coefficients compare one with zero. These estimates are secondary complementary evidence and never replace a failed fuzzy-IV identification gate. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
     file write `assignment_tex' "\endlastfoot" _n
 
     forvalues row = 1/`=_N' {
@@ -1370,7 +1373,7 @@ file write `conditional_tex' ///
 file write `conditional_tex' "\endfoot" _n
 file write `conditional_tex' "\bottomrule" _n
 file write `conditional_tex' ///
-    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Conditional effects are linear combinations from the same pooled fuzzy local-IV model, not separately estimated subgroup RDs. Continuous moderators are evaluated at their analysis-universe quartiles; binary moderators at zero and one. The common \(h=0.0075\), CCPP-equal weighting, triangular kernel, and CCPP-clustered inference are fixed across outcomes. A failed gate means the conditional effect is diagnostic only. Source: RUV, CMAN, and SISFOH 2012--2013.} \\" _n
+    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Conditional effects are linear combinations from the same pooled fuzzy local-IV model, not separately estimated subgroup RDs. Continuous moderators are evaluated at their analysis-universe quartiles; binary moderators at zero and one. The common \(h=0.0075\), CCPP-equal weighting, triangular kernel, and CCPP-clustered inference are fixed across outcomes. A failed gate means the conditional effect is diagnostic only. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
 file write `conditional_tex' "\endlastfoot" _n
 
 forvalues row = 1/`=_N' {
@@ -1432,7 +1435,7 @@ file write `robustness_tex' ///
 file write `robustness_tex' "\endfoot" _n
 file write `robustness_tex' "\bottomrule" _n
 file write `robustness_tex' ///
-    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} The common-window, CCPP-equal, CCPP-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), give observations equal weight, or cluster by district or running-score mass point. All models retain the pooled fully interacted local-linear 2SLS specification. No result, bandwidth, weight, or inference rule is selected by statistical significance. Source: RUV, CMAN, and SISFOH 2012--2013.} \\" _n
+    "\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} The common-window, CCPP-equal, CCPP-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), give observations equal weight, or cluster by district or running-score mass point. All models retain the pooled fully interacted local-linear 2SLS specification. No result, bandwidth, weight, or inference rule is selected by statistical significance. Source: RUV, CMAN, and ${hte_source_note_tex}.} \\" _n
 file write `robustness_tex' "\endlastfoot" _n
 
 forvalues row = 1/`=_N' {
@@ -1518,7 +1521,7 @@ twoway ///
     ylabel(`fuzzy_ylabels', angle(horizontal) labsize(vsmall) noticks) ///
     ytitle("") ///
     xtitle("Treatment-by-moderator interaction (below-cutoff SD units)") ///
-    title("Primary fuzzy-RD heterogeneity: SISFOH 2013 `unit_plural'", ///
+    title("Primary fuzzy-RD heterogeneity: ${hte_wave_label} `unit_plural'", ///
         size(medium) color(black)) ///
     subtitle("Pooled local IV; common h = 0.0075; robust 95% intervals", ///
         size(small) color(gs5)) ///
@@ -1528,7 +1531,7 @@ twoway ///
         "Notes: Unit is a `unit_label' in the selected B/C geography; each RUV community receives total weight one." ///
         "Treatment and treatment-by-moderator are instrumented by cutoff assignment and assignment-by-moderator." ///
         "Inference clusters by RUV community. Hollow gray estimates fail support, rank, or minimum conditional F > 10 and are diagnostic only." ///
-        "Continuous interactions are per moderator SD; binary interactions compare one with zero. Sources: RUV, CMAN, and SISFOH 2012-2013.", ///
+        "Continuous interactions are per moderator SD; binary interactions compare one with zero. Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(11) ysize(8) ///
     graphregion(color(white)) plotregion(color(white))
@@ -1572,7 +1575,7 @@ twoway ///
         angle(horizontal) labsize(vsmall) noticks) ///
     ytitle("") ///
     xtitle("Assignment-effect interaction (below-cutoff SD units)") ///
-    title("Assignment-effect heterogeneity: SISFOH 2013 `unit_plural'", ///
+    title("Assignment-effect heterogeneity: ${hte_wave_label} `unit_plural'", ///
         size(medium) color(black)) ///
     subtitle("Secondary rdhte evidence; common h = 0.0075; 95% intervals", ///
         size(small) color(gs5)) ///
@@ -1581,7 +1584,7 @@ twoway ///
         "Notes: Unit is a `unit_label' in the selected B/C geography; each RUV community receives total weight one." ///
         "These rdhte estimates describe heterogeneity in the cutoff assignment effect, not heterogeneity in the fuzzy-RD complier effect." ///
         "Inference clusters by RUV community. This secondary evidence never substitutes for a failed fuzzy-IV gate." ///
-        "Sources: RUV, CMAN, and SISFOH 2012-2013.", ///
+        "Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(11) ysize(8) ///
     graphregion(color(white)) plotregion(color(white))
@@ -1649,7 +1652,7 @@ twoway ///
         "Notes: The dashed line marks the prespecified strict interpretation gate F > 10." ///
         "The plotted statistic is the smaller conditional F across treatment and treatment-by-moderator equations." ///
         "Diagnostics use CCPP-equal triangular weights in h = 0.0075 and CCPP-clustered inference." ///
-        "An unavailable value is plotted at zero with an X and is not evidence of a zero first stage. Sources: RUV, CMAN, and SISFOH 2012-2013.", ///
+        "An unavailable value is plotted at zero with an X and is not evidence of a zero first stage. Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(10) ysize(`diagnostic_ysize') ///
     graphregion(color(white)) plotregion(color(white))
@@ -1676,9 +1679,9 @@ graph bar (asis) ccpp_clusters, ///
     legend(order(1 "Non-capital" 2 "District capital") ///
         rows(1) position(6) size(small) region(lcolor(none))) ///
     note( ///
-        "Notes: Bars count unique RUV communities in the complete `level_caption' SISFOH 2013 analysis sample." ///
+        "Notes: Bars count unique RUV communities in the complete `level_caption' ${hte_wave_label} analysis sample." ///
         "The support rule requires at least 10 communities in every moderator-by-side cell." ///
-        "This figure assesses overlap only; it is not an effect estimate. Sources: RUV, INEI spatial coding, and SISFOH 2012-2013.", ///
+        "This figure assesses overlap only; it is not an effect estimate. Sources: RUV, INEI spatial coding, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     ysize(7) xsize(9) ///
     graphregion(color(white)) plotregion(color(white))
@@ -1744,7 +1747,7 @@ twoway ///
         "Notes: P25, P50, and P75 are quartiles of log 2007 CCPP population among represented RUV communities." ///
         "Effects are linear combinations from one pooled model, not separately estimated subgroup RDs." ///
         "Each community receives total weight one; inference clusters by RUV community. Hollow gray estimates are diagnostic only." ///
-        "Sources: RUV, CMAN, INEI 2007 Census tabulations, and SISFOH 2012-2013.", ///
+        "Sources: RUV, CMAN, INEI 2007 Census tabulations, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
     xsize(11) ysize(9) ///
     graphregion(color(white)) plotregion(color(white))
@@ -1772,9 +1775,9 @@ if "`level'" == "individual" {
         legend(order(1 "Men" 2 "Women") rows(1) position(6) ///
             size(small) region(lcolor(none))) ///
         note( ///
-            "Notes: Bars count unique RUV communities containing eligible SISFOH people of each sex in the common design window." ///
+            "Notes: Bars count unique RUV communities containing eligible ${hte_person_source_label} of each sex in the common design window." ///
             "The support rule requires at least 10 people and at least 10 assignment clusters in every sex-by-side cell." ///
-            "This figure assesses overlap only; it is not an effect estimate. Sources: RUV, CMAN, and SISFOH 2012-2013.", ///
+            "This figure assesses overlap only; it is not an effect estimate. Sources: RUV, CMAN, and ${hte_source_note}.", ///
             size(tiny) color(gs5) span) ///
         ysize(7) xsize(9) ///
         graphregion(color(white)) plotregion(color(white))
@@ -1821,7 +1824,7 @@ if "`level'" == "individual" {
             "Notes: Effects for men and women are linear combinations from one pooled fully interacted fuzzy local-IV model." ///
             "The female outcome is excluded from its own moderator analysis as a mechanical identity." ///
             "Each community receives total weight one; inference clusters by RUV community. Hollow gray estimates are diagnostic only." ///
-            "Sources: RUV, CMAN, and SISFOH 2012-2013.", ///
+            "Sources: RUV, CMAN, and ${hte_source_note}.", ///
             size(tiny) color(gs5) span) ///
         xsize(11) ysize(8) ///
         graphregion(color(white)) plotregion(color(white))
@@ -1857,7 +1860,7 @@ if "`level'" == "individual" {
             angle(horizontal) labsize(vsmall) noticks) ///
         ytitle("") ///
         xtitle("Treatment-by-age interaction (below-cutoff SD units)") ///
-        title("Secondary age heterogeneity: SISFOH 2013 people", ///
+        title("Secondary age heterogeneity: ${hte_wave_label} people", ///
             size(medium) color(black)) ///
         subtitle("Models pass the fuzzy-IV gate; robust 95% intervals", ///
             size(small) color(gs5)) ///
@@ -1866,7 +1869,7 @@ if "`level'" == "individual" {
             "Notes: The moderator is respondent age standardized in the complete person-level analysis universe." ///
             "All eight models pass support, underidentification, and minimum conditional F > 10, but none survives BH correction." ///
             "Observed age composition can respond through migration or survival, so these secondary estimates do not establish baseline age moderation." ///
-            "Each RUV community receives total weight one; inference clusters by community. Sources: RUV, CMAN, and SISFOH 2012-2013.", ///
+            "Each RUV community receives total weight one; inference clusters by community. Sources: RUV, CMAN, and ${hte_source_note}.", ///
             size(tiny) color(gs5) span) ///
         xsize(10) ysize(7) ///
         graphregion(color(white)) plotregion(color(white))
@@ -1962,7 +1965,7 @@ capture program drop _vrd_post_level_hte_rdhte
 capture program drop _vrd_post_level_hte_na
 
 display as result ///
-    "SISFOH 2013 `level' heterogeneity module completed."
+    "${hte_wave_label} `level' heterogeneity module completed."
 display as text ///
     "Common fuzzy interactions passing all gates: `fuzzy_interactions_passing_gate'"
 display as text ///
