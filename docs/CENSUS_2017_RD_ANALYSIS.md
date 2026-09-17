@@ -6,9 +6,11 @@ The Census 2017 outcome workflow estimates main effects at the CCPP,
 household, and individual levels. It uses cumulative collective-reparation
 receipt through 2016 (`treat_16`) and treats Census measures as 2017 outcomes.
 The main-effects workflow does not estimate causal mediation or treatment-
-effect heterogeneity. Community-level heterogeneity is now implemented in the
-separate versioned module `05d_census2017_ccpp_heterogeneity.do`; household
-and individual heterogeneity and all mediation analyses remain separate.
+effect heterogeneity. Community- and household-level heterogeneity are now
+implemented in the separate versioned modules
+`05d_census2017_ccpp_heterogeneity.do` and
+`05e_census2017_household_heterogeneity.do`; individual heterogeneity and all
+mediation analyses remain separate.
 
 ## Canonical implementation
 
@@ -84,8 +86,9 @@ publication or Overleaf synchronization.
 
 ## Heterogeneity implementation status
 
-`05d_census2017_ccpp_heterogeneity.do` preserves the common design window and
-uses one pooled, fully interacted local-linear IV model for formal
+`05d_census2017_ccpp_heterogeneity.do` and
+`05e_census2017_household_heterogeneity.do` preserve the common design window
+and use one pooled, fully interacted local-linear IV model for formal
 comparisons. For a
 predetermined moderator, the endogenous terms would be treatment and
 treatment-by-moderator; cutoff assignment and
@@ -100,7 +103,18 @@ Candidate predetermined moderators include 2007 population, sex for person
 outcomes, and district-capital status. Continuous population should remain
 continuous unless theory fixes categories in advance. Familywise inference
 and effective sample sizes must be reported because the local sample is
-limited.
+limited. The household module gives every RUV community total weight one
+before triangular-kernel weighting and clusters primary inference by RUV
+community.
+
+The validated household module contains 24,877 complete-sample households in
+406 RUV communities and 2,706 households in 61 communities inside the common
+window. Of 48 common-window fuzzy-IV outcome-by-moderator rows, only the eight
+baseline-deprivation rows pass the prespecified support, underidentification,
+and minimum conditional `F > 10` gate. The district-capital moderator lacks
+local support and rank; the other four moderators fail the strength gate. No
+gate-passing row survives five-percent Holm or Benjamini--Hochberg adjustment.
+These failures are retained as diagnostics and are not interpreted causally.
 
 Realized CMAN project type is different: it is post-treatment and undefined
 for untreated communities. Conditioning on it, splitting the treated sample,

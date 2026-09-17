@@ -6,14 +6,15 @@ This protocol governs the prespecified effect-heterogeneity modules that follow
 the main SISFOH 2013 and Census 2017 outcome analyses. It fixes the estimands,
 moderators, sample, bandwidth, weighting, inference, instrument-strength gates,
 and interpretation rules before reviewing heterogeneity results. The first
-implemented module was `05a_sisfoh2013_ccpp_heterogeneity.do`; the first Census
-2017 module is `05d_census2017_ccpp_heterogeneity.do`.
+implemented module was `05a_sisfoh2013_ccpp_heterogeneity.do`. Census 2017 now
+has CCPP and household modules in `05d_census2017_ccpp_heterogeneity.do` and
+`05e_census2017_household_heterogeneity.do`.
 
 The SISFOH 2013 suite is implemented in
 `05a_sisfoh2013_ccpp_heterogeneity.do`,
 `05b_sisfoh2013_household_heterogeneity.do`, and
 `05c_sisfoh2013_individual_heterogeneity.do`. The latter two and the Census
-2017 CCPP module share the
+2017 CCPP and household modules share the
 versioned engine `_heterogeneity_level_engine.do` so that weighting,
 identification gates, multiplicity, and output checks cannot drift across
 levels or waves. Each caller supplies its wave- and level-specific primary
@@ -205,8 +206,8 @@ linear-dose and exclusion assumptions.
 
 ## Shared microdata engine and invariance gate
 
-Household-, individual-, and Census 2017 CCPP-level modules call the same
-wave-neutral engine,
+SISFOH household and individual modules and Census 2017 CCPP and household
+modules call the same wave-neutral engine,
 `code/stata/pipeline/_heterogeneity_level_engine.do`. Each calling module must
 declare the treatment variable, moderator-registry column, primary weighting
 and clustering rules, wave label, treatment-timing statement, person-source
@@ -218,15 +219,13 @@ output contract without silently changing the estimand across waves.
 
 `code/stata/tests/test_heterogeneity_engine_wave_contract.do` enforces the
 source-level contract. Any engine refactor must additionally reproduce the
-validated 2013 household and individual outputs before a new wave may use it.
-The 14 September 2026 refactor was run through `stata_run_selection` before and
-after the change. All 37 substantive aggregate artifacts--machine-readable
-results, support and contract files, LaTeX tables, and PNG figures--were
-byte-for-byte identical. The 17-row household and 20-row individual manifests
-were identical in path, artifact type, input signature, generator, checksum,
-and review status; only the expected run identifier changed. No estimator,
-sample, moderator, bandwidth, weight, cluster rule, diagnostic, or numerical
-result changed.
+validated modules before a new level or wave may use it. On 16 September 2026,
+the complete orchestrator and Census 2017 household output-contract test ran
+through `stata_run_selection`. The run generated 224 household result rows,
+14 support rows, and a unique 17-artifact household manifest. The shared
+figure layer was also corrected to derive outcome labels from the active
+registry rather than wave-ambiguous outcome IDs; all modules were regenerated
+and visually checked.
 
 ## Deferred work
 

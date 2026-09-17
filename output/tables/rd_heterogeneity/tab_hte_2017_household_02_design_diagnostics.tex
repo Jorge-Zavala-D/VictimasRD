@@ -1,0 +1,20 @@
+\begin{table}[!htbp]
+\centering
+\caption{Local support and fuzzy-heterogeneity identification diagnostics}
+\label{tab:hte-2017_household-diagnostics}
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lrrrrrll}
+\toprule
+Moderator & CCPP left & CCPP right & Min. cell & Min. SW \(F\) & KP \(F\) & Support & IV gate \\
+\midrule
+Log baseline CCPP population & 39 & 22 & 22 & 3.69 & 1.23 & Pass & Fail \\
+District-capital CCPP & 38 & 22 & 2 & -- & -- & Fail & Fail \\
+Baseline CCPP deprivation & 38 & 22 & 22 & 14.66 & 4.68 & Pass & Pass \\
+Distance to corresponding district capital & 38 & 22 & 22 & 1.99 & 0.76 & Pass & Fail \\
+Baseline CCPP economic development & 39 & 22 & 22 & 2.83 & 1.31 & Pass & Fail \\
+CCPP altitude & 38 & 22 & 22 & 0.28 & 0.14 & Pass & Fail \\
+\bottomrule
+\end{tabular}}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Diagnostics come from the pooled, fully interacted local-linear 2SLS model in the fixed \(h=0.0075\) window. Each eligible RUV community has total weight one before triangular kernel weighting. CCPP left and right are unique assignment clusters. For binary moderators, Min. cell is the smallest moderator-by-side CCPP count; for continuous moderators it is the smaller side count. The causal gate requires support, underidentification rejection at five percent, and the minimum Sanderson--Windmeijer conditional \(F\) strictly above 10. The Kleibergen--Paap statistic is supplementary. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\end{table}

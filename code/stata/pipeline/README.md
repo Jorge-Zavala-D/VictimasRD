@@ -120,8 +120,10 @@ and their wave-by-level registries are stored under `metadata/rd-outcomes/`.
 `05a_sisfoh2013_ccpp_heterogeneity.do`,
 `05b_sisfoh2013_household_heterogeneity.do`, and
 `05c_sisfoh2013_individual_heterogeneity.do` implement the full SISFOH 2013
-suite. `05d_census2017_ccpp_heterogeneity.do` begins the Census 2017 suite at
-the community level. The household, person, and 2017 CCPP modules share the
+suite. `05d_census2017_ccpp_heterogeneity.do` and
+`05e_census2017_household_heterogeneity.do` implement the first two Census
+2017 levels. The 2013 household and person modules and the 2017 CCPP and
+household modules share the
 wave-neutral
 `_heterogeneity_level_engine.do` to enforce one estimator, weighting, support,
 multiplicity, and output contract across 2013 and 2017. Each caller supplies
@@ -129,7 +131,9 @@ its wave-specific treatment, moderator-registry column, primary weighting and
 clustering rules, labels, and source vintage.
 `code/stata/tests/test_heterogeneity_engine_wave_contract.do` and
 `code/stata/tests/test_census2017_ccpp_heterogeneity_contract.do` guard the
-interface. Pooled, fully interacted
+interface. `code/stata/tests/test_census2017_household_heterogeneity_outputs.do`
+validates the household result grid, support and analysis contracts, strict
+instrument gate, and 17-artifact manifest. Pooled, fully interacted
 fuzzy-LATE heterogeneity estimated with `ivreg2` is primary; `rdhte`
 provides secondary assignment-effect heterogeneity and never substitutes for a
 weak or underidentified fuzzy interaction. All modules use the fixed

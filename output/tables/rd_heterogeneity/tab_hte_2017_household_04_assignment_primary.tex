@@ -1,0 +1,37 @@
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}p{0.20\linewidth}p{0.16\linewidth}rp{0.14\linewidth}rrl@{}}
+\caption{Primary assignment-effect heterogeneity}\label{tab:hte-2017_household-assignment-primary}\\
+\toprule
+Outcome & Moderator & Interaction & 95\% CI & Raw \(p\) & Holm \(p\) & Support \\
+\midrule
+\endfirsthead
+\toprule
+Outcome & Moderator & Interaction & 95\% CI & Raw \(p\) & Holm \(p\) & Support \\
+\midrule
+\endhead
+\midrule
+\multicolumn{7}{r}{\scriptsize Continued on next page} \\
+\endfoot
+\bottomrule
+\multicolumn{7}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} These are robust local-polynomial discontinuities in the assignment effect estimated with \texttt{rdhte}, not fuzzy-RD complier effects. Each RUV community has total weight one, the window is \(h=0.0075\), and inference clusters by RUV community. Continuous coefficients are assignment-effect slopes per moderator SD; binary coefficients compare one with zero. These estimates are secondary complementary evidence and never replace a failed fuzzy-IV identification gate. Multiplicity is adjusted within estimator and moderator tier. Source: RUV, CMAN, and INEI-assisted Census 2017.} \\
+\endlastfoot
+Female household members & Log baseline CCPP population & 1.30 & [-12.72, 15.31] & 0.856 & 1.000 & Pass \\
+Household members age 15-29 & Log baseline CCPP population & 8.66 & [-1.55, 18.87] & 0.097 & 0.773 & Pass \\
+Members living in another CCPP & Log baseline CCPP population & 17.27 & [-27.43, 61.97] & 0.449 & 1.000 & Pass \\
+Members with secondary education or higher & Log baseline CCPP population & 2.43 & [-17.39, 22.26] & 0.810 & 1.000 & Pass \\
+Employed household members & Log baseline CCPP population & -1.59 & [-26.36, 23.17] & 0.900 & 1.000 & Pass \\
+Members with health insurance & Log baseline CCPP population & -2.02 & [-20.58, 16.55] & 0.831 & 1.000 & Pass \\
+Members reporting disability & Log baseline CCPP population & -0.47 & [-14.61, 13.68] & 0.949 & 1.000 & Pass \\
+Core household wellbeing proxy & Log baseline CCPP population & -10.36 & [-31.28, 10.55] & 0.331 & 1.000 & Pass \\
+Female household members & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Household members age 15-29 & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Members living in another CCPP & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Members with secondary education or higher & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Employed household members & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Members with health insurance & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Members reporting disability & District-capital CCPP & -- & -- & -- & -- & Fail \\
+Core household wellbeing proxy & District-capital CCPP & -- & -- & -- & -- & Fail \\
+\end{longtable}
+\endgroup

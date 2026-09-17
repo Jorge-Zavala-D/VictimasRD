@@ -1574,13 +1574,6 @@ assert _N > 0
 
 generate int plot_y = _N - _n + 1
 generate str80 plot_label = outcome_label
-replace plot_label = "Household size" if outcome_id == "H01"
-replace plot_label = "Female share" if outcome_id == "H02"
-replace plot_label = "Employment rate" if outcome_id == "H03"
-replace plot_label = "Any social program" if outcome_id == "H04"
-replace plot_label = "Any unmet basic need" if outcome_id == "H06"
-replace plot_label = "Asset wellbeing" if outcome_id == "H07"
-replace plot_label = "Secondary education or higher" if outcome_id == "H08"
 local fuzzy_ylabels
 forvalues row = 1/`=_N' {
     local row_label = ///
@@ -1614,7 +1607,7 @@ twoway ///
         "`fuzzy_figure_inference_note'" ///
         "Continuous interactions are per moderator SD; binary interactions compare one with zero. Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
-    xsize(11) ysize(8) ///
+    xsize(13) ysize(8) ///
     graphregion(color(white)) plotregion(color(white))
 
 graph export ///
@@ -1631,13 +1624,6 @@ assert _N > 0
 
 generate int plot_y = _N - _n + 1
 generate str80 plot_label = outcome_label
-replace plot_label = "Household size" if outcome_id == "H01"
-replace plot_label = "Female share" if outcome_id == "H02"
-replace plot_label = "Employment rate" if outcome_id == "H03"
-replace plot_label = "Any social program" if outcome_id == "H04"
-replace plot_label = "Any unmet basic need" if outcome_id == "H06"
-replace plot_label = "Asset wellbeing" if outcome_id == "H07"
-replace plot_label = "Secondary education or higher" if outcome_id == "H08"
 local assignment_ylabels
 forvalues row = 1/`=_N' {
     local row_label = ///
@@ -1667,7 +1653,7 @@ twoway ///
         "`assign_figure_inference_note'" ///
         "Sources: RUV, CMAN, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
-    xsize(11) ysize(8) ///
+    xsize(13) ysize(8) ///
     graphregion(color(white)) plotregion(color(white))
 
 graph export ///
@@ -1788,22 +1774,6 @@ assert _N > 0
 
 generate int plot_y = _N - _n + 1
 generate str48 plot_outcome = outcome_label
-replace plot_outcome = "Household members" if outcome_id == "H01"
-replace plot_outcome = "Female members" if outcome_id == "H02"
-replace plot_outcome = "Employment rate" if outcome_id == "H03"
-replace plot_outcome = "Any social program" if outcome_id == "H04"
-replace plot_outcome = "Core wellbeing" if outcome_id == "H05"
-replace plot_outcome = "Any unmet basic need" if outcome_id == "H06"
-replace plot_outcome = "Asset wellbeing" if outcome_id == "H07"
-replace plot_outcome = "Secondary education+" if outcome_id == "H08"
-replace plot_outcome = "Female" if outcome_id == "I01"
-replace plot_outcome = "Age 15-29" if outcome_id == "I02"
-replace plot_outcome = "Secondary education+" if outcome_id == "I03"
-replace plot_outcome = "Employment" if outcome_id == "I04"
-replace plot_outcome = "Independent worker" if outcome_id == "I05"
-replace plot_outcome = "Health insurance" if outcome_id == "I06"
-replace plot_outcome = "Any social program" if outcome_id == "I07"
-replace plot_outcome = "Juntos" if outcome_id == "I08"
 local conditional_ylabels
 forvalues row = 1/`=_N' {
     local row_label = ///
@@ -1838,7 +1808,7 @@ twoway ///
         "`conditional_figure_design_note'" ///
         "Sources: RUV, CMAN, INEI 2007 Census tabulations, and ${hte_source_note}.", ///
         size(tiny) color(gs5) span) ///
-    xsize(11) ysize(9) ///
+    xsize(13) ysize(9) ///
     graphregion(color(white)) plotregion(color(white))
 
 graph export ///
