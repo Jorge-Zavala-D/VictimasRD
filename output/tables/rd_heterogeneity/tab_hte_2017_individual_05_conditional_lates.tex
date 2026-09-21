@@ -1,0 +1,59 @@
+\begingroup
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\begin{longtable}{@{}p{0.18\linewidth}p{0.15\linewidth}lrrp{0.13\linewidth}rl@{}}
+\caption{Conditional local effects implied by the pooled fuzzy-RD model}\label{tab:hte-2017_individual-conditional}\\
+\toprule
+Outcome & Moderator & Value & Raw value & Effect & 95\% CI & \(p\) & Gate \\
+\midrule
+\endfirsthead
+\toprule
+Outcome & Moderator & Value & Raw value & Effect & 95\% CI & \(p\) & Gate \\
+\midrule
+\endhead
+\midrule
+\multicolumn{8}{r}{\scriptsize Continued on next page} \\
+\endfoot
+\bottomrule
+\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} Conditional effects are linear combinations from the same pooled fuzzy local-IV model, not separately estimated subgroup RDs. Continuous moderators are evaluated at their analysis-universe quartiles; binary moderators at zero and one. The common \(h=0.0075\), CCPP-equal weighting, triangular kernel, and CCPP-clustered inference are fixed across outcomes. A failed gate means the conditional effect is diagnostic only. Source: RUV, CMAN, and INEI-assisted Census 2017.} \\
+\endlastfoot
+Female & Log baseline CCPP population & P25 & 4.55 & 5.55 & [-3.53, 14.63] & 0.231 & Fail \\
+Female & Log baseline CCPP population & P50 & 5.13 & 9.53 & [-4.35, 23.41] & 0.179 & Fail \\
+Female & Log baseline CCPP population & P75 & 5.62 & 12.88 & [-7.28, 33.04] & 0.211 & Fail \\
+Age 15-29 & Log baseline CCPP population & P25 & 4.55 & 4.33 & [-9.16, 17.81] & 0.530 & Fail \\
+Age 15-29 & Log baseline CCPP population & P50 & 5.13 & 14.35 & [-7.79, 36.48] & 0.204 & Fail \\
+Age 15-29 & Log baseline CCPP population & P75 & 5.62 & 22.78 & [-9.84, 55.41] & 0.171 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & P25 & 4.55 & 41.24 & [-11.77, 94.26] & 0.127 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & P50 & 5.13 & 82.67 & [-25.45, 190.78] & 0.134 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & P75 & 5.62 & 117.55 & [-46.50, 281.60] & 0.160 & Fail \\
+Secondary education or higher & Log baseline CCPP population & P25 & 4.55 & 8.31 & [-15.66, 32.27] & 0.497 & Fail \\
+Secondary education or higher & Log baseline CCPP population & P50 & 5.13 & 13.49 & [-13.19, 40.17] & 0.322 & Fail \\
+Secondary education or higher & Log baseline CCPP population & P75 & 5.62 & 17.86 & [-17.47, 53.20] & 0.322 & Fail \\
+Employed in the reference week & Log baseline CCPP population & P25 & 4.55 & -14.36 & [-31.26, 2.54] & 0.096 & Fail \\
+Employed in the reference week & Log baseline CCPP population & P50 & 5.13 & -9.43 & [-33.08, 14.22] & 0.435 & Fail \\
+Employed in the reference week & Log baseline CCPP population & P75 & 5.62 & -5.28 & [-37.09, 26.53] & 0.745 & Fail \\
+Any health insurance & Log baseline CCPP population & P25 & 4.55 & -6.63 & [-19.18, 5.91] & 0.300 & Fail \\
+Any health insurance & Log baseline CCPP population & P50 & 5.13 & -12.74 & [-40.84, 15.35] & 0.374 & Fail \\
+Any health insurance & Log baseline CCPP population & P75 & 5.62 & -17.89 & [-61.12, 25.35] & 0.417 & Fail \\
+Reports any disability & Log baseline CCPP population & P25 & 4.55 & -12.92 & [-27.33, 1.49] & 0.079 & Fail \\
+Reports any disability & Log baseline CCPP population & P50 & 5.13 & -12.48 & [-29.99, 5.04] & 0.163 & Fail \\
+Reports any disability & Log baseline CCPP population & P75 & 5.62 & -12.10 & [-35.71, 11.51] & 0.315 & Fail \\
+Core wellbeing proxy & Log baseline CCPP population & P25 & 4.55 & 13.49 & [-5.83, 32.81] & 0.171 & Fail \\
+Core wellbeing proxy & Log baseline CCPP population & P50 & 5.13 & 20.05 & [-14.16, 54.26] & 0.251 & Fail \\
+Core wellbeing proxy & Log baseline CCPP population & P75 & 5.62 & 25.57 & [-24.22, 75.36] & 0.314 & Fail \\
+Age 15-29 & Female respondent & Men & 0.00 & -4.67 & [-23.60, 14.27] & 0.629 & Pass \\
+Age 15-29 & Female respondent & Women & 1.00 & 9.75 & [-7.70, 27.19] & 0.274 & Pass \\
+Lives in another CCPP & Female respondent & Men & 0.00 & 43.94 & [0.85, 87.03] & 0.046 & Pass \\
+Lives in another CCPP & Female respondent & Women & 1.00 & 43.20 & [4.68, 81.71] & 0.028 & Pass \\
+Secondary education or higher & Female respondent & Men & 0.00 & -2.16 & [-29.89, 25.57] & 0.879 & Pass \\
+Secondary education or higher & Female respondent & Women & 1.00 & 13.44 & [-13.14, 40.02] & 0.322 & Pass \\
+Employed in the reference week & Female respondent & Men & 0.00 & -15.06 & [-31.48, 1.36] & 0.072 & Pass \\
+Employed in the reference week & Female respondent & Women & 1.00 & -7.14 & [-23.70, 9.41] & 0.398 & Pass \\
+Any health insurance & Female respondent & Men & 0.00 & -9.79 & [-37.46, 17.88] & 0.488 & Pass \\
+Any health insurance & Female respondent & Women & 1.00 & -2.35 & [-13.05, 8.34] & 0.666 & Pass \\
+Reports any disability & Female respondent & Men & 0.00 & -11.64 & [-30.72, 7.44] & 0.232 & Pass \\
+Reports any disability & Female respondent & Women & 1.00 & -9.55 & [-24.43, 5.33] & 0.208 & Pass \\
+Core wellbeing proxy & Female respondent & Men & 0.00 & 3.60 & [-12.55, 19.75] & 0.662 & Pass \\
+Core wellbeing proxy & Female respondent & Women & 1.00 & 18.35 & [-1.37, 38.07] & 0.068 & Pass \\
+\end{longtable}
+\endgroup

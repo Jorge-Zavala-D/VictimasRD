@@ -67,12 +67,12 @@ isid moderator_id side_label category_label
 
 import delimited using "`contract'", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
-assert _N == 14
-quietly count if contract_item == "weighting" & ///
-    contract_value == "CCPP-equal" & status == "approved"
+assert _N == 12
+quietly count if component == "weighting" & ///
+    value == "CCPP-equal" & status == "approved"
 assert r(N) == 1
-quietly count if contract_item == "inference" & ///
-    contract_value == "CCPP-clustered" & status == "approved"
+quietly count if component == "inference" & ///
+    value == "CCPP-clustered" & status == "approved"
 assert r(N) == 1
 
 import delimited using "`manifest'", ///
