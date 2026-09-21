@@ -34,6 +34,8 @@ local input_2017_ccpp ///
     "${analysis_data_root}/14_community_registry_census_2017.dta"
 local input_2017_household ///
     "${analysis_data_root}/13_census_2017_household_analysis.dta"
+local input_2017_individual ///
+    "${analysis_data_root}/12_census_2017_individual_analysis.dta"
 local project_registry ///
     "${intermediate_root}/03_cman_projects_2023.dta"
 local outcome_registry ///
@@ -46,6 +48,8 @@ local registry_17_ccpp ///
     "${metadata_root}/rd-outcomes/outcome-registry-2017-ccpp.csv"
 local registry_17_hh ///
     "${metadata_root}/rd-outcomes/outcome-registry-2017-household.csv"
+local registry_17_ind ///
+    "${metadata_root}/rd-outcomes/outcome-registry-2017-individual.csv"
 local moderator_registry ///
     "${metadata_root}/rd-heterogeneity/moderator-registry.csv"
 local protocol ///
@@ -62,6 +66,8 @@ local module_2017_ccpp ///
     "${pipeline_root}/05d_census2017_ccpp_heterogeneity.do"
 local module_2017_household ///
     "${pipeline_root}/05e_census2017_household_heterogeneity.do"
+local module_2017_individual ///
+    "${pipeline_root}/05f_census2017_individual_heterogeneity.do"
 
 foreach required_file in ///
     "`input_2013_ccpp'" ///
@@ -69,12 +75,14 @@ foreach required_file in ///
     "`input_2013_individual'" ///
     "`input_2017_ccpp'" ///
     "`input_2017_household'" ///
+    "`input_2017_individual'" ///
     "`project_registry'" ///
     "`outcome_registry'" ///
     "`registry_13_hh'" ///
     "`registry_13_ind'" ///
     "`registry_17_ccpp'" ///
     "`registry_17_hh'" ///
+    "`registry_17_ind'" ///
     "`moderator_registry'" ///
     "`protocol'" ///
     "`level_engine'" ///
@@ -82,7 +90,8 @@ foreach required_file in ///
     "`module_2013_household'" ///
     "`module_2013_individual'" ///
     "`module_2017_ccpp'" ///
-    "`module_2017_household'" {
+    "`module_2017_household'" ///
+    "`module_2017_individual'" {
 
     capture confirm file "`required_file'"
     if _rc {
@@ -118,12 +127,14 @@ global hte_input_2013_household  "`input_2013_household'"
 global hte_input_2013_individual "`input_2013_individual'"
 global hte_input_2017_ccpp       "`input_2017_ccpp'"
 global hte_input_2017_household  "`input_2017_household'"
+global hte_input_2017_individual "`input_2017_individual'"
 global hte_project_registry      "`project_registry'"
 global hte_outcome_registry      "`outcome_registry'"
 global hte_outcomes_13_hh  "`registry_13_hh'"
 global hte_outcomes_13_ind "`registry_13_ind'"
 global hte_outcomes_17_ccpp "`registry_17_ccpp'"
 global hte_outcomes_17_hh   "`registry_17_hh'"
+global hte_outcomes_17_ind  "`registry_17_ind'"
 global hte_moderator_registry    "`moderator_registry'"
 global hte_level_engine          "`level_engine'"
 global hte_figure_dir            "${figures_root}/rd_heterogeneity"
@@ -140,6 +151,8 @@ global hte_manifest_2017_ccpp ///
     "${metadata_root}/rd-heterogeneity-output-manifest-2017-ccpp.csv"
 global hte_manifest_2017_household ///
     "${metadata_root}/rd-heterogeneity-output-manifest-2017-household.csv"
+global hte_manifest_2017_individual ///
+    "${metadata_root}/rd-heterogeneity-output-manifest-2017-individual.csv"
 global hte_manifest_all ///
     "${metadata_root}/rd-heterogeneity-output-manifest-2013-2017.csv"
 
@@ -225,6 +238,16 @@ if _rc {
     exit _rc
 }
 
+display as result "Starting Census 2017 individual heterogeneity analysis."
+capture estimates clear
+capture ereturn clear
+capture matrix drop _all
+do "`module_2017_individual'"
+if _rc {
+    display as error "Census 2017 individual heterogeneity module failed."
+    exit _rc
+}
+
 
 *-----------------------------------*
 **# 4. Orchestrator closeout
@@ -270,7 +293,8 @@ export delimited using "${hte_manifest_2013}", ///
 
 foreach level_manifest in ///
     "${hte_manifest_2017_ccpp}" ///
-    "${hte_manifest_2017_household}" {
+    "${hte_manifest_2017_household}" ///
+    "${hte_manifest_2017_individual}" {
 
     capture confirm file "`level_manifest'"
     if _rc {
@@ -282,7 +306,8 @@ foreach level_manifest in ///
 
 foreach level_manifest in ///
     "${hte_manifest_2017_ccpp}" ///
-    "${hte_manifest_2017_household}" {
+    "${hte_manifest_2017_household}" ///
+    "${hte_manifest_2017_individual}" {
 
     import delimited using "`level_manifest'", ///
         clear varnames(1) bindquote(strict) encoding(utf8)
@@ -294,11 +319,11 @@ use `combined_manifest', clear
 isid path
 sort path
 quietly count
-assert r(N) == 106
+assert r(N) == 126
 export delimited using "${hte_manifest_all}", ///
     replace nolabel
 
-display as result "Completed SISFOH 2013 and Census 2017 CCPP and household heterogeneity modules."
+display as result "Completed all SISFOH 2013 and Census 2017 heterogeneity modules."
 display as text "Instrument-strength gate: minimum conditional F > ${hte_weak_f_gate}"
 display as text "Aggregate manifest: ${hte_manifest_2013}"
 display as text "Cross-wave manifest: ${hte_manifest_all}"

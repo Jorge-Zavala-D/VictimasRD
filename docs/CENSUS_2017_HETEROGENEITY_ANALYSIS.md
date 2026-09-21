@@ -2,15 +2,17 @@
 
 ## Scope
 
-`05d_census2017_ccpp_heterogeneity.do` and
-`05e_census2017_household_heterogeneity.do` implement the first two Census
-2017 treatment-effect heterogeneity levels. The CCPP module uses the
-388-community complete primary sample; the household module uses 24,877
-complete-sample households nested in 406 RUV communities. Both use the
-selected adjacent B/C design, `running_bc`, cumulative treatment through 2016,
-and the common fixed bandwidth `h = 0.0075`.
+`05d_census2017_ccpp_heterogeneity.do`,
+`05e_census2017_household_heterogeneity.do`, and
+`05f_census2017_individual_heterogeneity.do` implement all three Census 2017
+treatment-effect heterogeneity levels. The CCPP module uses the 388-community
+complete primary sample; the household module uses 24,877 households in 406
+RUV communities; and the individual module uses 54,317 linked people age 14
+or older in the same 406-community outcome universe. All use the selected
+adjacent B/C design, `running_bc`, cumulative treatment through 2016, and the
+common fixed bandwidth `h = 0.0075`.
 
-Neither module alters the main RD sample, selects moderators by results, or
+No heterogeneity module alters the main RD sample, selects moderators by results, or
 estimates mediation. The primary formal comparison is a pooled, fully
 interacted fuzzy local-IV model. `rdhte` is secondary assignment-effect
 evidence only.

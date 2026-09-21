@@ -1893,13 +1893,16 @@ if "`level'" == "individual" {
         width(3300) replace
 
 
-    * The only common-window fuzzy models passing the gate are secondary
-    * respondent-age interactions; show them with their composition caveat.
+    * Show all respondent-age interactions and keep the identification gate
+    * visible. Realized gate results may differ across waves.
     use `hte_results_final', clear
-    keep if spec_id == "common_h_iv" & gate_pass == 1
+    keep if spec_id == "common_h_iv" & moderator_id == "S04" & ///
+        gate_status != "not_applicable_identity"
     assert _N == 8
-    assert moderator_id == "S04"
     sort paper_order
+
+    quietly count if gate_pass == 1
+    local age_gate_count = r(N)
 
     generate int age_plot_y = _N - _n + 1
     local age_ylabels
@@ -1910,10 +1913,16 @@ if "`level'" == "individual" {
     }
 
     twoway ///
-        (rcap standardized_ci_low standardized_ci_high age_plot_y, ///
+        (rcap standardized_ci_low standardized_ci_high age_plot_y ///
+            if gate_pass == 1, ///
             horizontal lcolor(navy) lwidth(medthin)) ///
-        (scatter age_plot_y standardized_estimate, ///
-            msymbol(O) mcolor(navy) msize(medsmall)), ///
+        (scatter age_plot_y standardized_estimate if gate_pass == 1, ///
+            msymbol(O) mcolor(navy) msize(medsmall)) ///
+        (rcap standardized_ci_low standardized_ci_high age_plot_y ///
+            if gate_pass == 0, ///
+            horizontal lcolor(gs10) lwidth(medthin)) ///
+        (scatter age_plot_y standardized_estimate if gate_pass == 0, ///
+            msymbol(Oh) mcolor(gs7) msize(medsmall)), ///
         xline(0, lcolor(gs8) lpattern(shortdash)) ///
         ylabel(`age_ylabels', ///
             angle(horizontal) labsize(vsmall) noticks) ///
@@ -1921,12 +1930,13 @@ if "`level'" == "individual" {
         xtitle("Treatment-by-age interaction (below-cutoff SD units)") ///
         title("Secondary age heterogeneity: ${hte_wave_label} people", ///
             size(medium) color(black)) ///
-        subtitle("Models pass the fuzzy-IV gate; robust 95% intervals", ///
+        subtitle("Pooled local IV; common h = 0.0075; robust 95% intervals", ///
             size(small) color(gs5)) ///
-        legend(off) ///
+        legend(order(2 "Passes fuzzy-IV gate" 4 "Fails fuzzy-IV gate") ///
+            rows(1) position(6) size(small) region(lcolor(none))) ///
         note( ///
             "Notes: The moderator is respondent age standardized in the complete person-level analysis universe." ///
-            "All eight models pass support, underidentification, and minimum conditional F > 10, but none survives BH correction." ///
+            "`age_gate_count' of eight models pass support, underidentification, and the minimum conditional F > 10 gate; failed rows remain diagnostic." ///
             "Observed age composition can respond through migration or survival, so these secondary estimates do not establish baseline age moderation." ///
             "Each RUV community receives total weight one; inference clusters by community. Sources: RUV, CMAN, and ${hte_source_note}.", ///
             size(tiny) color(gs5) span) ///

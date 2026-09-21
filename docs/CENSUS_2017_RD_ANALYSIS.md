@@ -6,11 +6,13 @@ The Census 2017 outcome workflow estimates main effects at the CCPP,
 household, and individual levels. It uses cumulative collective-reparation
 receipt through 2016 (`treat_16`) and treats Census measures as 2017 outcomes.
 The main-effects workflow does not estimate causal mediation or treatment-
-effect heterogeneity. Community- and household-level heterogeneity are now
+effect heterogeneity. Community-, household-, and individual-level
+heterogeneity are now
 implemented in the separate versioned modules
-`05d_census2017_ccpp_heterogeneity.do` and
-`05e_census2017_household_heterogeneity.do`; individual heterogeneity and all
-mediation analyses remain separate.
+`05d_census2017_ccpp_heterogeneity.do`,
+`05e_census2017_household_heterogeneity.do`, and
+`05f_census2017_individual_heterogeneity.do`; all mediation analyses remain
+separate.
 
 ## Canonical implementation
 
@@ -86,8 +88,9 @@ publication or Overleaf synchronization.
 
 ## Heterogeneity implementation status
 
-`05d_census2017_ccpp_heterogeneity.do` and
-`05e_census2017_household_heterogeneity.do` preserve the common design window
+`05d_census2017_ccpp_heterogeneity.do`,
+`05e_census2017_household_heterogeneity.do`, and
+`05f_census2017_individual_heterogeneity.do` preserve the common design window
 and use one pooled, fully interacted local-linear IV model for formal
 comparisons. For a
 predetermined moderator, the endogenous terms would be treatment and

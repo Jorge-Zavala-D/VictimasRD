@@ -7,14 +7,16 @@ the main SISFOH 2013 and Census 2017 outcome analyses. It fixes the estimands,
 moderators, sample, bandwidth, weighting, inference, instrument-strength gates,
 and interpretation rules before reviewing heterogeneity results. The first
 implemented module was `05a_sisfoh2013_ccpp_heterogeneity.do`. Census 2017 now
-has CCPP and household modules in `05d_census2017_ccpp_heterogeneity.do` and
-`05e_census2017_household_heterogeneity.do`.
+has CCPP, household, and individual modules in
+`05d_census2017_ccpp_heterogeneity.do`,
+`05e_census2017_household_heterogeneity.do`, and
+`05f_census2017_individual_heterogeneity.do`.
 
 The SISFOH 2013 suite is implemented in
 `05a_sisfoh2013_ccpp_heterogeneity.do`,
 `05b_sisfoh2013_household_heterogeneity.do`, and
-`05c_sisfoh2013_individual_heterogeneity.do`. The latter two and the Census
-2017 CCPP and household modules share the
+`05c_sisfoh2013_individual_heterogeneity.do`. The latter two and all three
+Census 2017 modules share the
 versioned engine `_heterogeneity_level_engine.do` so that weighting,
 identification gates, multiplicity, and output checks cannot drift across
 levels or waves. Each caller supplies its wave- and level-specific primary
