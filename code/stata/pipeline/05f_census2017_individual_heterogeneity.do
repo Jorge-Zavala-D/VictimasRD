@@ -115,6 +115,7 @@ assert _N == 110940
 *-----------------------------------*
 
 global hte_level                    "individual"
+global hte_sort_key                 "census2017_cohort_pid"
 global hte_level_caption            "individual-level"
 global hte_unit_label               "Census source-cohort person age 14 or older"
 global hte_unit_plural              "people"

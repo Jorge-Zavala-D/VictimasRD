@@ -118,6 +118,7 @@ assert _N == 141679
 *-----------------------------------*
 
 global hte_level                    "individual"
+global hte_sort_key                 "sisfoh_pid"
 global hte_level_caption            "individual-level"
 global hte_unit_label               "SISFOH person age 14 or older"
 global hte_unit_plural              "people"

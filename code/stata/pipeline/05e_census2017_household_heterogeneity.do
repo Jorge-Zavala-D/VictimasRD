@@ -113,6 +113,7 @@ assert _N == 33066
 *-----------------------------------*
 
 global hte_level                    "household"
+global hte_sort_key                 "census2017_baseline_hhid"
 global hte_level_caption            "household-level"
 global hte_unit_label               "Census source household"
 global hte_unit_plural              "households"

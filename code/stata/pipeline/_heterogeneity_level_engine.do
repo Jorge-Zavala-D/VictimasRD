@@ -27,6 +27,7 @@ local required_globals ///
     hte_expected_results hte_expected_support_rows ///
     hte_input_basename hte_input_datasignature hte_module_current ///
     hte_manifest_current hte_output_stub hte_primary_outcomes ///
+    hte_sort_key ///
     hte_running hte_treatment hte_common_h hte_small_h ///
     hte_large_h hte_weak_f_gate hte_min_cell ///
     hte_primary_covariates hte_moderator_registry ///
@@ -42,6 +43,8 @@ foreach required_global of local required_globals {
         exit 198
     }
 }
+
+confirm variable ${hte_sort_key}
 
 local output_stub "${hte_output_stub}"
 local level "${hte_level}"
@@ -331,6 +334,54 @@ use `hte_analysis_base', clear
 **# 3. Pooled, fully interacted fuzzy local IV
 *-----------------------------------*
 
+capture program drop _vrd_sw_rank_fallback
+
+program define _vrd_sw_rank_fallback, rclass
+    version 19
+    syntax, ///
+        DVAR(varname) DMVAR(varname) ZVAR(varname) ZMVAR(varname) ///
+        MVAR(varname) RVAR(varname) RRVAR(varname) ///
+        RMVAR(varname) RRMVAR(varname) ///
+        WVAR(varname) SAMPLE(varname) CLUSTVAR(varname) ///
+        [COVARS(varlist)]
+
+    local included ///
+        "`mvar' `rvar' `rrvar' `rmvar' `rrmvar' `covars'"
+    tempvar other_hat fitted residual
+
+    quietly regress `dmvar' `zvar' `zmvar' ///
+        `included' [aw=`wvar'] if `sample'
+    quietly predict double `other_hat' if e(sample), xb
+    quietly regress `dvar' `other_hat' `included' ///
+        [aw=`wvar'] if `sample'
+    quietly predict double `fitted' if e(sample), xb
+    quietly replace `fitted' = `fitted' + ///
+        _b[`other_hat'] * (`dmvar' - `other_hat') if e(sample)
+    quietly generate double `residual' = `dvar' - `fitted' if e(sample)
+    quietly regress `residual' `zvar' `zmvar' `included' ///
+        [aw=`wvar'] if `sample', vce(cluster `clustvar')
+    quietly test `zvar' `zmvar'
+    local sw_f_treat = r(F) * r(df)
+
+    drop `other_hat' `fitted' `residual'
+    quietly regress `dvar' `zvar' `zmvar' ///
+        `included' [aw=`wvar'] if `sample'
+    quietly predict double `other_hat' if e(sample), xb
+    quietly regress `dmvar' `other_hat' `included' ///
+        [aw=`wvar'] if `sample'
+    quietly predict double `fitted' if e(sample), xb
+    quietly replace `fitted' = `fitted' + ///
+        _b[`other_hat'] * (`dvar' - `other_hat') if e(sample)
+    quietly generate double `residual' = `dmvar' - `fitted' if e(sample)
+    quietly regress `residual' `zvar' `zmvar' `included' ///
+        [aw=`wvar'] if `sample', vce(cluster `clustvar')
+    quietly test `zvar' `zmvar'
+    local sw_f_interaction = r(F) * r(df)
+
+    return scalar sw_f_treat = `sw_f_treat'
+    return scalar sw_f_interaction = `sw_f_interaction'
+end
+
 capture program drop _vrd_post_level_hte_iv
 
 program define _vrd_post_level_hte_iv
@@ -351,7 +402,7 @@ program define _vrd_post_level_hte_iv
         eligible eligible_count running_right ///
         assignment_m treatment_m running_m running_right_m ///
         covariate_missing side_tag cell_tag cluster_tag
-    tempname first_stage_matrix
+    tempname first_stage_matrix main_estimates
 
     quietly generate double `y_scaled' = `outvar' * `scale'
     quietly generate double `running_right' = ///
@@ -443,11 +494,15 @@ program define _vrd_post_level_hte_iv
     local clusters = r(N)
 
     local estimation_rc = 2001
+    local first_stage_available = 0
     if `support_pass' {
         * ivreg2 stores first-stage estimates internally. Clear them before
         * every fit so e(first) cannot inherit a prior outcome's diagnostics.
         capture estimates clear
         capture ereturn clear
+        * Make clustered SW diagnostics reproducible under finite precision.
+        sort `clustervar' ${hte_sort_key}
+        set sortseed 18092018
         capture quietly ivreg2 ///
             `y_scaled' ///
             `modvar' ${hte_running} `running_right' ///
@@ -456,8 +511,59 @@ program define _vrd_post_level_hte_iv
             (${hte_treatment} `treatment_m' = ///
                 hte_assignment `assignment_m') ///
             [aw=`analysis_weight'] if `eligible', ///
-            cluster(`clustervar') first
+            cluster(`clustervar') first psd0
         local estimation_rc = _rc
+
+        if !`estimation_rc' {
+            capture matrix `first_stage_matrix' = e(first)
+            if !_rc local first_stage_available = 1
+
+            local sw_missing = 1
+            if `first_stage_available' {
+                local sw_row = rownumb(`first_stage_matrix', "SWF")
+                if `sw_row' < . {
+                    local sw_missing = ///
+                        missing(`first_stage_matrix'[`sw_row', 1]) | ///
+                        missing(`first_stage_matrix'[`sw_row', 2])
+                }
+            }
+
+            local fallback_underid_p = .
+            capture local fallback_underid_p = e(idp)
+            if `sw_missing' & `first_stage_available' & ///
+                `fallback_underid_p' < .05 {
+                estimates store `main_estimates'
+                local fallback_covariates
+                if "`covariates'" != "" {
+                    local fallback_covariates "covars(`covariates')"
+                }
+                local fallback_sw_f_treat = .
+                local fallback_sw_f_interaction = .
+                capture quietly _vrd_sw_rank_fallback, ///
+                    dvar(${hte_treatment}) dmvar(`treatment_m') ///
+                    zvar(hte_assignment) zmvar(`assignment_m') ///
+                    mvar(`modvar') rvar(${hte_running}) ///
+                    rrvar(`running_right') rmvar(`running_m') ///
+                    rrmvar(`running_right_m') ///
+                    wvar(`analysis_weight') sample(`eligible') ///
+                    clustvar(`clustervar') `fallback_covariates'
+                local fallback_rc = _rc
+                if !`fallback_rc' {
+                    local fallback_sw_f_treat = r(sw_f_treat)
+                    local fallback_sw_f_interaction = r(sw_f_interaction)
+                }
+                estimates restore `main_estimates'
+                estimates drop `main_estimates'
+                if !`fallback_rc' & ///
+                    !missing(`fallback_sw_f_treat', ///
+                        `fallback_sw_f_interaction') {
+                    matrix `first_stage_matrix'[`sw_row', 1] = ///
+                        `fallback_sw_f_treat'
+                    matrix `first_stage_matrix'[`sw_row', 2] = ///
+                        `fallback_sw_f_interaction'
+                }
+            }
+        }
     }
 
     local estimate .
@@ -507,17 +613,16 @@ program define _vrd_post_level_hte_iv
         capture local underid_p = e(idp)
         capture local ar_p = e(arfp)
 
-        capture matrix `first_stage_matrix' = e(first)
-        if !_rc {
+        if `first_stage_available' {
             local sw_row = rownumb(`first_stage_matrix', "SWF")
-        if `sw_row' < . {
-            local sw_f_treat = `first_stage_matrix'[`sw_row', 1]
-            local sw_f_interaction = `first_stage_matrix'[`sw_row', 2]
-            if `sw_f_treat' < . & `sw_f_interaction' < . {
-                local min_sw_f = ///
-                    min(`sw_f_treat', `sw_f_interaction')
+            if `sw_row' < . {
+                local sw_f_treat = `first_stage_matrix'[`sw_row', 1]
+                local sw_f_interaction = `first_stage_matrix'[`sw_row', 2]
+                if `sw_f_treat' < . & `sw_f_interaction' < . {
+                    local min_sw_f = ///
+                        min(`sw_f_treat', `sw_f_interaction')
+                }
             }
-        }
         }
 
         local gate_pass = ///
@@ -2035,6 +2140,7 @@ foreach output_path of local output_paths {
 
 file close `manifest_file'
 
+capture program drop _vrd_sw_rank_fallback
 capture program drop _vrd_post_level_hte_iv
 capture program drop _vrd_post_level_hte_rdhte
 capture program drop _vrd_post_level_hte_na

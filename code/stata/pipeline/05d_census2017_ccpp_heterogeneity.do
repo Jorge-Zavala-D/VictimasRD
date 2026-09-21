@@ -105,6 +105,7 @@ assert _N == 549
 *-----------------------------------*
 
 global hte_level                    "ccpp"
+global hte_sort_key                 "ruv_id"
 global hte_level_caption            "CCPP-level"
 global hte_unit_label               "RUV community"
 global hte_unit_plural              "communities"

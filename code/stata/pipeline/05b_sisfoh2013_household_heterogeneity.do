@@ -120,6 +120,7 @@ assert _N == 42355
 *-----------------------------------*
 
 global hte_level                    "household"
+global hte_sort_key                 "sisfoh_hhid"
 global hte_level_caption            "household-level"
 global hte_unit_label               "SISFOH household"
 global hte_unit_plural              "households"
