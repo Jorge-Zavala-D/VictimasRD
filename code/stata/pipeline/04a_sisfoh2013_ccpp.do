@@ -730,6 +730,7 @@ export delimited using ///
 
 tempname contract_file
 local first_stage_status = cond(`first_stage_gate', "pass", "warning")
+local kp_f_text : display %5.2f `kp_f_main'
 local kp_status = cond(`kp_f_main' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 file open `contract_file' using ///
@@ -776,7 +777,7 @@ file write `registry_table' "\begingroup" _n
 file write `registry_table' "\small" _n
 file write `registry_table' "\begin{longtable}{p{0.10\linewidth}p{0.18\linewidth}p{0.24\linewidth}p{0.33\linewidth}}" _n
 file write `registry_table' "\caption{Registered 2013 CCPP outcomes and construction rules}" _n
-file write `registry_table' "\label{tab:rd_outcome_registry} \\" _n
+file write `registry_table' "\label{tab:rd_outcome_registry_2013_ccpp} \\" _n
 file write `registry_table' "\toprule" _n
 file write `registry_table' "Tier & Family & Outcome & Denominator or construction universe \\" _n
 file write `registry_table' "\midrule" _n
@@ -818,7 +819,7 @@ file write `first_stage_table' "\begin{table}[!htbp]" _n
 file write `first_stage_table' "\centering" _n
 file write `first_stage_table' "\small" _n
 file write `first_stage_table' "\caption{First-stage discontinuity for treatment through 2012}" _n
-file write `first_stage_table' "\label{tab:rd_outcomes_first_stage}" _n
+file write `first_stage_table' "\label{tab:rd_outcomes_first_stage_2013_ccpp}" _n
 file write `first_stage_table' "\begin{tabular}{lrrrrrr}" _n
 file write `first_stage_table' "\toprule" _n
 file write `first_stage_table' "Analysis sample & Estimate & Robust SE & 95\% CI & Effective N & \(h\) & \(F_z\) \\" _n
@@ -854,7 +855,7 @@ restore
 
 file write `first_stage_table' "\bottomrule" _n
 file write `first_stage_table' "\end{tabular}" _n
-file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2012. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment and district CR2 inference. The common design window is \(h=0.0075\) and bias window is \(b=0.0135\); the final row instead reports the treatment-based MSE selector. \(F_z\) is the squared robust bias-corrected \(z\) statistic and is compared with the strict interpretation gate \(F_z>10\). The linked primary-sample statistic meets that gate; fuzzy LATE estimates are nevertheless reported with reduced forms and Anderson--Rubin inference. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
+file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2012. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment and district CR2 inference. The common design window is \(h=0.0075\) and bias window is \(b=0.0135\); the final row instead reports the treatment-based MSE selector. \(F_z\) is the squared robust RD \(z\) statistic and is descriptive, not the registered strength screen. The clustered local-IV Kleibergen--Paap screen is \(F>10\), with primary \(F=`kp_f_text'\). Fuzzy LATEs are also reported with reduced forms and weak-instrument-robust diagnostics. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
 file write `first_stage_table' "\end{table}" _n
 file close `first_stage_table'
 
@@ -925,7 +926,7 @@ file write `main_table' ///
     "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `main_first_stage_n' \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
-file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Each row uses the same 487-community linked B/C analysis sample before local-window restriction and the same \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide the outcome and treatment discontinuities using one common bandwidth. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and district CR2 inference. Share and zero-to-one index outcomes are in percentage points; count outcomes are logged. Holm values adjust across the eight primary outcomes. The local first stage does not pass the conservative \(F\geq20\) gate, so the LATE column is diagnostic rather than publication-ready causal evidence. SISFOH counts are enumerated roster counts. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
+file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Each row uses the same 487-community linked B/C analysis sample before local-window restriction and the same \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide the outcome and treatment discontinuities using one common bandwidth. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and district CR2 inference. Share and zero-to-one index outcomes are in percentage points; count outcomes are logged. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=`kp_f_text'\). Reduced forms and weak-instrument-robust diagnostics remain necessary. SISFOH counts are enumerated roster counts. Source: RUV, CMAN, and SISFOH 2012--2013.}" _n
 file write `main_table' "\end{table}" _n
 file close `main_table'
 
@@ -981,7 +982,7 @@ restore
 
 file write `secondary_table' "\bottomrule" _n
 file write `secondary_table' "\end{longtable}" _n
-file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with local-linear triangular kernels, mass-point adjustment, and district CR2 inference. BH values control the false discovery rate within the declared outcome family. The internet row is an exploratory mechanism and is never an ordinary control. The GDP row uses the broader available B/C design sample and Seminario--Palomino estimates; other rows use SISFOH-linked communities. The first-stage warning in Table~\ref{tab:rd_outcomes_first_stage} applies to every LATE. Source: RUV, CMAN, SISFOH 2012--2013, and Seminario--Palomino.\end{minipage}" _n
+file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with local-linear triangular kernels, mass-point adjustment, and district CR2 inference. BH values control the false discovery rate within the declared outcome family. The internet row is an exploratory mechanism and is never an ordinary control. The GDP row uses the broader available B/C design sample and Seminario--Palomino estimates; other rows use SISFOH-linked communities. The first-stage warning in Table~\ref{tab:rd_outcomes_first_stage_2013_ccpp} applies to every LATE. Source: RUV, CMAN, SISFOH 2012--2013, and Seminario--Palomino.\end{minipage}" _n
 file close `secondary_table'
 
 tempname robustness_table

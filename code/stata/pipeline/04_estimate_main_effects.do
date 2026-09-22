@@ -245,25 +245,24 @@ assert _N == 57
 sort path
 export delimited using "${rd_manifest}", replace nolabel
 
-tempfile outcomes_2013_manifest outcomes_2017_ccpp_manifest ///
-    outcomes_2017_household_manifest
+tempfile manifest_13 manifest_17_ccpp manifest_17_hh
 import delimited using "${rd_manifest}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
-save "`outcomes_2013_manifest'", replace
+save "`manifest_13'", replace
 
 import delimited using "${rd_2017_ccpp_manifest}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
-save "`outcomes_2017_ccpp_manifest'", replace
+save "`manifest_17_ccpp'", replace
 
 import delimited using "${rd_2017_household_manifest}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
-save "`outcomes_2017_household_manifest'", replace
+save "`manifest_17_hh'", replace
 
 import delimited using "${rd_2017_individual_manifest}", ///
     clear varnames(1) bindquote(strict) encoding(utf8)
-append using "`outcomes_2017_household_manifest'" ///
-    "`outcomes_2017_ccpp_manifest'" ///
-    "`outcomes_2013_manifest'"
+append using "`manifest_17_hh'" ///
+    "`manifest_17_ccpp'" ///
+    "`manifest_13'"
 isid path
 assert _N == 117
 sort path

@@ -925,6 +925,7 @@ export delimited using ///
 
 tempname contract_file
 local first_stage_status = cond(`first_stage_gate', "pass", "warning")
+local kp_f_text : display %5.2f `kp_f_main'
 local kp_status = cond(`kp_f_main' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 
@@ -955,9 +956,9 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""primary_ccpp","406","validated","RUV communities represented in the complete primary sample""' _n
 file write `contract_file' ///
-    `""window_households","3810","validated","Complete-primary households inside the common fixed window""' _n
+    `""window_households","2706","validated","Complete-primary households inside the common fixed window""' _n
 file write `contract_file' ///
-    `""window_ccpp","65","validated","RUV communities inside the common fixed window""' _n
+    `""window_ccpp","61","validated","RUV communities inside the common fixed window""' _n
 file write `contract_file' ///
     `""first_stage_f","`main_first_stage_f'","`first_stage_status'","Squared robust first-stage z statistic under CCPP-equal weighting and CCPP CR2""' _n
 file write `contract_file' ///
@@ -1071,7 +1072,7 @@ restore
 
 file write `first_stage_table' "\bottomrule" _n
 file write `first_stage_table' "\end{tabular}" _n
-file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment. The common window is \(h=0.0075\), \(b=0.0135\); the final row uses the treatment-based MSE selector. CCPP-equal weights give each RUV community total weight one and are primary because treatment is assigned at that level; household-equal weights change the target population and are a required sensitivity. Inference is CR2 by complete RUV community ID. \(F_z\) is the squared robust \(z\) statistic and is compared with the strict gate \(F_z>10\). The primary statistic meets that gate; LATEs are still reported with reduced forms and weak-instrument-robust diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
+file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment. The common window is \(h=0.0075\), \(b=0.0135\); the final row uses the treatment-based MSE selector. CCPP-equal weights give each RUV community total weight one and are primary because treatment is assigned at that level; household-equal weights change the target population and are a required sensitivity. Inference is CR2 by complete RUV community ID. \(F_z\) is the squared robust RD \(z\) statistic and is descriptive, not the registered strength screen. The clustered local-IV Kleibergen--Paap screen is \(F>10\), with primary \(F=`kp_f_text'\). Fuzzy LATEs are also reported with reduced forms and weak-instrument-robust diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
 file write `first_stage_table' "\end{table}" _n
 file close `first_stage_table'
 
@@ -1187,10 +1188,10 @@ foreach formatted_value in ///
     local `formatted_value' = strtrim("``formatted_value''")
 }
 file write `main_table' ///
-    "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 65 \\" _n
+    "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 61 \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
-file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome household sample before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with households equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. Binary, share, and zero-to-one index effects are percentage points; household size is in members. Holm values adjust across the eight primary outcomes. The local first stage passes the conservative \(F\geq20\) gate; the LATE column must still be read with reduced forms and Anderson--Rubin inference. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
+file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome household sample before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with households equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. Binary, share, and zero-to-one index effects are percentage points; household size is in members. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=`kp_f_text'\). Reduced forms and weak-instrument-robust diagnostics remain necessary. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
 file write `main_table' "\end{table}" _n
 file close `main_table'
 

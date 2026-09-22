@@ -1387,6 +1387,11 @@ forvalues row = 1/`=_N' {
         local dose_`value' = strtrim("`dose_`value''")
         if missing(`value'[`row']) local dose_`value' "--"
     }
+    if gate_pass[`row'] != 1 {
+        foreach value in estimate standard_error ci_low ci_high {
+            local dose_`value' "--"
+        }
+    }
     file write `dose_tex' ///
         "`dose_outcome' & `dose_estimate' & `dose_standard_error' & `dose_ci_low' & `dose_ci_high' & `dose_kp_f' & `dose_ar_p' & `dose_status' \\" _n
 }
