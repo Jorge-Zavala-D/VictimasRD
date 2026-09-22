@@ -1,23 +1,23 @@
 /*
 Project: Victimas RD
-Purpose: Build a verified pointer inventory of publication-candidate artifacts
-Inputs:  Main-effect, heterogeneity, and mechanism output manifests
-Outputs: Candidate inventory, count table, and module manifest
+Purpose: Merge verified artifacts with the publication-review registry
+Inputs: Module 04--06 manifests and versioned review decisions
+Outputs: Reviewed candidate inventory, summary table, module manifest
 */
 
 version 19
 set more off
 
-foreach required_global in ///
-    project_root tables_root metadata_root {
+foreach required_global in project_root tables_root metadata_root {
     if `"${`required_global'}"' == "" {
-        display as error "Required master global not defined: `required_global'"
+        display as error "Required global not defined: `required_global'"
         exit 198
     }
 }
 
 local table_dir "${tables_root}/publication"
 local manifest "${metadata_root}/publication-output-manifest.csv"
+local review_registry "${metadata_root}/publication-review-registry.csv"
 capture mkdir "`table_dir'"
 
 local source_manifests ///
@@ -25,7 +25,14 @@ local source_manifests ///
 local source_pipelines "main_effects heterogeneity mechanisms"
 local expected_counts "117 126 12"
 
-tempfile candidate_inventory
+capture confirm file "`review_registry'"
+if _rc {
+    display as error "Publication-review registry not found:"
+    display as error "  `review_registry'"
+    exit 601
+}
+
+tempfile candidate_inventory review_decisions
 local first_source 1
 local source_signatures ""
 
@@ -48,11 +55,12 @@ forvalues source_index = 1/3 {
     local source_signatures ///
         "`source_signatures'`source_pipeline':`manifest_checksum';"
 
-    import delimited using "`manifest_absolute'", clear varnames(1) ///
+    import delimited "`manifest_absolute'", clear varnames(1) ///
         bindquote(strict) encoding(utf8)
     assert _N == `expected_count'
     isid path
     assert review_status == "generated_unreviewed"
+    rename review_status generation_status
     generate str24 source_pipeline = "`source_pipeline'"
 
     if `first_source' {
@@ -65,9 +73,33 @@ forvalues source_index = 1/3 {
     }
 }
 
+quietly checksum "`review_registry'"
+local registry_checksum : display %20.0f r(checksum)
+local registry_checksum = strtrim("`registry_checksum'")
+local source_signatures ///
+    "`source_signatures'review_registry:`registry_checksum';"
+
+import delimited "`review_registry'", clear varnames(1) ///
+    bindquote(strict) encoding(utf8) stringcols(_all)
+isid path
+assert _N == 255
+destring owner_approved, replace
+assert inlist(disposition, ///
+    "main_text", "appendix", "internal_only", "exclude")
+assert inlist(evidence_class, ///
+    "primary_causal", "secondary_causal", "assignment_effect", ///
+    "descriptive_only", "diagnostic", "source_table", ///
+    "not_for_interpretation")
+assert scientific_review_status == "preliminary_reviewed"
+assert inlist(owner_approved, 0, 1)
+assert !missing(review_note)
+assert missing(overleaf_destination) if owner_approved == 0
+save `review_decisions'
+
 use `candidate_inventory', clear
 isid path
 assert _N == 255
+merge 1:1 path using `review_decisions', assert(match) nogen
 
 generate byte safe_path = ///
     strpos(path, "..") == 0 & ///
@@ -76,7 +108,7 @@ generate byte safe_path = ///
     substr(path, 1, 1) != "\" & ///
     strpos(lower(path), "dropbox") == 0 & ///
     (strpos(path, "output/tables/") == 1 | ///
-        strpos(path, "output/figures/") == 1)
+     strpos(path, "output/figures/") == 1)
 assert safe_path == 1
 
 generate str8 extension = lower(substr(path, -4, 4))
@@ -94,30 +126,28 @@ forvalues row = 1/`=_N' {
         display as error "  `candidate_absolute'"
         exit 601
     }
-
     quietly checksum "`candidate_absolute'"
     assert r(checksum) == checksum[`row']
     replace checksum_verified = 1 in `row'
 }
 assert checksum_verified == 1
 
-generate str24 publication_status = "candidate_unreviewed"
-generate str244 overleaf_destination = ""
+generate str24 publication_status = "preliminary_reviewed"
+replace publication_status = "owner_approved" if owner_approved == 1
 drop safe_path safe_extension extension
 sort source_pipeline artifact_type path
-order source_pipeline path artifact_type publication_status ///
-    overleaf_destination checksum_verified
+order source_pipeline path artifact_type disposition evidence_class ///
+    scientific_review_status owner_approved publication_status ///
+    overleaf_destination review_note generation_status checksum_verified
 
-tempfile verified_inventory
-save `verified_inventory'
-export delimited using ///
+export delimited ///
     "`table_dir'/publication_candidate_inventory.csv", ///
     replace nolabel
 
 preserve
 generate byte artifact_count = 1
-collapse (sum) artifact_count, by(source_pipeline artifact_type)
-sort source_pipeline artifact_type
+collapse (sum) artifact_count, by(source_pipeline disposition)
+sort source_pipeline disposition
 
 tempname inventory_table
 file open `inventory_table' using ///
@@ -126,28 +156,29 @@ file open `inventory_table' using ///
 file write `inventory_table' "\begin{table}[!htbp]" _n
 file write `inventory_table' "\centering\small" _n
 file write `inventory_table' ///
-    "\caption{Verified publication-candidate artifact inventory}" _n
+    "\caption{Preliminary publication-review registry}" _n
 file write `inventory_table' ///
     "\label{tab:publication_candidate_inventory}" _n
 file write `inventory_table' "\begin{tabular}{llr}" _n
 file write `inventory_table' "\toprule" _n
 file write `inventory_table' ///
-    "Source pipeline & Artifact type & Count \\" _n
+    "Source pipeline & Proposed disposition & Count \\" _n
 file write `inventory_table' "\midrule" _n
 forvalues row = 1/`=_N' {
     local row_pipeline = ///
         proper(subinstr(source_pipeline[`row'], "_", " ", .))
-    local row_type = proper(artifact_type[`row'])
+    local row_disposition = ///
+        proper(subinstr(disposition[`row'], "_", " ", .))
     local row_count : display %4.0f artifact_count[`row']
     local row_count = strtrim("`row_count'")
     file write `inventory_table' ///
-        "`row_pipeline' & `row_type' & `row_count' \\" _n
+        "`row_pipeline' & `row_disposition' & `row_count' \\" _n
 }
 file write `inventory_table' "\midrule" _n
 file write `inventory_table' "All pipelines & All artifacts & 255 \\" _n
 file write `inventory_table' "\bottomrule\end{tabular}" _n
 file write `inventory_table' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The inventory contains repository-relative pointers only. Every listed CSV, LaTeX table, and PNG figure exists under the Git output tree and matches its generating manifest checksum. All entries remain candidate\_unreviewed; no artifact has been copied to Overleaf. Sources: versioned modules 04--06 output manifests.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Proposed dispositions reflect a preliminary scientific audit of module 04--06 outputs. Main-text and appendix selections remain blocked from release until owner approval and a safe Overleaf destination are recorded. Internal-only and excluded artifacts remain reproducible repository outputs but are not publication exhibits.}" _n
 file write `inventory_table' "\end{table}" _n
 file close `inventory_table'
 restore
@@ -174,17 +205,16 @@ foreach output_path of local output_paths {
     local output_checksum : display %20.0f r(checksum)
     local output_checksum = strtrim("`output_checksum'")
     file write `manifest_file' ///
-        `""`output_path'","table","module 04-06 manifests","`source_signatures'","code/stata/pipeline/07_build_tables_figures.do","`run_id'","`output_checksum'","generated_unreviewed""' _n
+        `""`output_path'","table","module 04-06 manifests and publication review registry","`source_signatures'","code/stata/pipeline/07_build_tables_figures.do","`run_id'","`output_checksum'","generated_unreviewed""' _n
 }
 file close `manifest_file'
 
-import delimited using "`manifest'", clear varnames(1) ///
+import delimited "`manifest'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
 assert _N == 2
 assert review_status == "generated_unreviewed"
 
-display as result ///
-    "Completed pointer-only publication candidate inventory."
+display as result "Completed publication-review candidate inventory."
 display as text "Inventory: `table_dir'/publication_candidate_inventory.csv"
-display as text "Manifest:  `manifest'"
+display as text "Manifest: `manifest'"

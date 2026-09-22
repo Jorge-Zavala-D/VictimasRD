@@ -187,13 +187,17 @@ written to `output/tables/rd_mechanisms/` and
 `output/figures/rd_mechanisms/`; their 12-row manifest is
 `metadata/rd-mechanism-output-manifest.csv`.
 
-`07_build_tables_figures.do` verifies the checksums and safe repository paths
-in the module-04, module-05, and module-06 manifests. It creates a 255-row
-pointer-only publication-candidate inventory under `output/tables/publication/`.
-It does not copy, regenerate, or synchronize any source artifact.
+`07_build_tables_figures.do` verifies checksums and safe repository paths in
+the module-04, module-05, and module-06 manifests, then merges the versioned
+255-row `metadata/publication-review-registry.csv`. It creates a pointer-only
+publication-candidate inventory and disposition summary under
+`output/tables/publication/`. It does not copy, regenerate, or synchronize any
+source artifact. The substantive audit is documented in
+`docs/PUBLICATION_RESULTS_AUDIT.md`.
 
-`08_run_release_checks.do` audits the 255 candidates for existence, checksum,
-safe path/extension, provenance, and review status. Technical failures stop
-the pipeline. A technically valid but unreviewed inventory returns Stata code
-zero with analytical status `BLOCKED`; this is the expected initial state and
-prevents publication release or Overleaf synchronization.
+`08_run_release_checks.do` audits all 255 candidates for existence, checksum,
+safe path/extension, provenance, resolved preliminary review, owner approval,
+and safe destination. Technical failures stop the pipeline. Internal-only and
+excluded artifacts do not block release once reviewed; proposed main-text and
+appendix artifacts remain `BLOCKED` until owner approval and exact safe
+Overleaf-relative destinations are recorded.

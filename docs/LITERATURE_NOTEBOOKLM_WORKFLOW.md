@@ -1,4 +1,4 @@
-# NotebookLM literature workflow
+# NotebookLM and Zotero literature workflow
 
 ## Purpose and status
 
@@ -14,10 +14,41 @@ The project literature notebook is:
   reconciled. The user subsequently added methodological sources, so the
   numbered inventory below is not a current full-notebook count.
 
-The notebook is the project's primary synthesis and discovery layer for the
-substantive literature. It is not the source of record for a citation. The
-underlying PDF, official document, bibliographic record, and exact supporting
-page remain authoritative.
+The parallel Zotero source library is:
+
+- **Title:** `IE Collective Reparations Peru`
+- **Current locally resolved library ID:** `5` (resolve by exact title each
+  session rather than assuming this machine-specific ID is stable)
+- **Access rule:** read-only unless the user explicitly requests a Zotero
+  library change
+- **Verified inventory, 22 September 2026:** 39 parent items with attached
+  source files, matching the substantive scope of the historical NotebookLM
+  inventory; searchable-text coverage varies by attachment.
+
+NotebookLM is the project's broad synthesis and discovery layer. Zotero is the
+preferred route to the underlying library item and attached source. Neither
+integration is itself the source of record for a claim: the underlying PDF,
+official document, bibliographic record, and exact supporting page remain
+authoritative.
+
+For each literature-dependent analytical or manuscript task, use the two
+integrations in parallel:
+
+1. query NotebookLM for source discovery, convergence, contradictions, and
+   gaps;
+2. resolve the exact work in the Zotero library by title, author, year, or
+   item ID;
+3. use targeted PDF reading to locate the supporting passage and record the
+   evidence type and scope;
+4. if Zotero reports abstract-only, metadata-only, or no extractable PDF text,
+   inspect the underlying attachment through an approved reader before using
+   the claim; and
+5. apply the citation-verification gate below before publication use.
+
+A successful library connection or attached-PDF count does not prove that all
+sources are text-searchable. Preserve the reading receipt or coverage status
+for every close-read request. Never write notes, edit metadata, change sharing,
+or alter attachments during evidence retrieval.
 
 Public-link queries succeeded even when the NotebookLM MCP health check
 reported no authenticated account. Future tasks may query the public URL
@@ -26,7 +57,7 @@ the user's explicit approval of the proposed library metadata.
 
 ## Mandatory use
 
-Consult the notebook when a task involves:
+Consult both NotebookLM and the Zotero source library when a task involves:
 
 - the theory, history, or implementation of transitional justice and
   reparations;
@@ -39,7 +70,7 @@ Consult the notebook when a task involves:
 - checking whether a proposed claim is already supported by the current
   bibliography.
 
-Do not use the notebook as the authority for:
+Do not use either integration as the authority for:
 
 - the official victimization-index formula, cutoffs, or rollout directives;
 - CMAN/RUV administrative counts, dates, budgets, or treatment status;
@@ -48,8 +79,8 @@ Do not use the notebook as the authority for:
   checked in the underlying source.
 
 Those questions require official project documents, canonical data, and the
-verified underlying RD-methods sources. The notebook may now be used to locate
-and synthesize those methods sources, but its answer is never the authority.
+verified underlying RD-methods sources. Either integration may locate and
+synthesize those methods sources, but its answer is never the authority.
 
 ### RD-methods addendum, 11 August 2026
 
@@ -297,8 +328,8 @@ substantive notebook.
 
 ## Citation verification gate
 
-No NotebookLM-derived claim may enter a manuscript or publication-facing table
-note until all of the following are recorded:
+No NotebookLM- or Zotero-derived claim may enter a manuscript or publication-
+facing table note until all of the following are recorded:
 
 1. the exact underlying source has been identified, with duplicates reconciled;
 2. author, year, title, outlet or publisher, DOI or stable URL, and edition or
@@ -313,9 +344,9 @@ note until all of the following are recorded:
    bibliography; and
 8. contradictory evidence and material limitations have been considered.
 
-NotebookLM output should be paraphrased only after this gate. Never cite
-NotebookLM, a chat answer, an upload number, or a truncated filename as the
-scholarly source.
+Integration output should be paraphrased only after this gate. Never cite
+NotebookLM, Zotero, a chat answer, an item number, an upload number, or a
+truncated filename as the scholarly source.
 
 ## Recommended query pattern
 

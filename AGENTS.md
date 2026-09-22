@@ -10,9 +10,11 @@ governance questions as blockers that require an explicit research-team
 decision; do not silently choose an answer. Read
 `docs/DATA_STORAGE_WORKFLOW.md` before changing any data path or destination.
 For literature, theory, interpretation, or manuscript tasks, also read
-`docs/LITERATURE_NOTEBOOKLM_WORKFLOW.md` and consult the linked project
-NotebookLM. Treat NotebookLM answers as discovery and synthesis aids; verify
-every citation and supporting passage in the underlying source before use.
+`docs/LITERATURE_NOTEBOOKLM_WORKFLOW.md` and consult both the linked project
+NotebookLM and the shared Zotero library `IE Collective Reparations Peru`.
+Treat either integration as a discovery and synthesis aid; verify every
+citation and supporting passage in the underlying source before use. Keep
+Zotero access read-only unless the user explicitly requests a library change.
 
 ## Data and Dropbox safety
 

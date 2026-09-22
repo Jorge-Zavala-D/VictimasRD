@@ -33,9 +33,15 @@ assert checksum_match == 1
 assert safe_path == 1
 assert safe_extension == 1
 assert technical_error == 0
-quietly count if review_status == "generated_unreviewed"
+assert review_resolved == 1
+assert owner_approved == 0
+quietly count if selected_for_release == 1
 assert r(N) > 0
 quietly count if release_eligible == 1
+assert r(N) == 0
+quietly count if selected_for_release == 0 & !missing(block_reason)
+assert r(N) == 0
+quietly count if selected_for_release == 1 & missing(block_reason)
 assert r(N) == 0
 
 import delimited using "`manifest'", clear varnames(1) ///

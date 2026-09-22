@@ -53,8 +53,13 @@ disclosure, and manuscript review is complete.
 `rd-mechanisms/analysis-registry.csv` is the 62-row non-observation contract
 for migration, candidate intermediate outcomes, linkage sensitivity, and the
 three noncausal descriptive associations. Module 06 records its aggregate
-products in `rd-mechanism-output-manifest.csv`. Module 07 records only its
-pointer inventory and summary table in `publication-output-manifest.csv`;
-module 08 records its release audit products in `release-audit-manifest.csv`.
-All three manifests use repository-relative paths and remain
-`generated_unreviewed` until substantive, disclosure, and manuscript review.
+products in `rd-mechanism-output-manifest.csv`.
+
+`publication-review-registry.csv` records the preliminary scientific
+disposition, evidence class, owner-approval gate, proposed Overleaf
+destination, and review note for all 255 module 04--06 artifacts. Module 07
+merges that registry into its pointer inventory and records the two generated
+inventory products in `publication-output-manifest.csv`; module 08 records its
+release audit products in `release-audit-manifest.csv`. Source manifests retain
+their `generated_unreviewed` generation status. A preliminary review decision
+does not authorize release or Overleaf synchronization.

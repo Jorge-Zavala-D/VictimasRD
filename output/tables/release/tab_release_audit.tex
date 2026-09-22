@@ -8,11 +8,13 @@ Audit item & Count \\
 \midrule
 Publication candidates & 255 \\
 Technically valid files & 255 \\
-Reviewed files & 0 \\
+Preliminarily reviewed files & 255 \\
+Proposed main-text or appendix files & 109 \\
+Owner-approved files & 0 \\
 Release-eligible files & 0 \\
-Files with review blockers & 255 \\
+Files blocking release & 109 \\
 \midrule
 Overall status & BLOCKED \\
 \bottomrule\end{tabular}
-\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} BLOCKED is the expected analytical status because every technically valid artifact remains generated\_unreviewed. It prevents publication release or Overleaf synchronization but is not a software error. Missing files, unsafe paths or extensions, absent provenance, and checksum mismatches are hard failures. Source: versioned module-07 candidate inventory.}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Preliminary scientific review resolves the disposition of every artifact but does not substitute for owner approval. Only proposed main-text or appendix artifacts require owner approval and a safe Overleaf-relative destination. Internal-only and excluded artifacts do not block release. Technical failures remain hard errors.}
 \end{table}
