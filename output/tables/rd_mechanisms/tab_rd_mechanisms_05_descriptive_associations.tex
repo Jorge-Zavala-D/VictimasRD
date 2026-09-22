@@ -1,0 +1,17 @@
+\begin{table}[!htbp]
+\centering\small
+\caption{Descriptive associations with 2017 CCPP migration}
+\label{tab:rd_mechanisms_associations}
+\begin{tabular}{p{0.33\linewidth}lrrrr}
+\toprule
+Predictor & Model & Estimate & 95\% CI & \(p\) & BH \(q\) \\
+\midrule
+Migration and baseline employment & Adjusted & 0.067 & [0.021, 0.113] & 0.005 & 0.015 \\
+Migration and baseline employment & Unadjusted & 0.054 & [0.031, 0.078] & 0.000 & -- \\
+Migration and baseline internet access & Adjusted & 0.043 & [-0.038, 0.124] & 0.290 & 0.435 \\
+Migration and baseline internet access & Unadjusted & 0.028 & [-0.037, 0.093] & 0.387 & -- \\
+Migration and baseline labor-force participation & Adjusted & -0.013 & [-0.073, 0.047] & 0.665 & 0.665 \\
+Migration and baseline labor-force participation & Unadjusted & -0.012 & [-0.083, 0.058] & 0.724 & -- \\
+\bottomrule\end{tabular}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Coefficients are changes in the 2017 CCPP migration share (zero-to-one units) associated with a one-standard-deviation difference in each 2013 predictor. They are noncausal associations, not indirect effects. Both models use the same complete-case selected B--C Census-covered CCPP sample within \(|running\_bc|\leq0.0075\), district-clustered standard errors, and separate local-linear score slopes. Adjusted models include 2007 altitude, log population, and core wellbeing; BH correction covers the three adjusted associations. Sources: RUV, CMAN, SISFOH 2012--2013, and INEI-assisted Census 2017 linkage.}
+\end{table}

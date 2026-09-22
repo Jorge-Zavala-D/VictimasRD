@@ -155,7 +155,7 @@ baseline moderators. The contract and moderator registry are
 documented in [`docs/RD_HETEROGENEITY_PROTOCOL.md`](../../../docs/RD_HETEROGENEITY_PROTOCOL.md)
 and `metadata/rd-heterogeneity/moderator-registry.csv`.
 
-Remaining modules will be added sequentially. They must:
+All canonical modules must:
 
 - read machine-specific roots from the master-loaded local path configuration;
 - treat Dropbox Raw and dated archives as immutable;
@@ -174,3 +174,26 @@ Remaining modules will be added sequentially. They must:
 The preserved `legacy-current` tree is historical evidence. Canonical modules
 may use it as a documented reference, but must not modify or execute it as the
 new pipeline.
+
+`06_analyze_migration_mechanisms.do` implements the approved migration and
+mechanism evidence hierarchy in
+[`docs/MIGRATION_MECHANISM_PROTOCOL.md`](../../../docs/MIGRATION_MECHANISM_PROTOCOL.md).
+It reuses module-04 aggregate estimates, adds only three prespecified
+district-clustered descriptive CCPP associations, and labels contemporaneous
+2017 labor/connectivity outcomes as candidate intermediate outcomes rather
+than causal mediators. It never estimates ACME/ADE, natural indirect effects,
+proportions mediated, or products of coefficients. Aggregate outputs are
+written to `output/tables/rd_mechanisms/` and
+`output/figures/rd_mechanisms/`; their 12-row manifest is
+`metadata/rd-mechanism-output-manifest.csv`.
+
+`07_build_tables_figures.do` verifies the checksums and safe repository paths
+in the module-04, module-05, and module-06 manifests. It creates a 255-row
+pointer-only publication-candidate inventory under `output/tables/publication/`.
+It does not copy, regenerate, or synchronize any source artifact.
+
+`08_run_release_checks.do` audits the 255 candidates for existence, checksum,
+safe path/extension, provenance, and review status. Technical failures stop
+the pipeline. A technically valid but unreviewed inventory returns Stata code
+zero with analytical status `BLOCKED`; this is the expected initial state and
+prevents publication release or Overleaf synchronization.

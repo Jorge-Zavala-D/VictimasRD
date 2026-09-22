@@ -815,13 +815,13 @@ if `run_all' | `run_05_estimate_heterogeneity' {
 if `run_all' | `run_06_analyze_mechanisms' {
     victimasrd_run_step, ///
         file("${pipeline_root}/06_analyze_migration_mechanisms.do") ///
-        label("Migration and exploratory mechanism analyses")
+        label("Migration and mechanism evidence synthesis")
 }
 
 if `run_all' | `run_07_build_outputs' {
     victimasrd_run_step, ///
         file("${pipeline_root}/07_build_tables_figures.do") ///
-        label("Reviewed tables, figures, and output manifest")
+        label("Publication-candidate pointer inventory")
 }
 
 if `run_all' | `run_08_run_release_checks' {

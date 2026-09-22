@@ -4,7 +4,7 @@
 
 **Version:** 2026-09-22
 
-**Status:** Pending user review; no separate research-team approval gate is required
+**Status:** Approved by the project owner on 2026-09-22; no separate research-team approval gate is required
 
 **Applies to:** `06_analyze_migration_mechanisms.do`, `07_build_tables_figures.do`, and `08_run_release_checks.do`
 
@@ -409,9 +409,9 @@ current data sufficient for causal mediation.
 
 ## 12. Governance decision
 
-The project owner explicitly waived a separate research-team approval step for
-this workflow on 2026-09-22. Once the user reviews this written protocol, its
-decisions become the binding contract for the implementation plan and modules
-06--08. Any later change to timing, target population, causal estimand,
-selection assumptions, or mediation identification must amend this file before
-the corresponding code changes.
+The project owner explicitly approved this written protocol and waived a
+separate research-team approval step on 2026-09-22. Its decisions are the
+binding contract for the implementation plan and modules 06--08. Any later
+change to timing, target population, causal estimand, selection assumptions,
+or mediation identification must amend this file before the corresponding code
+changes.
