@@ -10490,7 +10490,10 @@ generate byte moved_department_2013_2017 = ///
     substr(ubigeo_ccpp, 1, 2) ///
     if !missing(moved_ccpp_2013_2017)
 generate byte moved_or_not_linked_sens_2017 = ///
-    census2017_not_linked | moved_ccpp_2013_2017 == 1
+    moved_ccpp_2013_2017 if census2017_linked
+replace moved_or_not_linked_sens_2017 = 1 if census2017_not_linked
+assert missing(moved_or_not_linked_sens_2017) if ///
+    census2017_linked & missing(moved_ccpp_2013_2017)
 
 bysort census2017_baseline_hhid cpv2017_destination_hhid: ///
     generate byte baseline_dest_hh_tag_aux = ///

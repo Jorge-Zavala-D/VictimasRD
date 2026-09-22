@@ -8,7 +8,7 @@ moved_district_2013_2017,person,linked people with valid source and destination 
 moved_province_2013_2017,person,linked people with valid source and destination CCPP,destination province differs from source province,migration outcome,missing when CCPP migration is unobserved
 moved_department_2013_2017,person,linked people with valid source and destination CCPP,destination department differs from source department,migration outcome,missing when CCPP migration is unobserved
 moved_district_2012_2017,person,linked Census respondents age five or older,Census reports residence in another district five years earlier,supplementary mobility outcome,missing outside question universe
-moved_or_not_linked_sens_2017,person,all source-cohort people,one for observed CCPP migration or non-linkage,sensitivity outcome only,not a migration measure
+moved_or_not_linked_sens_2017,person,source-cohort excluding linked people with unobserved CCPP movement,one for observed CCPP migration or non-linkage,sensitivity outcome only,missing for linked people with unobserved CCPP movement
 internet_2017,person and destination household,linked people with valid current-household module,current household has internet,post-treatment outcome or descriptive mechanism,missing without valid household item
 employed_2017,person,linked Census respondents age five or older,worked or retained a job business farm or unpaid family activity in reference week,labor outcome,missing outside valid labor universe
 labor_force_2017,person,linked Census respondents age five or older,employed or actively seeking work,labor denominator,missing without valid employment and search status

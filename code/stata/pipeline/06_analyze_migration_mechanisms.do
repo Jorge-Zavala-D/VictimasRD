@@ -84,11 +84,11 @@ forvalues source_index = 1/6 {
 import delimited using "`registry'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid analysis_id
-assert _N == 62
+assert _N == 63
 quietly count if evidence_class == "descriptive_association"
 assert r(N) == 3
 quietly count if evidence_class != "descriptive_association"
-assert r(N) == 59
+assert r(N) == 60
 assert predictor_var != "" if evidence_class == "descriptive_association"
 assert predictor_var == "" if evidence_class != "descriptive_association"
 tempfile registry_all
@@ -516,7 +516,7 @@ file close `migration_table'
 * Linkage discontinuities.
 use `canonical_summary', clear
 keep if evidence_class == "linkage_selection"
-sort level
+sort level outcome_id
 tempname linkage_table
 file open `linkage_table' using ///
     "`table_dir'/tab_rd_mechanisms_03_linkage_selection.tex", ///
@@ -524,7 +524,7 @@ file open `linkage_table' using ///
 file write `linkage_table' "\begin{table}[!htbp]" _n
 file write `linkage_table' "\centering\small" _n
 file write `linkage_table' ///
-    "\caption{Discontinuities in Census 2017 linkage}" _n
+    "\caption{Census 2017 cohort coverage and linkage at the cutoff}" _n
 file write `linkage_table' ///
     "\label{tab:rd_mechanisms_linkage}" _n
 file write `linkage_table' ///
@@ -535,6 +535,7 @@ file write `linkage_table' ///
 file write `linkage_table' "\midrule" _n
 forvalues row = 1/`=_N' {
     local row_level = proper(level[`row'])
+    if "`row_level'" == "Ccpp" local row_level "CCPP"
     local row_label = outcome_label[`row']
     local row_estimate : display %7.2f estimate_bc[`row']
     local row_low : display %7.2f ci_low[`row']
@@ -549,7 +550,7 @@ forvalues row = 1/`=_N' {
 file write `linkage_table' "\bottomrule" _n
 file write `linkage_table' "\end{tabular}" _n
 file write `linkage_table' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Estimates are percentage-point discontinuities in inclusion in the INEI-assisted 2017 linked cohort, not migration. Local-linear models use selected adjacent B--C communities, treatment through 2016, common \(h=0.0075\), \(b=0.0135\), triangular kernels, district clustering for CCPPs, CCPP-equal weighting and CCPP clustering for people, and 95\% confidence intervals. Source: RUV, CMAN, and INEI-assisted Census 2017 linkage.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Estimates are percentage-point discontinuities in RUV-community coverage by the INEI-assisted source cohort or, conditional on coverage, Census 2017 person linkage; they are not migration effects. Local-linear models use selected adjacent B--C communities, treatment through 2016, common \(h=0.0075\), \(b=0.0135\), triangular kernels, district clustering for CCPPs, CCPP-equal weighting and CCPP clustering for people, and 95\% confidence intervals. Sources: RUV, CMAN, and INEI-assisted Census 2017 linkage.}" _n
 file write `linkage_table' "\end{table}" _n
 file close `linkage_table'
 

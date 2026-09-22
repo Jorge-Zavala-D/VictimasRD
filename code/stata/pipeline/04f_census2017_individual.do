@@ -43,11 +43,17 @@ program define _vrd_prepare_individual_outcomes
         indigenous_language_2017 ///
         if age_2017 >= 3 & !missing(indigenous_language_2017)
 
-    * Complementary extreme-case migration bound: every unlinked person stays.
+    * Reconstruct both endpoints on the same cohort; linked unknowns stay missing.
+    replace moved_or_not_linked_sens_2017 = ///
+        moved_ccpp_2013_2017 if census2017_linked == 1
+    replace moved_or_not_linked_sens_2017 = 1 ///
+        if census2017_not_linked == 1
     generate byte moved_or_not_linked_zero_2017 = ///
         moved_ccpp_2013_2017 if census2017_linked == 1
     replace moved_or_not_linked_zero_2017 = 0 ///
         if census2017_not_linked == 1
+    assert missing(moved_or_not_linked_sens_2017) == ///
+        missing(moved_or_not_linked_zero_2017)
 end
 
 use "${rd_input_2017_individual}", clear

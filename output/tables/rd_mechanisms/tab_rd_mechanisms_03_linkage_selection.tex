@@ -1,14 +1,15 @@
 \begin{table}[!htbp]
 \centering\small
-\caption{Discontinuities in Census 2017 linkage}
+\caption{Census 2017 cohort coverage and linkage at the cutoff}
 \label{tab:rd_mechanisms_linkage}
 \begin{tabular}{lp{0.42\linewidth}rrr}
 \toprule
 Unit & Linkage outcome & Estimate & 95\% CI & \(p\) \\
 \midrule
-Ccpp & Person linkage rate within covered CCPPs & -8.28 & [-35.36, 18.81] & 0.549 \\
+CCPP & Included in the INEI-assisted Census cohort & 10.73 & [-11.66, 33.12] & 0.348 \\
+CCPP & Person linkage rate within covered CCPPs & -8.28 & [-35.36, 18.81] & 0.549 \\
 Individual & Source-cohort person linked to Census 2017 & -8.28 & [-35.21, 18.65] & 0.547 \\
 \bottomrule
 \end{tabular}
-\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Estimates are percentage-point discontinuities in inclusion in the INEI-assisted 2017 linked cohort, not migration. Local-linear models use selected adjacent B--C communities, treatment through 2016, common \(h=0.0075\), \(b=0.0135\), triangular kernels, district clustering for CCPPs, CCPP-equal weighting and CCPP clustering for people, and 95\% confidence intervals. Source: RUV, CMAN, and INEI-assisted Census 2017 linkage.}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Estimates are percentage-point discontinuities in RUV-community coverage by the INEI-assisted source cohort or, conditional on coverage, Census 2017 person linkage; they are not migration effects. Local-linear models use selected adjacent B--C communities, treatment through 2016, common \(h=0.0075\), \(b=0.0135\), triangular kernels, district clustering for CCPPs, CCPP-equal weighting and CCPP clustering for people, and 95\% confidence intervals. Sources: RUV, CMAN, and INEI-assisted Census 2017 linkage.}
 \end{table}

@@ -212,6 +212,8 @@ merely to improve precision or significance.
 
 The module must report:
 
+- the cutoff discontinuity in whether a selected B/C RUV community entered
+  the INEI-assisted source cohort;
 - the cutoff discontinuity in person-level linkage;
 - the cutoff discontinuity in the CCPP linkage rate;
 - observed migration among linked people;
@@ -220,8 +222,10 @@ The module must report:
 - the existing sensitivity outcome that codes every unlinked person as a
   non-mover.
 
-The last two estimates are extreme-case coding endpoints, not formal sharp
-bounds on a fuzzy-RD LATE. They must never be labeled as observed migration.
+The last two estimates must share one denominator: linked people whose CCPP
+move status is unobserved remain missing in both branches. They are extreme-case
+coding endpoints, not formal sharp bounds on a fuzzy-RD LATE, and must never
+be labeled as observed migration.
 A linkage discontinuity close to zero reduces one specific concern but does not
 establish missing-at-random or eliminate selection bias.
 
