@@ -106,6 +106,27 @@ egen byte hte_window_ruv_tag = tag(ruv_id) if ///
 quietly count if hte_window_ruv_tag
 assert r(N) == 61
 
+* I03 follows the approved linked-adult migration population from module 04f.
+* The other seven outcomes retain their original complete-case cohort.
+generate byte hte_migration_sample = ///
+    hte_bc_design & census2017_linked == 1 & age_2017 >= 14 & ///
+    !missing(moved_ccpp_2013_2017)
+assert hte_migration_sample if hte_primary_sample
+quietly count if hte_migration_sample
+assert r(N) == 67125
+egen byte hte_migration_ruv_tag = tag(ruv_id) if hte_migration_sample
+quietly count if hte_migration_ruv_tag
+assert r(N) == 409
+quietly count if hte_migration_sample & ///
+    abs(${hte_running}) <= ${hte_common_h}
+assert r(N) == 7157
+egen byte hte_migration_window_tag = tag(ruv_id) if ///
+    hte_migration_sample & abs(${hte_running}) <= ${hte_common_h}
+quietly count if hte_migration_window_tag
+assert r(N) == 62
+
+generate byte hte_analysis_sample = hte_migration_sample
+
 keep if hte_bc_design
 assert _N == 110940
 
@@ -143,8 +164,10 @@ global hte_post_treatment_detail ///
 global hte_treatment                "${hte_treatment_2017}"
 global hte_moderator_var_column     "moderator_var_2017"
 global hte_wave_label               "Census 2017"
-global hte_source_note              "INEI-assisted Census 2017"
-global hte_source_note_tex          "INEI-assisted Census 2017"
+global hte_source_note ///
+    "INEI-assisted Census 2017 (migration: valid CCPP movement; others: complete cases)"
+global hte_source_note_tex ///
+    "INEI-assisted Census 2017 (migration: valid CCPP movement; others: complete cases)"
 global hte_treatment_timing_label ///
     "Cumulative collective-reparation receipt through 2016 for Census 2017 outcomes."
 global hte_person_source_label      "INEI-assisted Census 2017 people"
@@ -158,6 +181,7 @@ global hte_module_current           "code/stata/pipeline/05f_census2017_individu
 global hte_manifest_current         "${hte_manifest_2017_individual}"
 global hte_output_stub              "2017_individual"
 global hte_primary_outcomes         "`primary_outcomes'"
+global hte_outcome_specific_var     "moved_ccpp_2013_2017"
 
 do "${hte_level_engine}"
 local engine_rc = _rc

@@ -56,12 +56,11 @@ assert missing(min_sw_f) if estimator == "ivreg2" & ///
 assert gate_pass == 0 if estimator == "ivreg2" & ///
     (missing(sw_f_treat) | missing(sw_f_interaction))
 
-/* The female-moderator first stage uses one fixed person sample within each
-specification, so its diagnostics and gate cannot vary by outcome. Identified
-models must report both rank-aware conditional F statistics. */
+/* Seven outcomes retain the complete-case sample; I03 uses the approved
+linked-adult migration population. */
 preserve
     keep if moderator_id == "M03" & estimator == "ivreg2" & ///
-        gate_status != "not_applicable_identity"
+        gate_status != "not_applicable_identity" & outcome_id != "I03"
     foreach diagnostic in sw_f_treat sw_f_interaction min_sw_f gate_pass {
         bysort spec_id (outcome_id): ///
             assert `diagnostic' == `diagnostic'[1]
@@ -69,6 +68,15 @@ preserve
     assert !missing(sw_f_treat, sw_f_interaction, min_sw_f) if ///
         support_pass == 1 & underid_p < .05
 restore
+
+quietly count if moderator_id == "M03" & outcome_id == "I03" & ///
+    spec_id == "common_h_iv" & estimator == "ivreg2" & ///
+    n_left + n_right == 7157 & ccpp_left + ccpp_right == 62
+assert r(N) == 1
+quietly count if moderator_id == "M03" & outcome_id == "I02" & ///
+    spec_id == "common_h_iv" & estimator == "ivreg2" & ///
+    n_left + n_right == 5453 & ccpp_left + ccpp_right == 61
+assert r(N) == 1
 
 quietly count if moderator_id == "M03" & outcome_id == "I01" & ///
     gate_status == "not_applicable_identity"

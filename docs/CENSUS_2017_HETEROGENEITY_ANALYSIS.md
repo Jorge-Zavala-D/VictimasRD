@@ -1,15 +1,18 @@
 # Census 2017 heterogeneity analysis
 
-## 26 September 2026 population status
+## 27 September 2026 migration-population update
 
-The owner-approved 2017 individual primary observed-migration population is
-linked adults aged at least 14 with valid canonical CCPP movement. The
-existing `05f` individual migration heterogeneity rows still use the older
-54,317-person eight-outcome complete-case sample. They are historical
-complete-case sensitivity evidence, **not** heterogeneity of the newly
-registered primary observed-migration estimand. Keep those artifacts
-internal-only until a separate outcome-specific heterogeneity re-estimation
-and moderator-support audit. The CCPP and household modules are unaffected.
+The owner-approved 2017 individual observed-migration population is linked
+adults aged at least 14 with valid canonical CCPP movement. Module `05f` now
+uses this population for migration heterogeneity: 67,125 people in 409 RUV
+communities, including 7,157 people in 62 communities inside the common
+RD window. The other seven individual outcomes retain the eight-outcome
+complete-case cohort: 54,317 people in 406 communities, including 5,453
+people in 61 communities inside the window. The older migration
+heterogeneity output is historical complete-case sensitivity evidence,
+not the current primary-population result. The CCPP and household modules
+are unaffected; all individual heterogeneity artifacts remain internal-only
+pending scientific-owner review.
 
 ## Scope
 
@@ -18,8 +21,8 @@ and moderator-support audit. The CCPP and household modules are unaffected.
 `05f_census2017_individual_heterogeneity.do` implement all three Census 2017
 treatment-effect heterogeneity levels. The CCPP module uses the 388-community
 complete primary sample; the household module uses 24,877 households in 406
-RUV communities; and the individual module uses 54,317 linked people age 14
-or older in the same 406-community outcome universe. All use the selected
+RUV communities; and the individual module uses the two outcome-specific
+cohorts described above. All use the selected
 adjacent B/C design, `running_bc`, cumulative treatment through 2016, and the
 common fixed bandwidth `h = 0.0075`.
 
@@ -87,18 +90,56 @@ are unavailable because the local binary cells contain only two communities
 above and three below the cutoff. No gate-passing interaction survives a
 five-percent Holm or Benjamini--Hochberg correction.
 
+## Individual migration re-estimation: 27 September 2026
+
+The targeted `05f` run completed through the Stata MCP and passed its
+312-row output contract. Its 20-artifact level manifest records the unchanged
+Dropbox Coded input signature; no dataset was rewritten. The seven
+non-migration outcomes have exactly the same unadjusted estimates,
+standard errors, first-stage diagnostics, and gate decisions as the prior
+run. Family-adjusted values can change because the migration rows changed.
+
+Within the approved migration population, the female-moderator model uses
+7,157 adults in 62 communities. Its female-versus-male treatment-effect
+interaction is +0.99 percentage points (95% CI -11.51 to +13.49; raw
+`p = 0.876`, Holm-adjusted `p = 1`). This row passes the registered support,
+underidentification, and minimum conditional-first-stage gate
+(`F = 17.95`); it provides no evidence of a gender difference. The
+population interaction is underidentified (minimum conditional `F = 2.95`,
+underidentification `p = 0.111`), and district-capital status has only two
+communities in its smallest local cell. Do not interpret either failed-gate
+coefficient causally. Secondary deprivation and age interactions pass the
+gate but neither yields an adjusted signal. Across all individual outcomes,
+23 of 64 common-window fuzzy-IV interactions pass the gate; the sole raw
+five-percent signal remains wellbeing-by-gender, not migration, and its
+Holm-adjusted `p` is about 0.455.
+
+The 20-row support CSV and overlap plots describe the pooled
+migration-eligible candidate frame. Effective support for each outcome and
+moderator is in its model-result row; non-migration estimators still use the
+smaller complete-case sample. Continuous moderators retain the prespecified
+complete-case reference scale to preserve comparability with the seven
+unchanged outcomes. These are linked, observable adults, not all Census
+source-cohort adults. The historical complete-case migration-by-gender
+interaction was -0.75 percentage points (`p = 0.949`); it is retained only
+as a sensitivity reference, not substituted for the approved-population
+estimate. `rdhte` remains assignment-effect evidence, not fuzzy-LATE
+heterogeneity.
+
 ## Output contract
 
 All outputs are aggregate and non-sensitive. Machine-readable results and
 LaTeX tables are written under `output/tables/rd_heterogeneity`; figures are
 written under `output/figures/rd_heterogeneity`. Level manifests are
-`metadata/rd-heterogeneity-output-manifest-2017-ccpp.csv` and
-`metadata/rd-heterogeneity-output-manifest-2017-household.csv`.
+`metadata/rd-heterogeneity-output-manifest-2017-ccpp.csv`,
+`metadata/rd-heterogeneity-output-manifest-2017-household.csv`, and
+`metadata/rd-heterogeneity-output-manifest-2017-individual.csv`.
 
-The CCPP and household modules generated 43 artifacts: 26 CCPP artifacts and
-17 household artifacts. The household set contains 12 tables or
-machine-readable table files and five figures. The combined 2013--2017
-manifest contains 106 unique paths. Every artifact is marked
-`generated_unreviewed`; none has been synchronized to Overleaf. The eight
-household LaTeX fragments compiled into a 10-page QA document, and every page
-and all five household figures were visually inspected.
+The three Census 2017 modules generated 63 artifacts: 26 CCPP, 17 household,
+and 20 individual. The combined 2013--2017 manifest contains 126 unique
+paths; all 126 recorded checksums were verified after the targeted `05f`
+run. Every artifact remains marked `generated_unreviewed`; none was
+synchronized to Overleaf in this batch. The eight household LaTeX fragments
+compiled into a 10-page QA document in the earlier validation, and the
+revised individual migration figures were visually inspected for labels,
+notes, and clipping.

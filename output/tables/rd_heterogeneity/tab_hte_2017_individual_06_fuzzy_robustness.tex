@@ -15,7 +15,7 @@ Outcome & Moderator & Specification & Interaction & 95\% CI & Min. SW \(F\) & Un
 \multicolumn{8}{r}{\scriptsize Continued on next page} \\
 \endfoot
 \bottomrule
-\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} The common-window, CCPP-equal, CCPP-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), give observations equal weight, or cluster by district or running-score mass point. All models retain the pooled fully interacted local-linear 2SLS specification. No result, bandwidth, weight, or inference rule is selected by statistical significance. Source: RUV, CMAN, and INEI-assisted Census 2017.} \\
+\multicolumn{8}{p{0.94\textwidth}}{\footnotesize\textit{Notes:} The common-window, CCPP-equal, CCPP-clustered row is primary. Sensitivities add the fixed predetermined covariate set, use \(h=0.0050\) or \(h=0.0100\), give observations equal weight, or cluster by district or running-score mass point. All models retain the pooled fully interacted local-linear 2SLS specification. No result, bandwidth, weight, or inference rule is selected by statistical significance. Source: RUV, CMAN, and INEI-assisted Census 2017 (migration: valid CCPP movement; others: complete cases).} \\
 \endlastfoot
 Female & Log baseline CCPP population & common h covariates & 8.38 & [-8.52, 25.29] & 4.55 & 0.072 & Fail \\
 Female & Log baseline CCPP population & common h district cluster & 6.56 & [-8.21, 21.33] & 4.09 & 0.088 & Fail \\
@@ -31,13 +31,13 @@ Age 15-29 & Log baseline CCPP population & common h observation equal & 49.03 & 
 Age 15-29 & Log baseline CCPP population & common h score cluster & 16.52 & [-5.90, 38.94] & 3.72 & 0.088 & Fail \\
 Age 15-29 & Log baseline CCPP population & large h iv & 35.67 & [-89.95, 161.29] & 0.33 & 0.574 & Fail \\
 Age 15-29 & Log baseline CCPP population & small h iv & 35.53 & [-72.91, 143.98] & 0.63 & 0.445 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & common h covariates & 52.85 & [-39.36, 145.05] & 4.55 & 0.072 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & common h district cluster & 68.29 & [-48.70, 185.29] & 4.09 & 0.088 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & common h iv & 68.29 & [-48.21, 184.80] & 3.70 & 0.085 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & common h observation equal & 126.64 & [-775.44, 1028.72] & 0.10 & 0.740 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & common h score cluster & 68.29 & [-43.65, 180.24] & 3.72 & 0.088 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & large h iv & 138.52 & [-431.58, 708.62] & 0.33 & 0.574 & Fail \\
-Lives in another CCPP & Log baseline CCPP population & small h iv & 102.03 & [-294.28, 498.33] & 0.63 & 0.445 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & common h covariates & 66.74 & [-20.65, 154.12] & 3.91 & 0.087 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & common h district cluster & 75.02 & [-49.17, 199.22] & 3.13 & 0.115 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & common h iv & 75.02 & [-49.60, 199.64] & 2.95 & 0.111 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & common h observation equal & 103.09 & [-339.68, 545.86] & 0.29 & 0.575 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & common h score cluster & 75.02 & [-46.92, 196.97] & 3.12 & 0.114 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & large h iv & 104.29 & [-317.04, 525.63] & 0.35 & 0.565 & Fail \\
+Lives in another CCPP & Log baseline CCPP population & small h iv & 169.64 & [-368.87, 708.15] & 0.49 & 0.495 & Fail \\
 Secondary education or higher & Log baseline CCPP population & common h covariates & 10.69 & [-14.63, 36.01] & 4.55 & 0.072 & Fail \\
 Secondary education or higher & Log baseline CCPP population & common h district cluster & 8.55 & [-18.17, 35.28] & 4.09 & 0.088 & Fail \\
 Secondary education or higher & Log baseline CCPP population & common h iv & 8.55 & [-18.60, 35.71] & 3.70 & 0.085 & Fail \\
@@ -136,13 +136,13 @@ Age 15-29 & Female respondent & common h observation equal & 4.53 & [-16.00, 25.
 Age 15-29 & Female respondent & common h score cluster & 14.41 & [-4.07, 32.89] & 14.64 & 0.006 & Pass \\
 Age 15-29 & Female respondent & large h iv & 8.42 & [-14.59, 31.43] & 11.59 & 0.005 & Pass \\
 Age 15-29 & Female respondent & small h iv & 22.79 & [4.37, 41.21] & 9.30 & 0.037 & Fail \\
-Lives in another CCPP & Female respondent & common h covariates & -0.88 & [-24.09, 22.32] & 19.21 & 0.004 & Pass \\
-Lives in another CCPP & Female respondent & common h district cluster & -0.75 & [-22.98, 21.49] & 15.18 & 0.005 & Pass \\
-Lives in another CCPP & Female respondent & common h iv & -0.75 & [-23.56, 22.07] & 16.32 & 0.004 & Pass \\
-Lives in another CCPP & Female respondent & common h observation equal & 3.44 & [-9.61, 16.48] & 4.59 & 0.031 & Fail \\
-Lives in another CCPP & Female respondent & common h score cluster & -0.75 & [-23.58, 22.09] & 14.64 & 0.006 & Pass \\
-Lives in another CCPP & Female respondent & large h iv & -3.63 & [-29.27, 22.01] & 11.59 & 0.005 & Pass \\
-Lives in another CCPP & Female respondent & small h iv & -3.52 & [-37.54, 30.51] & 9.30 & 0.037 & Fail \\
+Lives in another CCPP & Female respondent & common h covariates & 0.02 & [-13.66, 13.69] & 20.94 & 0.004 & Pass \\
+Lives in another CCPP & Female respondent & common h district cluster & 0.99 & [-12.23, 14.21] & 17.03 & 0.006 & Pass \\
+Lives in another CCPP & Female respondent & common h iv & 0.99 & [-11.51, 13.49] & 17.95 & 0.004 & Pass \\
+Lives in another CCPP & Female respondent & common h observation equal & 4.81 & [-4.73, 14.36] & 8.18 & 0.019 & Fail \\
+Lives in another CCPP & Female respondent & common h score cluster & 0.99 & [-12.44, 14.43] & 15.44 & 0.007 & Pass \\
+Lives in another CCPP & Female respondent & large h iv & -5.63 & [-21.70, 10.45] & 12.86 & 0.004 & Pass \\
+Lives in another CCPP & Female respondent & small h iv & 9.27 & [-4.00, 22.55] & 11.06 & 0.033 & Pass \\
 Secondary education or higher & Female respondent & common h covariates & 18.46 & [-1.70, 38.62] & 19.21 & 0.004 & Pass \\
 Secondary education or higher & Female respondent & common h district cluster & 15.60 & [-2.29, 33.49] & 15.18 & 0.005 & Pass \\
 Secondary education or higher & Female respondent & common h iv & 15.60 & [-2.61, 33.81] & 16.32 & 0.004 & Pass \\

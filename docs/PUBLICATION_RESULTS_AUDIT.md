@@ -125,6 +125,17 @@ Gate results are:
 | 2017 household | 8/48, all secondary deprivation | No raw or adjusted interaction |
 | 2017 individual | 23/64 | One raw female interaction; Holm about .455 and AR p about .075 |
 
+On 27 September, individual migration heterogeneity was re-estimated on the
+approved linked-adult population (7,157 people and 62 RUV communities in
+the common window). The female-versus-male fuzzy-IV interaction is +0.99
+percentage points (95% CI -11.51 to +13.49; raw `p = 0.876`, Holm `p = 1`)
+and passes the registered conditional-first-stage gate. Baseline-population
+heterogeneity is underidentified; the district-capital cell fails support.
+The other seven individual outcomes retain their prior unadjusted results.
+All revised `05f` exhibits remain internal-only pending scientific-owner
+review, and the result applies only to linked adults with observable
+canonical CCPP movement.
+
 District-capital status lacks adequate local binary-cell support in every
 module. The 2017 CCPP population interaction is knife-edge and fails several
 sensitivity branches. `rdhte` results are assignment-effect heterogeneity only;
@@ -251,11 +262,10 @@ Prohibited:
 
 ## Next analytical workflow
 
-1. Re-estimate and audit the `05f` migration-heterogeneity rows on the newly
-   approved observed-migration adult population. Until then, the existing
-   complete-case heterogeneity artifacts remain internal-only. The
-   `treat_12`/`treat_16` timing convention remains fixed.
-2. Adjudicate historical-to-2017 CCPP-code changes before considering any
+1. Completed: re-estimate and audit `05f` migration heterogeneity on the
+   approved observed-migration adult population. The revised artifacts
+   remain internal-only; the `treat_12`/`treat_16` timing convention is fixed.
+2. Next: adjudicate historical-to-2017 CCPP-code changes before considering any
    change to the canonical migration definition. Keep source-cohort entry,
    Census linkage, and migration observability separate in the identification
    discussion.

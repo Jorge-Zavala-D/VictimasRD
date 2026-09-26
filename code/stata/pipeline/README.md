@@ -137,7 +137,10 @@ validates the household result grid, support and analysis contracts, strict
 instrument gate, and 17-artifact manifest.
 `code/stata/tests/test_census2017_individual_heterogeneity_outputs.do`
 validates the individual result grid, the mechanical female-outcome identity
-exclusion, and 20-artifact manifest. Pooled, fully interacted
+exclusion, and 20-artifact manifest. In `05f`, migration uses linked adults
+with valid canonical CCPP movement while the other seven outcomes retain the
+eight-outcome complete-case cohort; moderator standardization keeps that
+complete-case reference. Pooled, fully interacted
 fuzzy-LATE heterogeneity estimated with `ivreg2` is primary; `rdhte`
 provides secondary assignment-effect heterogeneity and never substitutes for a
 weak or underidentified fuzzy interaction. All modules use the fixed

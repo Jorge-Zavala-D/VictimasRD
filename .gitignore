@@ -51,6 +51,7 @@ logs/*
 .~lock.*
 
 # Stata, editor, and backup artifacts
+.Rhistory
 *.stswp
 *.bak
 *.swp

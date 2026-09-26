@@ -244,8 +244,12 @@ forvalues moderator_index = 1/`moderator_count' {
     label variable `moderator_var' "`m_label_`moderator_index''"
 }
 
-* All planned estimators use h no wider than hte_large_h.
-keep if hte_primary_sample & abs(${hte_running}) < ${hte_large_h}
+* Optional outcome-specific frame; 05f retains the original cohort for
+* moderator standardization while adding migration-valid linked adults.
+local analysis_sample "hte_primary_sample"
+capture confirm variable hte_analysis_sample
+if !_rc local analysis_sample "hte_analysis_sample"
+keep if `analysis_sample' & abs(${hte_running}) < ${hte_large_h}
 assert _N > 0
 
 tempfile hte_analysis_base hte_support
@@ -416,8 +420,13 @@ program define _vrd_post_level_hte_iv
     quietly generate double `running_right_m' = ///
         ${hte_running} * hte_assignment * `modvar'
 
+    local outcome_sample "hte_primary_sample"
+    if "`outvar'" == "${hte_outcome_specific_var}" {
+        confirm variable hte_analysis_sample
+        local outcome_sample "hte_analysis_sample"
+    }
     local estimator_sample ///
-        "abs(${hte_running}) < `hvalue' & !missing(`y_scaled', `modvar', ${hte_treatment}, `clustervar')"
+        "`outcome_sample' & abs(${hte_running}) < `hvalue' & !missing(`y_scaled', `modvar', ${hte_treatment}, `clustervar')"
 
     if "`covariates'" != "" {
         quietly egen byte `covariate_missing' = rowmiss(`covariates')
@@ -757,8 +766,13 @@ program define _vrd_post_level_hte_rdhte
         side_tag cell_tag cluster_tag
 
     quietly generate double `y_scaled' = `outvar' * `scale'
+    local outcome_sample "hte_primary_sample"
+    if "`outvar'" == "${hte_outcome_specific_var}" {
+        confirm variable hte_analysis_sample
+        local outcome_sample "hte_analysis_sample"
+    }
     quietly generate byte `eligible' = ///
-        abs(${hte_running}) < `hvalue' & ///
+        `outcome_sample' & abs(${hte_running}) < `hvalue' & ///
         !missing(`y_scaled', `modvar', `clustervar')
 
     bysort hte_cluster_ruv: egen long `eligible_count' = total(`eligible')
@@ -1679,10 +1693,14 @@ assert _N > 0
 
 generate int plot_y = _N - _n + 1
 generate str80 plot_label = outcome_label
+generate str80 plot_mod_label = moderator_label
+replace plot_mod_label = "Log baseline population" if moderator_id == "M01"
+replace plot_mod_label = "District capital" if moderator_id == "M02"
+replace plot_mod_label = "Women vs men" if moderator_id == "M03"
 local fuzzy_ylabels
 forvalues row = 1/`=_N' {
     local row_label = ///
-        plot_label[`row'] + ": " + moderator_id[`row']
+        plot_label[`row'] + ": " + plot_mod_label[`row']
     local fuzzy_ylabels ///
         `"`fuzzy_ylabels' `=plot_y[`row']' "`row_label'""'
 }
