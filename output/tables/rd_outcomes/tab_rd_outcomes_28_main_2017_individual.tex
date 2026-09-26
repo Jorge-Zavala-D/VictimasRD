@@ -9,15 +9,16 @@ Outcome & Control mean & Reduced form & Fuzzy LATE & 95\% robust CI & Holm \(p\)
 \midrule
 Female & 55.23 & 7.19 & 7.55 & [-2.94, 18.05] & 1.000 & 5,453 & 61 \\
 Age 15-29 & 30.64 & 4.90 & 5.18 & [-15.08, 25.44] & 1.000 & 5,453 & 61 \\
-Lives in another CCPP & 45.49 & 43.72 & 45.62 & [-0.40, 91.64] & 0.416 & 5,453 & 61 \\
+Lives in another CCPP & 38.58 & 20.90 & 21.86 & [-16.96, 60.67] & 1.000 & 7,157 & 62 \\
 Secondary education or higher & 48.95 & 7.34 & 7.81 & [-24.40, 40.01] & 1.000 & 5,453 & 61 \\
 Employed in the reference week & 46.08 & -12.51 & -12.98 & [-30.71, 4.76] & 1.000 & 5,453 & 61 \\
 Any health insurance & 88.41 & -3.90 & -3.95 & [-22.06, 14.16] & 1.000 & 5,453 & 61 \\
 Reports any disability & 17.57 & -10.26 & -10.71 & [-27.17, 5.76] & 1.000 & 5,453 & 61 \\
 Core wellbeing proxy & 57.61 & 12.48 & 13.03 & [-8.03, 34.09] & 1.000 & 5,453 & 61 \\
 \midrule
-Common first stage & & & 0.964 & [0.542, 1.385] & & 5,453 & 61 \\
+Complete-case first stage & & & 0.964 & [0.542, 1.385] & & 5,453 & 61 \\
+Migration-sample first stage & & & 0.957 & [0.535, 1.379] & & 7,157 & 62 \\
 \bottomrule
 \end{tabular}
-\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome sample of persons age 14 or older before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with persons equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. All reported effects are percentage points. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=20.90\). Reduced forms and weak-instrument-robust diagnostics remain necessary. The assisted linked cohort has no analysis weight and is not the full national Census microdata. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Seven non-migration outcomes use linked adults age 14 or older complete on all eight registered primary measures; the CCPP-migration row instead uses linked adults with valid canonical source--destination CCPP movement, without requiring wellbeing completeness. Row-specific effective persons and RUV communities are shown. Effects are percentage points at the official B--C cutoff in selected geography, using common \(h=0.0075\), \(b=0.0135\), local-linear triangular-kernel robust bias-corrected estimates, mass-point adjustment, CCPP-equal weights, and RUV-community CR2 inference. The assignment reduced form is shown beside the fuzzy treatment-receipt ratio; intervals are 95\% and Holm p-values cover eight primary outcomes. Local-IV Kleibergen--Paap F must exceed 10; it is 20.65 for migration and 20.90 for the complete-case outcomes. Migration estimates are conditional on linkage and valid movement, not effects for all source-cohort adults. Source: RUV, CMAN, INEI-assisted Census 2017.}
 \end{table}

@@ -122,6 +122,23 @@ egen byte primary_missing = rowmiss(`primary_outcomes') ///
 generate byte rd_primary_sample = ///
     rd_bc_design & census2017_linked == 1 & ///
     age_2017 >= 14 & primary_missing == 0
+* I03 needs only its own valid linked-adult migration outcome.
+generate byte rd_migration_sample = ///
+    rd_bc_design & census2017_linked == 1 & age_2017 >= 14 & ///
+    !missing(moved_ccpp_2013_2017)
+assert rd_migration_sample if rd_primary_sample
+quietly count if rd_migration_sample
+assert r(N) == 67125
+egen byte rd_migration_ruv_tag = tag(ruv_id) if rd_migration_sample
+quietly count if rd_migration_ruv_tag
+assert r(N) == 409
+quietly count if rd_migration_sample & ///
+    abs(${rd_running}) <= ${rd_common_h}
+assert r(N) == 7157
+egen byte rd_migration_window_ruv_tag = tag(ruv_id) if ///
+    rd_migration_sample & abs(${rd_running}) <= ${rd_common_h}
+quietly count if rd_migration_window_ruv_tag
+assert r(N) == 62
 
 quietly count if rd_primary_sample
 assert r(N) == 54317
@@ -218,14 +235,25 @@ local main_first_stage_se = e(se_tau_rb)
 local main_first_stage_f = ///
     (`main_first_stage_bc' / `main_first_stage_se')^2
 local main_first_stage_n = e(N_h_l) + e(N_h_r)
-local first_stage_gate = `main_first_stage_f' > ${rd_weak_f_gate}
 
-if !`first_stage_gate' {
-    display as error ///
-        "WARNING: the person-sample first stage does not meet the gate."
-    display as error ///
-        "Fuzzy LATEs remain diagnostic; reduced forms and weak-IV inference are required."
-}
+bysort cluster_ruv: egen long rd_migration_persons = ///
+    total(rd_migration_sample)
+generate double rd_weight_ccpp_migration = ///
+    rd_migration_sample / rd_migration_persons ///
+    if rd_migration_persons > 0
+quietly rdrobust ///
+    ${rd_treatment_2017} ${rd_running} if rd_migration_sample, ///
+    c(0) p(1) q(2) ///
+    h(${rd_common_h} ${rd_common_h}) ///
+    b(${rd_common_b} ${rd_common_b}) ///
+    kernel(triangular) weights(rd_weight_ccpp_migration) ///
+    vce(cr2 cluster_ruv) masspoints(adjust)
+local migration_first_stage_bc = e(tau_bc)
+local migration_first_stage_se = e(se_tau_rb)
+local migration_first_stage_f = ///
+    (`migration_first_stage_bc' / `migration_first_stage_se')^2
+local migration_first_stage_n = e(N_h_l) + e(N_h_r)
+assert `migration_first_stage_n' == 7157
 
 
 *-----------------------------------*
@@ -438,7 +466,7 @@ postfile `rd_post' ///
     str40 spec_id ///
     str24 estimand ///
     str16 estimator ///
-    str36 sample_rule ///
+    str48 sample_rule ///
     str18 weighting ///
     str28 vce ///
     byte p q ///
@@ -483,6 +511,18 @@ _vrd_post_individual_rd, ///
 _vrd_post_individual_rd, ///
     posthandle(`rd_post') ///
     outvar(${rd_treatment_2017}) ///
+    outcomeid("D06") ///
+    outlabel("Treatment through 2016: observed-migration adults") ///
+    family("design") tier("design") multiplicity("design") ///
+    paperorder(-2.5) specid("common_h_migration_ccpp_equal") ///
+    estimand("first_stage") usevar(rd_migration_sample) scale(1) ///
+    weighting("ccpp_equal") ///
+    hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
+    samplerule("selected_bc_linked_adult_migration")
+
+_vrd_post_individual_rd, ///
+    posthandle(`rd_post') ///
+    outvar(${rd_treatment_2017}) ///
     outcomeid("D03") ///
     outlabel("Treatment through 2016: person-equal sensitivity") ///
     family("design") tier("design") multiplicity("design") ///
@@ -519,6 +559,10 @@ generate byte rd_primary_donut_005 = ///
     rd_primary_sample & abs(${rd_running}) > .00005
 generate byte rd_primary_donut_025 = ///
     rd_primary_sample & abs(${rd_running}) > .00025
+generate byte rd_migration_donut_005 = ///
+    rd_migration_sample & abs(${rd_running}) > .00005
+generate byte rd_migration_donut_025 = ///
+    rd_migration_sample & abs(${rd_running}) > .00025
 
 forvalues outcome_index = 1/`outcome_count' {
     local outcome_var "`o_var_`outcome_index''"
@@ -535,6 +579,10 @@ forvalues outcome_index = 1/`outcome_count' {
     if "`outcome_tier'" == "primary" {
         local outcome_sample "rd_primary_sample"
         local sample_rule "selected_bc_primary_individual"
+    }
+    if "`outcome_id'" == "I03" {
+        local outcome_sample "rd_migration_sample"
+        local sample_rule "selected_bc_linked_adult_migration"
     }
 
     foreach estimand_spec in reduced_form fuzzy {
@@ -578,11 +626,11 @@ forvalues outcome_index = 1/`outcome_count' {
             family("`outcome_family'") tier("`outcome_tier'") ///
             multiplicity("`outcome_mult'") paperorder(`outcome_order') ///
             specid("common_h_covariates") estimand("fuzzy_late") ///
-            usevar(rd_primary_sample) scale(`outcome_scale') ///
+            usevar(`outcome_sample') scale(`outcome_scale') ///
             weighting("ccpp_equal") fuzzy ///
             covariates(${rd_primary_covariates}) ///
             hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-            samplerule("selected_bc_primary_individual")
+            samplerule("`sample_rule'")
 
         foreach fixed_window in 005 010 {
             local h_value = ${rd_small_h}
@@ -600,10 +648,10 @@ forvalues outcome_index = 1/`outcome_count' {
                 paperorder(`outcome_order') ///
                 specid("fixed_h_`fixed_window'") ///
                 estimand("fuzzy_late") ///
-                usevar(rd_primary_sample) scale(`outcome_scale') ///
+                usevar(`outcome_sample') scale(`outcome_scale') ///
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(`h_value') bvalue(`b_value') tuning(`h_value') ///
-                samplerule("selected_bc_primary_individual")
+                samplerule("`sample_rule'")
         }
 
         _vrd_post_individual_rd, ///
@@ -613,10 +661,10 @@ forvalues outcome_index = 1/`outcome_count' {
             multiplicity("`outcome_mult'") paperorder(`outcome_order') ///
             specid("common_h_person_equal") ///
             estimand("fuzzy_late") ///
-            usevar(rd_primary_sample) scale(`outcome_scale') ///
+            usevar(`outcome_sample') scale(`outcome_scale') ///
             weighting("person_equal") fuzzy ///
             hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
-            samplerule("selected_bc_primary_individual")
+            samplerule("`sample_rule'")
 
         foreach inference_spec in cr1 cr3 {
             _vrd_post_individual_rd, ///
@@ -627,12 +675,12 @@ forvalues outcome_index = 1/`outcome_count' {
                 paperorder(`outcome_order') ///
                 specid("common_h_`inference_spec'_ccpp") ///
                 estimand("fuzzy_late") ///
-                usevar(rd_primary_sample) scale(`outcome_scale') ///
+                usevar(`outcome_sample') scale(`outcome_scale') ///
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 vcetype("`inference_spec' cluster_ruv") ///
                 clustervar(cluster_ruv) ///
-                samplerule("selected_bc_primary_individual")
+                samplerule("`sample_rule'")
         }
 
         foreach cluster_level in district score {
@@ -648,12 +696,12 @@ forvalues outcome_index = 1/`outcome_count' {
                 paperorder(`outcome_order') ///
                 specid("common_h_cr2_`cluster_level'") ///
                 estimand("fuzzy_late") ///
-                usevar(rd_primary_sample) scale(`outcome_scale') ///
+                usevar(`outcome_sample') scale(`outcome_scale') ///
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 vcetype("cr2 `cluster_var'") ///
                 clustervar(`cluster_var') ///
-                samplerule("selected_bc_primary_individual")
+                samplerule("`sample_rule'")
         }
 
         foreach kernel_id in uniform epanechnikov {
@@ -665,11 +713,11 @@ forvalues outcome_index = 1/`outcome_count' {
                 paperorder(`outcome_order') ///
                 specid("common_h_`kernel_id'") ///
                 estimand("fuzzy_late") ///
-                usevar(rd_primary_sample) scale(`outcome_scale') ///
+                usevar(`outcome_sample') scale(`outcome_scale') ///
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 kernel("`kernel_id'") ///
-                samplerule("selected_bc_primary_individual")
+                samplerule("`sample_rule'")
         }
 
         _vrd_post_individual_rd, ///
@@ -678,13 +726,15 @@ forvalues outcome_index = 1/`outcome_count' {
             family("`outcome_family'") tier("`outcome_tier'") ///
             multiplicity("`outcome_mult'") paperorder(`outcome_order') ///
             specid("outcome_mserd_p2") estimand("fuzzy_late") ///
-            usevar(rd_primary_sample) scale(`outcome_scale') ///
+            usevar(`outcome_sample') scale(`outcome_scale') ///
             weighting("ccpp_equal") fuzzy ///
             polyorder(2) biasorder(3) bwselect("mserd") ///
-            samplerule("selected_bc_primary_individual")
+            samplerule("`sample_rule'")
 
         foreach donut_id in 005 025 {
             local donut_sample "rd_primary_donut_`donut_id'"
+            if "`outcome_id'" == "I03" ///
+                local donut_sample "rd_migration_donut_`donut_id'"
             local donut_value = .00005
             if "`donut_id'" == "025" local donut_value = .00025
 
@@ -699,7 +749,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 weighting("ccpp_equal") fuzzy ///
                 hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
                 tuning(`donut_value') ///
-                samplerule("selected_bc_primary_individual")
+                samplerule("`sample_rule'")
         }
     }
 }
@@ -708,11 +758,12 @@ forvalues outcome_index = 1/`outcome_count' {
 **# 5. Parametric local-linear IV analogues
 *-----------------------------------*
 
-generate byte above_bc = ${rd_running} >= 0 if rd_primary_sample
+generate byte above_bc = ${rd_running} >= 0 if rd_migration_sample
 generate double running_above = ///
-    ${rd_running} * above_bc if rd_primary_sample
+    ${rd_running} * above_bc if rd_migration_sample
 
 local kp_f_main .
+local kp_f_migration .
 
 forvalues outcome_index = 1/`outcome_count' {
     if "`o_tier_`outcome_index''" == "primary" {
@@ -723,6 +774,13 @@ forvalues outcome_index = 1/`outcome_count' {
         local outcome_mult "`o_mult_`outcome_index''"
         local outcome_scale = `o_scale_`outcome_index''
         local outcome_order = `o_order_`outcome_index''
+        local parametric_sample "rd_primary_sample"
+        local parametric_sample_rule "selected_bc_primary_individual"
+        if "`outcome_id'" == "I03" {
+            local parametric_sample "rd_migration_sample"
+            local parametric_sample_rule ///
+                "selected_bc_linked_adult_migration"
+        }
 
         foreach parametric_spec in ///
             parametric_common_h ///
@@ -752,7 +810,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 parametric_left_tag parametric_right_tag
 
             generate byte `parametric_eligible' = ///
-                rd_primary_sample & ///
+                `parametric_sample' & ///
                 abs(${rd_running}) <= ${rd_common_h} & ///
                 !missing(`outcome_var', ${rd_treatment_2017}, ///
                     above_bc, ${rd_running}, running_above, ///
@@ -868,6 +926,10 @@ forvalues outcome_index = 1/`outcome_count' {
                     `outcome_order' == 1 {
                     local kp_f_main = `kp_f'
                 }
+                if "`parametric_spec'" == "parametric_common_h" & ///
+                    "`outcome_id'" == "I03" {
+                    local kp_f_migration = `kp_f'
+                }
             }
 
             post `rd_post' ///
@@ -875,7 +937,7 @@ forvalues outcome_index = 1/`outcome_count' {
                 ("`outcome_label'") ("`outcome_family'") ///
                 ("primary") ("`outcome_mult'") (`outcome_order') ///
                 ("`parametric_spec'") ("parametric_late") ///
-                ("ivreg2") ("selected_bc_primary_individual") ///
+                ("ivreg2") ("`parametric_sample_rule'") ///
                 ("`parametric_weighting'") ("`parametric_vce'") ///
                 (1) (2) ("triangular") ("manual") ///
                 (${rd_common_h}) ///
@@ -894,6 +956,26 @@ forvalues outcome_index = 1/`outcome_count' {
     }
 }
 
+* Preserve the former eight-outcome I03 analysis as a selection sensitivity.
+foreach estimand_spec in reduced_form fuzzy {
+    local fuzzy_option
+    local estimand_name "reduced_form"
+    if "`estimand_spec'" == "fuzzy" {
+        local fuzzy_option "fuzzy"
+        local estimand_name "fuzzy_late"
+    }
+    _vrd_post_individual_rd, ///
+        posthandle(`rd_post') outvar(moved_ccpp_2013_2017) ///
+        outcomeid("I03") outlabel("Lives in another CCPP") ///
+        family("migration") tier("exploratory") ///
+        multiplicity("migration_complete_case_sensitivity") ///
+        paperorder(3) specid("complete_case_`estimand_spec'") ///
+        estimand("`estimand_name'") usevar(rd_primary_sample) ///
+        scale(100) weighting("ccpp_equal") `fuzzy_option' ///
+        hvalue(${rd_common_h}) bvalue(${rd_common_b}) ///
+        samplerule("selected_bc_eight_outcome_complete_case")
+}
+
 postclose `rd_post'
 
 
@@ -903,13 +985,16 @@ postclose `rd_post'
 
 use "`rd_results_raw'", clear
 
-* Five design/linkage rows, four common rows per registered outcome, and
-* seventeen additional robustness rows for each of eight primary outcomes.
-local expected_result_rows = 5 + 4 * `outcome_count' + 17 * 8
+* Six design/linkage rows, four common rows per registered outcome, seventeen
+* robustness rows per primary outcome, and two legacy I03 sensitivities.
+local expected_result_rows = 6 + 4 * `outcome_count' + 17 * 8 + 2
 assert _N == `expected_result_rows'
 quietly count if tier == "primary" & ///
     inlist(spec_id, "common_h_reduced_form", "common_h_fuzzy")
 assert r(N) == 16
+quietly count if outcome_id == "I03" & tier == "exploratory" & ///
+    inlist(spec_id, "complete_case_reduced_form", "complete_case_fuzzy")
+assert r(N) == 2
 
 generate double p_holm = .
 generate double q_bh = .
@@ -953,9 +1038,11 @@ export delimited using ///
 *-----------------------------------*
 
 tempname contract_file
-local first_stage_status = cond(`first_stage_gate', "pass", "warning")
 local kp_f_text : display %5.2f `kp_f_main'
 local kp_status = cond(`kp_f_main' > ${rd_weak_f_gate}, ///
+    "pass", "warning")
+local kp_f_migration_text : display %5.2f `kp_f_migration'
+local kp_migration_status = cond(`kp_f_migration' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 
 file open `contract_file' using ///
@@ -989,9 +1076,19 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""window_ccpp","61","validated","RUV communities inside the common fixed window""' _n
 file write `contract_file' ///
-    `""first_stage_f","`main_first_stage_f'","`first_stage_status'","Squared robust first-stage z statistic under CCPP-equal weighting and CCPP CR2""' _n
+    `""migration_persons","67125","approved","Linked adults with valid canonical CCPP movement in selected B/C geography""' _n
+file write `contract_file' ///
+    `""migration_ccpp","409","validated","RUV communities represented in observed-migration adult sample""' _n
+file write `contract_file' ///
+    `""migration_window_persons","7157","validated","Observed-migration adults inside common fixed window""' _n
+file write `contract_file' ///
+    `""migration_window_ccpp","62","validated","Observed-migration RUV communities inside common fixed window""' _n
+file write `contract_file' ///
+    `""first_stage_f","`main_first_stage_f'","diagnostic","Squared robust first-stage z statistic under CCPP-equal weighting and CCPP CR2; not the strength gate""' _n
 file write `contract_file' ///
     `""parametric_kp_f","`kp_f_main'","`kp_status'","CCPP-clustered Kleibergen-Paap F in the weighted local-linear IV model""' _n
+file write `contract_file' ///
+    `""migration_parametric_kp_f","`kp_f_migration'","`kp_migration_status'","CCPP-clustered Kleibergen-Paap F for approved observed-migration adults""' _n
 file write `contract_file' ///
     `""weak_f_gate","${rd_weak_f_gate}","approved","Conservative interpretation gate; no bandwidth or weighting rule is selected to pass""' _n
 file write `contract_file' ///
@@ -1068,7 +1165,7 @@ file write `first_stage_table' "\midrule" _n
 
 preserve
 use "`rd_results_final'", clear
-keep if inlist(outcome_id, "D01", "D02", "D03", "D04")
+keep if inlist(outcome_id, "D01", "D02", "D03", "D04", "D06")
 sort paper_order
 
 forvalues result_row = 1/`=_N' {
@@ -1101,7 +1198,7 @@ restore
 
 file write `first_stage_table' "\bottomrule" _n
 file write `first_stage_table' "\end{tabular}" _n
-file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment. The common window is \(h=0.0075\), \(b=0.0135\); the final row uses the treatment-based MSE selector. CCPP-equal weights give each RUV community total weight one and are primary because treatment is assigned at that level; person-equal weights change the target population and are a required sensitivity. Inference is CR2 by complete RUV community ID. \(F_z\) is the squared robust RD \(z\) statistic and is descriptive, not the registered strength screen. The clustered local-IV Kleibergen--Paap screen is \(F>10\), with primary \(F=`kp_f_text'\). Fuzzy LATEs are also reported with reduced forms and weak-instrument-robust diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
+file write `first_stage_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Outcome is cumulative collective-reparation receipt through 2016. Rows compare the source cohort, eight-outcome complete cases, and the approved linked-adult canonical-migration population; D06 is the latter. Estimates use the selected B--C geography, local-linear triangular-kernel RD, robust bias-corrected CR2 inference clustered by RUV community, mass-point adjustment, and common \(h=0.0075\), \(b=0.0135\), except the labeled MSE-selector row. CCPP-equal weighting gives each RUV community total weight one; person-equal weighting is sensitivity. \(F_z\) is a descriptive squared robust first-stage z statistic, not the registered local-IV strength test. Kleibergen--Paap F is `kp_f_text' for the complete cases and `kp_f_migration_text' for observed migration; interpret fuzzy effects only if F>10. Source: RUV, CMAN, INEI-assisted Census 2017.}" _n
 file write `first_stage_table' "\end{table}" _n
 file close `first_stage_table'
 
@@ -1213,10 +1310,22 @@ foreach formatted_value in ///
     local `formatted_value' = strtrim("``formatted_value''")
 }
 file write `main_table' ///
-    "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 61 \\" _n
+    "Complete-case first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 61 \\" _n
+local mig_fs : display %6.3f `migration_first_stage_bc'
+local mig_fs_n : display %9.0fc `migration_first_stage_n'
+local mig_fs_lo : display %6.3f ///
+    `migration_first_stage_bc' - 1.96 * `migration_first_stage_se'
+local mig_fs_hi : display %6.3f ///
+    `migration_first_stage_bc' + 1.96 * `migration_first_stage_se'
+foreach formatted_value in ///
+    mig_fs mig_fs_lo mig_fs_hi mig_fs_n {
+    local `formatted_value' = strtrim("``formatted_value''")
+}
+file write `main_table' ///
+    "Migration-sample first stage & & & `mig_fs' & [`mig_fs_lo', `mig_fs_hi'] & & `mig_fs_n' & 62 \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
-file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome sample of persons age 14 or older before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with persons equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. All reported effects are percentage points. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=`kp_f_text'\). Reduced forms and weak-instrument-robust diagnostics remain necessary. The assisted linked cohort has no analysis weight and is not the full national Census microdata. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
+file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Seven non-migration outcomes use linked adults age 14 or older complete on all eight registered primary measures; the CCPP-migration row instead uses linked adults with valid canonical source--destination CCPP movement, without requiring wellbeing completeness. Row-specific effective persons and RUV communities are shown. Effects are percentage points at the official B--C cutoff in selected geography, using common \(h=0.0075\), \(b=0.0135\), local-linear triangular-kernel robust bias-corrected estimates, mass-point adjustment, CCPP-equal weights, and RUV-community CR2 inference. The assignment reduced form is shown beside the fuzzy treatment-receipt ratio; intervals are 95\% and Holm p-values cover eight primary outcomes. Local-IV Kleibergen--Paap F must exceed 10; it is `kp_f_migration_text' for migration and `kp_f_text' for the complete-case outcomes. Migration estimates are conditional on linkage and valid movement, not effects for all source-cohort adults. Source: RUV, CMAN, INEI-assisted Census 2017.}" _n
 file write `main_table' "\end{table}" _n
 file close `main_table'
 
@@ -1303,12 +1412,13 @@ file write `robustness_table' "\endhead" _n
 
 preserve
 use "`rd_results_final'", clear
-keep if tier == "primary" & inlist(spec_id, ///
+keep if (tier == "primary" & inlist(spec_id, ///
     "common_h_fuzzy", "common_h_covariates", ///
     "common_h_person_equal", ///
     "outcome_mserd_fuzzy", "outcome_cerrd_fuzzy", ///
     "fixed_h_005", "fixed_h_010", ///
-    "parametric_common_h", "parametric_district")
+    "parametric_common_h", "parametric_district")) | ///
+    (outcome_id == "I03" & spec_id == "complete_case_fuzzy")
 generate byte specification_order = .
 replace specification_order = 1 if spec_id == "common_h_fuzzy"
 replace specification_order = 2 if spec_id == "common_h_covariates"
@@ -1319,6 +1429,7 @@ replace specification_order = 6 if spec_id == "outcome_mserd_fuzzy"
 replace specification_order = 7 if spec_id == "outcome_cerrd_fuzzy"
 replace specification_order = 8 if spec_id == "parametric_common_h"
 replace specification_order = 9 if spec_id == "parametric_district"
+replace specification_order = 10 if spec_id == "complete_case_fuzzy"
 assert specification_order < .
 sort paper_order specification_order
 
@@ -1341,6 +1452,8 @@ forvalues result_row = 1/`=_N' {
         local row_spec "2SLS, CCPP SE"
     if spec_id[`result_row'] == "parametric_district" ///
         local row_spec "2SLS, district SE"
+    if spec_id[`result_row'] == "complete_case_fuzzy" ///
+        local row_spec "Eight-outcome complete case"
 
     local row_weight "CCPP-equal"
     if weighting[`result_row'] == "person_equal" ///
@@ -1372,7 +1485,7 @@ restore
 
 file write `robustness_table' "\bottomrule" _n
 file write `robustness_table' "\end{longtable}" _n
-file write `robustness_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The common-window CCPP-equal row is primary. Sensitivities add the fixed predetermined covariate set; change to person-equal weighting; use outcome-specific MSE and coverage-error selectors; narrow or widen the fixed window; and fit triangular-weighted local-linear 2SLS analogues. Continuity-based rows report robust bias-corrected inference. Parametric rows report cluster-robust Anderson--Rubin \(p\)-values when available. The machine-readable CSV additionally contains CCPP CR1/CR3, district and score-mass-point CR2, alternative kernels, local quadratic, donut, Kleibergen--Paap, underidentification, and wild-cluster-bootstrap diagnostics. No specification is selected by statistical significance. Source: RUV, CMAN, and INEI-assisted Census 2017.\end{minipage}" _n
+file write `robustness_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Main rows use the approved outcome-specific samples: I03 includes linked adults age 14 or older with valid canonical CCPP movement; the other seven primary outcomes retain eight-outcome complete cases. The I03 eight-outcome complete-case row is a differently selected sensitivity, not the primary result. All effects are percentage points for collective-reparation receipt through 2016 at the selected B--C cutoff. Common-window estimates use \(h=0.0075\), \(b=0.0135\), CCPP-equal weighting, local-linear triangular-kernel robust bias-corrected inference with RUV-community CR2 clustering and mass-point adjustment; labeled rows vary bandwidth, covariates, weights, clustering, or fit a local 2SLS analogue. The table reports 95\% CIs and robust or Anderson--Rubin p-values where available. Source: RUV, CMAN, INEI-assisted Census 2017.\end{minipage}" _n
 file write `robustness_table' "\endgroup" _n
 file close `robustness_table'
 
@@ -1393,6 +1506,9 @@ generate byte rd_primary_sample = ///
     rd_bc_design & census2017_linked == 1 & ///
     age_2017 >= 14 & primary_missing == 0
 keep if rd_bc_design
+generate byte rd_migration_sample = ///
+    census2017_linked == 1 & age_2017 >= 14 & ///
+    !missing(moved_ccpp_2013_2017)
 encode ruv_id, generate(cluster_ruv)
 
 capture program drop _vrd_make_individual_rdplot
@@ -1443,10 +1559,14 @@ program define _vrd_make_individual_rdplot
     local graph_title_prefix "Assignment discontinuity"
     local graph_effect_label "reduced form"
     local panel_effect_label "RF"
+    local graph_population "linked adults 14+ complete on eight outcomes"
+    if "`outvar'" == "moved_ccpp_2013_2017" ///
+        local graph_population "linked adults 14+ with valid canonical CCPP movement"
     if "`firststage'" != "" {
         local graph_title_prefix "First-stage discontinuity"
         local graph_effect_label "assignment jump"
         local panel_effect_label "FS"
+        local graph_population "linked adults 14+ with valid canonical CCPP movement"
     }
 
     capture drop rdplot_*
@@ -1499,7 +1619,7 @@ program define _vrd_make_individual_rdplot
             3 "Local-linear fits") rows(1) position(6) ///
             size(small) region(lcolor(none))) ///
         note( ///
-            "Notes: Unit is a de-identified Census person age 14 or older in the selected B/C geography; each RUV community has total weight one." ///
+            "Notes: Sample is `graph_population' in the selected B/C geography; each RUV community has total weight one." ///
             "Points are weighted quantile-spaced binned means; bars are 95% bin confidence intervals." ///
             "Lines are triangular-kernel local-linear fits within h = 0.0075; the subtitle reports the robust bias-corrected `graph_effect_label'." ///
             "Inference is CR2 by RUV community with mass-point adjustment (effective persons = `graph_n')." ///
@@ -1556,7 +1676,7 @@ _vrd_make_individual_rdplot, ///
     outlabel("Treatment through 2016") ///
     panellabel("Treatment through 2016") ///
     ytitle("Treatment probability") ///
-    scale(1) samplevar(rd_primary_sample) ///
+    scale(1) samplevar(rd_migration_sample) ///
     graphname(rd_ind_panel_1) ///
     figure("${rd_figure_dir}/fig_rd_outcomes_65_first_stage_2016_individual.png") ///
     firststage
@@ -1580,12 +1700,15 @@ forvalues outcome_index = 1/8 {
     if `outcome_index' == 7 local panel_label "Disability"
     if `outcome_index' == 8 local panel_label "Core wellbeing"
 
+    local plot_sample "rd_primary_sample"
+    if `outcome_index' == 3 local plot_sample "rd_migration_sample"
+
     _vrd_make_individual_rdplot, ///
         outvar(`outcome_var') ///
         outlabel("`outcome_label'") ///
         panellabel("`panel_label'") ///
         ytitle("`outcome_ytitle'") ///
-        scale(`outcome_scale') samplevar(rd_primary_sample) ///
+        scale(`outcome_scale') samplevar(`plot_sample') ///
         graphname(rd_ind_panel_`panel_number') ///
         figure("${rd_figure_dir}/fig_rd_outcomes_`figure_number'_`outcome_stub'_individual.png")
 }
@@ -1600,8 +1723,9 @@ graph combine ///
     subtitle("Common B-C design window; CCPP-equal reduced-form fits", ///
         size(vsmall) color(gs5)) ///
     note( ///
-        "Notes: Unit is a de-identified Census person age 14 or older in the selected B/C geography; every RUV community receives total weight one." ///
-        "All panels use the complete eight-outcome primary sample, h = 0.0075, triangular kernels, and mass-point adjustment." ///
+        "Notes: Linked Census adults age 14 or older in selected B/C geography; each RUV community receives total weight one." ///
+        "Migration and first-stage panels use valid canonical CCPP movement; the other outcomes use eight-outcome complete cases." ///
+        "All panels use h = 0.0075, triangular kernels, and mass-point adjustment." ///
         "Panel subtitles report robust bias-corrected reduced forms with CCPP CR2 inference; binned points include 95% intervals." ///
         "Fuzzy LATE and weak-instrument diagnostics appear in the tables. Sources: RUV, CMAN, and INEI-assisted Census 2017.", ///
         size(tiny) color(gs5) span) ///
@@ -1658,10 +1782,10 @@ twoway ///
         size(small) color(gs5)) ///
     legend(off) ///
     note( ///
-        "Notes: Unit is a linked Census person in the selected B/C geography; each RUV community receives total weight one." ///
+        "Notes: Linked Census adults in selected B/C geography; I03 requires valid canonical CCPP movement, other outcomes require eight-outcome completeness. Each RUV community receives total weight one." ///
         "Effects are scaled by the weighted below-cutoff outcome SD and estimated with local-linear triangular-kernel fuzzy RD." ///
         "Intervals use robust bias correction, mass-point adjustment, and CCPP CR2 inference." ///
-        "The first stage exceeds the prespecified strict F > 10 gate; LATEs remain paired with reduced forms and Anderson-Rubin inference." ///
+        "Outcome-specific local-IV first stages exceed F > 10; LATEs remain paired with reduced forms and Anderson--Rubin inference." ///
         "Sources: RUV, CMAN, and INEI-assisted Census 2017.", ///
         size(tiny) color(gs5) span) ///
     xsize(10) ysize(7) ///
@@ -1734,7 +1858,7 @@ twoway ///
         6 "h = 0.0100") rows(1) position(6) size(small) ///
         region(lcolor(none))) ///
     note( ///
-        "Notes: Unit is a linked Census person; each RUV community receives total weight one." ///
+        "Notes: Linked adults in selected B/C geography; I03 uses valid canonical CCPP movement, while seven other outcomes use eight-outcome complete cases. Each RUV community receives total weight one." ///
         "All models use local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference." ///
         "The center point is the common design window; flanking points are prespecified sensitivities." ///
         "No window is selected by an outcome estimate. Sources: RUV, CMAN, and INEI-assisted Census 2017.", ///

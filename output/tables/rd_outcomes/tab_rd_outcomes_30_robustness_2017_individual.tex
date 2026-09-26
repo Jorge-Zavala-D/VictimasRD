@@ -31,15 +31,16 @@ Age 15-29 & Outcome-specific MSE & CCPP-equal & -10.83 & [-34.32, 12.66] & 0.011
 Age 15-29 & Outcome-specific CER & CCPP-equal & -2.37 & [-20.94, 16.19] & 0.0088 & 0.802 & 6,646 \\
 Age 15-29 & 2SLS, CCPP SE & CCPP-equal & 4.41 & [-11.64, 20.47] & 0.0075 & 0.582 & 5,453 \\
 Age 15-29 & 2SLS, district SE & CCPP-equal & 4.41 & [-11.38, 20.21] & 0.0075 & 0.578 & 5,453 \\
-Lives in another CCPP & Common window & CCPP-equal & 45.62 & [-0.40, 91.64] & 0.0075 & 0.052 & 5,453 \\
-Lives in another CCPP & Common + covariates & CCPP-equal & 32.36 & [-4.60, 69.33] & 0.0075 & 0.086 & 5,153 \\
-Lives in another CCPP & Common, person weights & Person-equal & 43.90 & [-19.34, 107.15] & 0.0075 & 0.174 & 5,453 \\
-Lives in another CCPP & Fixed (h=0.0050) & CCPP-equal & 71.23 & [8.12, 134.33] & 0.0050 & 0.027 & 4,062 \\
-Lives in another CCPP & Fixed (h=0.0100) & CCPP-equal & 33.10 & [-18.01, 84.20] & 0.0100 & 0.204 & 15,206 \\
-Lives in another CCPP & Outcome-specific MSE & CCPP-equal & 32.09 & [-33.19, 97.37] & 0.0148 & 0.335 & 22,953 \\
-Lives in another CCPP & Outcome-specific CER & CCPP-equal & 32.74 & [-21.22, 86.70] & 0.0109 & 0.234 & 15,229 \\
-Lives in another CCPP & 2SLS, CCPP SE & CCPP-equal & 43.67 & [4.81, 82.52] & 0.0075 & 0.007 & 5,453 \\
-Lives in another CCPP & 2SLS, district SE & CCPP-equal & 43.67 & [4.73, 82.61] & 0.0075 & 0.006 & 5,453 \\
+Lives in another CCPP & Common window & CCPP-equal & 21.86 & [-16.96, 60.67] & 0.0075 & 0.270 & 7,157 \\
+Lives in another CCPP & Common + covariates & CCPP-equal & 13.21 & [-15.87, 42.30] & 0.0075 & 0.373 & 6,837 \\
+Lives in another CCPP & Common, person weights & Person-equal & 25.36 & [-26.76, 77.48] & 0.0075 & 0.340 & 7,157 \\
+Lives in another CCPP & Fixed (h=0.0050) & CCPP-equal & 26.37 & [-24.72, 77.46] & 0.0050 & 0.312 & 5,506 \\
+Lives in another CCPP & Fixed (h=0.0100) & CCPP-equal & 24.13 & [-15.79, 64.05] & 0.0100 & 0.236 & 19,881 \\
+Lives in another CCPP & Outcome-specific MSE & CCPP-equal & 27.18 & [-20.90, 75.26] & 0.0138 & 0.268 & 27,872 \\
+Lives in another CCPP & Outcome-specific CER & CCPP-equal & 24.42 & [-15.05, 63.89] & 0.0102 & 0.225 & 19,953 \\
+Lives in another CCPP & 2SLS, CCPP SE & CCPP-equal & 21.81 & [-10.13, 53.75] & 0.0075 & 0.105 & 7,157 \\
+Lives in another CCPP & 2SLS, district SE & CCPP-equal & 21.81 & [-12.36, 55.98] & 0.0075 & 0.131 & 7,157 \\
+Lives in another CCPP & Eight-outcome complete case & CCPP-equal & 45.62 & [-0.40, 91.64] & 0.0075 & 0.052 & 5,453 \\
 Secondary education or higher & Common window & CCPP-equal & 7.81 & [-24.40, 40.01] & 0.0075 & 0.635 & 5,453 \\
 Secondary education or higher & Common + covariates & CCPP-equal & 7.54 & [-19.64, 34.71] & 0.0075 & 0.587 & 5,153 \\
 Secondary education or higher & Common, person weights & Person-equal & -8.16 & [-54.47, 38.15] & 0.0075 & 0.730 & 5,453 \\
@@ -87,5 +88,5 @@ Core wellbeing proxy & 2SLS, CCPP SE & CCPP-equal & 12.39 & [-5.05, 29.83] & 0.0
 Core wellbeing proxy & 2SLS, district SE & CCPP-equal & 12.39 & [-4.97, 29.75] & 0.0075 & 0.103 & 5,453 \\
 \bottomrule
 \end{longtable}
-\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The common-window CCPP-equal row is primary. Sensitivities add the fixed predetermined covariate set; change to person-equal weighting; use outcome-specific MSE and coverage-error selectors; narrow or widen the fixed window; and fit triangular-weighted local-linear 2SLS analogues. Continuity-based rows report robust bias-corrected inference. Parametric rows report cluster-robust Anderson--Rubin \(p\)-values when available. The machine-readable CSV additionally contains CCPP CR1/CR3, district and score-mass-point CR2, alternative kernels, local quadratic, donut, Kleibergen--Paap, underidentification, and wild-cluster-bootstrap diagnostics. No specification is selected by statistical significance. Source: RUV, CMAN, and INEI-assisted Census 2017.\end{minipage}
+\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Main rows use the approved outcome-specific samples: I03 includes linked adults age 14 or older with valid canonical CCPP movement; the other seven primary outcomes retain eight-outcome complete cases. The I03 eight-outcome complete-case row is a differently selected sensitivity, not the primary result. All effects are percentage points for collective-reparation receipt through 2016 at the selected B--C cutoff. Common-window estimates use \(h=0.0075\), \(b=0.0135\), CCPP-equal weighting, local-linear triangular-kernel robust bias-corrected inference with RUV-community CR2 clustering and mass-point adjustment; labeled rows vary bandwidth, covariates, weights, clustering, or fit a local 2SLS analogue. The table reports 95\% CIs and robust or Anderson--Rubin p-values where available. Source: RUV, CMAN, INEI-assisted Census 2017.\end{minipage}
 \endgroup

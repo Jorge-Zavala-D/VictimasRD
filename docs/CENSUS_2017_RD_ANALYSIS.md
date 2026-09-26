@@ -14,6 +14,24 @@ implemented in the separate versioned modules
 `05f_census2017_individual_heterogeneity.do`; all mediation analyses remain
 separate.
 
+## 26 September 2026 individual-migration amendment
+
+The approved I03 observed-migration sample is linked adults aged at least 14
+with valid canonical CCPP movement: 67,125 adults in 409 RUV communities,
+7,157 adults in 62 communities inside the fixed RD window. The other seven
+individual primary outcomes retain 54,317 eight-outcome complete cases,
+5,453 locally in 61 communities. The 2017 individual result file now has
+348 estimator rows, including two explicitly exploratory rows preserving
+the former I03 complete-case analysis. Its I03 fuzzy estimate is +21.86
+percentage points (95% CI [-16.96, 60.67], raw p = .270) with an
+outcome-sample local-IV Kleibergen--Paap F of 20.65; the assignment reduced
+form is +20.90 points (95% CI [-5.30, 47.11], raw p = .118). The August
+validation snapshot below documents the older common complete-case design,
+not the current I03 population. The interpretation remains conditional on
+linkage and observed canonical movement; it does not cover all source-cohort
+adults. Module `05f` migration heterogeneity has not yet been re-estimated
+for this population.
+
 ## Canonical implementation
 
 - `code/stata/pipeline/04d_census2017_ccpp.do`

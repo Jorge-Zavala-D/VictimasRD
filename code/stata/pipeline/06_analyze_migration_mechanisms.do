@@ -146,6 +146,15 @@ use `harmonized_results', clear
 isid wave level outcome_id spec_id estimator
 save `harmonized_results', replace
 
+* The registered strength screen is local-IV KP F, not rdrobust's z squared.
+keep if spec_id == "parametric_common_h" & estimator == "ivreg2"
+keep wave level outcome_id source_result_file sample_rule first_stage_f
+rename sample_rule kp_sample_rule
+rename first_stage_f kp_f
+isid wave level outcome_id source_result_file
+tempfile kp_strength
+save `kp_strength'
+
 
 *-----------------------------------*
 **# 2. Canonical and supporting evidence
@@ -171,16 +180,22 @@ replace analysis_status = "estimated" if _merge == 3 & estimation_rc == 0
 
 assert _merge == 3 & estimation_rc == 0 if ///
     inlist(evidence_class, "total_migration_effect", ///
-        "linkage_selection", "selection_sensitivity")
+    "linkage_selection", "selection_sensitivity")
+
+merge m:1 wave level outcome_id source_result_file ///
+    using `kp_strength', keep(master match) ///
+    keepusing(kp_f kp_sample_rule) generate(_merge_kp)
+assert sample_rule == kp_sample_rule if ///
+    _merge_kp == 3 & estimand == "fuzzy_late"
 
 generate byte reportable_late = ///
     estimand == "fuzzy_late" & estimation_rc == 0 & ///
-    !missing(first_stage_f) & first_stage_f > 10
+    !missing(kp_f) & kp_f > 10
 replace reportable_late = 0 if missing(reportable_late)
 assert reportable_late == 0 if estimand == "fuzzy_late" & ///
-    (missing(first_stage_f) | first_stage_f <= 10)
+    (missing(kp_f) | kp_f <= 10)
 
-drop _merge
+drop _merge _merge_kp kp_sample_rule
 sort wave level evidence_class outcome_id
 isid analysis_id
 
@@ -407,7 +422,7 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""treatment_2017","treat_16","locked","approved protocol""' _n
 file write `contract_file' ///
-    `""first_stage_gate","F > 10","locked","approved protocol""' _n
+    `""first_stage_gate","KP F > 10","locked","outcome-sample local-IV gate; rdrobust z squared is descriptive only""' _n
 file write `contract_file' ///
     `""primary_estimand","fuzzy RD LATE","locked","approved protocol""' _n
 file write `contract_file' ///
@@ -447,6 +462,7 @@ forvalues row = 1/`=_N' {
     local row_wave : display %4.0f wave[`row']
     local row_wave = strtrim("`row_wave'")
     local row_level = proper(level[`row'])
+    if "`row_level'" == "Ccpp" local row_level "CCPP"
     local row_class = ///
         proper(subinstr(evidence_class[`row'], "_", " ", .))
     local row_count : display %4.0f analyses[`row']
@@ -479,26 +495,27 @@ file write `migration_table' ///
     "\label{tab:rd_mechanisms_migration} \\" _n
 file write `migration_table' "\toprule" _n
 file write `migration_table' ///
-    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F\) \\" _n
+    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F_{\mathrm{KP}}\) \\" _n
 file write `migration_table' "\midrule" _n
 file write `migration_table' "\endfirsthead" _n
 file write `migration_table' ///
     "\multicolumn{7}{c}{\tablename\ \thetable{} -- continued} \\" _n
 file write `migration_table' "\toprule" _n
 file write `migration_table' ///
-    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F\) \\" _n
+    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F_{\mathrm{KP}}\) \\" _n
 file write `migration_table' "\midrule" _n
 file write `migration_table' "\endhead" _n
 forvalues row = 1/`=_N' {
     local row_wave : display %4.0f wave[`row']
     local row_wave = strtrim("`row_wave'")
     local row_level = proper(level[`row'])
+    if "`row_level'" == "Ccpp" local row_level "CCPP"
     local row_label = outcome_label[`row']
     local row_estimate : display %7.2f estimate_bc[`row']
     local row_low : display %7.2f ci_low[`row']
     local row_high : display %7.2f ci_high[`row']
     local row_p : display %6.3f pvalue[`row']
-    local row_f : display %6.2f first_stage_f[`row']
+    local row_f : display %6.2f kp_f[`row']
     foreach formatted_value in ///
         row_estimate row_low row_high row_p row_f {
         local `formatted_value' = strtrim("``formatted_value''")
@@ -509,7 +526,7 @@ forvalues row = 1/`=_N' {
 file write `migration_table' "\bottomrule" _n
 file write `migration_table' "\end{longtable}" _n
 file write `migration_table' ///
-    "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Estimates are percentage-point effects. Each row is a bias-corrected local-linear fuzzy-RD estimate at the official B--C cutoff in the selected geography, using common \(h=0.0075\), \(b=0.0135\), triangular kernels, and 95\% confidence intervals. Treatment is receipt by 2012 for SISFOH 2013 and by 2016 for Census 2017. CCPP models cluster by district; household and individual models use CCPP-equal weights and CCPP clustering. Estimates with \(F\leq10\) are not interpreted as LATEs. Sources: RUV, CMAN, SISFOH 2012--2013, and INEI-assisted Census 2017 linkage.\end{minipage}" _n
+    "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Percentage-point fuzzy-RD estimates at the official B--C cutoff in selected geography, using local-linear triangular kernels, robust bias correction, common \(h=0.0075\), \(b=0.0135\), and 95\% confidence intervals. Receipt is measured through 2012 for SISFOH 2013 and through 2016 for Census 2017. CCPP models cluster by district; household and person models use CCPP-equal weights and RUV-community clustering. The 2017 individual CCPP-migration row includes linked adults age 14 or older with valid canonical movement, not all source-cohort adults. \(F_{\mathrm{KP}}\) is the local-IV Kleibergen--Paap strength statistic; a dot means it was not computed for that outcome-specific sample, so its fuzzy estimate is diagnostic rather than an interpretation-cleared LATE. Sources: RUV, CMAN, SISFOH 2012--2013, INEI-assisted Census 2017.\end{minipage}" _n
 file write `migration_table' "\endgroup" _n
 file close `migration_table'
 
@@ -571,24 +588,25 @@ file write `mechanism_table' ///
     "\label{tab:rd_mechanisms_outcomes} \\" _n
 file write `mechanism_table' "\toprule" _n
 file write `mechanism_table' ///
-    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F\) \\" _n
+    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F_{\mathrm{KP}}\) \\" _n
 file write `mechanism_table' "\midrule\endfirsthead" _n
 file write `mechanism_table' ///
     "\multicolumn{7}{c}{\tablename\ \thetable{} -- continued} \\" _n
 file write `mechanism_table' "\toprule" _n
 file write `mechanism_table' ///
-    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F\) \\" _n
+    "Wave & Unit & Outcome & Estimate & 95\% CI & \(p\) & \(F_{\mathrm{KP}}\) \\" _n
 file write `mechanism_table' "\midrule\endhead" _n
 forvalues row = 1/`=_N' {
     local row_wave : display %4.0f wave[`row']
     local row_wave = strtrim("`row_wave'")
     local row_level = proper(level[`row'])
+    if "`row_level'" == "Ccpp" local row_level "CCPP"
     local row_label = outcome_label[`row']
     local row_estimate : display %7.2f estimate_bc[`row']
     local row_low : display %7.2f ci_low[`row']
     local row_high : display %7.2f ci_high[`row']
     local row_p : display %6.3f pvalue[`row']
-    local row_f : display %6.2f first_stage_f[`row']
+    local row_f : display %6.2f kp_f[`row']
     foreach formatted_value in ///
         row_estimate row_low row_high row_p row_f {
         local `formatted_value' = strtrim("``formatted_value''")
@@ -598,7 +616,7 @@ forvalues row = 1/`=_N' {
 }
 file write `mechanism_table' "\bottomrule\end{longtable}" _n
 file write `mechanism_table' ///
-    "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Estimates are percentage-point effects on share, binary, or zero-to-one index outcomes. Rows are total RD effects on candidate intermediate outcomes, not indirect effects or causal mediation estimates. SISFOH 2013 outcomes follow treatment through 2012; 2017 labor and connectivity outcomes are contemporaneous with migration and may be downstream. Models use the selected adjacent B--C sample, common \(h=0.0075\), \(b=0.0135\), triangular kernels, 95\% intervals, district clustering for CCPPs, and CCPP-equal weights with CCPP clustering for household and person models. Sources: RUV, CMAN, SISFOH 2012--2013, and INEI-assisted Census 2017 linkage.\end{minipage}" _n
+    "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Percentage-point fuzzy-RD effects on candidate intermediate outcomes, not indirect effects or causal mediation estimates. SISFOH 2013 follows receipt through 2012; Census 2017 labor and connectivity measures are contemporaneous with migration and may be downstream. Models use selected adjacent B--C geography, local-linear triangular kernels, robust bias correction, common \(h=0.0075\), \(b=0.0135\), and 95\% intervals. CCPP models cluster by district; household and person models use CCPP-equal weights and RUV-community clustering. \(F_{\mathrm{KP}}\) is the outcome-sample local-IV strength statistic; a dot means unavailable and the fuzzy estimate is diagnostic only. Sources: RUV, CMAN, SISFOH 2012--2013, INEI-assisted Census 2017.\end{minipage}" _n
 file write `mechanism_table' "\endgroup" _n
 file close `mechanism_table'
 
@@ -671,6 +689,7 @@ forvalues row = 1/`=_N' {
     local row_wave : display %4.0f wave[`row']
     local row_wave = strtrim("`row_wave'")
     local row_level = proper(level[`row'])
+    if "`row_level'" == "Ccpp" local row_level "CCPP"
     local row_label = plot_label[`row']
     local axis_label "`row_level': `row_label'"
     label define rd_migration_axis ///
@@ -695,12 +714,12 @@ twoway ///
     ytitle("") ///
     title("Total migration effects across units", ///
         size(medsmall) color(black)) ///
-    subtitle("Census 2017 outcomes; common B-C window and robust 95% confidence intervals", ///
+    subtitle("Census 2017; common B-C window; robust 95% intervals", ///
         size(small) color(gs5)) ///
-    legend(order(2 "F > 10" 3 "F <= 10") cols(1) ///
+    legend(order(2 "KP F > 10" 3 "KP F <= 10 or unavailable") cols(1) ///
         position(2) ring(0) size(vsmall) region(lcolor(none))) ///
-    note("Notes: Selected B/C sample; treatment through 2016; h=0.0075, b=0.0135." ///
-        "CCPP models cluster by district; micro models use CCPP-equal weights and CCPP clustering." ///
+    note("Notes: Selected B/C sample; receipt through 2016; local-linear fuzzy RD, h=0.0075, b=0.0135, robust 95% intervals." ///
+        "Individual migration uses linked adults with valid canonical CCPP movement; CCPP models cluster by district, micro models by RUV community with CCPP-equal weights." ///
         "Sources: RUV, CMAN, INEI-assisted Census 2017 linkage.", ///
         size(tiny) color(gs5) span) ///
     xsize(13) ysize(10) graphregion(color(white)) ///
@@ -716,7 +735,7 @@ sort outcome_id
 generate str52 plot_label = outcome_label
 replace plot_label = "Unlinked coded as moved" if outcome_id == "E01"
 replace plot_label = "Unlinked coded as not moved" if outcome_id == "E02"
-replace plot_label = "Linked-sample migration" if outcome_id == "I03"
+replace plot_label = "Linked adults: valid CCPP move" if outcome_id == "I03"
 generate int plot_order = _N - _n + 1
 capture label drop rd_linkage_axis
 forvalues row = 1/`=_N' {
@@ -741,7 +760,7 @@ twoway ///
     xlabel(, grid glcolor(gs14) glwidth(vthin) labsize(small)) ///
     ylabel(1(1)`linkage_max', valuelabel angle(0) ///
         labsize(small) nogrid) ///
-    xtitle("Bias-corrected fuzzy-RD effect (percentage points)", ///
+    xtitle("Fuzzy-RD ratio estimate (percentage points)", ///
         size(small)) ///
     ytitle("") ///
     title("Migration estimate and non-linkage sensitivity endpoints", ///
@@ -751,8 +770,9 @@ twoway ///
     legend(order(2 "Linked outcome" 3 "Extreme-case endpoint") ///
         cols(1) position(2) ring(0) ///
         size(vsmall) region(lcolor(none))) ///
-    note("Notes: Alternative non-linkage codings, not causal bounds; selected B/C sample." ///
-        "Treatment through 2016; h=0.0075, b=0.0135; CCPP-equal weights and CCPP clustering." ///
+    note("Notes: I03 uses linked adults age 14+ with valid canonical CCPP movement; endpoint codings use a different source-cohort denominator and are not causal bounds." ///
+        "Endpoint ratios are diagnostic only because outcome-specific KP F was not computed for those codings." ///
+        "Selected B/C sample, receipt through 2016; local-linear fuzzy RD, h=0.0075, b=0.0135, robust 95% intervals, CCPP-equal weights and RUV-community clustering." ///
         "Sources: RUV, CMAN, INEI-assisted Census 2017 linkage.", ///
         size(tiny) color(gs5) span) ///
     xsize(13) ysize(6.5) graphregion(color(white)) ///
@@ -783,6 +803,7 @@ forvalues row = 1/`=_N' {
     local row_wave : display %4.0f wave[`row']
     local row_wave = strtrim("`row_wave'")
     local row_level = proper(level[`row'])
+    if "`row_level'" == "Ccpp" local row_level "CCPP"
     local row_label = plot_label[`row']
     local axis_label "`row_wave' `row_level': `row_label'"
     label define rd_mechanism_axis ///

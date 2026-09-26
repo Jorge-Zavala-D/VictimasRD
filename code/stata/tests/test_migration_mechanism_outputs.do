@@ -34,13 +34,17 @@ foreach required_file in ///
 import delimited using "`summary'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid analysis_id
-assert _N == 59
+assert _N == 60
 assert inlist(evidence_class, ///
     "total_migration_effect", "mechanism_outcome_effect", ///
     "linkage_selection", "selection_sensitivity")
+confirm variable kp_f
 assert reportable_late == 0 if ///
     estimand == "fuzzy_late" & ///
-    (missing(first_stage_f) | first_stage_f <= 10)
+    (missing(kp_f) | kp_f <= 10)
+assert reportable_late == 1 if ///
+    estimand == "fuzzy_late" & estimation_rc == 0 & ///
+    !missing(kp_f) & kp_f > 10
 
 quietly count if outcome_var == "moved_ccpp_2013_2017" & ///
     evidence_class == "total_migration_effect"

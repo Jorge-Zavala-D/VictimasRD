@@ -6,7 +6,7 @@ contract_item,value,status,source
 "bias_bandwidth","0.0135","locked","approved protocol"
 "treatment_2013","treat_12","locked","approved protocol"
 "treatment_2017","treat_16","locked","approved protocol"
-"first_stage_gate","F > 10","locked","approved protocol"
+"first_stage_gate","KP F > 10","locked","outcome-sample local-IV gate; rdrobust z squared is descriptive only"
 "primary_estimand","fuzzy RD LATE","locked","approved protocol"
 "inference_ccpp","district clustered","locked","approved protocol"
 "inference_micro","CCPP clustered with CCPP-equal weights","locked","approved protocol"

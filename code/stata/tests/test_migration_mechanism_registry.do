@@ -23,7 +23,7 @@ import delimited using "`registry'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 
 isid analysis_id
-assert _N == 62
+assert _N == 63
 assert inlist(wave, 2013, 2017)
 assert inlist(level, "ccpp", "household", "individual")
 assert inlist(evidence_class, ///
@@ -34,7 +34,7 @@ assert inlist(evidence_class, ///
 quietly count if evidence_class == "descriptive_association"
 assert r(N) == 3
 quietly count if evidence_class != "descriptive_association"
-assert r(N) == 59
+assert r(N) == 60
 
 assert predictor_var != "" if evidence_class == "descriptive_association"
 assert predictor_var == "" if evidence_class != "descriptive_association"

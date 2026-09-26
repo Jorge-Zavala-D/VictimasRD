@@ -2,11 +2,22 @@
 
 **Project:** Victimas RD
 
-**Version:** 2026-09-22
+**Version:** 2026-09-26
 
 **Status:** Approved by the project owner on 2026-09-22; no separate research-team approval gate is required
 
 **Applies to:** `06_analyze_migration_mechanisms.do`, `07_build_tables_figures.do`, and `08_run_release_checks.do`
+
+**Population amendment approved 26 September 2026:** The person-level I03
+primary observed-migration row uses linked adults aged at least 14 with valid
+canonical CCPP movement, without requiring completeness of unrelated 2017
+outcomes. The earlier eight-outcome complete-case I03 estimate is a sensitivity
+only. Module 06 must carry the revised row and denominator from module 04f,
+not recompute or substitute its former result. This observed-population fuzzy
+RD estimate remains conditional on linkage and movement observability;
+selection into observation is not assumed ignorable. The 2017 individual
+heterogeneity module's old complete-case migration rows remain internal-only
+until re-estimated for the approved population.
 
 ## 1. Purpose
 

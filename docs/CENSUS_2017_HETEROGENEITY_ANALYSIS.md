@@ -1,5 +1,16 @@
 # Census 2017 heterogeneity analysis
 
+## 26 September 2026 population status
+
+The owner-approved 2017 individual primary observed-migration population is
+linked adults aged at least 14 with valid canonical CCPP movement. The
+existing `05f` individual migration heterogeneity rows still use the older
+54,317-person eight-outcome complete-case sample. They are historical
+complete-case sensitivity evidence, **not** heterogeneity of the newly
+registered primary observed-migration estimand. Keep those artifacts
+internal-only until a separate outcome-specific heterogeneity re-estimation
+and moderator-support audit. The CCPP and household modules are unaffected.
+
 ## Scope
 
 `05d_census2017_ccpp_heterogeneity.do`,

@@ -7,6 +7,24 @@ This protocol records the research-team decisions governing the canonical
 It does not change the geography selected in data preparation and does not
 cover the separate causal-mediation or heterogeneity workflows.
 
+### 26 September 2026: approved 2017 individual migration population
+
+The project owner approved linked adults aged at least 14 with valid canonical
+source-to-destination CCPP movement as the primary *observed-migration*
+population for outcome I03. Completeness of the seven other 2017 primary
+outcomes, especially the wellbeing score, must not determine inclusion in
+I03. The original eight-outcome complete-case I03 estimate is retained only
+as a clearly labeled sensitivity. The other seven outcomes keep their prior
+complete-case rule. All eight remain in the registered primary multiplicity
+family, but tables must report outcome-specific sample sizes and first-stage
+support rather than describe the family as one identical person sample.
+
+The I03 discontinuity and fuzzy ratio are conditional on linkage and valid
+canonical movement. Without additional selection assumptions or bounds,
+they do not identify an effect for all source-cohort adults or the national
+Census population. This amendment changes no geography, running-variable
+rule, treatment date, bandwidth, weighting, clustering, or F>10 gate.
+
 ## Assignment rule and analysis sample
 
 - The running variable is `running_bc`, the official RUV victimization score
@@ -123,13 +141,16 @@ older and prevents community size or enumeration intensity from determining
 its contribution. A person-equal branch is required and explicitly labeled as
 a different population-weighted estimand.
 
-The 2017 primary person family contains 54,317 linked people age 14 or older
-in 406 RUV communities; the common window contains 5,453 people in 61
-communities. It adds CCPP migration, disability, and harmonized wellbeing to
-the compact main family. The primary migration variable is observed only for
-linked people. Complementary exploratory bounds code every unlinked
-source-cohort person as moved or as not moved; neither bound replaces the
-linked-cohort primary estimate.
+Seven 2017 primary person outcomes retain the eight-outcome complete-case
+population: 54,317 linked people aged at least 14 in 406 RUV communities,
+with 5,453 people in 61 communities in the common window. Outcome I03 instead
+uses the approved observed-migration population: 67,125 linked adults with
+valid canonical CCPP movement in 409 communities, with 7,157 adults in 62
+communities in the common window. These are distinct effective populations
+within one prespecified eight-hypothesis family. The old I03 complete-case
+estimate is a sensitivity. Exploratory codings that assign unlinked people
+movement endpoints are not formal bounds and do not replace the observed
+migration estimate.
 
 Secondary outcomes use the denominator appropriate to the source question:
 valid-age rosters for age composition, females age 12--49 for pregnancy,

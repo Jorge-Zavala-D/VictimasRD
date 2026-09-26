@@ -1,8 +1,60 @@
 # Census 2017 linkage and migration: substantive audit
 
 **Audit dates:** 22–23 September 2026  
-**Status:** Scientific-review hold; no individual migration estimate is approved for the paper.  
+**Status:** Primary observed-migration population approved 26 September 2026; scientific and publication-review holds remain.
 **Design held fixed:** Selected B/C geography, treatment through 2016 (`treat_16`), local-linear triangular-kernel RD, common `h = 0.0075` and `b = 0.0135`.
+
+## 26 September 2026 decision and regenerated evidence
+
+The project owner approved linked adults aged at least 14 with valid canonical
+CCPP movement as the primary *observed-migration* population. Module `04f`
+now estimates I03 on 67,125 such adults in 409 RUV communities; 7,157 adults
+in 62 communities enter the common RD window. The other seven individual
+primary outcomes retain their 54,317-person eight-outcome complete-case
+population. The historical I03 complete-case estimate is labeled sensitivity,
+not another primary result. The fixed geography, cutoff, treatment year,
+bandwidth, weights, clustering, and eight-outcome multiplicity family did not
+change.
+
+On the approved I03 population, the robust bias-corrected assignment reduced
+form is +20.90 percentage points (95% CI [-5.30, 47.11], raw p = .118,
+Holm-adjusted p = .863). The fuzzy treatment-receipt estimate is +21.86 points
+(95% CI [-16.96, 60.67], raw p = .270, Holm-adjusted p = 1.000). The
+outcome-sample local-IV Kleibergen--Paap F is 20.65, above the registered
+F > 10 interpretation screen. A triangular-weighted local-linear 2SLS
+analogue gives +21.81 points (95% CI [-10.13, 53.75], raw p = .181). These
+estimates are too imprecise to establish either a positive effect or a null
+effect, and the approved population does not reproduce the earlier significant
+assignment reduced form. The old 54,317-person complete-case sensitivity
+remains +43.72 points for the reduced form (p = .004) and +45.62 for the
+fuzzy ratio (p = .052); its difference from the approved result is a
+sample-selection warning, not evidence of effect heterogeneity.
+
+An aggregate-artifact comparison against the prior Git version found no
+raw-estimate, interval, p-value, or effective-sample changes in the 14
+non-migration primary reduced-form/fuzzy rows. The old I03 reduced-form and
+fuzzy estimates were preserved exactly in the new complete-case sensitivity
+rows. Adjusted p-values for the eight-outcome family were recomputed after
+the I03 primary p-value changed.
+
+The person-level linkage discontinuity is -8.28 points (95% CI [-35.21,
+18.65], p = .547), too imprecise to establish linkage ignorability. The
+unlinked-endpoint codings still use a broader source-cohort denominator and
+have no outcome-specific local-IV KP statistic; they remain diagnostic
+alternative codings, not formal causal bounds or reportable LATEs. Module
+`05f` migration heterogeneity still uses the old complete-case population
+and remains internal-only pending its own re-estimation. No generated output
+has been approved for Overleaf or a publication claim.
+
+Validation after the decision: a clean master-driven run completed all six
+module-04 outcome analyses and produced 117 unique manifest artifacts. The
+2017 individual file contains 348 result rows with no estimation failures.
+All 14 non-migration primary reduced-form/fuzzy rows match the prior Git
+output exactly on estimates, intervals, raw p-values, and sample counts;
+the two old I03 rows match their labeled sensitivities. Modules 06–08 were
+rerun, six focused Stata contract tests passed, and visual inspection led
+to one corrected subtitle. The 255-artifact release audit reports zero
+technical errors and remains BLOCKED pending scientific and owner review.
 
 ## Question and source boundary
 

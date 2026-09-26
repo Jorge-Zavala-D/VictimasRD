@@ -38,7 +38,13 @@ foreach level in household individual {
     assert r(N) == 1
     local table = cond("`level'" == "household", "23", "28")
     local body = fileread("output/tables/rd_outcomes/tab_rd_outcomes_`table'_main_2017_`level'.tex")
-    assert strpos(`"`body'"', "Common first stage") > 0
+    if "`level'" == "individual" {
+        quietly count if metric == "migration_window_persons" & value == "7157"
+        assert r(N) == 1
+        assert strpos(`"`body'"', "Complete-case first stage") > 0
+        assert strpos(`"`body'"', "Migration-sample first stage") > 0
+    }
+    else assert strpos(`"`body'"', "Common first stage") > 0
     assert strpos(`"`body'"', "& 65 ") == 0
 }
 
