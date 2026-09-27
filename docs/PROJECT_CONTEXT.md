@@ -435,6 +435,18 @@ linkage, aggregation, wellbeing, NBI, disclosure, and interpretation rules are
 in `docs/CENSUS_2017_PREPARATION.md`; the historical code and independent
 thesis comparison is in `docs/CENSUS_2017_LEGACY_AND_DUMEZ_AUDIT.md`.
 
+**September 2026 qualification:** the accepted 807-to-803 source-code map is
+not proof of stable historical-to-2017 CCPP identity or correct person-level
+origin assignment. In the fixed local B/C window, 71 RUV communities narrow
+to 65 with an assisted source cohort and 62 with observable canonical CCPP
+movement. An audit-only directory comparison flags 173 of 807 source codes
+for further review, including two held local codes. Neither a nonsignificant
+linkage discontinuity nor technically feasible exploratory linkage weights
+establishes ignorable selection. Do not recode missing movement or release
+2017 migration claims before the source-field and code-equivalence questions
+are resolved with the research team. See
+`docs/CENSUS_2017_SELECTION_AND_CODE_COMPARABILITY_AUDIT_2026-09-27.md`.
+
 ## Recorded analysis-readiness assessment
 
 On August 14, 2026, the project determined that the prepared data are

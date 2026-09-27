@@ -82,6 +82,13 @@ code association. Four RUV rows legitimately receive two historical source
 codes. The pipeline treats this reviewed file as a versioned adjudication, not
 as a fuzzy match.
 
+The later [selection and code-comparability audit](CENSUS_2017_SELECTION_AND_CODE_COMPARABILITY_AUDIT_2026-09-27.md)
+found that historical-source-to-RUV acceptance does not by itself establish a
+stable 2017 code or each linked person's CCPP origin. Its separate 807-row
+comparison ledger holds two locally important source codes and flags other
+directory discrepancies. The executable crosswalk and current datasets are
+unchanged pending source clarification and an explicit research-team decision.
+
 ## Recovering canonical SISFOH IDs
 
 The INEI delivery retained source roster coordinates but not the pipeline's
