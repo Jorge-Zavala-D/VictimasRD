@@ -30,7 +30,7 @@ use "${rd_input_2017_household}", clear
 quietly datasignature
 local input_datasignature "`r(datasignature)'"
 
-assert _N == 58021
+assert _N == 58015
 isid census2017_baseline_hhid
 
 local required_vars ///
@@ -55,7 +55,11 @@ generate byte rd_bc_design = ///
     inlist(victimization_level_source, "B", "C")
 
 quietly count if rd_bc_design
-assert r(N) == 33066
+assert r(N) == 33060
+quietly count if rd_bc_design & hh_linked_members_2017 > 0 & ///
+    !missing(hh_linked_members_2017)
+local linked_households = r(N)
+assert `linked_households' == 29692
 
 quietly count if rd_bc_design & ///
     ((victimization_level_source == "B" & ${rd_running} < 0) | ///
@@ -77,7 +81,7 @@ egen long cluster_score = group(${rd_running})
 
 egen byte rd_ruv_tag = tag(ruv_id) if rd_bc_design
 quietly count if rd_ruv_tag
-assert r(N) == 426
+assert r(N) == 425
 
 local primary_outcomes ///
     hh_share_female_2017 ///
@@ -95,18 +99,18 @@ generate byte rd_primary_sample = ///
     rd_bc_design & primary_missing == 0
 
 quietly count if rd_primary_sample
-assert r(N) == 24877
+assert r(N) == 25106
 egen byte rd_primary_ruv_tag = tag(ruv_id) if rd_primary_sample
 quietly count if rd_primary_ruv_tag
-assert r(N) == 406
+assert r(N) == 407
 
 quietly count if rd_primary_sample & ///
     abs(${rd_running}) <= ${rd_common_h}
-assert r(N) == 2706
+assert r(N) == 2935
 egen byte rd_window_ruv_tag = tag(ruv_id) if ///
     rd_primary_sample & abs(${rd_running}) <= ${rd_common_h}
 quietly count if rd_window_ruv_tag
-assert r(N) == 61
+assert r(N) == 62
 
 preserve
 import delimited using "${rd_registry_2017_hh}", ///
@@ -159,7 +163,7 @@ forvalues outcome_index = 1/`outcome_count' {
 * B/C design branch. This reduces repeated computation without changing any
 * sample rule, weight, bandwidth, or estimand.
 keep if rd_bc_design
-assert _N == 33066
+assert _N == 33060
 
 
 *-----------------------------------*
@@ -950,15 +954,15 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""common_b","${rd_common_b}","approved","Common bias bandwidth for robust bias correction""' _n
 file write `contract_file' ///
-    `""linked_households","42355","validated","Selected B/C households before complete-primary restriction""' _n
+    `""linked_households","`linked_households'","validated","Selected B/C source households with at least one INEI-linked 2017 member before complete-primary restriction""' _n
 file write `contract_file' ///
-    `""primary_households","24877","validated","Complete eight-outcome primary household sample""' _n
+    `""primary_households","25106","validated","Complete eight-outcome primary household sample""' _n
 file write `contract_file' ///
-    `""primary_ccpp","406","validated","RUV communities represented in the complete primary sample""' _n
+    `""primary_ccpp","407","validated","RUV communities represented in the complete primary sample""' _n
 file write `contract_file' ///
-    `""window_households","2706","validated","Complete-primary households inside the common fixed window""' _n
+    `""window_households","2935","validated","Complete-primary households inside the common fixed window""' _n
 file write `contract_file' ///
-    `""window_ccpp","61","validated","RUV communities inside the common fixed window""' _n
+    `""window_ccpp","62","validated","RUV communities inside the common fixed window""' _n
 file write `contract_file' ///
     `""first_stage_f","`main_first_stage_f'","`first_stage_status'","Squared robust first-stage z statistic under CCPP-equal weighting and CCPP CR2""' _n
 file write `contract_file' ///
@@ -1188,7 +1192,7 @@ foreach formatted_value in ///
     local `formatted_value' = strtrim("``formatted_value''")
 }
 file write `main_table' ///
-    "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 61 \\" _n
+    "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 62 \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
 file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} All rows use the same complete eight-outcome household sample before local-window restriction and the common \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide outcome and treatment discontinuities. Every RUV community receives total weight one, with households equally weighted within community. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and CCPP CR2 inference. Binary, share, and zero-to-one index effects are percentage points; household size is in members. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=`kp_f_text'\). Reduced forms and weak-instrument-robust diagnostics remain necessary. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
@@ -1789,8 +1793,8 @@ capture program drop _vrd_make_household_rdplot
 
 display as result "Census 2017 household outcome module completed."
 display as text "Registered outcomes: `outcome_count'"
-display as text "Complete primary households: 24877"
-display as text "Primary linked RUV communities: 406"
+display as text "Complete primary households: 25106"
+display as text "Primary linked RUV communities: 407"
 display as text "Common fixed-window households: `main_first_stage_n'"
 display as text "Robust first-stage F_z: `main_first_stage_f'"
 display as text "Parametric Kleibergen-Paap F: `kp_f_main'"

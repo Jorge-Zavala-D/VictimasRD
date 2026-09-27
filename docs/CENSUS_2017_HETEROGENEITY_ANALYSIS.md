@@ -1,26 +1,40 @@
 # Census 2017 heterogeneity analysis
 
-## 27 September 2026 migration-population update
+> **27 September 2026 source-place correction:** The corrected six-module
+> heterogeneity run and output-contract tests passed through Stata MCP. Older
+> dated snapshots below are historical, not current publication evidence.
+> The approved ruling is in
+> `docs/CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md`.
+
+## Corrected 2017 cohort and heterogeneity audit
 
 The owner-approved 2017 individual observed-migration population is linked
-adults aged at least 14 with valid canonical CCPP movement. Module `05f` now
-uses this population for migration heterogeneity: 67,125 people in 409 RUV
-communities, including 7,157 people in 62 communities inside the common
-RD window. The other seven individual outcomes retain the eight-outcome
-complete-case cohort: 54,317 people in 406 communities, including 5,453
-people in 61 communities inside the window. The older migration
-heterogeneity output is historical complete-case sensitivity evidence,
-not the current primary-population result. The CCPP and household modules
-are unaffected; all individual heterogeneity artifacts remain internal-only
-pending scientific-owner review.
+adults aged at least 14 with valid canonical CCPP movement. Module `05f` uses
+67,648 such people in 410 RUV communities, including 7,680 in 63 communities
+inside the common RD window. The other seven individual outcomes retain the
+eight-outcome complete-case cohort: 54,812 people in 407 communities, 5,948
+in 62 communities locally. Module `05d` uses 389 complete-sample CCPPs,
+including 60 locally; `05e` uses 25,106 complete-sample households in 407
+communities, 2,935 households in 62 communities locally.
+
+The corrected formal IV grid has 24 of 48 community, eight of 48 household,
+and 23 of 64 individual rows passing the prespecified support,
+underidentification, and minimum conditional `F > 10` gates. These pass counts
+are unchanged from the prior cohort, and no gate-passing 2017 interaction
+survives five-percent Holm or Benjamini--Hochberg adjustment. The female
+interaction for migration is +0.95 percentage points (95% CI [-11.53, 13.43],
+raw p = .881, Holm p = 1; minimum conditional F = 18.07) on the observed-
+migration population. This is not evidence of a gender difference in the
+treatment effect. All heterogeneity artifacts remain internal or preliminary
+appendix candidates pending scientific and owner review.
 
 ## Scope
 
 `05d_census2017_ccpp_heterogeneity.do`,
 `05e_census2017_household_heterogeneity.do`, and
 `05f_census2017_individual_heterogeneity.do` implement all three Census 2017
-treatment-effect heterogeneity levels. The CCPP module uses the 388-community
-complete primary sample; the household module uses 24,877 households in 406
+treatment-effect heterogeneity levels. The CCPP module uses the 389-community
+complete primary sample; the household module uses 25,106 households in 407
 RUV communities; and the individual module uses the two outcome-specific
 cohorts described above. All use the selected
 adjacent B/C design, `running_bc`, cumulative treatment through 2016, and the
@@ -90,7 +104,7 @@ are unavailable because the local binary cells contain only two communities
 above and three below the cutoff. No gate-passing interaction survives a
 five-percent Holm or Benjamini--Hochberg correction.
 
-## Individual migration re-estimation: 27 September 2026
+## Pre-adjudication individual migration snapshot (historical)
 
 The targeted `05f` run completed through the Stata MCP and passed its
 312-row output contract. Its 20-artifact level manifest records the unchanged

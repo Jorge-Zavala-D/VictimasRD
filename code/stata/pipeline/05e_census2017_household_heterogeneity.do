@@ -22,7 +22,7 @@ use "${hte_input_2017_household}", clear
 quietly datasignature
 local input_datasignature "`r(datasignature)'"
 
-assert _N == 58021
+assert _N == 58015
 isid census2017_baseline_hhid
 
 local required_vars ///
@@ -65,7 +65,7 @@ generate byte hte_bc_design = ///
     inlist(victimization_level_source, "B", "C")
 
 quietly count if hte_bc_design
-assert r(N) == 33066
+assert r(N) == 33060
 quietly count if hte_bc_design & ///
     ((victimization_level_source == "B" & ${hte_running} < 0) | ///
      (victimization_level_source == "C" & ${hte_running} >= 0))
@@ -91,21 +91,21 @@ generate byte hte_primary_sample = ///
     hte_bc_design & hte_primary_missing == 0
 
 quietly count if hte_primary_sample
-assert r(N) == 24877
+assert r(N) == 25106
 egen byte hte_primary_ruv_tag = tag(ruv_id) if hte_primary_sample
 quietly count if hte_primary_ruv_tag
-assert r(N) == 406
+assert r(N) == 407
 
 quietly count if hte_primary_sample & ///
     abs(${hte_running}) <= ${hte_common_h}
-assert r(N) == 2706
+assert r(N) == 2935
 egen byte hte_window_ruv_tag = tag(ruv_id) if ///
     hte_primary_sample & abs(${hte_running}) <= ${hte_common_h}
 quietly count if hte_window_ruv_tag
-assert r(N) == 61
+assert r(N) == 62
 
 keep if hte_bc_design
-assert _N == 33066
+assert _N == 33060
 
 
 *-----------------------------------*

@@ -406,25 +406,26 @@ that begins with the project's SISFOH source cohort. The outputs therefore
 describe that cohort and must never be presented as complete CCPP population
 tabulations.
 
-The assisted source contains 193,376 people in 58,021 source households and
-807 historical source CCPP codes. A reviewed exact crosswalk maps those codes
-to 803 canonical RUV communities, all within the fixed main RD geography. INEI
-linked 150,864 people to Census records and did not link 42,512. Non-linkage is
-retained as missing Census outcomes and is not coded as migration. Deterministic
-roster recovery attaches 192,439 people to canonical SISFOH person IDs; 937
-remain unresolved. Five source households containing 25 people imply
-conflicting SISFOH household IDs and are retained with the household link
-quarantined.
+The immutable assisted delivery contains 193,376 people in 58,021 source
+households and 807 historical source CCPP codes. INEI linked 150,864 people to
+Census records and did not link 42,512. The approved source-place adjudication
+accepts 806 codes mapping to 802 canonical RUV communities and quarantines
+the unsupported 34-person Ancahuasi source group without an RUV assignment.
+The RUV-linked analytical files consequently contain 193,342 people in
+58,015 source households: 150,832 linked and 42,510 unlinked. Non-linkage is
+retained as missing Census outcomes and is not coded as migration.
+Deterministic roster recovery attaches 192,405 analytical people to canonical
+SISFOH person IDs; 937 remain unresolved. Five source households containing
+25 people imply conflicting SISFOH household IDs and retain a quarantined
+household link.
 
-The individual and source-household analytical files retain all 193,376 people
-and all 58,021 source households. The community output preserves all 5,712 RUV
-rows and leaves Census measures missing outside the 803 represented
-communities. Migration compares valid linked 2017 destination CCPP codes with
-the canonical source RUV CCPP and is observed for 146,410 people; non-linkage
-never enters that definition. NBI measures that require a full destination
-household roster are constructed only for the 27,276 complete rosters, not for
-the 37,933 partial, 1,223 unknown-size, or four overfull destination
-households.
+The community output preserves all 5,712 RUV rows and leaves Census measures
+missing outside the 802 represented communities. Migration compares valid
+linked 2017 destination CCPP codes to canonical source RUV CCPP codes and is
+observed for 147,083 analytical people; non-linkage never enters that
+definition. NBI measures require a full destination household roster and are
+constructed only for 27,274 complete rosters, not for 37,926 partial, 1,223
+unknown-size, or four overfull destination households.
 
 The block integrates the analytically useful parts of Ana Maria Dumez's thesis
 workflow while separating linkage, migration, employment, internet access,
@@ -446,6 +447,8 @@ establishes ignorable selection. Do not recode missing movement or release
 2017 migration claims before the source-field and code-equivalence questions
 are resolved with the research team. See
 `docs/CENSUS_2017_SELECTION_AND_CODE_COMPARABILITY_AUDIT_2026-09-27.md`.
+
+**27 September 2026 superseding source-place decision:** The project lead approved [the documented adjudication](CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md). The original INEI delivery remains 193,376 people in 807 source codes; the RUV-linked analytical cohort excludes 34 Ancahuasi-source people formerly assigned to Cahuapirhua, leaving 193,342 people in 58,015 source households and 802 represented RUV communities. Ranracancha `0306080001` is accepted under its corroborated source code, and its one erroneous RUV district code is corrected. Observable CCPP movement rises to 147,083 people (including 673 linked Ranracancha people); the 42,510 analytically retained but unlinked people are not coded as nonmigrants. This adjudication resolves those two held identity cases, **not** wider cohort selection, incomplete linkage, or all other code-vintage discrepancies. The earlier numerical audit is a pre-correction snapshot.
 
 ## Recorded analysis-readiness assessment
 
@@ -642,14 +645,15 @@ be resolved by the research team before an authoritative release:
    and specifications.
 4. **Canonical datasets:** several base, modified, SAT/PBI, and conflict-copy
    variants coexist without a complete lineage map.
-5. **Downstream sample flow:** the current pipeline now fixes the Census 2017
-   cohort at 193,376 people, 58,021 source households, and 803 of the 1,162
-   selected-geography communities. The manuscript's historical counts and
-   estimands still need to be reconciled to this documented cohort.
+5. **Downstream sample flow:** the immutable Census 2017 delivery has 193,376
+   people and 58,021 source households. After the approved 34-person source-code
+   quarantine, the RUV-linked analytical cohort has 193,342 people, 58,015
+   households, and 802 of the 1,162 selected-geography communities. The
+   manuscript's historical counts and estimands still need reconciliation.
 6. **Migration and linkage selection:** migration is now defined only for
    linked people with valid source and destination CCPP codes; non-linkage is a
-   separate outcome. Differential linkage and the interpretation of the 42,512
-   unlinked people remain identification risks requiring explicit analysis.
+   separate outcome. Differential linkage and interpretation of the 42,510
+   analytically retained unlinked people remain identification risks.
 7. **Output provenance:** current manuscript claims appear to rely on older,
    multi-specification workbooks that may include manual selection or edits.
 8. **Fuzzy matches:** community-name matching and manual corrections need a

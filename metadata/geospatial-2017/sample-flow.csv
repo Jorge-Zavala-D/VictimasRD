@@ -9,8 +9,8 @@ geospatial_area_disagreements,16,quarantined,GeoGPS-derived TIPO disagrees with 
 geospatial_district_capitals,1874,validated,One suffix-0001 capital for each 2017 district
 geospatial_province_capitals,196,validated,One district-01 CCPP-0001 capital for each province
 geospatial_department_capitals,25,validated,One province-01 district-01 CCPP-0001 capital for each department
-geospatial_exact_current,4705,validated,RUV records linked by exact current verified CCPP UBIGEO
-geospatial_exact_census2007,2,validated,Additional RUV records linked by exact 2007 Census CCPP UBIGEO
+geospatial_exact_current,4706,validated,RUV records linked by exact current verified CCPP UBIGEO
+geospatial_exact_census2007,1,validated,Additional RUV records linked by exact 2007 Census CCPP UBIGEO
 geospatial_unique_exact_path,0,validated,Additional RUV records linked by unique exact normalized full path
 geospatial_unique_district_name,0,validated,Additional RUV records linked by unique exact district-code and CCPP name
 geospatial_code_conflicts,4,quarantined,Current verified CCPP code retained over a different valid 2007 Census code

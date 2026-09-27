@@ -1,5 +1,11 @@
 # Census 2017 linkage and migration: substantive audit
 
+> **Superseded numerical snapshot:** The approved 27 September source-place
+> adjudication changed the analytical cohort and regenerated the migration
+> estimates. Counts and coefficients below describe the earlier cohort; use
+> [the corrected RD analysis](CENSUS_2017_RD_ANALYSIS.md) and
+> [publication audit](PUBLICATION_RESULTS_AUDIT.md) for current numbers.
+
 **Audit dates:** 22–23 September 2026  
 **Status:** Primary observed-migration population approved 26 September 2026; scientific and publication-review holds remain.
 **Design held fixed:** Selected B/C geography, treatment through 2016 (`treat_16`), local-linear triangular-kernel RD, common `h = 0.0075` and `b = 0.0135`.

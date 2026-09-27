@@ -1,7 +1,7 @@
 analysis_id,predictor_var,outcome_label,spec_id,estimand,estimate,standard_error,pvalue,ci_low,ci_high,n,ccpp_count,clusters,estimation_rc,q_bh
-A17C_EMP,employment_rate_2013,Migration and baseline employment,descriptive_adjusted,noncausal_association,.0673143096874207,.022696426,.0050711646,.021443119,.1131855,59,59,41,0,.0152134937234223
-A17C_EMP,employment_rate_2013,Migration and baseline employment,descriptive_unadjusted,noncausal_association,.0544770036080948,.011822211,.000040907526,.030583424,.078370586,59,59,41,0,
-A17C_INET,share_asset_internet_2013,Migration and baseline internet access,descriptive_adjusted,noncausal_association,.0429807691542867,.040094476,.29015106,-.038053185,.12401473,59,59,41,0,.4352265894412994
-A17C_INET,share_asset_internet_2013,Migration and baseline internet access,descriptive_unadjusted,noncausal_association,.0281682528859891,.032190852,.38677678,-.036891881,.093228392,59,59,41,0,
-A17C_LFP,labor_force_participation_2013,Migration and baseline labor-force participation,descriptive_adjusted,noncausal_association,-.0129701712712627,.029738307,.66507757,-.073073529,.047133189,59,59,41,0,.6650775671005249
-A17C_LFP,labor_force_participation_2013,Migration and baseline labor-force participation,descriptive_unadjusted,noncausal_association,-.0124056474739815,.034937128,.72439152,-.083016217,.058204923,59,59,41,0,
+A17C_EMP,employment_rate_2013,Migration and baseline employment,descriptive_adjusted,noncausal_association,.066850473602053,.022320926,.0046389839,.02177245,.1119285,60,60,42,0,.0139169516041875
+A17C_EMP,employment_rate_2013,Migration and baseline employment,descriptive_unadjusted,noncausal_association,.0530025811643053,.011706971,.00005053588,.029359873,.076645292,60,60,42,0,
+A17C_INET,share_asset_internet_2013,Migration and baseline internet access,descriptive_adjusted,noncausal_association,.0421750155041477,.038712375,.28231966,-.036006212,.12035624,60,60,42,0,.4234794974327087
+A17C_INET,share_asset_internet_2013,Migration and baseline internet access,descriptive_unadjusted,noncausal_association,.0287855128117325,.031837314,.37120125,-.035511252,.093082279,60,60,42,0,
+A17C_LFP,labor_force_participation_2013,Migration and baseline labor-force participation,descriptive_adjusted,noncausal_association,-.0129633078682551,.029281573,.66030091,-.072098643,.04617203,60,60,42,0,.6603009104728699
+A17C_LFP,labor_force_participation_2013,Migration and baseline labor-force participation,descriptive_unadjusted,noncausal_association,-.0117806648819888,.034746591,.73630613,-.081952833,.0583915,60,60,42,0,

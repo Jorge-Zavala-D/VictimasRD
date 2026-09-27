@@ -20,7 +20,7 @@ The block has two distinct source roles:
    analysis.
 
 The Census outputs therefore describe the linked 2013 source cohort. They are
-not full 2017 resident-population tabulations for the 803 represented RUV
+not full 2017 resident-population tabulations for the 802 represented RUV
 communities, and they must not be interpreted as such.
 
 ## Source contract
@@ -40,8 +40,11 @@ attempting an impossible CCPP merge. The assisted file contains restricted
 linkage identifiers; none is retained in the final coded datasets.
 
 The handoff is internally inconsistent about an early requested-community
-count (899 in one passage and 889 in another). The auditable delivered data
-contain 807 source CCPP codes, which is the implemented universe.
+count (899 in one passage and 889 in another). The recovered INEI request
+workbook contains 889 unique requested codes; the auditable delivery contains
+807 source CCPP codes. One delivered code is quarantined from RUV-linked
+analysis under the [approved adjudication](CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md),
+without altering the immutable delivery.
 
 ## INEI linkage and attrition
 
@@ -70,10 +73,11 @@ selection risk.
 
 ## Source CCPP crosswalk
 
-`metadata/census-2017/source-ccpp-crosswalk.csv` maps all 807 historical source
-codes to 803 canonical RUV rows. The crosswalk was built from exact legacy RUV
-geographic paths and the supplied victimization score, then compared with the
-current deterministic SISFOH-to-RUV map.
+`metadata/census-2017/source-ccpp-crosswalk.csv` records all 807 historical source
+codes: 806 accepted codes map to 802 canonical RUV rows, while `0307080005`
+is quarantined without a RUV assignment. The crosswalk was built from exact
+legacy RUV geographic paths and the supplied victimization score, then
+compared with the current deterministic SISFOH-to-RUV map.
 
 Most codes agree across both sources. Fifty-eight require the exact historical
 path because the source code changed, and one code (`0905020049`) is resolved
@@ -84,10 +88,12 @@ as a fuzzy match.
 
 The later [selection and code-comparability audit](CENSUS_2017_SELECTION_AND_CODE_COMPARABILITY_AUDIT_2026-09-27.md)
 found that historical-source-to-RUV acceptance does not by itself establish a
-stable 2017 code or each linked person's CCPP origin. Its separate 807-row
-comparison ledger holds two locally important source codes and flags other
-directory discrepancies. The executable crosswalk and current datasets are
-unchanged pending source clarification and an explicit research-team decision.
+stable 2017 code or each linked person's CCPP origin. The
+[approved source-place decision](CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md)
+resolves its two held assignments: retain Ranracancha `0306080001` under its
+verified RUV code, and quarantine 34 Ancahuasi-source people previously
+assigned to Cahuapirhua. Other directory discrepancies and selection
+limitations remain under review.
 
 ## Recovering canonical SISFOH IDs
 
@@ -121,7 +127,9 @@ ledger.
 
 ### Individual
 
-`12_census_2017_individual_analysis.dta` has all 193,376 source-cohort people.
+`12_census_2017_individual_analysis.dta` has 193,342 RUV-linked source-cohort
+people; the 193,376-person immutable INEI delivery remains the raw denominator,
+with 34 source people quarantined before this analytical merge.
 It combines the canonical CCPP/RUV/treatment context, recoverable SISFOH 2013
 person measures, linkage status, Census 2017 person outcomes, current
 household/dwelling conditions, and migration indicators. Direct and indirect
@@ -129,25 +137,25 @@ source linkage identifiers are removed.
 
 ### Source household
 
-`13_census_2017_household_analysis.dta` has 58,021 de-identified 2013 source
+`13_census_2017_household_analysis.dta` has 58,015 de-identified 2013 source
 households. It aggregates the source cohort rather than redefining households
 around destination living arrangements. It records linkage rates, member
 migration, outcomes among linked members, the number of destination households
 and CCPPs, and whether members split across destinations. Where a source
 household maps to the canonical SISFOH household, the full cleaned SISFOH
-household measures are attached. This succeeds for 57,740 of the 58,021 source
+household measures are attached. This succeeds for 57,734 of the 58,015 source
 households; the other 281 remain in the analytical file with the corresponding
 SISFOH household fields missing.
 
 ### Source CCPP
 
 `14_community_registry_census_2017.dta` retains all 5,712 RUV rows. Census
-cohort outcomes are present for the 803 represented RUV communities and remain
+cohort outcomes are present for the 802 represented RUV communities and remain
 missing elsewhere. Aggregates include the source-cohort size, linkage rate,
 migration shares, demographic and socioeconomic outcomes, household
 dispersion, NBI exposure, and harmonized wellbeing measures.
 
-All 803 represented communities fall inside the fixed 1,162-community main RD
+All 802 represented communities fall inside the fixed 1,162-community main RD
 geography because the original INEI assistance request targeted the study
 cohort. Census coverage is therefore not national coverage of the 5,712 RUV
 communities and not complete coverage even within the selected geography.

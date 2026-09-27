@@ -2,6 +2,8 @@
 
 **Date:** 27 September 2026. **Status:** diagnostic, not a change to the registered analysis or the data-preparation crosswalk. All checks used `stata_run_selection` on the existing Dropbox sources and analytical datasets. No Dropbox source, coded dataset, analysis program, or publication-facing output was changed.
 
+**Superseded case disposition:** The [approved source-place adjudication](CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md) subsequently accepted Ranracancha `0306080001`, corrected its RUV district code, and quarantined the unsupported Ancahuasi-to-Cahuapirhua assignment. The counts and estimates below are the *pre-correction diagnostic snapshot*, not current analytical results. Its separate source-cohort coverage, person-linkage, movement-observability, and non-ignorability cautions remain applicable; see regenerated sample-flow and results-audit records for post-correction numbers.
+
 ## The three selection mechanisms are distinct
 
 The public 2017 Census modules identify districts, not the RUV communities. CCPP-level outcomes instead start from an INEI-assisted SISFOH 2012–2013 source cohort. INEI's handoff reports 899 requested communities, 807 found in SISFOH, 193,376 source people, 150,864 linked Census records, and 42,512 unlinked people. It says 13 communities were recovered using place names and that SISFOH settlements below 150 inhabitants could be aggregated to district-level identifiers ending in `9999`. These details do not establish that each delivered person has a stable, individually verified ten-digit CCPP origin.

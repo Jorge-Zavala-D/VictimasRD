@@ -1,5 +1,11 @@
 # Census 2017 RD outcome analysis
 
+> **27 September 2026 source-place correction:** The analytical Census cohort
+> excludes 34 Ancahuasi-source people whose RUV assignment was unsupported
+> and retains the verified Ranracancha cohort. The current module-04 results
+> below were regenerated after that correction; older snapshots remain
+> historical. See `docs/CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md`.
+
 ## Scope
 
 The Census 2017 outcome workflow estimates main effects at the CCPP,
@@ -14,23 +20,38 @@ implemented in the separate versioned modules
 `05f_census2017_individual_heterogeneity.do`; all mediation analyses remain
 separate.
 
-## 26 September 2026 individual-migration amendment
+## 27 September 2026 corrected individual-migration estimate
 
 The approved I03 observed-migration sample is linked adults aged at least 14
-with valid canonical CCPP movement: 67,125 adults in 409 RUV communities,
-7,157 adults in 62 communities inside the fixed RD window. The other seven
-individual primary outcomes retain 54,317 eight-outcome complete cases,
-5,453 locally in 61 communities. The 2017 individual result file now has
+with valid canonical CCPP movement: 67,648 adults in 410 RUV communities,
+7,680 adults in 63 communities inside the fixed RD window. The other seven
+individual primary outcomes retain 54,812 eight-outcome complete cases,
+5,948 locally in 62 communities. The 2017 individual result file has
 348 estimator rows, including two explicitly exploratory rows preserving
-the former I03 complete-case analysis. Its I03 fuzzy estimate is +21.86
-percentage points (95% CI [-16.96, 60.67], raw p = .270) with an
-outcome-sample local-IV Kleibergen--Paap F of 20.65; the assignment reduced
-form is +20.90 points (95% CI [-5.30, 47.11], raw p = .118). The August
+the former I03 complete-case analysis. The corrected I03 fuzzy estimate is
++21.45 percentage points (95% CI [-17.24, 60.14], raw p = .277;
+Holm-adjusted p = 1.000) with an outcome-sample local-IV
+Kleibergen--Paap F of 20.10. The assignment reduced form is +20.72 points
+(95% CI [-5.48, 46.92], raw p = .121). The August
 validation snapshot below documents the older common complete-case design,
 not the current I03 population. The interpretation remains conditional on
 linkage and observed canonical movement; it does not cover all source-cohort
-adults. Module `05f` migration heterogeneity has not yet been re-estimated
-for this population.
+adults. Module `05f` migration heterogeneity is being re-estimated for this
+population; its old outputs are not current evidence.
+
+The corrected six-module main-effects run completed through Stata MCP on
+27 September 2026 (`logs/census2017_main_effects_20260927.log`, return code 0).
+Within the selected B/C source cohort, 29,692 households have at least one
+INEI-linked 2017 member, and 85,873 people are individually linked; these
+denominators are distinct from the smaller eight-outcome complete-case samples.
+The 2017 community, household, and individual result files contain 273, 286,
+and 348 estimator rows, respectively. In the fixed common window, the complete
+community sample has 60 CCPPs (first-stage F 55.26), the complete household
+sample has 2,935 households in 62 CCPPs (F 20.44), and the complete individual
+sample has 5,948 people in 62 CCPPs (F 20.44). The migration-specific
+individual sample has 7,680 people in 63 CCPPs (F 20.10). These instrument
+diagnostics clear the prespecified F > 10 gate but do not establish the
+linkage-selection assumptions or make the resulting estimates publication-ready.
 
 ## Canonical implementation
 

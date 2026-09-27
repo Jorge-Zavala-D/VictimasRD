@@ -89,12 +89,12 @@ generate byte hte_primary_sample = ///
     hte_primary_missing == 0
 
 quietly count if hte_bc_design & census2017_cohort_covered == 1
-assert r(N) == 426
+assert r(N) == 425
 quietly count if hte_primary_sample
-assert r(N) == 388
+assert r(N) == 389
 quietly count if hte_primary_sample & ///
     abs(${hte_running}) <= ${hte_common_h}
-assert r(N) == 59
+assert r(N) == 60
 
 keep if hte_bc_design
 assert _N == 549
@@ -570,7 +570,7 @@ forvalues row = 1/`=_N' {
 file write `project_tex' "\bottomrule" _n
 file write `project_tex' "\end{tabular}" _n
 file write `project_tex' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Composition covers CMAN project records through 2016 linked to the 388-community complete Census 2017 CCPP analysis universe. A community may receive projects in more than one group. Cutoff jumps are robust bias-corrected local-linear assignment discontinuities in receipt of at least one group-specific project, using triangular weights, \(h=0.0075\), \(b=0.0135\), mass-point adjustment, and district CR2 inference. Project type is a post-assignment implementation attribute; the table does not estimate causal project-type heterogeneity. Sources: RUV, CMAN, INEI 2007 Census, and INEI-assisted Census 2017.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Composition covers CMAN project records through 2016 linked to the 389-community complete Census 2017 CCPP analysis universe. A community may receive projects in more than one group. Cutoff jumps are robust bias-corrected local-linear assignment discontinuities in receipt of at least one group-specific project, using triangular weights, \(h=0.0075\), \(b=0.0135\), mass-point adjustment, and district CR2 inference. Project type is a post-assignment implementation attribute; the table does not estimate causal project-type heterogeneity. Sources: RUV, CMAN, INEI 2007 Census, and INEI-assisted Census 2017.}" _n
 file write `project_tex' "\end{table}" _n
 file close `project_tex'
 
@@ -627,7 +627,7 @@ graph hbar (asis) record_share_pct, ///
         size(small) color(gs5)) ///
     legend(off) ///
     note( ///
-        "Notes: Unit is a CMAN project record through 2016 linked to one of 388 complete-sample RUV communities." ///
+        "Notes: Unit is a CMAN project record through 2016 linked to one of 389 complete-sample RUV communities." ///
         "Categories are assigned by the versioned project-title classifier; communities may receive more than one project." ///
         "This is descriptive implementation evidence, not a causal heterogeneity estimate. Sources: RUV, CMAN, and INEI-assisted Census 2017.", ///
         size(tiny) color(gs5) span) ///
@@ -724,7 +724,7 @@ rdplot hte_financing_pc_1000 ${hte_running} ///
         xline(0, lcolor(maroon) lpattern(shortdash)) ///
         legend(off) ///
         note( ///
-            "Notes: Unit is an RUV community in the 388-community complete Census 2017 CCPP analysis universe." ///
+            "Notes: Unit is an RUV community in the 389-community complete Census 2017 CCPP analysis universe." ///
             "The outcome is cumulative nominal CMAN financing plus recorded cofinancing through 2016 divided by 2007 population." ///
             "The plot is a first-stage diagnostic and does not verify disbursement, execution, completion, or cofinancing realization. Sources: RUV, CMAN, and INEI 2007 Census.", ///
             size(tiny) color(gs5) span) ///

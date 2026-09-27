@@ -27,6 +27,7 @@ foreach required_file in ///
     }
 }
 
+capture mata: mata drop require_tokens()
 mata:
 void require_tokens(string scalar path, string rowvector tokens)
 {

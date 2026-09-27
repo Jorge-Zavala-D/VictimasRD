@@ -31,15 +31,18 @@ foreach level in household individual {
         "output/tables/rd_outcomes/rd_2017_`level'_analysis_contract.csv", ///
         clear varnames(1) bindquote(strict)
     local unit = cond("`level'" == "household", "households", "persons")
-    local expected = cond("`level'" == "household", "2706", "5453")
+    local linked_expected = cond("`level'" == "household", "29692", "85873")
+    quietly count if metric == "linked_`unit'" & value == "`linked_expected'"
+    assert r(N) == 1
+    local expected = cond("`level'" == "household", "2935", "5948")
     quietly count if metric == "window_`unit'" & value == "`expected'"
     assert r(N) == 1
-    quietly count if metric == "window_ccpp" & value == "61"
+    quietly count if metric == "window_ccpp" & value == "62"
     assert r(N) == 1
     local table = cond("`level'" == "household", "23", "28")
     local body = fileread("output/tables/rd_outcomes/tab_rd_outcomes_`table'_main_2017_`level'.tex")
     if "`level'" == "individual" {
-        quietly count if metric == "migration_window_persons" & value == "7157"
+        quietly count if metric == "migration_window_persons" & value == "7680"
         assert r(N) == 1
         assert strpos(`"`body'"', "Complete-case first stage") > 0
         assert strpos(`"`body'"', "Migration-sample first stage") > 0

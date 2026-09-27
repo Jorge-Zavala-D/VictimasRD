@@ -71,11 +71,11 @@ restore
 
 quietly count if moderator_id == "M03" & outcome_id == "I03" & ///
     spec_id == "common_h_iv" & estimator == "ivreg2" & ///
-    n_left + n_right == 7157 & ccpp_left + ccpp_right == 62
+    n_left + n_right == 7680 & ccpp_left + ccpp_right == 63
 assert r(N) == 1
 quietly count if moderator_id == "M03" & outcome_id == "I02" & ///
     spec_id == "common_h_iv" & estimator == "ivreg2" & ///
-    n_left + n_right == 5453 & ccpp_left + ccpp_right == 61
+    n_left + n_right == 5948 & ccpp_left + ccpp_right == 62
 assert r(N) == 1
 
 quietly count if moderator_id == "M03" & outcome_id == "I01" & ///

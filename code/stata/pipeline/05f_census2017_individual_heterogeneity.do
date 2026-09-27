@@ -22,7 +22,7 @@ use "${hte_input_2017_individual}", clear
 quietly datasignature
 local input_datasignature "`r(datasignature)'"
 
-assert _N == 193376
+assert _N == 193342
 isid census2017_cohort_pid
 
 local required_vars ///
@@ -66,7 +66,7 @@ generate byte hte_bc_design = ///
     inlist(victimization_level_source, "B", "C")
 
 quietly count if hte_bc_design
-assert r(N) == 110940
+assert r(N) == 110906
 quietly count if hte_bc_design & ///
     ((victimization_level_source == "B" & ${hte_running} < 0) | ///
      (victimization_level_source == "C" & ${hte_running} >= 0))
@@ -93,18 +93,18 @@ generate byte hte_primary_sample = ///
     age_2017 >= 14 & hte_primary_missing == 0
 
 quietly count if hte_primary_sample
-assert r(N) == 54317
+assert r(N) == 54812
 egen byte hte_primary_ruv_tag = tag(ruv_id) if hte_primary_sample
 quietly count if hte_primary_ruv_tag
-assert r(N) == 406
+assert r(N) == 407
 
 quietly count if hte_primary_sample & ///
     abs(${hte_running}) <= ${hte_common_h}
-assert r(N) == 5453
+assert r(N) == 5948
 egen byte hte_window_ruv_tag = tag(ruv_id) if ///
     hte_primary_sample & abs(${hte_running}) <= ${hte_common_h}
 quietly count if hte_window_ruv_tag
-assert r(N) == 61
+assert r(N) == 62
 
 * I03 follows the approved linked-adult migration population from module 04f.
 * The other seven outcomes retain their original complete-case cohort.
@@ -113,22 +113,22 @@ generate byte hte_migration_sample = ///
     !missing(moved_ccpp_2013_2017)
 assert hte_migration_sample if hte_primary_sample
 quietly count if hte_migration_sample
-assert r(N) == 67125
+assert r(N) == 67648
 egen byte hte_migration_ruv_tag = tag(ruv_id) if hte_migration_sample
 quietly count if hte_migration_ruv_tag
-assert r(N) == 409
+assert r(N) == 410
 quietly count if hte_migration_sample & ///
     abs(${hte_running}) <= ${hte_common_h}
-assert r(N) == 7157
+assert r(N) == 7680
 egen byte hte_migration_window_tag = tag(ruv_id) if ///
     hte_migration_sample & abs(${hte_running}) <= ${hte_common_h}
 quietly count if hte_migration_window_tag
-assert r(N) == 62
+assert r(N) == 63
 
 generate byte hte_analysis_sample = hte_migration_sample
 
 keep if hte_bc_design
-assert _N == 110940
+assert _N == 110906
 
 
 *-----------------------------------*

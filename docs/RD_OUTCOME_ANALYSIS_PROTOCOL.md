@@ -118,8 +118,8 @@ estimate may be selected. The complete eight-outcome primary sample contains
 39,074 households in 487 RUV communities; the common window contains 3,810
 households in 65 communities.
 
-The 2017 primary household family contains 24,877 source households in 406
-RUV communities; the common window contains 2,706 households in 61
+The 2017 primary household family contains 25,106 source households in 407
+RUV communities; the common window contains 2,935 households in 62
 communities. Its eight outcomes cover demographic composition, migration,
 education, employment, insurance, disability, and core wellbeing. The same
 CCPP-equal primary weighting and household-equal sensitivity apply.
@@ -142,10 +142,10 @@ its contribution. A person-equal branch is required and explicitly labeled as
 a different population-weighted estimand.
 
 Seven 2017 primary person outcomes retain the eight-outcome complete-case
-population: 54,317 linked people aged at least 14 in 406 RUV communities,
-with 5,453 people in 61 communities in the common window. Outcome I03 instead
-uses the approved observed-migration population: 67,125 linked adults with
-valid canonical CCPP movement in 409 communities, with 7,157 adults in 62
+population: 54,812 linked people aged at least 14 in 407 RUV communities,
+with 5,948 people in 62 communities in the common window. Outcome I03 instead
+uses the approved observed-migration population: 67,648 linked adults with
+valid canonical CCPP movement in 410 communities, with 7,680 adults in 63
 communities in the common window. These are distinct effective populations
 within one prespecified eight-hypothesis family. The old I03 complete-case
 estimate is a sensitivity. Exploratory codings that assign unlinked people

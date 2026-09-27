@@ -1368,6 +1368,15 @@ replace ubigeo_ccpp = adjudicated_ubigeo_ccpp if ///
     ruv_adjudication_merge == 3 & ///
     missing(ubigeo_ccpp)
 
+/* The RUV district code for Ranracancha is Ocobamba's 030605.
+   Its verified CCPP code and the official district code are 030608. */
+count if ruv_id == "S03000445" & ///
+    ubigeo_dist == "030605" & ///
+    ubigeo_ccpp == "0306080001" & ///
+    dist_victim_raw == "RANRACANCHA"
+assert r(N) == 1
+replace ubigeo_dist = "030608" if ruv_id == "S03000445"
+
 assert ///
     victim_inei_code_vintage == adjudicated_code_vintage if ///
     ruv_adjudication_merge == 3 & ///
@@ -5687,7 +5696,7 @@ save `gdp_links'
 
 count
 local gdp_exact_current = r(N)
-assert `gdp_exact_current' == 4992
+assert `gdp_exact_current' == 4993
 
 foreach candidate_code in ///
     census2007_ubigeo_ccpp ///
@@ -5739,7 +5748,7 @@ foreach candidate_code in ///
 use `gdp_links', clear
 count if gdp_ccpp_link_method == "exact_census2007_ubigeo"
 local gdp_exact_census2007 = r(N)
-assert `gdp_exact_census2007' == 10
+assert `gdp_exact_census2007' == 9
 count if gdp_ccpp_link_method == "exact_geospatial_ubigeo"
 local gdp_exact_geospatial = r(N)
 assert `gdp_exact_geospatial' == 0
@@ -9871,8 +9880,10 @@ import delimited ///
 
 keep source_ccpp_code ruv_id match_method validation review_status
 assert regexm(source_ccpp_code, "^[0-9]{10}$")
-assert regexm(ruv_id, "^S[0-9]{8}$")
-assert review_status == "accepted"
+assert inlist(review_status, "accepted", "quarantined")
+assert regexm(ruv_id, "^S[0-9]{8}$") if review_status == "accepted"
+assert ruv_id == "" if review_status == "quarantined"
+assert source_ccpp_code == "0307080005" if review_status == "quarantined"
 assert validation != ""
 isid source_ccpp_code
 
@@ -9880,11 +9891,14 @@ count
 local census2017_source_ccpp_rows = r(N)
 assert `census2017_source_ccpp_rows' == 807
 
-egen byte census2017_ruv_tag = tag(ruv_id)
+count if review_status == "quarantined"
+assert r(N) == 1
+egen byte census2017_ruv_tag = tag(ruv_id) ///
+    if review_status == "accepted"
 count if census2017_ruv_tag
 local census2017_source_ruv_rows = r(N)
-assert `census2017_source_ruv_rows' == 803
-drop census2017_ruv_tag review_status validation
+assert `census2017_source_ruv_rows' == 802
+drop census2017_ruv_tag validation
 rename match_method census2017_ccpp_link_method
 save `census2017_source_links'
 
@@ -9990,7 +10004,13 @@ assert `census2017_stage3_rows' == 3993
 
 merge m:1 source_ccpp_code using `census2017_source_links'
 assert _merge == 3
-drop _merge
+count if review_status == "quarantined"
+local census2017_quarantined_rows = r(N)
+assert `census2017_quarantined_rows' == 34
+local census2017_analytic_cohort_rows = ///
+    `census2017_cohort_rows' - `census2017_quarantined_rows'
+keep if review_status == "accepted"
+drop _merge review_status
 
 merge m:1 ruv_id using ///
     "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
@@ -10109,7 +10129,10 @@ generate byte census2017_not_linked = !census2017_linked
 
 merge m:1 source_ccpp_code using `census2017_source_links'
 assert _merge == 3
-drop _merge
+count if review_status == "quarantined"
+assert r(N) == `census2017_quarantined_rows'
+keep if review_status == "accepted"
+drop _merge review_status
 merge m:1 ruv_id using ///
     "${analysis_data_root}/11_community_registry_sisfoh_2013.dta", ///
     keep(master match) ///
@@ -10131,7 +10154,7 @@ generate str28 census2017_person_link_method = ///
     "source_ccpp_roster_exact" if _merge == 3
 count if _merge == 3
 local census2017_person_key_source = r(N)
-assert `census2017_person_key_source' == 191832
+assert `census2017_person_key_source' == 191798
 drop _merge sisfoh_pid_candidate sisfoh_hhid_candidate
 
 replace ubigeo_ccpp_sisfoh = source_ccpp_inei
@@ -10611,7 +10634,7 @@ replace cpv2017_dest_hh_tag_aux = 0 ///
     if missing(cpv2017_destination_hhid)
 count if cpv2017_dest_hh_tag_aux
 local census2017_destination_hh_rows = r(N)
-assert `census2017_destination_hh_rows' == 66436
+assert `census2017_destination_hh_rows' == 66427
 count if cpv2017_dest_hh_tag_aux & missing(c4_p1)
 local cpv2017_dest_hh_no_roster = r(N)
 assert `cpv2017_dest_hh_no_roster' == 1223
@@ -10619,11 +10642,11 @@ count if ///
     cpv2017_dest_hh_tag_aux & ///
     cpv2017_delivery_members < c4_p1 & !missing(c4_p1)
 local cpv2017_dest_hh_partial = r(N)
-assert `cpv2017_dest_hh_partial' == 37933
+assert `cpv2017_dest_hh_partial' == 37926
 count if ///
     cpv2017_dest_hh_tag_aux & cpv2017_roster_complete == 1
 local cpv2017_dest_hh_complete = r(N)
-assert `cpv2017_dest_hh_complete' == 27276
+assert `cpv2017_dest_hh_complete' == 27274
 count if ///
     cpv2017_dest_hh_tag_aux & ///
     cpv2017_delivery_members > c4_p1 & !missing(c4_p1)
@@ -10874,7 +10897,7 @@ compress
 sort census2017_cohort_pid
 isid census2017_cohort_pid
 count
-assert r(N) == `census2017_cohort_rows'
+assert r(N) == `census2017_analytic_cohort_rows'
 save `census2017_person_clean'
 
 merge m:1 ruv_id using ///
@@ -10887,7 +10910,7 @@ sort census2017_cohort_pid
 isid census2017_cohort_pid
 count
 local census2017_person_analysis_rows = r(N)
-assert `census2017_person_analysis_rows' == 193376
+assert `census2017_person_analysis_rows' == 193342
 save ///
     "${analysis_data_root}/12_census_2017_individual_analysis.dta", ///
     replace
@@ -11036,14 +11059,14 @@ generate byte census2017_sisfoh_hh_recovered = _merge == 3
 drop _merge
 count if census2017_sisfoh_hh_recovered
 local census2017_sisfoh_hh_rows = r(N)
-assert `census2017_sisfoh_hh_rows' == 57740
+assert `census2017_sisfoh_hh_rows' == 57734
 
 compress
 sort census2017_baseline_hhid
 isid census2017_baseline_hhid
 count
 local census2017_household_rows = r(N)
-assert `census2017_household_rows' == 58021
+assert `census2017_household_rows' == 58015
 save `census2017_household_clean'
 
 merge m:1 ruv_id using ///
@@ -12252,19 +12275,25 @@ post `qa_post' ///
     ("census2017_source_ccpp_codes") ///
     (`census2017_source_ccpp_rows') ///
     ("validated") ///
-    ("INEI-assisted source CCPP codes accepted in the frozen crosswalk")
+    ("All historical source CCPP codes in the immutable INEI delivery")
+
+post `qa_post' ///
+    ("census2017_quarantined_source_people") ///
+    (`census2017_quarantined_rows') ///
+    ("quarantined") ///
+    ("Ancahuasi source people excluded from unsupported RUV Cahuapirhua assignment")
 
 post `qa_post' ///
     ("census2017_source_ruv_rows") ///
     (`census2017_source_ruv_rows') ///
     ("validated") ///
-    ("Canonical RUV communities represented by the 807 source codes")
+    ("RUV communities represented by 806 accepted historical source codes")
 
 post `qa_post' ///
     ("census2017_cohort_rows") ///
     (`census2017_cohort_rows') ///
     ("validated") ///
-    ("All people in the INEI-assisted SISFOH-to-Census cohort retained")
+    ("All people in the immutable INEI-assisted SISFOH-to-Census delivery")
 
 post `qa_post' ///
     ("census2017_linked_rows") ///
@@ -12398,13 +12427,13 @@ post `qa_post' ///
     ("census2017_individual_analysis_rows") ///
     (`census2017_person_analysis_rows') ///
     ("validated") ///
-    ("All source-cohort people in the coded individual analysis file")
+    ("Accepted RUV-linked source people in the coded individual analysis file")
 
 post `qa_post' ///
     ("census2017_household_analysis_rows") ///
     (`census2017_household_rows') ///
     ("validated") ///
-    ("All source households in the coded household analysis file")
+    ("Accepted RUV-linked source households in the coded household analysis file")
 
 post `qa_post' ///
     ("census2017_main_sample_covered") ///

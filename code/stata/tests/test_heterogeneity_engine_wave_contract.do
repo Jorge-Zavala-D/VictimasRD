@@ -16,6 +16,7 @@ if _rc {
 local engine_path ///
     "${project_root}/code/stata/pipeline/_heterogeneity_level_engine.do"
 
+capture mata: mata drop check_wave_contract()
 mata:
 void check_wave_contract(string scalar engine_path)
 {

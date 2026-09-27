@@ -81,9 +81,9 @@ generate byte rd_primary_sample = ///
     rd_census_sample & primary_missing == 0
 
 quietly count if rd_census_sample
-assert r(N) == 426
+assert r(N) == 425
 quietly count if rd_primary_sample
-assert r(N) == 388
+assert r(N) == 389
 
 encode ubigeo_dist, generate(cluster_dist)
 
@@ -993,7 +993,7 @@ file write `main_table' ///
     "Common first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `main_first_stage_n' \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
-file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Each row uses the same 388-community complete Census-linked B/C analysis sample before local-window restriction and the same \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide the outcome and treatment discontinuities using one common bandwidth. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and district CR2 inference. Share and zero-to-one index outcomes are in percentage points; count outcomes are logged. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=`kp_f_text'\). Reduced forms and weak-instrument-robust diagnostics remain necessary. Population and dwelling counts are official CCPP-directory totals; linked person shares describe the assisted cohort. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
+file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Each row uses the same 389-community complete Census-linked B/C analysis sample before local-window restriction and the same \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide the outcome and treatment discontinuities using one common bandwidth. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and district CR2 inference. Share and zero-to-one index outcomes are in percentage points; count outcomes are logged. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=`kp_f_text'\). Reduced forms and weak-instrument-robust diagnostics remain necessary. Population and dwelling counts are official CCPP-directory totals; linked person shares describe the assisted cohort. Source: RUV, CMAN, and INEI-assisted Census 2017.}" _n
 file write `main_table' "\end{table}" _n
 file close `main_table'
 
@@ -1541,7 +1541,7 @@ capture program drop _vrd_make_outcome_rdplot
 
 display as result "Census 2017 CCPP outcome module completed."
 display as text "Registered outcomes: `outcome_count'"
-display as text "Primary linked B/C communities: 388"
+display as text "Primary linked B/C communities: 389"
 display as text "Common fixed-window effective N: `main_first_stage_n'"
 display as text "Robust first-stage F_z: `main_first_stage_f'"
 display as text "Parametric Kleibergen-Paap F: `kp_f_main'"

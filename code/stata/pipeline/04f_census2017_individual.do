@@ -60,7 +60,7 @@ use "${rd_input_2017_individual}", clear
 quietly datasignature
 local input_datasignature "`r(datasignature)'"
 
-assert _N == 193376
+assert _N == 193342
 isid census2017_cohort_pid
 
 local required_vars ///
@@ -88,7 +88,10 @@ generate byte rd_bc_design = ///
     inlist(victimization_level_source, "B", "C")
 
 quietly count if rd_bc_design
-assert r(N) == 110940
+assert r(N) == 110906
+quietly count if rd_bc_design & census2017_linked == 1
+local linked_persons = r(N)
+assert `linked_persons' == 85873
 
 quietly count if rd_bc_design & ///
     ((victimization_level_source == "B" & ${rd_running} < 0) | ///
@@ -110,7 +113,7 @@ egen long cluster_score = group(${rd_running})
 
 egen byte rd_ruv_tag = tag(ruv_id) if rd_bc_design
 quietly count if rd_ruv_tag
-assert r(N) == 426
+assert r(N) == 425
 
 local primary_outcomes ///
     female_2017 age_15_29_2017 moved_ccpp_2013_2017 ///
@@ -128,31 +131,31 @@ generate byte rd_migration_sample = ///
     !missing(moved_ccpp_2013_2017)
 assert rd_migration_sample if rd_primary_sample
 quietly count if rd_migration_sample
-assert r(N) == 67125
+assert r(N) == 67648
 egen byte rd_migration_ruv_tag = tag(ruv_id) if rd_migration_sample
 quietly count if rd_migration_ruv_tag
-assert r(N) == 409
+assert r(N) == 410
 quietly count if rd_migration_sample & ///
     abs(${rd_running}) <= ${rd_common_h}
-assert r(N) == 7157
+assert r(N) == 7680
 egen byte rd_migration_window_ruv_tag = tag(ruv_id) if ///
     rd_migration_sample & abs(${rd_running}) <= ${rd_common_h}
 quietly count if rd_migration_window_ruv_tag
-assert r(N) == 62
+assert r(N) == 63
 
 quietly count if rd_primary_sample
-assert r(N) == 54317
+assert r(N) == 54812
 egen byte rd_primary_ruv_tag = tag(ruv_id) if rd_primary_sample
 quietly count if rd_primary_ruv_tag
-assert r(N) == 406
+assert r(N) == 407
 
 quietly count if rd_primary_sample & ///
     abs(${rd_running}) <= ${rd_common_h}
-assert r(N) == 5453
+assert r(N) == 5948
 egen byte rd_window_ruv_tag = tag(ruv_id) if ///
     rd_primary_sample & abs(${rd_running}) <= ${rd_common_h}
 quietly count if rd_window_ruv_tag
-assert r(N) == 61
+assert r(N) == 62
 
 preserve
 import delimited using "${rd_registry_2017_ind}", ///
@@ -208,7 +211,7 @@ forvalues outcome_index = 1/`outcome_count' {
 * B/C design branch. This reduces repeated computation without changing any
 * sample rule, weight, bandwidth, or estimand.
 keep if rd_bc_design
-assert _N == 110940
+assert _N == 110906
 
 
 *-----------------------------------*
@@ -253,7 +256,7 @@ local migration_first_stage_se = e(se_tau_rb)
 local migration_first_stage_f = ///
     (`migration_first_stage_bc' / `migration_first_stage_se')^2
 local migration_first_stage_n = e(N_h_l) + e(N_h_r)
-assert `migration_first_stage_n' == 7157
+assert `migration_first_stage_n' == 7680
 
 
 *-----------------------------------*
@@ -1066,23 +1069,23 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""common_b","${rd_common_b}","approved","Common bias bandwidth for robust bias correction""' _n
 file write `contract_file' ///
-    `""linked_persons","141679","validated","Selected B/C linked persons before the age and item-valid primary restriction""' _n
+    `""linked_persons","`linked_persons'","validated","Selected B/C INEI-linked 2017 source people before the age and item-valid primary restriction""' _n
 file write `contract_file' ///
-    `""primary_persons","54317","validated","Complete eight-outcome sample of persons age 14 or older""' _n
+    `""primary_persons","54812","validated","Complete eight-outcome sample of persons age 14 or older""' _n
 file write `contract_file' ///
-    `""primary_ccpp","406","validated","RUV communities represented in the complete primary sample""' _n
+    `""primary_ccpp","407","validated","RUV communities represented in the complete primary sample""' _n
 file write `contract_file' ///
-    `""window_persons","5453","validated","Complete-primary persons inside the common fixed window""' _n
+    `""window_persons","5948","validated","Complete-primary persons inside the common fixed window""' _n
 file write `contract_file' ///
-    `""window_ccpp","61","validated","RUV communities inside the common fixed window""' _n
+    `""window_ccpp","62","validated","RUV communities inside the common fixed window""' _n
 file write `contract_file' ///
-    `""migration_persons","67125","approved","Linked adults with valid canonical CCPP movement in selected B/C geography""' _n
+    `""migration_persons","67648","approved","Linked adults with valid canonical CCPP movement in selected B/C geography""' _n
 file write `contract_file' ///
-    `""migration_ccpp","409","validated","RUV communities represented in observed-migration adult sample""' _n
+    `""migration_ccpp","410","validated","RUV communities represented in observed-migration adult sample""' _n
 file write `contract_file' ///
-    `""migration_window_persons","7157","validated","Observed-migration adults inside common fixed window""' _n
+    `""migration_window_persons","7680","validated","Observed-migration adults inside common fixed window""' _n
 file write `contract_file' ///
-    `""migration_window_ccpp","62","validated","Observed-migration RUV communities inside common fixed window""' _n
+    `""migration_window_ccpp","63","validated","Observed-migration RUV communities inside common fixed window""' _n
 file write `contract_file' ///
     `""first_stage_f","`main_first_stage_f'","diagnostic","Squared robust first-stage z statistic under CCPP-equal weighting and CCPP CR2; not the strength gate""' _n
 file write `contract_file' ///
@@ -1310,7 +1313,7 @@ foreach formatted_value in ///
     local `formatted_value' = strtrim("``formatted_value''")
 }
 file write `main_table' ///
-    "Complete-case first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 61 \\" _n
+    "Complete-case first stage & & & `formatted_first_stage' & [`formatted_first_stage_low', `formatted_first_stage_high'] & & `formatted_first_stage_n' & 62 \\" _n
 local mig_fs : display %6.3f `migration_first_stage_bc'
 local mig_fs_n : display %9.0fc `migration_first_stage_n'
 local mig_fs_lo : display %6.3f ///
@@ -1322,7 +1325,7 @@ foreach formatted_value in ///
     local `formatted_value' = strtrim("``formatted_value''")
 }
 file write `main_table' ///
-    "Migration-sample first stage & & & `mig_fs' & [`mig_fs_lo', `mig_fs_hi'] & & `mig_fs_n' & 62 \\" _n
+    "Migration-sample first stage & & & `mig_fs' & [`mig_fs_lo', `mig_fs_hi'] & & `mig_fs_n' & 63 \\" _n
 file write `main_table' "\bottomrule" _n
 file write `main_table' "\end{tabular}" _n
 file write `main_table' "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Seven non-migration outcomes use linked adults age 14 or older complete on all eight registered primary measures; the CCPP-migration row instead uses linked adults with valid canonical source--destination CCPP movement, without requiring wellbeing completeness. Row-specific effective persons and RUV communities are shown. Effects are percentage points at the official B--C cutoff in selected geography, using common \(h=0.0075\), \(b=0.0135\), local-linear triangular-kernel robust bias-corrected estimates, mass-point adjustment, CCPP-equal weights, and RUV-community CR2 inference. The assignment reduced form is shown beside the fuzzy treatment-receipt ratio; intervals are 95\% and Holm p-values cover eight primary outcomes. Local-IV Kleibergen--Paap F must exceed 10; it is `kp_f_migration_text' for migration and `kp_f_text' for the complete-case outcomes. Migration estimates are conditional on linkage and valid movement, not effects for all source-cohort adults. Source: RUV, CMAN, INEI-assisted Census 2017.}" _n
@@ -1937,8 +1940,8 @@ capture program drop _vrd_make_individual_rdplot
 
 display as result "Census 2017 individual outcome module completed."
 display as text "Registered outcomes: `outcome_count'"
-display as text "Complete primary persons: 54317"
-display as text "Primary linked RUV communities: 406"
+display as text "Complete primary persons: 54812"
+display as text "Primary linked RUV communities: 407"
 display as text "Common fixed-window persons: `main_first_stage_n'"
 display as text "Robust first-stage F_z: `main_first_stage_f'"
 display as text "Parametric Kleibergen-Paap F: `kp_f_main'"

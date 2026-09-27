@@ -25,8 +25,8 @@ sisfoh2013_legacy_nbi2_exact,50,reconciliation,Matched legacy CCPP rows reproduc
 sisfoh2013_legacy_nbi3_exact,19,reconciliation,Matched legacy CCPP rows reproducing NBI3 counts exactly
 sisfoh2013_legacy_nbi5_exact,1071,reconciliation,Matched legacy CCPP rows reproducing NBI5 counts exactly
 sisfoh2013_ambiguous_code_candidates,0,quarantined,Same-priority code candidates excluded from deterministic linkage
-sisfoh2013_exact_current_code,4849,validated,RUV rows linked by the verified canonical CCPP code
-sisfoh2013_exact_census2007_code,9,validated,Additional RUV rows linked by the 2007 Census CCPP code
+sisfoh2013_exact_current_code,4850,validated,RUV rows linked by the verified canonical CCPP code
+sisfoh2013_exact_census2007_code,8,validated,Additional RUV rows linked by the 2007 Census CCPP code
 sisfoh2013_exact_geospatial_code,0,validated,Additional RUV rows linked by the 2017 geospatial CCPP code
 sisfoh2013_exact_gdp_code,17,validated,Additional RUV rows linked by the GDP-source CCPP code
 sisfoh2013_unique_exact_path,6,validated,Additional RUV rows linked by a unique normalized full geographic path

@@ -4,8 +4,8 @@ gdp_district_source_rows,1833,validated,Unique six-digit districts represented i
 gdp_department_source_rows,25,validated,Two-digit departments represented in the GDP source
 gdp_national_total_rows,1,validated,Workbook total rows reconciled exactly to keyed annual sums
 gdp_ccpp_zero_1993_2018,12141,source_feature,Source CCPPs with zero estimated GDP in every annual column
-gdp_exact_current_ubigeo,4992,validated,RUV rows linked by exact current ten-digit CCPP UBIGEO
-gdp_exact_census2007_ubigeo,10,validated,Additional rows linked by unique unused exact Census 2007 UBIGEO
+gdp_exact_current_ubigeo,4993,validated,RUV rows linked by exact current ten-digit CCPP UBIGEO
+gdp_exact_census2007_ubigeo,9,validated,Additional rows linked by unique unused exact Census 2007 UBIGEO
 gdp_exact_geospatial_ubigeo,0,validated,Additional rows linked by unique unused exact spatial UBIGEO
 gdp_unique_exact_full_path,2,validated,Additional rows linked by a unique exact normalized full path
 gdp_unique_exact_primary_name,17,validated,Additional rows linked by unique exact primary name within district
