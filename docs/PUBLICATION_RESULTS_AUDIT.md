@@ -1,5 +1,23 @@
 # Publication results audit
 
+## 30 September 2026 identification and complete exhibit review
+
+The [dated review](IDENTIFICATION_AND_PUBLICATION_REVIEW_2026-09-30.md)
+supersedes earlier next-step recommendations. It records verified annual
+assignment evidence, the 48-test primary-family audit, the corrected observed-
+adult migration estimate, and the separate −29.71-point complete-household
+availability diagnostic. All 94 appendix candidates, three definition
+dependencies, and two corrected migration tables were rendered and reviewed.
+The [99-item proposal register](../metadata/publication-exhibit-review-2026-09-30.csv)
+contains six main-text and 22 appendix proposals, with 71 internal review items.
+It does not change canonical roles or approve publication.
+
+Modules 07/08 and the candidate, release, and publication-repair Stata contracts
+pass on the current manifests. All artifact/input checksums are unchanged;
+manifest run IDs record the fresh validation. Release remains BLOCKED and no
+Overleaf file was copied or edited. Historical numerical passages below are
+snapshots; the dated review states the current permitted claims.
+
 ## Status
 
 **27 September source-place correction:** The [approved Census 2017 adjudication](CENSUS_2017_SOURCE_ADJUDICATION_2026-09-27.md) is implemented and the affected preparation, main-effect, heterogeneity, mechanism, consolidated-output, and release-check modules have been rerun. The 26 September numerical passages below are historical snapshots; the corrected results are summarized in the next section. The overall release gate remains **BLOCKED**. No artifact was synced to Overleaf.
@@ -312,10 +330,15 @@ Prohibited:
 1. Completed: re-estimate and audit `05f` migration heterogeneity on the
    approved observed-migration adult population. The revised artifacts
    remain internal-only; the `treat_12`/`treat_16` timing convention is fixed.
-2. Next: adjudicate historical-to-2017 CCPP-code changes before considering any
-   change to the canonical migration definition. Keep source-cohort entry,
-   Census linkage, and migration observability separate in the identification
-   discussion.
-3. Review the 94 preliminary appendix candidates, approve only the final
-   subset, and assign exact safe Overleaf-relative destinations. Rerun modules
-   07 and 08 after these owner decisions. No Overleaf copy was made.
+2. Completed: the approved 27 September source-place adjudication and affected
+   result regeneration. It does not resolve all code-vintage or selection
+   questions.
+3. Completed: the 30 September documentary, claims, and 99-item exhibit review.
+   Proposed destinations are explicit but not publication-approved; no Overleaf
+   copy was made.
+4. Next: targeted historical-score/registration/eligibility verification and a
+   stated-assumptions assessment of selection-adjustment feasibility. Keep
+   source-cohort entry, person linkage, movement observability, and household
+   complete-case availability distinct. Then finalize journal-sized exhibits
+   and artifact-level publication decisions; rerun 07/08 when canonical roles
+   or inputs actually change.

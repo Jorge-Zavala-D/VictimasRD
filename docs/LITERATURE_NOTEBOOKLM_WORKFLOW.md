@@ -1,5 +1,26 @@
 # NotebookLM and Zotero literature workflow
 
+## 30 September 2026 evidence-access receipt
+
+The exact shared Zotero library was consulted read-only and again resolved to
+39 parent items. This task used the already configured local MCP endpoint when
+the connector was not exposed in the active tool list; no library metadata or
+attachments were changed. Searchable-text retrieval failed for some sources,
+so the underlying local PDF, not a returned snippet, determined the citation.
+
+Two queries to the explicit project NotebookLM URL succeeded. The notebook
+reported 45 sources after the methods additions, but its queried collection
+lacked the decisive CMAN 2012/2016 annual assignment records. Neither the count
+nor a successful answer certifies exhaustive reading. The synthesis's claims
+about retrospective scores, discrete-score density tests, and ignorable
+linkage were checked rather than adopted. Official records and underlying
+methods, locators, and limitations are documented in the
+[dated identification review](IDENTIFICATION_AND_PUBLICATION_REVIEW_2026-09-30.md).
+No NotebookLM or Zotero mutation was performed.
+The fresh independent review later could not reconnect to either integration.
+Treat access as intermittent and verify it in the next task; this does not
+invalidate earlier successful queries or the underlying local source checks.
+
 ## Purpose and status
 
 The project literature notebook is:

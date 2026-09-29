@@ -1,5 +1,31 @@
 # Victimas RD project context
 
+## 30 September 2026: current interpretation and publication decision
+
+Read the superseding
+[identification and publication review](IDENTIFICATION_AND_PUBLICATION_REVIEW_2026-09-30.md)
+before interpreting current results or preparing manuscript inputs. Dated
+official evidence establishes joint A/B priority and additional administrative
+conditions, not a strict national A-then-B queue. Historical score/risk-set
+verification and selection assumptions remain unresolved. Preserve the existing
+analysis contract; do not repair these gaps with favorable sample searches or
+automatic weighting/trimming.
+
+The primary observed-adult migration result is +21.45 percentage points
+(95% interval −17.24 to 60.14; Holm p=1). Complete 2017 household analysis-sample
+availability has a −29.71-point discontinuity (interval −52.20 to −7.22), so
+person-linkage diagnostics alone do not settle selection. All 48 registered
+primary fixed-window fuzzy outcome tests remain nonsignificant after Holm
+adjustment, which is not proof of zero effects.
+
+All 94 preliminary appendix candidates and five dependencies/supplements were
+reviewed. Proposed roles/destinations are in the dated exhibit register, not
+automatic changes to the canonical publication registry. No artifact was
+approved or copied to Overleaf. The technical release contracts pass while
+scientific/disclosure/owner release remains BLOCKED. Earlier status sections
+below retain historical context and must not supersede this review or the
+approved 27 September source-place correction.
+
 ## Status and purpose
 
 This document is the required starting point for work in this repository. It

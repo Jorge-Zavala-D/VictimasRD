@@ -27,6 +27,7 @@ restricted/
 # Local build and cache directories
 build/
 cache/
+__pycache__/
 tmp/
 temp/
 graphify-out/
