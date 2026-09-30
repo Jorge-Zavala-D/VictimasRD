@@ -1,0 +1,288 @@
+exhibit_id,source_path,row_order,cell1,cell2,cell3,cell4,cell5,cell6,cell7,cell8
+A03,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_02_design_diagnostics.tex,1,Log baseline CCPP population,43.00,22.00,22.00,3.67,2.49,0.89,underidentified
+A03,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_02_design_diagnostics.tex,2,District-capital CCPP,42.00,22.00,2.00,--,--,--,insufficient support
+A03,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_02_design_diagnostics.tex,3,Baseline CCPP deprivation,42.00,22.00,22.00,8.00,2.27,1.24,weak interaction instruments
+A03,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_02_design_diagnostics.tex,4,Distance to corresponding district capital,42.00,22.00,22.00,2.30,1.48,0.75,underidentified
+A03,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_02_design_diagnostics.tex,5,Baseline CCPP economic development,43.00,22.00,22.00,2.80,2.12,0.97,underidentified
+A03,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_02_design_diagnostics.tex,6,CCPP altitude,42.00,22.00,22.00,0.24,0.21,0.11,underidentified
+A04,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_07_project_implementation.tex,1,Productive and livelihood,106,106,53.27,51.51,25.84,,
+A04,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_07_project_implementation.tex,2,Social and basic services,41,41,20.60,19.00,18.83,,
+A04,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_07_project_implementation.tex,3,Community and civic infrastructure,35,35,17.59,6.92,3.70,,
+A04,output/tables/rd_heterogeneity/tab_hte_2013_ccpp_07_project_implementation.tex,4,Management and capacity support,17,17,8.54,0.68,0.85,,
+A05,output/tables/rd_heterogeneity/tab_hte_2013_household_02_design_diagnostics.tex,1,Log baseline CCPP population,43,22,22,2.75,1.03,Pass,Fail
+A05,output/tables/rd_heterogeneity/tab_hte_2013_household_02_design_diagnostics.tex,2,District-capital CCPP,42,22,2,--,--,Fail,Fail
+A05,output/tables/rd_heterogeneity/tab_hte_2013_household_02_design_diagnostics.tex,3,Baseline CCPP deprivation,42,22,22,2.60,1.47,Pass,Fail
+A05,output/tables/rd_heterogeneity/tab_hte_2013_household_02_design_diagnostics.tex,4,Distance to corresponding district capital,42,22,22,1.61,0.78,Pass,Fail
+A05,output/tables/rd_heterogeneity/tab_hte_2013_household_02_design_diagnostics.tex,5,Baseline CCPP economic development,43,22,22,2.40,1.12,Pass,Fail
+A05,output/tables/rd_heterogeneity/tab_hte_2013_household_02_design_diagnostics.tex,6,CCPP altitude,42,22,22,0.31,0.15,Pass,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,1,Log baseline CCPP population,43,22,22,2.75,1.03,Pass,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,2,District-capital CCPP,42,22,2,--,--,Fail,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,3,Female respondent,43,22,22,8.40,4.20,Pass,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,4,Baseline CCPP deprivation,42,22,22,2.61,1.47,Pass,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,5,Distance to corresponding district capital,42,22,22,1.61,0.79,Pass,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,6,Baseline CCPP economic development,43,22,22,2.40,1.12,Pass,Fail
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,7,Respondent age,43,22,22,10.18,5.14,Pass,Pass
+A06,output/tables/rd_heterogeneity/tab_hte_2013_individual_02_design_diagnostics.tex,8,CCPP altitude,42,22,22,0.31,0.15,Pass,Fail
+A07,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_02_design_diagnostics.tex,1,Log baseline CCPP population,39,21,21,12.85,2.20,Pass,Pass
+A07,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_02_design_diagnostics.tex,2,District-capital CCPP,39,21,2,--,--,Fail,Fail
+A07,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_02_design_diagnostics.tex,3,Baseline CCPP deprivation,38,21,21,27.05,12.03,Pass,Pass
+A07,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_02_design_diagnostics.tex,4,Distance to corresponding district capital,39,21,21,52.77,4.30,Pass,Pass
+A07,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_02_design_diagnostics.tex,5,Baseline CCPP economic development,39,21,21,4.98,2.04,Pass,Fail
+A07,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_02_design_diagnostics.tex,6,CCPP altitude,39,21,21,5.95,3.15,Pass,Fail
+A08,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_07_project_implementation.tex,1,Productive livelihood,96,96,54.5,60.94,,,
+A08,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_07_project_implementation.tex,2,Social and basic services,31,31,17.6,34.73,,,
+A08,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_07_project_implementation.tex,3,Community and civic infrastructure,36,36,20.5,17.30,,,
+A08,output/tables/rd_heterogeneity/tab_hte_2017_ccpp_07_project_implementation.tex,4,Management and capacity support,13,13,7.4,0.21,,,
+A09,output/tables/rd_heterogeneity/tab_hte_2017_household_02_design_diagnostics.tex,1,Log baseline CCPP population,40,22,22,3.88,1.32,Pass,Fail
+A09,output/tables/rd_heterogeneity/tab_hte_2017_household_02_design_diagnostics.tex,2,District-capital CCPP,39,22,2,--,--,Fail,Fail
+A09,output/tables/rd_heterogeneity/tab_hte_2017_household_02_design_diagnostics.tex,3,Baseline CCPP deprivation,39,22,22,15.23,3.29,Pass,Pass
+A09,output/tables/rd_heterogeneity/tab_hte_2017_household_02_design_diagnostics.tex,4,Distance to corresponding district capital,39,22,22,2.02,0.77,Pass,Fail
+A09,output/tables/rd_heterogeneity/tab_hte_2017_household_02_design_diagnostics.tex,5,Baseline CCPP economic development,40,22,22,2.79,1.29,Pass,Fail
+A09,output/tables/rd_heterogeneity/tab_hte_2017_household_02_design_diagnostics.tex,6,CCPP altitude,39,22,22,0.28,0.14,Pass,Fail
+A10,output/tables/rd_mechanisms/tab_rd_mechanisms_03_linkage_selection.tex,1,CCPP,Included in the INEI-assisted Census cohort,14.06,"[-8.34, 36.46]",0.219,,,
+A10,output/tables/rd_mechanisms/tab_rd_mechanisms_03_linkage_selection.tex,2,CCPP,Person linkage rate within covered CCPPs,-7.59,"[-34.57, 19.38]",0.581,,,
+A10,output/tables/rd_mechanisms/tab_rd_mechanisms_03_linkage_selection.tex,3,Individual,Source-cohort person linked to Census 2017,-7.59,"[-34.42, 19.23]",0.579,,,
+A11,output/tables/rd_outcomes/tab_rd_outcomes_02_first_stage.tex,1,Treatment through 2012: full B/C design universe,0.771,0.226,"[0.329, 1.213]",71,0.0075,11.67,
+A11,output/tables/rd_outcomes/tab_rd_outcomes_02_first_stage.tex,2,Treatment through 2012: linked primary sample,0.781,0.232,"[0.327, 1.236]",65,0.0075,11.35,
+A11,output/tables/rd_outcomes/tab_rd_outcomes_02_first_stage.tex,3,Treatment through 2012: MSE selector,0.768,0.226,"[0.325, 1.211]",70,0.0074,11.55,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,1,Primary,Demography,Rostered household members,Linked household person roster,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,2,Primary,Demography,Female household members,Rostered household members,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,3,Primary,Labor,Employed working-age members,Members age 14 or older with valid labor status,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,4,Primary,Social Protection,Household has a social-program participant,Households with validated member program responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,5,Primary,Wellbeing,Core wellbeing proxy,Households with all four core domains,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,6,Primary,Deprivation,Household has any unmet basic need,Households with all five NBI components,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,7,Primary,Assets,Durable-assets wellbeing domain,Households with validated asset responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,8,Primary,Human Capital,Members with secondary education or higher,Members age 14 or older with valid education,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,9,Secondary,Demography,Members age 0-14,Rostered members with valid age,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,10,Secondary,Demography,Members age 15-29,Rostered members with valid age,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,11,Secondary,Demography,Members age 30-44,Rostered members with valid age,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,12,Secondary,Demography,Members age 45-64,Rostered members with valid age,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,13,Secondary,Demography,Members age 65 or older,Rostered members with valid age,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,14,Secondary,Demography,Female-headed household,Households with an identified head,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,15,Secondary,Human Capital,Literate working-age members,Members age 14 or older with valid literacy,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,16,Secondary,Human Capital,Members with non-Spanish mother tongue,Members age 3 or older with valid language,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,17,Secondary,Human Capital,Members with a named Indigenous mother tongue,Members age 3 or older with valid language,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,18,Secondary,Health,Members with health insurance,Rostered members with validated insurance responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,19,Secondary,Health,Household has an insured member,Households with validated member insurance responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,20,Secondary,Health,Members reporting a disability,Rostered members with validated disability responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,21,Secondary,Health,Household has a member reporting disability,Households with validated member disability responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,22,Secondary,Social Protection,Household has a Juntos participant,Households with validated member program responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,23,Secondary,Social Protection,Members in any social program,Rostered members with validated program responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,24,Secondary,Labor,Working-age members in the labor force,Members age 14 or older with valid labor status,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,25,Secondary,Labor,Unemployed household labor-force members,Household labor-force members age 14 or older,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,26,Secondary,Labor Sector,Household has an agricultural worker,Households with linked member labor records,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,27,Secondary,Labor Sector,Household has a livestock worker,Households with linked member labor records,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,28,Secondary,Labor Sector,Household has a services worker,Households with linked member labor records,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,29,Secondary,Labor Sector,Household has a government worker,Households with linked member labor records,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,30,Secondary,Deprivation,Household has two or more unmet basic needs,Households with all five NBI components,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,31,Secondary,Deprivation,NBI inadequate housing,Households with required dwelling materials,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,32,Secondary,Deprivation,NBI overcrowding,Households with a positive occupied-room count,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,33,Secondary,Deprivation,NBI inadequate sanitation,Households with valid sanitation source,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,34,Secondary,Deprivation,NBI school-attendance proxy,Households with an assessable child roster,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,35,Secondary,Deprivation,NBI high economic dependency,Households with valid head education and labor roster,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,36,Secondary,Deprivation,Number of unmet basic needs,Households with all five NBI components,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,37,Secondary,Wellbeing,Housing wellbeing domain,Households with valid floor material,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,38,Secondary,Wellbeing,Services wellbeing proxy,Households with valid water and sanitation items,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,39,Secondary,Wellbeing,Energy wellbeing domain,Households with valid lighting and cooking fuel,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,40,Secondary,Wellbeing,Human-capital wellbeing domain,Households with valid literacy and education shares,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,41,Secondary,Housing Services,Dwelling has an earth floor,Households with valid floor material,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,42,Secondary,Housing Services,Water from a public network or pylon,Households with valid water source,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,43,Secondary,Housing Services,Household has improved sanitation,Households with valid sanitation source,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,44,Secondary,Housing Services,Dwelling has electric lighting,Households with valid lighting source,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,45,Secondary,Housing Services,Household uses cleaner cooking fuel,Households with valid cooking fuel,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,46,Secondary,Assets,Household owns a television,Households with validated asset responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,47,Secondary,Assets,Household owns a refrigerator,Households with validated asset responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,48,Secondary,Assets,Household owns a washing machine,Households with validated asset responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,49,Secondary,Assets,Household owns a computer,Households with validated asset responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,50,Secondary,Assets,Household owns a mobile phone,Households with validated asset responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,51,Mechanism,Connectivity,Connectivity wellbeing domain,Households with validated connectivity responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,52,Mechanism,Connectivity,Household has internet access,Households with validated connectivity responses,,,,
+A12,output/tables/rd_outcomes/tab_rd_outcomes_06_registry_2013_household.tex,53,Mechanism,Connectivity,Household has cable service,Households with validated connectivity responses,,,,
+A13,output/tables/rd_outcomes/tab_rd_outcomes_07_sample_first_stage_2013_household.tex,1,Treatment through 2012: linked household universe,CCPP-equal,0.781,0.234,"[0.322, 1.240]","4,098",65,11.11
+A13,output/tables/rd_outcomes/tab_rd_outcomes_07_sample_first_stage_2013_household.tex,2,Treatment through 2012: complete primary sample,CCPP-equal,0.781,0.234,"[0.322, 1.240]","3,810",65,11.11
+A13,output/tables/rd_outcomes/tab_rd_outcomes_07_sample_first_stage_2013_household.tex,3,Treatment through 2012: household-equal sensitivity,Household-equal,0.443,0.348,"[-0.238, 1.125]","3,810",65,1.62
+A13,output/tables/rd_outcomes/tab_rd_outcomes_07_sample_first_stage_2013_household.tex,4,Treatment through 2012: treatment-based MSE selector,CCPP-equal,0.789,0.232,"[0.334, 1.245]","3,941",68,11.53
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,1,Rostered household members,3.02,0.05,0.07,"[-1.26, 1.40]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,2,Female household members,53.46,0.85,1.12,"[-15.60, 17.84]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,3,Employed working-age members,56.23,7.80,10.42,"[-14.70, 35.54]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,4,Household has a social-program participant,54.20,1.84,2.24,"[-50.13, 54.61]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,5,Core wellbeing proxy,38.22,-4.58,-6.12,"[-27.24, 15.01]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,6,Household has any unmet basic need,53.01,8.39,11.03,"[-33.20, 55.25]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,7,Durable-assets wellbeing domain,6.27,1.61,1.90,"[-8.54, 12.34]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,8,Members with secondary education or higher,36.66,-14.91,-19.12,"[-52.00, 13.77]",1.000,"3,810",65
+A14,output/tables/rd_outcomes/tab_rd_outcomes_08_main_2013_household.tex,9,Common first stage,,,0.781,"[0.322, 1.241]",,"3,810",65
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,1,Primary,Composition,Female,Persons age 14 or older in the complete primary universe,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,2,Primary,Composition,Age 15-29,Persons age 14 or older in the complete primary universe,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,3,Primary,Human Capital,Secondary education or higher,Persons age 14 or older with valid education and labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,4,Primary,Labor,Employed in the preceding month,Persons age 14 or older with valid education and labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,5,Primary,Labor,Independent worker,Persons age 14 or older with valid education and labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,6,Primary,Health,Any health insurance,Persons age 14 or older in the complete primary universe,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,7,Primary,Social Protection,Any listed social program,Persons age 14 or older in the complete primary universe,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,8,Primary,Social Protection,Juntos participation,Persons age 14 or older in the complete primary universe,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,9,Secondary,Composition,Household head,All linked rostered persons,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,10,Secondary,Composition,Age 0-14,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,11,Secondary,Composition,Age 15-19,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,12,Secondary,Composition,Age 20-24,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,13,Secondary,Composition,Age 25-29,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,14,Secondary,Composition,Age 30-44,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,15,Secondary,Composition,Age 45-64,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,16,Secondary,Composition,Age 65 or older,Rostered persons with valid age,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,17,Secondary,Composition,Pregnant,Females age 12-49 with a valid pregnancy response,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,18,Secondary,Composition,Married or cohabiting,Persons age 12 or older with valid marital status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,19,Secondary,Human Capital,Schooling-deprivation proxy ages 7-12,Children age 7-12 with valid highest education level,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,20,Secondary,Human Capital,Literate,Persons age 14 or older with valid literacy,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,21,Secondary,Human Capital,Completed primary education,Persons age 14 or older with valid education,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,22,Secondary,Human Capital,Approximate completed education years,Persons age 14 or older with valid level and grade mapping,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,23,Secondary,Human Capital,Named Indigenous childhood language,Persons age 3 or older with valid childhood language,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,24,Secondary,Human Capital,Non-Spanish childhood language,Persons age 3 or older with valid childhood language,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,25,Secondary,Health,EsSalud insurance,All linked rostered persons with validated insurance responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,26,Secondary,Health,SIS insurance,All linked rostered persons with validated insurance responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,27,Secondary,Health,Private health insurance,All linked rostered persons with validated insurance responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,28,Secondary,Health,Armed-forces or police insurance,All linked rostered persons with validated insurance responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,29,Secondary,Health,Other health insurance,All linked rostered persons with validated insurance responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,30,Secondary,Health,Any permanent limitation,All linked rostered persons with validated disability responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,31,Secondary,Health,Visual limitation,All linked rostered persons with validated disability responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,32,Secondary,Health,Hearing limitation,All linked rostered persons with validated disability responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,33,Secondary,Health,Speech limitation,All linked rostered persons with validated disability responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,34,Secondary,Health,Mobility limitation,All linked rostered persons with validated disability responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,35,Secondary,Health,Cognitive limitation,All linked rostered persons with validated disability responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,36,Secondary,Social Protection,Number of listed social programs,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,37,Secondary,Social Protection,Vaso de Leche participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,38,Secondary,Social Protection,Soup-kitchen participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,39,Secondary,Social Protection,School-meal participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,40,Secondary,Social Protection,Nutritional-supplement participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,41,Secondary,Social Protection,Food-basket participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,42,Secondary,Social Protection,Housing-program participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,43,Secondary,Social Protection,Pension 65 participation,Persons age 65 or older with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,44,Secondary,Social Protection,Cuna Mas participation,Children age 0-3 with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,45,Secondary,Social Protection,Other social-program participation,All linked rostered persons with validated program responses,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,46,Secondary,Labor Status,In the labor force,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,47,Secondary,Labor Status,Unemployed,Labor-force participants age 14 or older,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,48,Secondary,Labor Status,Dependent worker,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,49,Secondary,Labor Status,Employer,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,50,Secondary,Labor Status,Domestic worker,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,51,Secondary,Labor Status,Unpaid family worker,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,52,Secondary,Labor Status,Engaged in home duties,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,53,Secondary,Labor Status,Student,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,54,Secondary,Labor Sector,Employed in agriculture,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,55,Secondary,Labor Sector,Employed in livestock,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,56,Secondary,Labor Sector,Employed in forestry,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,57,Secondary,Labor Sector,Employed in fishing,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,58,Secondary,Labor Sector,Employed in mining,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,59,Secondary,Labor Sector,Employed in handicrafts,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,60,Secondary,Labor Sector,Employed in commerce,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,61,Secondary,Labor Sector,Employed in services,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,62,Secondary,Labor Sector,Employed in another sector,Persons age 14 or older with valid labor status,,,,
+A15,output/tables/rd_outcomes/tab_rd_outcomes_11_registry_2013_individual.tex,63,Secondary,Labor Sector,Employed in government,Persons age 14 or older with valid labor status,,,,
+A16,output/tables/rd_outcomes/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex,1,Treatment through 2012: linked person universe,CCPP-equal,0.781,0.234,"[0.322, 1.240]","13,151",65,11.11
+A16,output/tables/rd_outcomes/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex,2,Treatment through 2012: complete primary sample,CCPP-equal,0.781,0.234,"[0.322, 1.240]","8,870",65,11.11
+A16,output/tables/rd_outcomes/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex,3,Treatment through 2012: person-equal sensitivity,Person-equal,0.441,0.350,"[-0.246, 1.128]","8,870",65,1.58
+A16,output/tables/rd_outcomes/tab_rd_outcomes_12_sample_first_stage_2013_individual.tex,4,Treatment through 2012: treatment-based MSE selector,CCPP-equal,0.784,0.234,"[0.325, 1.242]","8,919",66,11.23
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,1,Female,52.84,-3.15,-4.03,"[-21.59, 13.53]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,2,Age 15-29,29.88,-18.12,-23.21,"[-53.86, 7.43]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,3,Secondary education or higher,42.54,-11.82,-15.14,"[-45.76, 15.49]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,4,Employed in the preceding month,53.00,10.30,13.55,"[-10.41, 37.52]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,5,Independent worker,45.44,4.44,5.90,"[-23.10, 34.90]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,6,Any health insurance,84.82,-13.56,-17.11,"[-70.78, 36.57]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,7,Any listed social program,24.19,8.46,10.70,"[-17.84, 39.24]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,8,Juntos participation,16.32,4.79,6.14,"[-10.92, 23.19]",1.000,"8,870",65
+A17,output/tables/rd_outcomes/tab_rd_outcomes_13_main_2013_individual.tex,9,Common first stage,,,0.781,"[0.322, 1.241]",,"8,870",65
+A18,output/tables/rd_outcomes/tab_rd_outcomes_17_first_stage_2017_ccpp.tex,1,Treatment through 2016: full B/C design universe,0.984,0.203,"[0.585, 1.382]",71,0.0075,23.38,
+A18,output/tables/rd_outcomes/tab_rd_outcomes_17_first_stage_2017_ccpp.tex,2,Treatment through 2016: complete primary sample,1.132,0.152,"[0.833, 1.430]",60,0.0075,55.26,
+A18,output/tables/rd_outcomes/tab_rd_outcomes_17_first_stage_2017_ccpp.tex,3,Treatment through 2016: MSE selector,0.956,0.206,"[0.553, 1.360]",62,0.0067,21.57,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,1,Primary,Demography,Female household members,Linked source-household members with valid sex,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,2,Primary,Demography,Household members age 15-29,Linked source-household members with valid age,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,3,Primary,Migration,Members living in another CCPP,Linked members with valid source and destination CCPP codes,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,4,Primary,Human Capital,Members with secondary education or higher,Linked members age 14 or older with valid education,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,5,Primary,Labor,Employed household members,Linked members age 14 or older with valid labor status,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,6,Primary,Health,Members with health insurance,Linked members with valid insurance responses,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,7,Primary,Health,Members reporting disability,Linked members with valid disability responses,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,8,Primary,Wellbeing,Core household wellbeing proxy,Source households with all four harmonized domains,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,9,Secondary,Demography,Mean age of linked members,Linked source-household members with valid age,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,10,Secondary,Demography,Household members age 0-14,Linked source-household members with valid age,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,11,Secondary,Demography,Household members age 30-44,Linked source-household members with valid age,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,12,Secondary,Demography,Household members age 45-64,Linked source-household members with valid age,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,13,Secondary,Demography,Household members age 65 or older,Linked source-household members with valid age,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,14,Secondary,Migration,Members living in another district,Linked members with valid source and destination CCPP codes,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,15,Secondary,Migration,Members living in another province,Linked members with valid source and destination CCPP codes,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,16,Secondary,Migration,Members living in another department,Linked members with valid source and destination CCPP codes,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,17,Secondary,Migration,Source household split across destination households,All source households in the assisted cohort,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,18,Secondary,Migration,Members in another district five years earlier,Linked members age five or older with a valid retrospective residence response,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,19,Secondary,Human Capital,Literate household members,Linked members age 14 or older with valid literacy,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,20,Secondary,Human Capital,Members completing primary education,Linked members age 14 or older with valid education,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,21,Secondary,Human Capital,School attendance among children,Linked children age 6-17 with valid attendance,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,22,Secondary,Labor,Labor-force participation,Linked members age 14 or older with valid labor status,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,23,Secondary,Labor,Unemployment rate,Linked household labor-force members age 14 or older,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,24,Secondary,Health,Members with SIS insurance,Linked members with valid insurance responses,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,25,Secondary,Health,Members with EsSalud insurance,Linked members with valid insurance responses,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,26,Secondary,Human Capital,Members with an Indigenous childhood language,Linked members age three or older with valid language,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,27,Secondary,Deprivation,Members exposed to any unmet basic need,Linked members in complete destination-household rosters with all NBI components,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,28,Secondary,Deprivation,Single-destination household has any unmet basic need,Source households linked to exactly one destination household with complete NBI inputs,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,29,Secondary,Wellbeing,Housing wellbeing domain,Source households with valid linked floor material,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,30,Secondary,Wellbeing,Services wellbeing domain,Source households with valid linked water and sanitation items,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,31,Secondary,Wellbeing,Energy wellbeing domain,Source households with valid linked electricity and cooking fuel,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,32,Secondary,Wellbeing,Durable-assets wellbeing domain,Source households with all four linked asset responses,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,33,Secondary,Deprivation,Core household deprivation proxy,Source households with the core wellbeing score,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,34,Mechanism,Connectivity,Members exposed to household internet,Linked members with a valid destination-household internet response,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,35,Mechanism,Connectivity,Single-destination household has internet,Source households linked to exactly one destination household with valid internet response,,,,
+A19,output/tables/rd_outcomes/tab_rd_outcomes_21_registry_2017_household.tex,36,Mechanism,Connectivity,Connectivity wellbeing domain,Source households with valid linked phone internet and cable responses,,,,
+A20,output/tables/rd_outcomes/tab_rd_outcomes_22_sample_first_stage_2017_household.tex,1,Treatment through 2016: source-household universe,CCPP-equal,0.971,0.211,"[0.558, 1.384]","4,051",64,21.20
+A20,output/tables/rd_outcomes/tab_rd_outcomes_22_sample_first_stage_2017_household.tex,2,Treatment through 2016: complete primary sample,CCPP-equal,0.972,0.215,"[0.551, 1.393]","2,935",62,20.44
+A20,output/tables/rd_outcomes/tab_rd_outcomes_22_sample_first_stage_2017_household.tex,3,Treatment through 2016: household-equal sensitivity,Household-equal,0.650,0.395,"[-0.125, 1.424]","2,935",62,2.70
+A20,output/tables/rd_outcomes/tab_rd_outcomes_22_sample_first_stage_2017_household.tex,4,Treatment through 2016: treatment-based MSE selector,CCPP-equal,0.893,0.227,"[0.448, 1.338]","2,634",52,15.46
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,1,Female household members,54.22,9.58,9.90,"[-0.29, 20.10]",0.456,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,2,Household members age 15-29,21.39,3.02,3.22,"[-12.53, 18.98]",1.000,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,3,Members living in another CCPP,43.77,33.79,35.01,"[-7.41, 77.42]",0.740,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,4,Members with secondary education or higher,44.06,4.78,5.17,"[-23.98, 34.31]",1.000,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,5,Employed household members,45.97,-11.46,-11.70,"[-30.08, 6.68]",1.000,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,6,Members with health insurance,87.05,-1.04,-1.11,"[-15.40, 13.18]",1.000,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,7,Members reporting disability,19.39,-6.76,-6.95,"[-24.58, 10.69]",1.000,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,8,Core household wellbeing proxy,55.17,8.93,9.30,"[-10.70, 29.30]",1.000,"2,935",62
+A21,output/tables/rd_outcomes/tab_rd_outcomes_23_main_2017_household.tex,9,Common first stage,,,0.972,"[0.551, 1.393]",,"2,935",62
+A22,output/tables/rd_outcomes/tab_rd_outcomes_27_sample_first_stage_2017_individual.tex,1,Treatment through 2016: source-cohort universe,CCPP-equal,0.971,0.211,"[0.558, 1.384]","13,010",64,21.20
+A22,output/tables/rd_outcomes/tab_rd_outcomes_27_sample_first_stage_2017_individual.tex,2,Treatment through 2016: complete primary sample,CCPP-equal,0.972,0.215,"[0.551, 1.393]","5,948",62,20.44
+A22,output/tables/rd_outcomes/tab_rd_outcomes_27_sample_first_stage_2017_individual.tex,3,Treatment through 2016: observed-migration adults,CCPP-equal,0.965,0.215,"[0.543, 1.386]","7,680",63,20.10
+A22,output/tables/rd_outcomes/tab_rd_outcomes_27_sample_first_stage_2017_individual.tex,4,Treatment through 2016: person-equal sensitivity,Person-equal,0.725,0.417,"[-0.092, 1.543]","5,948",62,3.02
+A22,output/tables/rd_outcomes/tab_rd_outcomes_27_sample_first_stage_2017_individual.tex,5,Treatment through 2016: treatment-based MSE selector,CCPP-equal,0.894,0.227,"[0.450, 1.339]","5,301",52,15.56
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,1,RUV community frame,71,71,100.0,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,2,CCPP source-cohort entry,64,71,90.1,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,3,Eight-outcome household completeness,"2,935","4,051",69.8,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,4,Any household member linked,"3,532","4,051",86.9,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,5,Any member movement observed,"3,532","4,051",86.9,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,6,2017 age unobserved,"3,148","13,010",23.7,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,7,Adult movement observable,"7,680","7,680",100.0,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,8,Person linkage,"9,862","13,010",76.3,,,,
+A23,output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex,9,Person movement observable,"9,862","13,010",76.3,,,,
+A24,output/tables/rd_mechanisms/tab_rd_mechanisms_07_selection_feasibility.tex,1,Linked-adult movement,"28,250","28,086","[1.000, 1.000]","2,840",0,,
+A24,output/tables/rd_mechanisms/tab_rd_mechanisms_07_selection_feasibility.tex,2,Household completeness,"13,371","13,285","[0.397, 0.927]","1,230",3,,
+A24,output/tables/rd_mechanisms/tab_rd_mechanisms_07_selection_feasibility.tex,3,Person linkage,"45,740","45,482","[0.607, 0.883]","2,664",1,,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,1,Log rostered population,4.74,0.51,0.66,"[-1.73, 3.04]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,2,Log rostered households,3.64,0.46,0.59,"[-1.59, 2.78]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,3,Residents age 15-29,21.49,-16.30,-20.92,"[-49.81, 7.97]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,4,Residents in any social program,31.42,4.22,5.34,"[-34.32, 45.01]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,5,Core wellbeing proxy,38.55,-4.32,-5.80,"[-26.24, 14.64]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,6,Households with any unmet basic need,53.01,8.38,11.01,"[-35.75, 57.78]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,7,Labor-force participation,53.62,10.40,13.71,"[-11.54, 38.96]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,8,Secondary education or higher,42.54,-11.82,-15.14,"[-47.37, 17.10]",1.000,65,
+M03,output/tables/rd_outcomes/tab_rd_outcomes_03_main_2013_ccpp.tex,9,Common first stage,,,0.781,"[0.327, 1.236]",,65,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,1,Log 2017 CCPP population,4.78,-0.92,-0.81,"[-2.03, 0.41]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,2,Log occupied dwellings in 2017,4.22,-0.77,-0.68,"[-1.72, 0.36]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,3,Residents living in another CCPP,36.13,9.64,8.44,"[-12.18, 29.07]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,4,Residents age 15-29,23.15,-2.76,-2.43,"[-11.62, 6.75]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,5,Secondary education or higher,46.14,3.27,2.82,"[-12.21, 17.84]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,6,Employed residents,46.97,-16.08,-14.03,"[-28.55, 0.50]",0.467,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,7,Residents with health insurance,90.20,1.14,1.04,"[-6.02, 8.10]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,8,Core wellbeing proxy,53.47,1.32,1.14,"[-12.79, 15.06]",1.000,60,
+M04,output/tables/rd_outcomes/tab_rd_outcomes_18_main_2017_ccpp.tex,9,Common first stage,,,1.132,"[0.833, 1.430]",,60,
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,1,Female,55.21,7.18,7.48,"[-3.00, 17.95]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,2,Age 15-29,30.57,4.86,5.09,"[-15.11, 25.29]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,3,Lives in another CCPP,38.20,20.72,21.45,"[-17.24, 60.14]",1.000,"7,680",63
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,4,Secondary education or higher,49.00,7.36,7.77,"[-24.35, 39.89]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,5,Employed in the reference week,46.06,-12.52,-12.87,"[-30.56, 4.81]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,6,Any health insurance,88.44,-3.89,-3.89,"[-21.95, 14.16]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,7,Reports any disability,17.44,-10.32,-10.68,"[-27.11, 5.76]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,8,Core wellbeing proxy,57.66,12.50,12.94,"[-8.06, 33.94]",1.000,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,9,Complete-case first stage,,,0.972,"[0.551, 1.393]",,"5,948",62
+M05,output/tables/rd_outcomes/tab_rd_outcomes_28_main_2017_individual.tex,10,Migration-sample first stage,,,0.965,"[0.543, 1.386]",,"7,680",63
+M06,output/tables/rd_outcomes/tab_rd_outcomes_32_linkage_2017_household.tex,1,Household included in complete primary sample,69.6,-29.7,"[-52.2, -7.2]","4,051",64,,
+M06,output/tables/rd_outcomes/tab_rd_outcomes_32_linkage_2017_household.tex,2,Household member linkage rate,75.4,-9.8,"[-34.8, 15.2]","4,051",64,,

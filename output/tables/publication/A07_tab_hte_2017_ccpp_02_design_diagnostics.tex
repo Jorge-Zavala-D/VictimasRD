@@ -1,0 +1,16 @@
+\begingroup\fontsize{9.25}{11.4}\selectfont
+\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.27\linewidth}p{0.16\linewidth}rrp{0.10\linewidth}p{0.15\linewidth}@{}}
+\caption{2017 community heterogeneity: support and instrument gates}\label{tab:pub_A07} \\
+\toprule Moderator & Left / right / min. & Min. SW \(F\) & KP \(F\) & Support & IV gate \\ \midrule\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule Moderator & Left / right / min. & Min. SW \(F\) & KP \(F\) & Support & IV gate \\ \midrule\endhead
+Log baseline CCPP population & 39 / 21 / 21 & 12.85 & 2.20 & Pass & Pass \\
+District-capital CCPP & 39 / 21 / 2 & -- & -- & Fail & Fail \\
+Baseline CCPP deprivation & 38 / 21 / 21 & 27.05 & 12.03 & Pass & Pass \\
+Distance to corresponding district capital & 39 / 21 / 21 & 52.77 & 4.30 & Pass & Pass \\
+Baseline CCPP economic development & 39 / 21 / 21 & 4.98 & 2.04 & Pass & Fail \\
+CCPP altitude & 39 / 21 / 21 & 5.95 & 3.15 & Pass & Fail \\
+\bottomrule\end{longtable}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Diagnostics come from the pooled, fully interacted local-linear 2SLS model in the fixed \(h=0.0075\) window. Each RUV community contributes one observation before triangular kernel weighting; primary inference clusters by district. CCPP left and right are unique assignment clusters. For binary moderators, Min. cell is the smallest moderator-by-side CCPP count; for continuous moderators it is the smaller side count. The causal gate requires support, underidentification rejection at five percent, and the minimum Sanderson--Windmeijer conditional \(F\) strictly above 10. The Kleibergen--Paap statistic is supplementary. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\par\smallskip{\footnotesize\textit{Review boundary:} Conditional local evidence; historical design search and selection remain limitations. RF denotes the assignment reduced form; CCPP denotes a community. In outcome tables, shares, binary outcomes and zero-to-one indices are in percentage points; logarithms remain log points and counts remain counts. A common window is not claimed optimal for every outcome. No artifact-level release approval or manuscript synchronization is implied.}\par\endgroup

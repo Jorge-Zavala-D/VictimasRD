@@ -198,14 +198,18 @@ written to `output/tables/rd_mechanisms/` and
 `metadata/rd-mechanism-output-manifest.csv`.
 
 `07_build_tables_figures.do` verifies checksums and safe repository paths in
-the module-04, module-05, and module-06 manifests, then merges the versioned
-255-row `metadata/publication-review-registry.csv`. It creates a pointer-only
-publication-candidate inventory and disposition summary under
-`output/tables/publication/`. It does not copy, regenerate, or synchronize any
-source artifact. The substantive audit is documented in
-`docs/PUBLICATION_RESULTS_AUDIT.md`.
+module-04, module-05, and module-06 manifests, then merges the versioned
+261-row `metadata/publication-review-registry.csv`. It retains the pointer-only
+candidate inventory and disposition summary, and calls
+`_publication_review_pack.do` to build six proposed main-text and 29 supporting
+review exhibits from validated aggregate sources, without re-estimating or
+changing canonical publication roles. Its 41-record manifest includes the two
+inventory products, 35 derivatives, and four review-support files. The separate
+multi-file TeX review project and scientific boundaries are documented in
+[`docs/PUBLICATION_REVIEW_PACK.md`](../../../docs/PUBLICATION_REVIEW_PACK.md).
+No module-07 output is automatically synchronized to Overleaf.
 
-`08_run_release_checks.do` audits all 255 candidates for existence, checksum,
+`08_run_release_checks.do` audits all 261 candidates for existence, checksum,
 safe path/extension, provenance, resolved preliminary review, owner approval,
 and safe destination. Technical failures stop the pipeline. Internal-only and
 excluded artifacts do not block release once reviewed; proposed main-text and

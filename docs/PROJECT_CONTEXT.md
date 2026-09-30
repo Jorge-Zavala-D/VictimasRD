@@ -1,5 +1,17 @@
 # Victimas RD project context
 
+## 30 September 2026: publication-sized review packet
+
+The owner approved a separate presentation/narrative packet built from existing
+estimates, without canonical role promotion or Overleaf synchronization. Read
+[the review-pack contract and validation receipt](PUBLICATION_REVIEW_PACK.md)
+before using its six proposed main and 29 supporting exhibits or its narrative.
+The canonical 261-artifact registry, dated 99-item review ledger, analysis
+contracts, and release holds are unchanged. The packet distinguishes weak or
+unavailable fuzzy heterogeneity from supported assignment-only heterogeneity,
+and preserves separate linkage/observability populations. A readable compiled
+review packet is not publication approval.
+
 ## 30 September 2026: CMAN timing decision and selection-feasibility milestone
 
 The owner has closed dated RUV histories, annual eligibility lists, and award

@@ -1,14 +1,14 @@
 /*
 Project: Victimas RD
-Purpose: Merge verified artifacts with the publication-review registry
+Purpose: Verify publication candidates and build separate review exhibits
 Inputs: Module 04--06 manifests and versioned review decisions
-Outputs: Reviewed candidate inventory, summary table, module manifest
+Outputs: Candidate inventory, review packet inputs, module manifest
 */
 
 version 19
 set more off
 
-foreach required_global in project_root tables_root metadata_root {
+foreach required_global in project_root tables_root figures_root metadata_root {
     if `"${`required_global'}"' == "" {
         display as error "Required global not defined: `required_global'"
         exit 198
@@ -185,9 +185,20 @@ restore
 
 local run_id = subinstr("`c(current_date)'_`c(current_time)'", " ", "", .)
 local run_id = subinstr("`run_id'", ":", "", .)
+* Reformat verified aggregates for print; retain the original release registry.
+do "${project_root}/code/stata/pipeline/_publication_review_pack.do"
+import delimited "`table_dir'/publication_review_exhibits.csv", clear ///
+    varnames(1) bindquote(strict) encoding(utf8)
+levelsof path, local(review_paths) clean
+
 local output_paths ///
     output/tables/publication/publication_candidate_inventory.csv ///
-    output/tables/publication/tab_publication_candidate_inventory.tex
+    output/tables/publication/tab_publication_candidate_inventory.tex ///
+    output/tables/publication/publication_review_exhibits.csv ///
+    output/tables/publication/publication_review_cells.csv ///
+    output/tables/publication/publication_results_values.tex ///
+    output/tables/publication/publication_review_exhibits.tex ///
+    `review_paths'
 
 tempname manifest_file
 file open `manifest_file' using "`manifest'", write replace text
@@ -204,15 +215,17 @@ foreach output_path of local output_paths {
     quietly checksum "`absolute_output'"
     local output_checksum : display %20.0f r(checksum)
     local output_checksum = strtrim("`output_checksum'")
+    local artifact_type "table"
+    if strpos("`output_path'", "output/figures/") == 1 local artifact_type "figure"
     file write `manifest_file' ///
-        `""`output_path'","table","module 04-06 manifests and publication review registry","`source_signatures'","code/stata/pipeline/07_build_tables_figures.do","`run_id'","`output_checksum'","generated_unreviewed""' _n
+        `""`output_path'","`artifact_type'","module 04-06 manifests and publication review registry","`source_signatures'","code/stata/pipeline/07_build_tables_figures.do","`run_id'","`output_checksum'","generated_unreviewed""' _n
 }
 file close `manifest_file'
 
 import delimited "`manifest'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 2
+assert _N == 41
 assert review_status == "generated_unreviewed"
 
 display as result "Completed publication-review candidate inventory."

@@ -1,6 +1,6 @@
 /*
 Project: Victimas RD
-Purpose: Validate the pointer-only publication candidate inventory
+Purpose: Validate the candidate inventory and expanded publication manifest
 */
 
 version 19
@@ -65,7 +65,7 @@ assert owner_approved == 0
 import delimited using "`manifest'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 2
+assert _N == 41
 assert review_status == "generated_unreviewed"
 
 forvalues row = 1/`=_N' {

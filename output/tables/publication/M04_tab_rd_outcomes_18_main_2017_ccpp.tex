@@ -1,0 +1,19 @@
+\begingroup\fontsize{9.25}{11.4}\selectfont
+\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.28\linewidth}rrp{0.24\linewidth}rr@{}}
+\caption{2017 community outcomes near the B/C cutoff}\label{tab:pub_M04} \\
+\toprule Outcome & Mean & RF & Fuzzy estimate / 95\% CI & Holm \(p\) & Local \(N\) \\ \midrule\endfirsthead
+\multicolumn{6}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule Outcome & Mean & RF & Fuzzy estimate / 95\% CI & Holm \(p\) & Local \(N\) \\ \midrule\endhead
+Log 2017 CCPP population & 4.78 & -0.92 & \shortstack[r]{-0.81 \\{} [-2.03, 0.41]} & 1.000 & 60 \\
+Log occupied dwellings in 2017 & 4.22 & -0.77 & \shortstack[r]{-0.68 \\{} [-1.72, 0.36]} & 1.000 & 60 \\
+Residents living in another CCPP & 36.13 & 9.64 & \shortstack[r]{8.44 \\{} [-12.18, 29.07]} & 1.000 & 60 \\
+Residents age 15-29 & 23.15 & -2.76 & \shortstack[r]{-2.43 \\{} [-11.62, 6.75]} & 1.000 & 60 \\
+Secondary education or higher & 46.14 & 3.27 & \shortstack[r]{2.82 \\{} [-12.21, 17.84]} & 1.000 & 60 \\
+Employed residents & 46.97 & -16.08 & \shortstack[r]{-14.03 \\{} [-28.55, 0.50]} & 0.467 & 60 \\
+Residents with health insurance & 90.20 & 1.14 & \shortstack[r]{1.04 \\{} [-6.02, 8.10]} & 1.000 & 60 \\
+Core wellbeing proxy & 53.47 & 1.32 & \shortstack[r]{1.14 \\{} [-12.79, 15.06]} & 1.000 & 60 \\
+Common first stage &  &  & \shortstack[r]{1.132 \\{} [0.833, 1.430]} &  & 60 \\
+\bottomrule\end{longtable}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Each row uses the same 389-community complete Census-linked B/C analysis sample before local-window restriction and the same \(h=0.0075\), \(b=0.0135\) design window. Reduced forms are assignment discontinuities; fuzzy LATEs divide the outcome and treatment discontinuities using one common bandwidth. Estimates are robust bias-corrected local-linear triangular-kernel results with mass-point adjustment and district CR2 inference. Share and zero-to-one index outcomes are in percentage points; count outcomes are logged. Holm values adjust across the eight primary outcomes. The registered clustered local-IV Kleibergen--Paap first-stage screen is \(F>10\); the primary sample has \(F=54.92\). Reduced forms and weak-instrument-robust diagnostics remain necessary. Population and dwelling counts are official CCPP-directory totals; linked person shares describe the assisted cohort. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\par\smallskip{\footnotesize\textit{Review boundary:} Conditional local evidence; historical design search and selection remain limitations. RF denotes the assignment reduced form; CCPP denotes a community. In outcome tables, shares, binary outcomes and zero-to-one indices are in percentage points; logarithms remain log points and counts remain counts. A common window is not claimed optimal for every outcome. No artifact-level release approval or manuscript synchronization is implied.}\par\endgroup

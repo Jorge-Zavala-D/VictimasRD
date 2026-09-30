@@ -1,0 +1,14 @@
+\begingroup\fontsize{9.25}{11.4}\selectfont
+\setlength{\tabcolsep}{3pt}\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.31\linewidth}p{0.14\linewidth}p{0.24\linewidth}rr@{}}
+\caption{2017 household first stages and analysis frames}\label{tab:pub_A20} \\
+\toprule Analysis frame & Weight & Estimate / 95\% CI (SE) & \(N\) / CCPP & \(F_z\) \\ \midrule\endfirsthead
+\multicolumn{5}{c}{\tablename\ \thetable{} -- continued} \\
+\toprule Analysis frame & Weight & Estimate / 95\% CI (SE) & \(N\) / CCPP & \(F_z\) \\ \midrule\endhead
+Treatment through 2016: source-household universe & CCPP-equal & \shortstack[r]{0.971 \\{} [0.558, 1.384] \\{} (0.211)} & 4,051 / 64 & 21.20 \\
+Treatment through 2016: complete primary sample & CCPP-equal & \shortstack[r]{0.972 \\{} [0.551, 1.393] \\{} (0.215)} & 2,935 / 62 & 20.44 \\
+Treatment through 2016: household-equal sensitivity & Household-equal & \shortstack[r]{0.650 \\{} [-0.125, 1.424] \\{} (0.395)} & 2,935 / 62 & 2.70 \\
+Treatment through 2016: treatment-based MSE selector & CCPP-equal & \shortstack[r]{0.893 \\{} [0.448, 1.338] \\{} (0.227)} & 2,634 / 52 & 15.46 \\
+\bottomrule\end{longtable}
+\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} The outcome is cumulative collective-reparation receipt through 2016. Estimates are robust bias-corrected local-linear triangular-kernel discontinuities at the official B--C cutoff in the selected geography, with mass-point adjustment. The common window is \(h=0.0075\), \(b=0.0135\); the final row uses the treatment-based MSE selector. CCPP-equal weights give each RUV community total weight one and are primary because treatment is assigned at that level; household-equal weights change the target population and are a required sensitivity. Inference is CR2 by complete RUV community ID. \(F_z\) is the squared robust RD \(z\) statistic and is descriptive, not the registered strength screen. The clustered local-IV Kleibergen--Paap screen is \(F>10\), with primary \(F=21.04\). Fuzzy LATEs are also reported with reduced forms and weak-instrument-robust diagnostics. Source: RUV, CMAN, and INEI-assisted Census 2017.}
+\par\smallskip{\footnotesize\textit{Review boundary:} Conditional local evidence; historical design search and selection remain limitations. RF denotes the assignment reduced form; CCPP denotes a community. In outcome tables, shares, binary outcomes and zero-to-one indices are in percentage points; logarithms remain log points and counts remain counts. A common window is not claimed optimal for every outcome. No artifact-level release approval or manuscript synchronization is implied.}\par\endgroup

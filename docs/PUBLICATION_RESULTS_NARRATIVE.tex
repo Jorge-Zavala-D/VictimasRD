@@ -1,0 +1,225 @@
+% Review prose, not an edit to the live manuscript. Numerical macros come from
+% module 07 and must be regenerated with the accompanying review exhibits.
+
+\section{Collective reparations and local development: results for review}
+
+Collective reparations can improve conditions in communities affected by
+violence, but place-based investment need not have the same consequences for
+every resident. Better local opportunities may encourage people to remain;
+greater resources and connectivity may also make moving more feasible. The
+present evidence does not distinguish these competing pathways conclusively.
+This review brings the community, household and individual estimates together
+without treating related observations as independent replications.
+
+The numerical findings concern the approved geographic sample: Apurimac and
+Huancavelica, together with La Convencion province in Cusco and Huancayo
+province in Junin. This geography contains 1,162 of the 5,712 communities in
+the supplied victim registry. The analyses compare adjacent victimization
+categories B and C around the official score threshold of 0.062320. The
+geography and common estimation window were retained after historical
+exploratory design work; they were not selected prospectively before the
+original research. The search history must accompany the eventual paper.
+
+Treatment is cumulative recorded receipt through 2012 for the 2013 outcomes
+and through 2016 for the 2017 outcomes. Under the project lead's binding
+measurement decision, the CMAN register's project year is assumed to be the
+year of both allocation and delivery. This assumption avoids inventing dates
+that the source does not contain; it does not independently verify execution
+or completion. The 2013 outcomes are treated as materialized in 2013, although
+the SISFOH operation covered 2012--2013. The later outcomes come from the
+restricted INEI-assisted Census linkage, not complete community-level Census
+tabulations for Peru.
+
+\subsection{Reading the main estimates}
+
+The main tables display the complete registered primary outcome families,
+their assignment reduced forms, fuzzy treatment-receipt ratios, robust 95\%
+confidence intervals and within-family Holm adjustments. All \PrimaryTests{}
+primary common-window fuzzy tests return estimates, and \PrimarySignals{}
+have a Holm-adjusted probability below 0.05. The adjustment is within each
+registered eight-outcome family, not one global family of all
+\PrimaryTests{} tests. This evidence does not establish that reparations had
+no effects: many intervals admit substantively important changes in either
+direction. The companion community figures show every primary outcome,
+standardized by its below-cutoff outcome standard deviation. Original units
+remain available in the tables.
+
+The 2013 community outcomes describe rostered population and households,
+age composition, social-program participation, wellbeing, unmet basic needs,
+labor-force participation and education. Household and person analyses add
+granularity but use their own response universes and weights. A community
+mean, a household share and a person-level indicator are not interchangeable
+estimands. In particular, a larger number of household or person observations
+does not supply a corresponding increase in independent treatment-assignment
+units. The appendix reports effective observations, represented communities,
+first stages and outcome definitions rather than relying on nominal national
+sample sizes to convey precision.
+
+The same principle applies to the 2017 community, household and individual
+families. Their point estimates should be read jointly with uncertainty,
+linkage and completeness. The approved common window
+\(h=0.0075\), with bias window \(b=0.0135\), holds the design neighborhood
+fixed. It does not make missing-outcome patterns identical or establish that
+this window is optimal for every outcome. Registered bandwidth sensitivities
+are supporting diagnostics, not alternative windows selected for favorable
+findings. Logarithmic outcomes remain in log points: exponentiating a fuzzy
+ratio is not automatically a complier-average percentage effect. The GDP
+source's community allocation and monetary-unit limitations also remain;
+it is not an independent measure of local income inequality or local growth.
+
+\subsection{Observed migration and the population it represents}
+
+The primary individual migration outcome compares valid canonical origin and
+destination community codes among linked people with known 2017 age of at
+least 14. It does not classify unlinked people as nonmigrants. The fuzzy
+estimate is \MigrationEffect{} percentage points, with robust 95\% interval
+\([\MigrationLower{},\MigrationUpper{}]\), raw
+\(p=\MigrationP{}\) and within-family Holm
+\(p=\MigrationHolm{}\). Its effective local sample contains
+\MigrationN{} people in \MigrationCCPP{} victim-registry communities.
+The matching local-IV Kleibergen--Paap first-stage statistic is
+\(F=\MigrationF{}\). Passing the registered \(F>10\) screen is necessary
+for the treatment-receipt interpretation used here, but does not settle
+continuity, exclusion, monotonicity or selection.
+
+This estimate concerns observed linked adults near the cutoff, conditional
+on the identification assumptions. It is not a demonstrated migration effect
+for all source residents, nor a precise relative percentage increase. The
+other seven individual primary outcomes retain a different complete-case
+population. Their effective sample counts therefore differ even though the
+geography and nominal score window are common. The migration row is not
+silently forced back into the wellbeing-complete population for convenience.
+
+\subsection{Selection is several different processes}
+
+Community entry into the assisted delivery, person linkage, movement
+observability, age observability and household outcome completeness are
+different selection layers. The supporting exhibits report their parent
+frames separately. In the common window the delivery covers 64 of 71 victim
+registry communities. It contains 13,010 source people, of whom 9,862 have
+observed linkage and movement. All 7,680 linked known-age adults in the
+approved local population have observable movement. That conditional 100\%
+rate does not establish complete linkage or movement observability for all
+source adults: 2017 age is unknown for 3,148 source people, and uncovered
+communities are absent from the delivery. Counts are unweighted; the exported
+rates give each represented community equal weight within its stated frame.
+
+Household member linkage likewise differs from entry into the full primary
+household analysis sample. Of 4,051 source households locally, 3,532 have at
+least one linked member, whereas 2,935 have all eight primary household
+outcomes. The formal discontinuity in complete-household analysis
+availability is \HouseholdSelectionEffect{} percentage points, with robust
+95\% interval \([\HouseholdSelectionLower{},\HouseholdSelectionUpper{}]\)
+and raw \(p=\HouseholdSelectionP{}\). This is a selection diagnostic,
+not a substantive treatment effect surviving a primary outcome-family
+correction. Its negative discontinuity makes the household results
+selection-sensitive. A different, nonsignificant member-linkage diagnostic
+cannot be used to declare linkage ignorable.
+
+The baseline-only propensity exercises remain feasibility diagnostics. They
+use score-side terms and registered pre-treatment population, wellbeing and
+GDP measures. Positive fitted probabilities do not demonstrate missing at
+random, actual population overlap, or transportability. Effective weighted
+observation counts are not independent-cluster counts. No propensity-weighted
+RD replaces the primary analysis. No linked-adult movement logit is fit when
+all eligible responses are observed in its model frame.
+
+The finite-source movement intervals use only known zero-to-one support and
+retain missing observations in their denominators. They concern all-age
+source people or the fraction of \emph{all source members} of a household,
+not the primary eligible-adult population or the primary household fraction
+among observed members. They are descriptive support intervals, not sampling
+confidence intervals or causal RD bounds. Lee/Dong-type trimming would
+require additional population and selection assumptions; the sign of an
+availability jump alone does not establish individual monotonic selection.
+The current evidence does not warrant dividing these intervals by a first
+stage or extrapolating them to missing communities.
+
+\subsection{Heterogeneity: report identification gates before effect contrasts}
+
+The primary treatment-receipt heterogeneity exercise uses local-IV
+interactions, not subgroup estimates selected for attractive first stages.
+Its instrument set must identify both treatment and the treatment--moderator
+interaction. Population, district-capital status and other registered
+baseline moderators are substantively motivated, but motivation cannot
+replace adequate support or conditional instrument strength. The appendix
+retains every registered moderator's support and gate result, and summarizes
+all six families without substituting a single first-stage statistic for
+the two-endogenous-variable diagnostics.
+
+Most common-window interaction cells fail one or more registered gates.
+Gate-passing estimates do not provide a family-adjusted pattern sufficient
+to claim a validated moderator of the program's effects. This does not
+demonstrate homogeneous effects: weak instruments and limited local
+support restrict what can be learned. The separate \texttt{rdhte} results
+concern assignment-effect heterogeneity. They cannot be promoted to the main
+fuzzy treatment-receipt heterogeneity estimates merely because their
+diagnostics appear more favorable.
+
+The supporting overview records \AssignmentSignals{} secondary assignment
+contrasts below their original adjusted thresholds among \AssignmentAdjusted{}
+supported, adjusted contrasts across the six wave-by-level displays. These
+counts combine neither the correction families nor the estimands into one
+global test, and related outcomes at different levels are not independent
+replications. They warrant interpretation as assignment-response heterogeneity,
+not as identified heterogeneity in the effects of receiving reparations.
+
+Project composition and category-specific receipt jumps describe
+implementation, not randomized project-type contrasts. Project choice is
+post-assignment and endogenous, and its characteristics are observed for
+funded communities. Treated-only comparisons do not establish that productive
+projects caused migration. The excluded financing-dose estimates remain
+excluded: a strong first stage does not establish the additional exclusion
+restriction for financing per capita. Population moderation and descriptive
+project composition can inform future hypotheses without relabeling these
+unidentified contrasts as causal evidence.
+
+\subsection{Mechanism evidence is not an identified indirect effect}
+
+The mechanism exhibits distinguish candidate intermediate-outcome RD ratios
+from descriptive associations. They retain the registered multiplicity
+families and flag unavailable outcome-sample instrument-strength diagnostics.
+Contemporaneous 2017 employment, internet access and observed migration do
+not establish mediator-before-outcome ordering. Their associations can also
+reflect selection, reverse ordering or treatment-induced common causes.
+They therefore do not identify an average causal mediation effect or a
+proportion mediated.
+
+The separate associations with 2013 community predictors may help organize
+substantive hypotheses, but those predictors are themselves post-treatment
+for communities financed earlier. Temporal precedence over a 2017 outcome
+alone does not make them valid instruments or ordinary pre-treatment
+controls. These results preserve the motivation of the earlier mediation
+work while placing its product-of-coefficients interpretation on hold.
+The current evidence cannot establish either a liquidity-driven mobility
+mechanism or a place-based anchoring mechanism conclusively.
+
+\subsection{What the study can and cannot presently support}
+
+The review documents conditional local estimates with explicit population
+boundaries, not an unqualified national impact evaluation. Official program
+documentation supports joint A/B priority together with administrative and
+geographic conditions, rather than a strict national sequence exhausting A
+before B. Dated registration, score and historical eligibility information
+is not reconstructed from the later supplied workbook. The owner's decision
+to proceed with the CMAN year assumption closes that acquisition prerequisite,
+not the associated interpretation limitations.
+
+Fuzzy receipt ratios require assumptions beyond a discontinuity in recorded
+treatment. These include credible local continuity, exclusion and
+monotonicity; the modern RD treatment is explicit about the additional
+conditions for complier interpretation.\footnote{Cattaneo, Idrobo and
+Titiunik, \emph{A Practical Introduction to Regression Discontinuity Designs:
+Extensions}, author version dated 25 March 2024, Section 3.2, PDF pp.\ 43--45;
+\url{https://doi.org/10.1017/9781009441896}.}
+Score rounding, limited local support, selection and the historical search
+must accompany any eventual causal interpretation. Mass-point adjustments
+do not create missing support, and conventional diagnostics cannot prove
+all identifying assumptions.
+
+The next publication decision is therefore about the permitted claims and
+artifact-level disclosure, not a search for a statistically favorable
+replacement design. Every exhibit in this packet remains an internal review
+derivative. Neither successful computation nor readable typesetting grants
+publication approval, approves canonical main-text roles, or authorizes
+replacement of a live Overleaf input.

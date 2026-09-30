@@ -821,7 +821,7 @@ if `run_all' | `run_06_analyze_mechanisms' {
 if `run_all' | `run_07_build_outputs' {
     victimasrd_run_step, ///
         file("${pipeline_root}/07_build_tables_figures.do") ///
-        label("Publication-candidate pointer inventory")
+        label("Publication inventory and separate results-review packet")
 }
 
 if `run_all' | `run_08_run_release_checks' {
