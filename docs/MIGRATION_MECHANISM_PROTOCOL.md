@@ -2,7 +2,24 @@
 
 **Project:** Victimas RD
 
-**Version:** 2026-09-26
+**Version:** 2026-09-30
+
+## 30 September 2026: owner timing assumption and selection extension
+
+Use the existing CMAN project year as the sole allocation-and-delivery-year
+record, under the owner's explicit assumption that both occurred in that year.
+It is not a verified completion date. Acquisition of dated RUV histories,
+annual CMAN eligibility lists, and award histories is closed as a prerequisite.
+No change to `treat_12`, `treat_16`, the approved observed-adult population, or
+the common-window inference contract follows. Timing ambiguity remains a
+disclosed limitation, not a request for unavailable records.
+
+Module 06 now also reports separate selection-stage denominators, baseline-only
+selection-model feasibility, and descriptive zero-to-one missing-movement
+intervals under the [selection-feasibility contract](CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md).
+It applies no causal selection weights, trimming bounds, or Heckman correction.
+These diagnostics do not establish MAR, monotone selection, or transportability
+from linked observed adults to the full source or national adult population.
 
 **Status:** Approved by the project owner on 2026-09-22; no separate research-team approval gate is required
 

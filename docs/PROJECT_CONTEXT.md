@@ -1,5 +1,17 @@
 # Victimas RD project context
 
+## 30 September 2026: CMAN timing decision and selection-feasibility milestone
+
+The owner has closed dated RUV histories, annual eligibility lists, and award
+histories as a prerequisite. Use the existing CMAN project year as the sole
+allocation-and-delivery-year assumption, not verified execution timing. Do not
+reconstruct unavailable historical risk sets. `treat_12`/`treat_16` and the
+approved samples/specifications remain unchanged. Read the
+[current selection-feasibility contract](CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md)
+before interpreting weights, missing-outcome intervals, or linkage. This
+supersedes historical-date acquisition requests, not identification or release
+limitations.
+
 ## 30 September 2026: current interpretation and publication decision
 
 Read the superseding

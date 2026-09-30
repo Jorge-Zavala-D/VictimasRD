@@ -254,12 +254,11 @@ independently re-render all exhibits, and its integration-access limits are
 recorded above. It complements, rather than substitutes for, the runtime and
 rendering checks performed in this task.
 
-**Next milestone:** targeted historical-assignment and selection feasibility
-work, not another search for a stronger sample. Seek dated RUV registration
-and score versions, annual CMAN priority/eligibility lists and award histories,
-and evidence sufficient to justify or reject a selection adjustment for the
-fixed observed-adult and household populations. Record unsuccessful retrieval
-as missing evidence. If those facts cannot be established, keep the explicit
-conditional/selection-sensitive claims rather than presenting them as solved.
-Only then finalize journal-sized exhibits, artifact-level disclosure/owner
-decisions, canonical publication roles, and live manuscript synchronization.
+**Superseding owner decision, 30 September:** acquisition of dated RUV histories,
+annual eligibility lists, and award histories is closed as a prerequisite. Use
+the existing CMAN year under the allocation-and-delivery assumption, without
+representing timing as independently verified. The
+[selection-feasibility milestone](CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md)
+evaluates the fixed populations without automatically applying weights or
+causal trimming. Next: journal-sized exhibits, artifact-level disclosure/owner
+decisions, canonical publication roles, and authorized manuscript synchronization.

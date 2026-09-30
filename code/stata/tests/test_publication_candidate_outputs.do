@@ -28,7 +28,7 @@ foreach required_file in "`inventory'" "`manifest'" "`review_registry'" {
 import delimited using "`inventory'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 255
+assert _N == 261
 assert inlist(source_pipeline, ///
     "main_effects", "heterogeneity", "mechanisms")
 assert generation_status == "generated_unreviewed"
@@ -58,7 +58,7 @@ assert r(N) == 0
 import delimited using "`review_registry'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 255
+assert _N == 261
 assert scientific_review_status == "preliminary_reviewed"
 assert owner_approved == 0
 

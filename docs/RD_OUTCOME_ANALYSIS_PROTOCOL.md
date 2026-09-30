@@ -1,5 +1,15 @@
 # RD outcome-analysis protocol
 
+## 30 September 2026: authoritative treatment-year assumption
+
+The owner instructs us to use the existing CMAN project year as the only year
+record and assume it is both the allocation and delivery year. `treat_12` and
+`treat_16` remain cumulative receipt indicators under that assumption. Do not
+request dated registration/score histories, annual eligibility lists, or award
+histories as a prerequisite; do not create unobserved historical risk sets or
+describe this adopted timing convention as verified completion evidence.
+All other design, population, and inference contracts remain unchanged.
+
 ## Status and scope
 
 This protocol records the research-team decisions governing the canonical

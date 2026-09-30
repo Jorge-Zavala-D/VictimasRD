@@ -7,6 +7,10 @@ Outputs: Aggregate CSV/LaTeX/PNG artifacts and a versioned output manifest
 
 version 19
 set more off
+* Keep standalone figures independent of the interactive session's scheme.
+capture findfile scheme-plotplainblind.scheme
+local mechanism_scheme "s2color"
+if !_rc local mechanism_scheme "plotplainblind"
 
 foreach required_global in ///
     project_root pipeline_root analysis_data_root figures_root ///
@@ -434,6 +438,12 @@ file write `contract_file' ///
 file write `contract_file' ///
     `""linkage_endpoints","extreme-case coding endpoints not bounds","locked","approved protocol""' _n
 file write `contract_file' ///
+    `""cman_year_interpretation","allocation and delivery in recorded CMAN year","owner_assumption","owner decision 2026-09-30""' _n
+file write `contract_file' ///
+    `""historical_date_acquisition","closed_not_required","owner_decision","owner decision 2026-09-30""' _n
+file write `contract_file' ///
+    `""selection_correction","not applied; feasibility diagnostics only","not_identified","docs/CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md""' _n
+file write `contract_file' ///
     `""review_status","generated_unreviewed","pending review","repository policy""' _n
 file close `contract_file'
 
@@ -723,7 +733,7 @@ twoway ///
         "Sources: RUV, CMAN, INEI-assisted Census 2017 linkage.", ///
         size(tiny) color(gs5) span) ///
     xsize(13) ysize(10) graphregion(color(white)) ///
-    plotregion(color(white))
+    plotregion(color(white)) scheme(`mechanism_scheme')
 graph export ///
     "`figure_dir'/fig_rd_mechanisms_01_migration_forest.png", ///
     width(3200) replace
@@ -776,7 +786,7 @@ twoway ///
         "Sources: RUV, CMAN, INEI-assisted Census 2017 linkage.", ///
         size(tiny) color(gs5) span) ///
     xsize(13) ysize(6.5) graphregion(color(white)) ///
-    plotregion(color(white))
+    plotregion(color(white)) scheme(`mechanism_scheme')
 graph export ///
     "`figure_dir'/fig_rd_mechanisms_02_linkage_sensitivity.png", ///
     width(3200) replace
@@ -837,7 +847,7 @@ twoway ///
         "Sources: RUV, CMAN, SISFOH, INEI-assisted Census 2017 linkage.", ///
         size(tiny) color(gs5) span) ///
     xsize(13) ysize(10) graphregion(color(white)) ///
-    plotregion(color(white))
+    plotregion(color(white)) scheme(`mechanism_scheme')
 graph export ///
     "`figure_dir'/fig_rd_mechanisms_03_mechanism_forest.png", ///
     width(3200) replace
@@ -846,6 +856,9 @@ graph export ///
 *-----------------------------------*
 **# 6. Output manifest and closeout checks
 *-----------------------------------*
+
+* Separate coverage, linkage, measurement and completeness without changing I03.
+do "${pipeline_root}/_migration_selection_audit.do"
 
 quietly checksum "${metadata_root}/rd-outcome-output-manifest.csv"
 local upstream_manifest_checksum : display %20.0f r(checksum)
@@ -856,6 +869,20 @@ use "`input_2017_ccpp'", clear
 quietly datasignature
 local input_datasignature ///
     "module04:`upstream_manifest_checksum';census2017:`r(datasignature)'"
+foreach selection_source in ///
+    12_census_2017_individual_analysis.dta ///
+    13_census_2017_household_analysis.dta {
+    quietly checksum "${analysis_data_root}/`selection_source'"
+    local source_checksum : display %20.0f r(checksum)
+    local source_checksum = strtrim("`source_checksum'")
+    local input_datasignature ///
+        "`input_datasignature';`selection_source':`source_checksum'"
+}
+quietly checksum "${project_root}/docs/CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md"
+local selection_protocol_checksum : display %20.0f r(checksum)
+local selection_protocol_checksum = strtrim("`selection_protocol_checksum'")
+local input_datasignature ///
+    "`input_datasignature';selection_protocol:`selection_protocol_checksum'"
 
 local run_id = subinstr("`c(current_date)'_`c(current_time)'", " ", "", .)
 local run_id = subinstr("`run_id'", ":", "", .)
@@ -872,7 +899,13 @@ local output_paths ///
     output/tables/rd_mechanisms/tab_rd_mechanisms_05_descriptive_associations.tex ///
     output/figures/rd_mechanisms/fig_rd_mechanisms_01_migration_forest.png ///
     output/figures/rd_mechanisms/fig_rd_mechanisms_02_linkage_sensitivity.png ///
-    output/figures/rd_mechanisms/fig_rd_mechanisms_03_mechanism_forest.png
+    output/figures/rd_mechanisms/fig_rd_mechanisms_03_mechanism_forest.png ///
+    output/tables/rd_mechanisms/rd_census2017_selection_flow.csv ///
+    output/tables/rd_mechanisms/rd_census2017_selection_overlap.csv ///
+    output/tables/rd_mechanisms/rd_census2017_selection_intervals.csv ///
+    output/tables/rd_mechanisms/tab_rd_mechanisms_06_selection_flow.tex ///
+    output/tables/rd_mechanisms/tab_rd_mechanisms_07_selection_feasibility.tex ///
+    output/figures/rd_mechanisms/fig_rd_mechanisms_04_selection_flow.png
 
 tempname manifest_file
 file open `manifest_file' using "`manifest'", write replace text
@@ -898,14 +931,14 @@ foreach output_path of local output_paths {
     }
 
     file write `manifest_file' ///
-        `""`output_path'","`artifact_type'","module-04 aggregate results;14_community_registry_census_2017.dta","`input_datasignature'","code/stata/pipeline/06_analyze_migration_mechanisms.do","`run_id'","`output_checksum'","generated_unreviewed""' _n
+        `""`output_path'","`artifact_type'","module-04 aggregate results;canonical Census-2017 community/person/household datasets","`input_datasignature'","code/stata/pipeline/06_analyze_migration_mechanisms.do","`run_id'","`output_checksum'","generated_unreviewed""' _n
 }
 file close `manifest_file'
 
 import delimited using "`manifest'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 12
+assert _N == 18
 assert review_status == "generated_unreviewed"
 
 display as result ///

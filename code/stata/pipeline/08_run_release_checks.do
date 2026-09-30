@@ -58,7 +58,7 @@ foreach estimand_file in ///
 import delimited using "`inventory'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 255
+assert _N == 261
 capture confirm string variable overleaf_destination
 if _rc {
     assert missing(overleaf_destination)

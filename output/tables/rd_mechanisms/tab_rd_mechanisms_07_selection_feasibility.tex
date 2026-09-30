@@ -1,0 +1,12 @@
+\begin{table}[!htbp]\centering\small
+\caption{Baseline selection-model feasibility, not causal correction}
+\label{tab:rd_mechanisms_selection_feasibility}
+\begin{tabular}{lrrrrr}\toprule
+Stage & Parent & Baseline complete & Probability range & IPW ESS & Empty CCPPs \\
+\midrule
+Linked-adult movement &    28,250 &    28,086 & [1.000, 1.000] &     2,840 &   0 \\
+Household completeness &    13,371 &    13,285 & [0.397, 0.927] &     1,230 &   3 \\
+Person linkage &    45,740 &    45,482 & [0.607, 0.883] &     2,664 &   1 \\
+\bottomrule\end{tabular}
+\parbox{0.98\linewidth}{\footnotesize\textit{Notes:} Logit feasibility fits use the fixed bias window (0.0135), cutoff side and side-specific linear score slopes, 2007 log population/equal-domain wellbeing and 2006 log GDP, with CCPP-equal weights and CCPP-clustered model uncertainty. Baseline-complete counts exclude missing covariates; no probabilities or weights are trimmed. Where every baseline-complete row is observed, no logit is fitted and the empirical observability probability is one. ESS is the Kish effective observation size of untrimmed CCPP-equal inverse-selection weights among selected rows, not an independent-cluster count. Empty CCPPs have no selected row within the baseline-complete model frame; CCPP counts exclude communities without complete baseline covariates. No weighted RD effect or causal adjustment is reported. Positive fitted probabilities do not prove overlap, MAR or adult transportability. Source: canonical RUV--SISFOH--Census linkage and predetermined covariates.}
+\end{table}

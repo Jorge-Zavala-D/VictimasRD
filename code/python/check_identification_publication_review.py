@@ -20,7 +20,7 @@ def check(root, dropbox=None):
     original = {row['path'] for row in review if row['candidate_set'] == 'original_appendix_94'}
     assert len(original) == 94
     assert original == {row['path'] for row in canonical if row['disposition'] == 'appendix'}
-    assert len(canonical) == 255 and all(row['owner_approved'] == '0' for row in canonical)
+    assert len(canonical) == 261 and all(row['owner_approved'] == '0' for row in canonical)
     assert [sum(row['proposed_role'] == role for row in review) for role in ('main_text', 'appendix', 'internal_review')] == [6, 22, 71]
     for row in review:
         path = pathlib.PurePosixPath(row['path'])

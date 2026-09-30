@@ -1,0 +1,55 @@
+scope,side,stage,level,denominator,stage_label,denominator_n,numerator_n,denominator_ccpp,numerator_ccpp,rate_ccpp_equal
+common_h,above,ruv_frame,ccpp,Selected RUV communities,RUV community frame,26,26,26,26,1
+common_h,above,source_coverage,ccpp,Selected RUV communities,CCPP source-cohort entry,26,22,26,22,.846153846153846
+common_h,above,household_complete,household,All source households,Eight-outcome household completeness,1272,874,22,22,.700779728541616
+common_h,above,household_linkage,household,All source households,Any household member linked,1272,1047,22,22,.86715081856328
+common_h,above,household_movement,household,All source households,Any member movement observed,1272,1047,22,22,.86715081856328
+common_h,above,adult_age_unknown,person,All source-cohort people,2017 age unobserved,4044,1180,22,22,.249130473825236
+common_h,above,adult_movement,person,Linked known-age adults age 14 or older,Adult movement observable,2266,2266,22,22,1
+common_h,above,person_linkage,person,All source-cohort people,Person linkage,4044,2864,22,22,.750869526174764
+common_h,above,person_movement,person,All source-cohort people,Person movement observable,4044,2864,22,22,.750869526174764
+common_h,all,ruv_frame,ccpp,Selected RUV communities,RUV community frame,71,71,71,71,1
+common_h,all,source_coverage,ccpp,Selected RUV communities,CCPP source-cohort entry,71,64,71,64,.901408450704225
+common_h,all,household_complete,household,All source households,Eight-outcome household completeness,4051,2935,64,62,.697623837432959
+common_h,all,household_linkage,household,All source households,Any household member linked,4051,3532,64,63,.868870457920394
+common_h,all,household_movement,household,All source households,Any member movement observed,4051,3532,64,63,.868870457920394
+common_h,all,adult_age_unknown,person,All source-cohort people,2017 age unobserved,13010,3148,64,63,.236700556085006
+common_h,all,adult_movement,person,Linked known-age adults age 14 or older,Adult movement observable,7680,7680,63,63,1
+common_h,all,person_linkage,person,All source-cohort people,Person linkage,13010,9862,64,63,.763299443914994
+common_h,all,person_movement,person,All source-cohort people,Person movement observable,13010,9862,64,63,.763299443914994
+common_h,below,ruv_frame,ccpp,Selected RUV communities,RUV community frame,45,45,45,45,1
+common_h,below,source_coverage,ccpp,Selected RUV communities,CCPP source-cohort entry,45,42,45,42,.933333333333333
+common_h,below,household_complete,household,All source households,Eight-outcome household completeness,2779,2061,42,40,.695970751614139
+common_h,below,household_linkage,household,All source households,Any household member linked,2779,2485,42,41,.869771221393169
+common_h,below,household_movement,household,All source households,Any member movement observed,2779,2485,42,41,.869771221393169
+common_h,below,adult_age_unknown,person,All source-cohort people,2017 age unobserved,8966,1968,42,41,.230189646792505
+common_h,below,adult_movement,person,Linked known-age adults age 14 or older,Adult movement observable,5414,5414,41,41,1
+common_h,below,person_linkage,person,All source-cohort people,Person linkage,8966,6998,42,41,.769810353207495
+common_h,below,person_movement,person,All source-cohort people,Person movement observable,8966,6998,42,41,.769810353207495
+selected_bc,above,ruv_frame,ccpp,Selected RUV communities,RUV community frame,255,255,255,255,1
+selected_bc,above,source_coverage,ccpp,Selected RUV communities,CCPP source-cohort entry,255,189,255,189,.741176470588235
+selected_bc,above,household_complete,household,All source households,Eight-outcome household completeness,16780,12621,189,180,.691122978144432
+selected_bc,above,household_linkage,household,All source households,Any household member linked,16780,15063,189,188,.877102498072094
+selected_bc,above,household_movement,household,All source households,Any member movement observed,16780,14766,189,182,.847126372966053
+selected_bc,above,adult_age_unknown,person,All source-cohort people,2017 age unobserved,57017,12822,189,187,.230502030653818
+selected_bc,above,adult_movement,person,Linked known-age adults age 14 or older,Adult movement observable,35816,35063,187,181,.967914438502674
+selected_bc,above,person_linkage,person,All source-cohort people,Person linkage,57017,44195,189,188,.769497969346182
+selected_bc,above,person_movement,person,All source-cohort people,Person movement observable,57017,43283,189,182,.743783914496858
+selected_bc,all,ruv_frame,ccpp,Selected RUV communities,RUV community frame,549,549,549,549,1
+selected_bc,all,source_coverage,ccpp,Selected RUV communities,CCPP source-cohort entry,549,425,549,425,.774134790528233
+selected_bc,all,household_complete,household,All source households,Eight-outcome household completeness,33060,25106,425,407,.694505748428526
+selected_bc,all,household_linkage,household,All source households,Any household member linked,33060,29692,425,423,.878182600008082
+selected_bc,all,household_movement,household,All source households,Any member movement observed,33060,29209,425,411,.852143813054555
+selected_bc,all,adult_age_unknown,person,All source-cohort people,2017 age unobserved,110906,25033,425,421,.233238524056192
+selected_bc,all,adult_movement,person,Linked known-age adults age 14 or older,Adult movement observable,68829,67648,422,410,.971563981042654
+selected_bc,all,person_linkage,person,All source-cohort people,Person linkage,110906,85873,425,423,.766761475943808
+selected_bc,all,person_movement,person,All source-cohort people,Person movement observable,110906,84390,425,411,.744482009355641
+selected_bc,below,ruv_frame,ccpp,Selected RUV communities,RUV community frame,294,294,294,294,1
+selected_bc,below,source_coverage,ccpp,Selected RUV communities,CCPP source-cohort entry,294,236,294,236,.802721088435374
+selected_bc,below,household_complete,household,All source households,Eight-outcome household completeness,16280,12485,236,227,.697214831410279
+selected_bc,below,household_linkage,household,All source households,Any household member linked,16280,14629,236,235,.879047596897496
+selected_bc,below,household_movement,household,All source households,Any member movement observed,16280,14443,236,229,.856162017193228
+selected_bc,below,adult_age_unknown,person,All source-cohort people,2017 age unobserved,53889,12211,236,234,.235430037840297
+selected_bc,below,adult_movement,person,Linked known-age adults age 14 or older,Adult movement observable,33013,32585,235,229,.974468085106383
+selected_bc,below,person_linkage,person,All source-cohort people,Person linkage,53889,41678,236,235,.764569962159702
+selected_bc,below,person_movement,person,All source-cohort people,Person movement observable,53889,41107,236,229,.74504107684848

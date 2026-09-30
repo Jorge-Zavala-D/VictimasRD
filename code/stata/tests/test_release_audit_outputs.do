@@ -26,7 +26,7 @@ foreach required_file in "`audit'" "`manifest'" {
 import delimited using "`audit'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 255
+assert _N == 261
 assert overall_status == "BLOCKED"
 assert file_exists == 1
 assert checksum_match == 1

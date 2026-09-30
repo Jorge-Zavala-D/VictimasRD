@@ -23,7 +23,7 @@ capture mkdir "`table_dir'"
 local source_manifests ///
     "rd-outcome-output-manifest.csv rd-heterogeneity-output-manifest-2013-2017.csv rd-mechanism-output-manifest.csv"
 local source_pipelines "main_effects heterogeneity mechanisms"
-local expected_counts "117 126 12"
+local expected_counts "117 126 18"
 
 capture confirm file "`review_registry'"
 if _rc {
@@ -82,7 +82,7 @@ local source_signatures ///
 import delimited "`review_registry'", clear varnames(1) ///
     bindquote(strict) encoding(utf8) stringcols(_all)
 isid path
-assert _N == 255
+assert _N == 261
 destring owner_approved, replace
 assert inlist(disposition, ///
     "main_text", "appendix", "internal_only", "exclude")
@@ -98,7 +98,7 @@ save `review_decisions'
 
 use `candidate_inventory', clear
 isid path
-assert _N == 255
+assert _N == 261
 merge 1:1 path using `review_decisions', assert(match) nogen
 
 generate byte safe_path = ///
@@ -175,7 +175,7 @@ forvalues row = 1/`=_N' {
         "`row_pipeline' & `row_disposition' & `row_count' \\" _n
 }
 file write `inventory_table' "\midrule" _n
-file write `inventory_table' "All pipelines & All artifacts & 255 \\" _n
+file write `inventory_table' "All pipelines & All artifacts & 261 \\" _n
 file write `inventory_table' "\bottomrule\end{tabular}" _n
 file write `inventory_table' ///
     "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Proposed dispositions reflect a preliminary scientific audit of module 04--06 outputs. Main-text and appendix selections remain blocked from release until owner approval and a safe Overleaf destination are recorded. Internal-only and excluded artifacts remain reproducible repository outputs but are not publication exhibits.}" _n

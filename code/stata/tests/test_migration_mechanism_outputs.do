@@ -90,7 +90,7 @@ assert missing(q_bh) if spec_id == "descriptive_unadjusted"
 import delimited using "`manifest'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
-assert _N == 12
+assert _N == 18
 assert review_status == "generated_unreviewed"
 
 foreach figure_name in ///

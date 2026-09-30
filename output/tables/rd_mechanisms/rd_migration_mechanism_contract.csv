@@ -12,4 +12,7 @@ contract_item,value,status,source
 "inference_micro","CCPP clustered with CCPP-equal weights","locked","approved protocol"
 "mediation_claim","not estimated","locked","approved protocol"
 "linkage_endpoints","extreme-case coding endpoints not bounds","locked","approved protocol"
+"cman_year_interpretation","allocation and delivery in recorded CMAN year","owner_assumption","owner decision 2026-09-30"
+"historical_date_acquisition","closed_not_required","owner_decision","owner decision 2026-09-30"
+"selection_correction","not applied; feasibility diagnostics only","not_identified","docs/CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md"
 "review_status","generated_unreviewed","pending review","repository policy"

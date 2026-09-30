@@ -1,0 +1,4 @@
+model_id,denominator,n_parent,n_covariate_complete,n_fit,n_selected,estimation_rc,converged,p_min,p_p01,p_p99,p_max,n_p_below_005,ess_ipw,ccpp_baseline_complete,ccpp_complete_without_selected,causal_adjustment_approved,model_status,interpretation
+adult_movement,Linked known-age adults age 14 or older,28250,28086,0,28086,0,,1,1,1,1,0,2839.96686780579,106,0,0,all_complete_observed,baseline-only feasibility diagnostic
+household_complete,All source households,13371,13285,13285,10143,0,1,.396719848955376,.529841173223966,.927400068919233,.927400068919233,0,1230.16269942786,107,3,0,estimated,baseline-only feasibility diagnostic
+person_linkage,All source-cohort people,45740,45482,45482,34873,0,1,.606540624240248,.704826361293671,.883354412385442,.883354412385442,0,2664.18636316427,107,1,0,estimated,baseline-only feasibility diagnostic

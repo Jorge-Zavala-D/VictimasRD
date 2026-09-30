@@ -1,0 +1,7 @@
+frame,side,n_parent,n_observed,n_partly_observed,n_unobserved,n_ccpp,lower,upper,width,estimand,causal_late_bound,primary_adult_target
+source_households,above,1272,633,414,225,22,.286809013057176,.555940390010252,.269131376953077,finite_source_cohort_description,0,0
+source_households,above_minus_below,4051,2189,1343,519,64,-.241733541710504,.273029518497472,.514763060207976,finite_source_cohort_description,0,0
+source_households,below,2779,1556,929,294,42,.28291087151278,.52854255476768,.245631683254899,finite_source_cohort_description,0,0
+source_people_all_ages,above,4044,2864,0,1180,22,.288283701836037,.537414175661273,.249130473825236,finite_source_cohort_description,0,0
+source_people_all_ages,above_minus_below,13010,9862,0,3148,64,-.21993043633302,.25938968428472,.479320120617741,finite_source_cohort_description,0,0
+source_people_all_ages,below,8966,6998,0,1968,42,.278024491376553,.508214138169058,.230189646792505,finite_source_cohort_description,0,0

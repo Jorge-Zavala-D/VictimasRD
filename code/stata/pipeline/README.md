@@ -15,6 +15,13 @@ The expected modules are:
 8. `07_build_tables_figures.do`
 9. `08_run_release_checks.do`
 
+Module 06 calls `_migration_selection_audit.do` for separate coverage/linkage/
+measurement/completeness denominators, baseline selection-model feasibility,
+and finite-source-cohort descriptive intervals. It does not apply causal
+selection weighting or trimming. The owner's CMAN allocation-and-delivery-year
+assumption and the scientific boundaries are in
+[`docs/CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md`](../../../docs/CENSUS_2017_SELECTION_FEASIBILITY_2026-09-30.md).
+
 `01_data_preparation.do` is the single authoritative Stata preparation
 program. It is organized internally by source family and performs source
 validation, cleaning, deterministic linkage, candidate generation, merge
