@@ -1,5 +1,18 @@
 # Victimas RD project context
 
+## 2 October 2026: World Development framing and manuscript revision plan
+
+The owner favors World Development and requested a side-by-side framing
+assessment against IJTJ using the same audited evidence. Read
+[the framing and revision plan](MANUSCRIPT_FRAMING_AND_REWRITE_PLAN_2026-10-02.md)
+before drafting the revised manuscript. It contains provisional abstracts,
+exhibit plans, source-verified literature anchors and an ordered section
+revision map. The immediate writing batch is the data/measurement and
+empirical-strategy foundation, using the existing `World Development
+Manuscript` Overleaf scaffold and preserving `Working Paper - Legacy`.
+This planning decision changes no estimand, estimate, canonical artifact
+role or release hold; no live manuscript or output was synchronized.
+
 ## 30 September 2026: publication-sized review packet
 
 The owner approved a separate presentation/narrative packet built from existing
