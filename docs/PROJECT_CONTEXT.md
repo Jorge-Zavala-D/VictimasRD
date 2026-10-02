@@ -1,5 +1,19 @@
 # Victimas RD project context
 
+## 2 October 2026: robustness and interpretation-limits synthesis completed
+
+The owner approved the next writing milestone from frozen evidence. The
+existing live robustness section now contains a threat-organized synthesis
+of institutional/history, score/support, specification, strength/dependence,
+selection, measurement and multiplicity limitations. Read
+[the robustness and validation receipt](MANUSCRIPT_ROBUSTNESS_AUDIT_2026-10-02.md)
+for source verification, exact numerical checks, independent review and the
+31-page compiled preview. Exactly one live source changed; 460 protected
+files and all 35 exhibit holds remain unchanged. No analysis was re-estimated
+and no sample, treatment, weighting or inference contract changed. Next:
+introduction/conclusion, then abstract/title from the audited evidence; full
+paper scientific, disclosure and publication holds remain in place.
+
 ## 2 October 2026: mechanisms/heterogeneity and Online Appendix E completed
 
 The owner approved the next writing batch using frozen module-05 and module-06
