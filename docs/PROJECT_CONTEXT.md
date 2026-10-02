@@ -1,5 +1,22 @@
 # Victimas RD project context
 
+## 2 October 2026: mechanisms/heterogeneity and Online Appendix E completed
+
+The owner approved the next writing batch using frozen module-05 and module-06
+evidence. The existing live Overleaf extensions section and Online Appendix E
+now contain independently audited drafts. Read
+
+[the extensions and validation receipt](MANUSCRIPT_EXTENSIONS_AUDIT_2026-10-02.md)
+
+for the complete receipt-versus-assignment hierarchy, 63 diagnostic-screened
+receipt contrasts, all fifteen adjusted assignment signals, 37 candidate
+intermediate outcomes, six noncausal associations and eight project-receipt
+discontinuities. Three verified bibliography entries were appended. Exactly
+three live files changed; 422 protected files and all 35 exhibit release holds
+remain unchanged. Main/appendix previews compile at 28/45 pages without
+clearing whole-paper scientific or publication holds. Next: the planned
+robustness/limitations synthesis, before introduction, abstract and conclusion.
+
 ## 2 October 2026: main-results narrative and Online Appendix D completed
 
 The owner approved the next writing batch from the frozen module-04 evidence.
