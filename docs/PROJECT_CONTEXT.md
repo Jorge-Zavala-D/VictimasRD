@@ -1,5 +1,18 @@
 # Victimas RD project context
 
+## 2 October 2026: empirical-foundation manuscript batch completed
+
+The owner approved implementation of the first writing batch in the existing
+live Overleaf manuscript. The data/measurement and empirical-strategy sections
+and Online Appendices B and C now contain substantive, independently reviewed
+drafts. Read [the audit and validation receipt](MANUSCRIPT_EMPIRICAL_FOUNDATION_AUDIT_2026-10-02.md)
+for the source accounting, citation verification, corrections and compiled
+previews. Six authorized live inputs changed, including bibliography dependencies;
+the legacy paper, datasets, analysis code, estimates and 35 exhibit release holds
+were preserved. This validates the writing batch, not the entire paper or a
+publication release. The next planned batch is institutional context and the
+conceptual framework, together with Online Appendix A.
+
 ## 2 October 2026: World Development framing and manuscript revision plan
 
 The owner favors World Development and requested a side-by-side framing
