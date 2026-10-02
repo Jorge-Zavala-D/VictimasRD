@@ -1,5 +1,25 @@
 # Victimas RD project context
 
+## 2 October 2026: introduction, conclusion, abstract and title completed
+
+The owner authorized the final writing batch from the audited, frozen
+evidence. The live World Development introduction and conclusion were
+drafted first, followed by an aligned abstract and the title **Collective
+Reparations, Local Development, and Mobility in Peru**. Read
+
+[the synthesis and validation receipt](MANUSCRIPT_SYNTHESIS_AUDIT_2026-10-02.md)
+
+for claim/source reconciliation, the independent clean review, exact scope,
+and remaining interpretation boundaries. Exactly four live sources changed;
+457 protected files, the bibliography and all 35 exhibit holds remain
+unchanged. The main preview compiles at 37 pages, the title-dependent Online
+Appendix at 44 pages, and the administrative title-page template at one page.
+The latter's remaining author/admin declarations are not certified. No
+estimate, data, sample, timing or inference contract changed. Next: an
+integrated whole-manuscript reader audit and publication-production preflight;
+technical writing completion does not clear scientific, disclosure or
+publication holds.
+
 ## 2 October 2026: robustness and interpretation-limits synthesis completed
 
 The owner approved the next writing milestone from frozen evidence. The
