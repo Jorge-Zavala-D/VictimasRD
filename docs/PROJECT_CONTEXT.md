@@ -1,5 +1,36 @@
 # Victimas RD project context
 
+## 2 October 2026: main-results narrative and Online Appendix D completed
+
+The owner approved the next writing batch from the frozen module-04 evidence.
+The existing live Overleaf results section and Online Appendix D now contain
+independently audited drafts. Read
+[the results and validation receipt](MANUSCRIPT_RESULTS_AUDIT_2026-10-02.md)
+for the complete 48-outcome/family coverage, exact observed-adult movement
+population, marginal 2013 instrument strength, selection boundaries and two
+adjusted parametric sensitivity signals. All 117 module-04 artifacts and 72
+figures were assessed; known held presentation defects are documented, not
+silently edited. Exactly two live sources changed and 277 protected files
+remain unchanged. Main/appendix previews compile at 25/33 pages, without
+clearing whole-paper scientific or publication holds. All 35 exhibit holds
+remain intact. Next: mechanisms/heterogeneity and Online Appendix E, followed
+by robustness/limitations before the introduction, abstract and conclusion.
+
+## 2 October 2026: institutional-context and framework manuscript batch completed
+
+The owner approved the next writing batch in the existing live Overleaf
+manuscript. The institutional context/conceptual framework and Online Appendix A
+now contain substantive, independently reviewed drafts. Read
+[the source and validation receipt](MANUSCRIPT_CONTEXT_FRAMEWORK_AUDIT_2026-10-02.md)
+for the joint A/B priority rule, dated implementation evidence, conceptual
+pathways, and separation of 2013 observed-origin conditions from 2017
+linked-cohort/destination outcomes. Nine official bibliography entries were
+appended; exactly three live inputs changed. Legacy sources, estimates and all
+35 exhibit release holds remain intact. The compiled previews validate this
+writing batch, not the full paper or its public release. The next planned batch
+is the results narrative and Online Appendix D using the frozen module-04
+evidence, followed by mechanisms/heterogeneity before the introduction/abstract.
+
 ## 2 October 2026: empirical-foundation manuscript batch completed
 
 The owner approved implementation of the first writing batch in the existing
