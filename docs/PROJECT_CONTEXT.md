@@ -1,5 +1,19 @@
 # Victimas RD project context
 
+## 3 October 2026: integrated reader audit and production preflight
+
+The owner authorized the whole-manuscript reader audit and assessment of work
+to date. Read [the integration/preflight receipt](MANUSCRIPT_INTEGRATION_PREFLIGHT_2026-10-03.md)
+for exact source/code/artifact coverage, numerical reconciliation, narrow
+manuscript repairs, exhibit placement, the completed transparency draft and
+author-confirmed administrative facts. All 12 existing tests and the current
+manifest checks pass; none of the 35 held exhibits is approved or inserted.
+The full raw-data pipeline and every line of the large Stata tree were not
+independently regenerated/adjudicated. Scientific/disclosure/publication holds
+remain separate from technical success. Next: generator-level presentation
+repairs and finite-value safeguards, followed by final-scale exhibit review
+and explicit release/integration decisions; no new estimator or sample search.
+
 ## 2 October 2026: introduction, conclusion, abstract and title completed
 
 The owner authorized the final writing batch from the audited, frozen

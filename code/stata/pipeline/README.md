@@ -194,7 +194,7 @@ district-clustered descriptive CCPP associations, and labels contemporaneous
 than causal mediators. It never estimates ACME/ADE, natural indirect effects,
 proportions mediated, or products of coefficients. Aggregate outputs are
 written to `output/tables/rd_mechanisms/` and
-`output/figures/rd_mechanisms/`; their 12-row manifest is
+`output/figures/rd_mechanisms/`; their 18-row manifest is
 `metadata/rd-mechanism-output-manifest.csv`.
 
 `07_build_tables_figures.do` verifies checksums and safe repository paths in
