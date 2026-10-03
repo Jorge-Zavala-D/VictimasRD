@@ -1,5 +1,25 @@
 # Victimas RD project context
 
+## 3 October 2026: complete RD diagnostic supplement integrated internally
+
+Read [the diagnostic integration receipt](RD_DIAGNOSTIC_APPENDIX_INTEGRATION_2026-10-03.md)
+and the new diagnostic integration/source-audit and integrated-navigation CSVs
+in `metadata`. The owner approved the next task, including all 19 full-width
+diagnostic figures and their unchanged formal family table. They are now consumed
+by Online Appendix C.9, pages 39-60: Table A16 and Figures A2-A20. The active
+internal draft contains 55 reviewed input copies (31 tables, 24 figures), with
+40 main-article and 94 appendix pages in the isolated checksum-matched previews.
+
+All samples, estimates, bandwidths, code, canonical numerical outputs and
+registered families are unchanged. Historical review/generation holds remain
+dated evidence; the new record approves these exact internal copies only.
+Source-timing, standardized/raw-unit, bin-mean/formal-inference, finite-score,
+multiplicity and selection boundaries are explicit. This does not establish
+balance, no manipulation, ignorable linkage or causal validity. Publication-font,
+software locking, administrative and disclosure/submission approvals remain
+separate. Older 35-exhibit/72-page and pending-integration notes below describe
+their own completed batches, not the current internal integration status.
+
 ## 3 October 2026: election-timing graphical repair closeout
 
 Read [the superseding repair receipt](RD_ELECTION_TIMING_NOTE_REPAIR_2026-10-03.md)
