@@ -1,0 +1,27 @@
+{
+  "lock_id": "observed-2026-10-03",
+  "reported_runtime": {
+    "stata_version": 19,
+    "flavor": "IC",
+    "os": "Windows",
+    "bit": 64,
+    "born_date": "12 Aug 2026"
+  },
+  "manifest": "metadata/stata-dependency-lock-2026-10-03.csv",
+  "manifest_sha256": "d010f2891149fc6e9026b3b501ca0ff0ad1b14087b8919c669e6532ae35e7616",
+  "manifest_stata_checksum": 598622890,
+  "manifest_bytes": 2755021,
+  "file_counts": {
+    "project_ado": 267,
+    "official_base": 12954,
+    "stata_install": 2,
+    "total": 13223
+  },
+  "installation_scope": "Installed StataMP-64.exe and mp-64.dll plus official BASE files; not independent attestation of MCP-host executable identity",
+  "root_resolution": "Logical roles only; project_ado from configured build root, official_base and stata_install from Stata sysdir values",
+  "installer_source_semantics": "Recorded installation-tracker source or observed local support, not an exact remote recovery URL",
+  "historical_generation_identity_certified": false,
+  "other_machine_validated": false,
+  "redistribution_approved": false,
+  "research_estimates_regenerated": false
+}

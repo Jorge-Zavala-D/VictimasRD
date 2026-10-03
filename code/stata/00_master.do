@@ -7,7 +7,7 @@
 |                   dependencies, and optionally run the ordered pipeline.      |
 |                                                                               |
 | Date created:     27 July 2026                                                |
-| Last updated:     13 August 2026                                              |
+| Last updated:     3 October 2026                                              |
 | Stata version:    19                                                          |
 *-------------------------------------------------------------------------------*/
 
@@ -398,185 +398,26 @@ display as text "Git outputs:         ${output_root}"
 *-----------------------------------*
 
 /*
-Development bootstrap
----------------------
-Missing packages are installed into ${ado_root}, which is under the ignored
-build directory. This avoids silently modifying the preserved legacy ado tree.
-
-The package list is intentionally broad enough for the expected data audit,
-community matching, spatial work, modern RD methods, inference, and academic
-output workflow. Add packages only when a reviewed pipeline module requires
-them.
-
-This bootstrap is not the final release environment. Before results are
-certified, replace unversioned network installation with a reviewed dependency
-manifest or a license-compliant, version-locked package snapshot.
+The reviewed lock replaces floating installation. Restore exact approved
+package bytes into the ignored cache if preflight fails; do not upgrade them
+or run a network installer as part of routine replication.
 */
-
-local install_missing_packages 1
-assert inlist(`install_missing_packages', 0, 1)
-
 sysdir set PLUS "${ado_root}"
 discard
-
-/*
-Each adjacent pair is:
-
-    SSC package name    command used to verify installation
-*/
-
-local ssc_package_command_pairs ///
-    reclink     reclink ///
-    freqindex   freqindex ///
-    matchit     matchit ///
-    strdist     strdist ///
-    geodist     geodist ///
-    geonear     geonear ///
-    distinct    distinct ///
-    unique      unique ///
-    gtools      gtools ///
-    ftools      ftools ///
-    rangestat   rangestat ///
-    rangejoin   rangejoin ///
-    carryforward carryforward ///
-    labutil2    labvars ///
-    fre         fre ///
-    ivreg2      ivreg2 ///
-    ranktest    ranktest ///
-    boottest    boottest ///
-    reghdfe     reghdfe ///
-    ivreghdfe   ivreghdfe ///
-    ritest      ritest ///
-    estout      esttab ///
-    outreg2     outreg2 ///
-    coefplot    coefplot ///
-    grc1leg2    grc1leg2 ///
-    spmap       spmap ///
-    winsor2     winsor2 ///
-    sumstats    sumstats ///
-    keeporder   keeporder
-
-local pair_count : word count `ssc_package_command_pairs'
-assert mod(`pair_count', 2) == 0
-
-local missing_commands
-
-forvalues package_index = 1(2)`pair_count' {
-    local command_index = `package_index' + 1
-    local package : word `package_index' of `ssc_package_command_pairs'
-    local command : word `command_index' of `ssc_package_command_pairs'
-
-    capture which `command'
-
-    if _rc & `install_missing_packages' {
-        display as text "Installing missing SSC package: `package'"
-        capture noisily ssc install `package', replace
-    }
-
-    capture which `command'
-
-    if _rc {
-        local missing_commands "`missing_commands' `command'"
-    }
-}
-
-/*
-The current official Stata distributions of these packages are maintained in
-their authors' repositories rather than SSC.
-*/
-
-local net_specs ///
-    lpdensity lpdensity https://raw.githubusercontent.com/nppackages/lpdensity/main/stata ///
-    rdrobust rdrobust     https://raw.githubusercontent.com/rdpackages/rdrobust/main/stata ///
-    rdhte    rdhte        https://raw.githubusercontent.com/rdpackages/rdhte/main/stata ///
-    rddensity rddensity   https://raw.githubusercontent.com/rdpackages/rddensity/main/stata ///
-    rdpower   rdmde       https://raw.githubusercontent.com/rdpackages/rdpower/main/stata ///
-    rdmulti   rdmc        https://raw.githubusercontent.com/rdpackages/rdmulti/main/stata ///
-    rdlocrand rdwinselect https://raw.githubusercontent.com/rdpackages/rdlocrand/main/stata ///
-    binsreg   binsreg     https://raw.githubusercontent.com/nppackages/binsreg/main/stata
-
-local triple_count : word count `net_specs'
-assert mod(`triple_count', 3) == 0
-
-forvalues package_index = 1(3)`triple_count' {
-    local command_index = `package_index' + 1
-    local source_index  = `package_index' + 2
-    local package : word `package_index' of `net_specs'
-    local command : word `command_index' of `net_specs'
-    local source  : word `source_index' of `net_specs'
-
-    capture which `command'
-
-    if _rc & `install_missing_packages' {
-        display as text "Installing missing official-source package: `package'"
-        capture noisily net install `package', from("`source'") replace
-    }
-
-    capture which `command'
-
-    if _rc {
-        local missing_commands "`missing_commands' `command'"
-    }
-}
-
-/*
-palettes uses colrspace. Install the dependency explicitly because Stata's
-package installers do not resolve user-written dependencies automatically.
-*/
-
-capture which colorpalette
-
-if _rc & `install_missing_packages' {
-    display as text "Installing color-palette dependencies."
-    capture noisily ssc install colrspace, replace
-    capture noisily ssc install palettes, replace
-}
-
-capture which colorpalette
-
-if _rc {
-    local missing_commands "`missing_commands' colorpalette"
-}
-
-/*
-plotplainblind provides a clean colorblind-safe default. Graph-producing
-modules must still specify polished titles, subtitles, labels, confidence
-intervals, legends, and complete notes.
-*/
-
-capture set scheme plotplainblind
-
-if _rc & `install_missing_packages' {
-    display as text "Installing Stata Journal graph schemes (gr0070)."
-    capture noisily net install gr0070, ///
-        from("https://www.stata-journal.com/software/sj17-3") replace
-    capture set scheme plotplainblind
-}
-
-if _rc {
-    capture set scheme stcolor
-
-    if _rc {
-        set scheme s2color
-        global graph_scheme "s2color"
-    }
-    else {
-        global graph_scheme "stcolor"
-    }
-
-    display as text "plotplainblind unavailable; using built-in scheme ${graph_scheme}."
-}
-else {
-    global graph_scheme "plotplainblind"
-}
-
-if `"`missing_commands'"' != "" {
-    display as error "Required user-written commands remain unavailable:"
-    display as error "`missing_commands'"
-    display as error "Review network access and the package list before running pipeline modules."
+capture adopath - SITE
+capture adopath - "."
+capture adopath - PERSONAL
+capture adopath - OLDPLACE
+do "${code_root}/lib/00_validate_environment.do"
+capture noisily victimasrd_validate_environment
+local environment_rc = _rc
+if `environment_rc' {
+    display as error "Environment lock failed; no analysis module was started."
     log close victimasrd_master
-    exit 499
+    exit `environment_rc'
 }
+set scheme plotplainblind
+global graph_scheme "plotplainblind"
 
 /*
 Custom PLUS directories require an explicit Mata-library index in a cold

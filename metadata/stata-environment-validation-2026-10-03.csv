@@ -1,0 +1,13 @@
+check_id,scope,status,expected_return_code,observed_return_code,evidence,interpretation_boundary
+V01,Native 13223-file lock,pass,0,0,Stata MCP native checksum and findfile acceptance,Current observed installation only
+V02,Master cold-session environment and synthetic IV RD density density-plot checks,pass,0,0,Ignored master-receipt.csv and master log,All empirical analysis switches off; no research-estimate rerun
+V03,Changed manifest bytes,pass,9,9,Stata MCP malformed-lock negative test,Reviewed manifest checksum and length gate
+V04,Changed same-length project file,pass,9,9,Stata MCP isolated cache-clone mutation test,Canonical cache and shared installation not altered
+V05,Missing project file,pass,9,9,Stata MCP isolated cache-clone missing-file test,Canonical cache and shared installation not altered
+V06,Added executable project file,pass,9,9,Stata MCP isolated cache-clone extra .mo test,Executable cache inventory gate
+V07,Added nested cache directory,pass,9,9,Stata MCP isolated nested-code test after witnessed failing test,Failing acceptance test preceded fix and successful rejection
+V08,Shadow-code search root,pass,9,9,Stata MCP isolated foreign-search-path rejection,Only BASE and PLUS admitted
+V09,Empty unapproved search root,pass,9,9,Stata MCP empty-root test after witnessed failing test,Failing acceptance test preceded strict search-path fix
+V10,Caller data order labels characteristics and estimation results,pass,0,0,Stata MCP seven-row state-preservation fixture on success and failure,Exact scalar comparison used rather than rounded local numeric text
+V11,Read-only SHA-256 verifier and seven behavior tests,pass,0,0,Python unittest and actual-installation cryptographic checks,Maintenance checker is not invoked from Stata
+V12,Private archive restored to separate local cache,pass,0,0,417-file SHA-256 restoration receipt and Stata MCP restored-cache native acceptance,Same-machine restoration only; no cross-machine or redistribution certification

@@ -4,10 +4,11 @@ This repository is the version-controlled home for the reproducible research
 components of the Victimas RD project on Peru's Collective Reparations Program
 (`Programa de Reparaciones Colectivas`, PRC).
 
-The repository is being initialized from a research archive, not from a
-finished replication package. The current analysis has unresolved differences
-in its sample definition, assignment cutoffs, treatment timing, canonical data
-snapshots, and paper-output provenance. See
+The repository was initialized from a research archive, not from a finished
+replication package. The current internal analysis uses documented,
+owner-approved samples, treatment conventions, and estimands. Its selection,
+limited-support, weak-instrument, measurement, and interpretation boundaries
+remain explicit; an internal manuscript is not a public replication release. See
 [`docs/PROJECT_CONTEXT.md`](docs/PROJECT_CONTEXT.md) before changing analysis
 code or interpreting results.
 
@@ -41,6 +42,12 @@ Raw/Working/Coded data contract.
    reproducible, appropriately sized, and non-sensitive.
 7. For an output used in the paper, validate it in Git and then synchronize it
    to the exact Overleaf path recorded in the output manifest.
+8. The master requires the reviewed local Stata cache and exact observed
+   installation; it does not download missing packages. Read
+   [`docs/STATA_ENVIRONMENT_LOCK_2026-10-03.md`](docs/STATA_ENVIRONMENT_LOCK_2026-10-03.md)
+   for the file lock, failure behavior, local restoration check, and the still
+   unresolved cross-machine and redistribution requirements. Copying the path
+   template alone is not sufficient to provision a new machine.
 
 ## Initial structure
 
@@ -103,9 +110,11 @@ Data products remain outside Git:
   `10_sisfoh_2013_household_analysis.dta`; and
 - the current 5,712-row CCPP registry with SISFOH aggregates is written to
   Dropbox Coded as `11_community_registry_sisfoh_2013.dta`;
-- the complete 193,376-person Census source cohort and 58,021 source households
-  are written as `12_census_2017_individual_analysis.dta` and
-  `13_census_2017_household_analysis.dta`; and
+- the adjudicated 193,342-person Census analytical cohort and 58,015 source
+  households are written as `12_census_2017_individual_analysis.dta` and
+  `13_census_2017_household_analysis.dta`. The original 193,376-person,
+  58,021-household delivery is preserved separately; the 34-record source-place
+  quarantine does not erase or redefine that delivery denominator; and
 - the all-row RUV registry with Census linked-cohort outcomes is written as
   `14_community_registry_census_2017.dta`.
 
@@ -124,22 +133,20 @@ The dataset-by-dataset readiness assessment is in
 
 ## Current release status
 
-This repository is not yet an authoritative replication package. Before a
-release, the research team must at minimum:
+The current internal manuscript consumes 55 reviewed generated inputs: six main
+and 49 appendix exhibits. The scientific choices and selection boundaries are
+documented in `docs/PROJECT_CONTEXT.md`; the completed internal reviews do not
+establish national representativeness, ignorable linkage, or causal mediation.
+The observed software lock is prospective, not a certification of every
+historical generating environment or a finished public replication package.
 
-- reconcile the approved legacy geography with the assignment regime and
-  estimand used in the manuscript;
-- address score rounding and mass points at the official victimization-index
-  cutoffs;
-- define analysis-specific treatment timing from the recorded CMAN treatment
-  year;
-- identify canonical community, household, and individual data snapshots;
-- assess differential Census linkage and reconcile the documented cohort with
-  manuscript sample counts;
-- map every live manuscript input to its producing specification and canonical
-  Git output;
-- regenerate paper outputs through a single versioned pipeline; and
-- complete data-access, ethics, licensing, and disclosure review.
+Before release, the remaining production and authorization requirements include:
+
+- verify the locked environment and full pipeline on another authorized machine;
+- settle software/data redistribution, disclosure, and access-permission wording;
+- complete outstanding author contributions, administrative declarations, and
+  target-journal production requirements, without inferring missing information;
+- obtain explicit approval for the submission package and public release.
 
 Repository visibility should remain private until the research team approves a
 release and its contents.

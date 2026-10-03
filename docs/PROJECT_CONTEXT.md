@@ -1,5 +1,26 @@
 # Victimas RD project context
 
+## 3 October 2026: observed software lock and whole-manuscript preflight
+
+Read [the observed Stata environment lock](STATA_ENVIRONMENT_LOCK_2026-10-03.md)
+and [the whole-manuscript audit receipt](WHOLE_MANUSCRIPT_ENVIRONMENT_AUDIT_2026-10-03.md) before changing the
+dependency cache or interpreting replication readiness. The master now checks
+13,223 recorded file identities and admits only the official BASE and locked
+project PLUS search roots. It no longer silently installs or updates packages.
+This is a prospective lock of the currently observed installation, not proof
+of the environment that generated every historical result. A private local
+project-cache snapshot was restored and verified; another machine, software
+redistribution permissions, and a full raw-data rerun remain uncertified.
+
+The current internal paper has 55 reviewed generated inputs: six main exhibits
+and 49 appendix exhibits, comprising 31 tables and 24 figures. The active
+scientific narrative, registered outcome families, samples, estimates,
+bandwidths, numerical outputs, and shared bibliography were preserved in this
+batch. Only Appendix F and the submission checklist received live-source
+updates for software/provenance status. No submission or public release was
+authorized. Older software-locking and incomplete-diagnostic-integration notes
+below are historical records, not the current task status.
+
 ## 3 October 2026: complete RD diagnostic supplement integrated internally
 
 Read [the diagnostic integration receipt](RD_DIAGNOSTIC_APPENDIX_INTEGRATION_2026-10-03.md)
