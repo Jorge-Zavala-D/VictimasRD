@@ -1,5 +1,26 @@
 # Victimas RD project context
 
+## 3 October 2026: authorized internal-draft integration and substantive literature
+
+The owner approved internal-draft integration of all 35 reviewed publication
+exhibits at the documented destinations. Read
+[the integration and literature receipt](PUBLICATION_LITERATURE_INTEGRATION_2026-10-03.md)
+and the three dated integration/literature CSV registries in `metadata` before
+continuing manuscript work. The active World Development manuscript consumes
+30 checksum-identical generated tables and five figures. Its substantive
+argument now uses 17 verified academic sources; all 39 shared-library records
+are screened with explicit coverage and exclusion reasons. Zotero remains
+read-only. The correct project NotebookLM query was attempted but blocked by
+its browser overlay; no fresh NotebookLM synthesis is claimed.
+
+This is a dated approval of the frozen internal copies, not a change to the
+generation-time owner/release hold fields or permission to release future
+generations. Submission and public-release approval remain blocked. The
+original legacy manuscript, data destinations, analytical code, frozen results
+and scientific selection/identification boundaries are unchanged. The older
+receipts below describe their own completed batches, not a current ban on the
+35 explicitly approved internal copies.
+
 ## 3 October 2026: corrective publication production
 
 The authorized corrective batch repairs the generators for A25's percent/

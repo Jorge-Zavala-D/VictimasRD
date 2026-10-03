@@ -1,5 +1,18 @@
 # Publication-sized results review
 
+## Internal-draft approval addendum — 3 October 2026
+
+The owner explicitly approved internal-draft integration of the exact 35
+reviewed exhibits after the corrective batch. The dated receipt is
+`PUBLICATION_LITERATURE_INTEGRATION_2026-10-03.md`; canonical and copied hashes,
+callers and exact destinations are recorded in
+`metadata/publication-draft-integration-2026-10-03.csv`. The active manuscript
+and appendix now consume these frozen inputs. The generated registry retains
+its generation-time `hold_no_sync` and zero public-release fields; this later
+approval permits only the recorded internal copies. No submission, public
+release, automatic promotion of new runs or manual artifact repair is implied.
+Other density/covariate plots outside this set are not silently integrated.
+
 ## Corrective production addendum — 3 October 2026
 
 Read `CORRECTIVE_PUBLICATION_PRODUCTION_2026-10-03.md` and
