@@ -1,5 +1,21 @@
 # Publication-sized results review
 
+## Integrated reader/compression addendum — 3 October 2026
+
+Read `PUBLICATION_READER_COMPRESSION_2026-10-03.md` for the current bounded
+reader pass. The assembled internal main article and online appendix compile
+to 40 and 72 pages, respectively; prior counts below are historical receipts.
+The six main and 29 appendix exhibit destinations are unchanged, and every
+canonical/copied artifact retains its approved hash. The new
+`metadata/publication-reader-navigation-2026-10-03.csv` records actual compiled
+numbers and starting pages, separately from exhibit IDs. The source-audit CSV
+records the eight live TeX edits. This pass removes duplicate numerical prose,
+adds distinct A-prefixed appendix numbering and linked contents, repairs the
+parent-relative shared bibliography, and updates the internal checklist.
+No generated exhibit was manually edited, no result was re-estimated, and no
+generation-time or public-release hold was relaxed. Density/covariate graphics
+outside the approved 35 remain subject to separate artifact review.
+
 ## Internal-draft approval addendum — 3 October 2026
 
 The owner explicitly approved internal-draft integration of the exact 35

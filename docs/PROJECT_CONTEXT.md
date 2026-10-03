@@ -1,5 +1,22 @@
 # Victimas RD project context
 
+## 3 October 2026: integrated internal reader and compression pass
+
+The authorized reader/compression pass is recorded in
+[the dated reader receipt](PUBLICATION_READER_COMPRESSION_2026-10-03.md).
+The current local previews contain 40 main-article pages and 72 online-appendix
+pages. These are internal drafts, not journal-length certification or release
+approval. All 35 reviewed exhibit files, all 48 primary estimates, the 41-key
+citation set and the scientific selection/identification boundaries remain
+unchanged. Eight live manuscript-source files were revised for readability,
+placement, appendix navigation, shared-bibliography resolution and checklist
+status. The two `metadata/publication-reader-*-2026-10-03.csv` records give
+before/after source hashes and the actual compiled exhibit numbers/pages.
+Read this receipt before further manuscript production; older dated page
+counts below describe their own batches. No analysis code or datasets were
+changed or rerun. Submission and public release remain blocked pending the
+documented graphical, administrative and disclosure review.
+
 ## 3 October 2026: authorized internal-draft integration and substantive literature
 
 The owner approved internal-draft integration of all 35 reviewed publication
