@@ -1563,6 +1563,10 @@ forvalues graph_index = 1/17 {
     if inrange(`graph_index', 6, 11) {
         local graph_source "ONPE and JNE municipal-election records"
     }
+    if inrange(`graph_index', 9, 11) {
+        local timing_note ///
+            "The 2006 cycle includes 2007 replacement elections; these measures are timing-sensitive."
+    }
     if `graph_index' >= 12 {
         local timing_note ///
             "The 2007 measure is timing-sensitive because the Census may overlap the first program year."
@@ -1570,7 +1574,7 @@ forvalues graph_index = 1/17 {
     }
 
     local graph_note `""`timing_note' Sources: RUV and `graph_source'.""'
-    if inlist(`graph_index', 1, 2, 3, 5) {
+    if inlist(`graph_index', 1, 2, 3, 5, 9, 10, 11) {
         local graph_note `""`timing_note'" "Sources: RUV and `graph_source'.""'
     }
 

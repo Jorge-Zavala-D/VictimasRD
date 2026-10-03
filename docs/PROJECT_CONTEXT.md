@@ -1,5 +1,20 @@
 # Victimas RD project context
 
+## 3 October 2026: election-timing graphical repair closeout
+
+Read [the superseding repair receipt](RD_ELECTION_TIMING_NOTE_REPAIR_2026-10-03.md)
+and `metadata/rd-graphical-review-after-election-notes-2026-10-03.csv` before
+using the additional 19 RD diagnostic figures. The owner authorized the three
+remaining note-only repairs. G11-G13 now disclose 2007 replacement-election
+returns in the 2006 cycle; their specific repair holds are resolved. All 19
+are reviewed internal candidates, still pending owner integration and public
+release. All samples, estimates, bandwidths, formal tests, and the existing
+11-variable core/six-variable timing families are unchanged. Historical family
+labels do not establish genuine pre-program timing. The previous 16/3 receipt
+below remains dated history, not the current repair disposition. No Dropbox
+data or live manuscript changed. Full-width-only review, small-note/font
+limits, and every scientific/selection qualification remain binding.
+
 ## 3 October 2026: held RD graphical diagnostic audit
 
 Read [the graphical audit receipt](RD_GRAPHICAL_PUBLICATION_AUDIT_2026-10-03.md)
