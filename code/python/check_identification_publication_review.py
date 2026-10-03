@@ -103,6 +103,8 @@ def check_pack(root):
     intervals = sorted(read_csv(root / 'output/tables/rd_mechanisms/rd_census2017_selection_intervals.csv'),
                        key=lambda row: (row['frame'], row['side']))
     assert len(tables['A25']) == len(intervals) == 6
+    interval_text = (directory / 'A25_supplement.tex').read_text(encoding='utf-8-sig')
+    assert 'Side intervals: percent' in interval_text and 'differences: percentage points' in interval_text, 'A25 display units are not explicit'
     for row, display in zip(intervals, tables['A25']):
         assert display[2] == f"[{100 * float(row['lower']):.2f}, {100 * float(row['upper']):.2f}]"
         if row['side'] == 'above_minus_below':
@@ -142,6 +144,9 @@ def check_pack(root):
     associations = sorted(read_csv(root / 'output/tables/rd_mechanisms/rd_migration_mechanism_associations.csv'),
                           key=lambda row: (row['analysis_id'], row['spec_id']))
     assert len(tables['A28']) == len(associations) == 6
+    association_text = (directory / 'A28_supplement.tex').read_text(encoding='utf-8-sig')
+    assert '2017-source altitude' in association_text and '2007 log population' in association_text and '2007 wellbeing' in association_text, 'A28 covariate years are inaccurate'
+    assert '60 communities' in association_text and '42 districts' in association_text and 'unweighted OLS' in association_text and 'local standard deviation' in association_text, 'A28 model/sample note is incomplete'
     for row, display in zip(associations, tables['A28']):
         assert f"{float(row['estimate']):.3f}" in display[2]
         assert f"[{float(row['ci_low']):.3f}, {float(row['ci_high']):.3f}]" in display[2]

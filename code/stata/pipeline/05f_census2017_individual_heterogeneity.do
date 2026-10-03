@@ -87,10 +87,10 @@ generate byte hte_assignment = ${hte_running} >= 0 ///
     if !missing(${hte_running})
 
 egen byte hte_primary_missing = rowmiss(`primary_outcomes') ///
-    if hte_bc_design & census2017_linked == 1 & age_2017 >= 14
+    if hte_bc_design & census2017_linked == 1 & age_2017 >= 14 & !missing(age_2017)
 generate byte hte_primary_sample = ///
     hte_bc_design & census2017_linked == 1 & ///
-    age_2017 >= 14 & hte_primary_missing == 0
+    age_2017 >= 14 & !missing(age_2017) & hte_primary_missing == 0
 
 quietly count if hte_primary_sample
 assert r(N) == 54812
@@ -109,7 +109,7 @@ assert r(N) == 62
 * I03 follows the approved linked-adult migration population from module 04f.
 * The other seven outcomes retain their original complete-case cohort.
 generate byte hte_migration_sample = ///
-    hte_bc_design & census2017_linked == 1 & age_2017 >= 14 & ///
+    hte_bc_design & census2017_linked == 1 & age_2017 >= 14 & !missing(age_2017) & ///
     !missing(moved_ccpp_2013_2017)
 assert hte_migration_sample if hte_primary_sample
 quietly count if hte_migration_sample

@@ -1,5 +1,21 @@
 # Victimas RD project context
 
+## 3 October 2026: corrective publication production
+
+The authorized corrective batch repairs the generators for A25's percent/
+percentage-point units, A28's covariate years and A29's clipped note, and adds
+explicit finite-statistic and known-age guards. Read
+[the corrective validation receipt](CORRECTIVE_PUBLICATION_PRODUCTION_2026-10-03.md)
+and `metadata/publication-corrective-review-2026-10-03.csv` for the exact
+artifact identities, checks and remaining release boundary. The master-path
+publication regeneration and all 13 Stata tests pass; frozen numerical sources,
+the two table bodies and current adult eligibility are unchanged. The 46-page
+review preview matches the live manuscript's 165.1 mm text width. All 35 owner/
+release holds remain intact, and no live Overleaf file has changed. This is
+corrective production, not a new sample search or estimation strategy. The
+independent review found no unresolved Critical or Important issue within this
+bounded batch; the detailed receipt retains all wider certification limits.
+
 ## 3 October 2026: integrated reader audit and production preflight
 
 The owner authorized the whole-manuscript reader audit and assessment of work

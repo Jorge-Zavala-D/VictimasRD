@@ -1,3 +1,3 @@
 path,artifact_type,input_data,input_datasignature,generator,run_id,checksum,review_status
-"output/tables/release/release_audit.csv","table","publication_candidate_inventory.csv","3903661530","code/stata/pipeline/08_run_release_checks.do","30Sep2026_131942","3793726399","generated_unreviewed"
-"output/tables/release/tab_release_audit.tex","table","publication_candidate_inventory.csv","3903661530","code/stata/pipeline/08_run_release_checks.do","30Sep2026_131942","2387213746","generated_unreviewed"
+"output/tables/release/release_audit.csv","table","publication_candidate_inventory.csv","3903661530","code/stata/pipeline/08_run_release_checks.do","3Oct2026_014353","3793726399","generated_unreviewed"
+"output/tables/release/tab_release_audit.tex","table","publication_candidate_inventory.csv","3903661530","code/stata/pipeline/08_run_release_checks.do","3Oct2026_014353","2387213746","generated_unreviewed"

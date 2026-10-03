@@ -353,8 +353,8 @@ foreach number in 25 26 27 28 {
     local source "output/tables/rd_mechanisms/rd_census2017_selection_intervals.csv"
     local caption "Finite source-frame movement intervals, not causal bounds"
     local layout "p{0.34\linewidth}lp{0.30\linewidth}r"
-    local header "Target frame & Contrast & Identified support interval & Parent \(N\)"
-    local note "Intervals use only zero-to-one outcome support and the fixed delivered source frame. They are not confidence intervals, RD effects, fuzzy LATE bounds or bounds for eligible adults. Household intervals concern the fraction of all source members, not the primary observed-member household outcome. No interval is divided by the first stage. Sources: canonical INEI-assisted linkage and the registered selection audit."
+    local header "Target frame & Contrast & Support interval (\% / pp) & Parent \(N\)"
+    local note "Side intervals: percent; differences: percentage points (pp). Intervals use only zero-to-one outcome support and the fixed delivered source frame. They are not confidence intervals, RD effects, fuzzy LATE bounds or bounds for eligible adults. Household intervals concern the fraction of all source members, not the primary observed-member household outcome. No interval is divided by the first stage. Sources: canonical INEI-assisted linkage and the registered selection audit."
     if `number' == 26 {
         local source "metadata/rd-heterogeneity-output-manifest-2013-2017.csv"
         local caption "Heterogeneity reporting gates across all six outcome families"
@@ -374,7 +374,7 @@ foreach number in 25 26 27 28 {
         local caption "2013 predictors and 2017 migration: noncausal associations"
         local layout "p{0.32\linewidth}lp{0.26\linewidth}rr"
         local header "2013 predictor & Model & Coefficient / 95\% CI & Raw \(p\) & BH \(q\)"
-        local note "Coefficients are changes in the 2017 community migration share, in zero-to-one units, associated with one standard deviation of a 2013 predictor. They are neither fuzzy-RD LATEs nor mediation effects. Adjusted regressions use local-linear score terms and registered 2007 covariates; inference clusters by district. BH corrections concern the adjusted association family; unadjusted rows are descriptive sensitivities. Sources: RUV, CMAN, SISFOH and INEI-assisted Census."
+        local note "Coefficients are zero-to-one changes in the 2017 community migration share per local standard deviation of the 2013 predictor. These are neither fuzzy-RD LATEs nor mediation effects. All models are unweighted OLS on 60 communities with inference clustered by 42 districts and side-specific local-linear score terms. Adjusted models additionally control for 2017-source altitude, 2007 log population and 2007 wellbeing. BH corrections concern the adjusted association family; unadjusted rows are descriptive sensitivities. Sources: RUV, CMAN, SISFOH and INEI-assisted Census."
     }
     tempname table
     file open `table' using "${project_root}/`output'", write replace text
@@ -501,12 +501,14 @@ twoway (bar plot_rate plot_order, horizontal barwidth(0.55) fcolor(navy%75) lcol
         angle(0) labsize(small) nogrid) ///
     xlabel(0(25)100, labsize(small) grid glcolor(gs14)) xscale(range(0 137)) ///
     ytitle("") xtitle("CCPP-equal rate (%)", size(small)) legend(off) ///
-    title("Census 2017: distinct selection and observation stages", size(medsmall)) ///
-    subtitle("Fixed RD window; labels give unweighted observed / parent counts", size(small)) ///
-    note("Selected B/C geography, h=0.0075. Rates give each represented community equal weight." ///
-        "Parent frames differ: RUV communities; delivered people; linked known-age adults (age 14+); source households." ///
-        "Adult movement is conditional on linkage and known age. Household completeness requires all eight primary outcomes." ///
-        "Descriptive rates, not estimates with sampling confidence intervals or evidence of ignorable selection." ///
+    title("Census 2017: distinct observation stages", size(medsmall) span) ///
+    subtitle("Fixed RD window; labels show observed / parent counts", size(small) span) ///
+    note("Selected B/C geography; h=0.0075. Each represented CCPP has equal weight." ///
+        "Parent frames differ: RUV communities; delivered people; source households;" ///
+        "and linked known-age adults (age 14+). This is not a sequential attrition funnel." ///
+        "Adult movement is conditional on linkage and known age. Household completeness" ///
+        "requires all eight primary outcomes. Rates are descriptive, not estimates with" ///
+        "sampling confidence intervals or evidence of ignorable selection." ///
         "Sources: RUV, CMAN, SISFOH and INEI-assisted Census 2017.", size(small) span) ///
     xsize(6.6) ysize(5.2) graphregion(color(white))
 local output "output/figures/publication/A29_selection_flow.png"

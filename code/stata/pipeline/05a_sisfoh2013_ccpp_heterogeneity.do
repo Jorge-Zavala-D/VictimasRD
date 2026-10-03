@@ -383,7 +383,9 @@ program define _vrd_post_hte_iv
             if `sw_row' < . {
                 local sw_f_treat = hte_first[`sw_row', 1]
                 local sw_f_interaction = hte_first[`sw_row', 2]
-                local min_sw_f = min(`sw_f_treat', `sw_f_interaction')
+                * min() ignores missing operands; require both instruments.
+                local min_sw_f = cond(missing(`sw_f_treat', `sw_f_interaction'), ///
+                    ., min(`sw_f_treat', `sw_f_interaction'))
             }
         }
 
@@ -752,6 +754,10 @@ postclose `hte_cond_post'
 use `hte_results_raw', clear
 assert _N == 176
 assert estimation_rc >= 0 & estimation_rc < .
+assert missing(min_sw_f) if estimator == "ivreg2" & ///
+    missing(sw_f_treat, sw_f_interaction)
+assert gate_pass == 0 if estimator == "ivreg2" & ///
+    missing(sw_f_treat, sw_f_interaction)
 
 generate double p_holm = .
 generate double q_bh = .

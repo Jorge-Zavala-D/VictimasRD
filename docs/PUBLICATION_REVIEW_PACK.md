@@ -1,5 +1,16 @@
 # Publication-sized results review
 
+## Corrective production addendum — 3 October 2026
+
+Read `CORRECTIVE_PUBLICATION_PRODUCTION_2026-10-03.md` and
+`metadata/publication-corrective-review-2026-10-03.csv` for the narrowly scoped
+A25/A28/A29 producing-code repairs and final-scale review. The preview now
+matches the live manuscript's Letter/12-point/one-inch-margin layout (165.1 mm
+text width) and compiles at 46 pages; the older page count below is a dated
+receipt, not the current preview. Both corrected numeric table bodies and all
+frozen source results are unchanged. All 35 generated exhibit owner/release
+holds remain intact; bounded presentation clearance does not authorize sync.
+
 ## Scope and status — 30 September 2026
 
 The project lead approved building a separate review packet from the existing

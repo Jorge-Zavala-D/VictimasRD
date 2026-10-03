@@ -34,14 +34,14 @@ program define _vrd_prepare_individual_outcomes
     * CPV codes 1 and 3 identify cohabiting and married respondents.
     generate byte partnered_2017 = ///
         inlist(marital_status_2017, 1, 3) ///
-        if age_2017 >= 12 & !missing(marital_status_2017)
+        if age_2017 >= 12 & !missing(age_2017) & !missing(marital_status_2017)
 
     generate double education_years_age14_2017 = ///
         education_years_approx_2017 ///
-        if age_2017 >= 14 & !missing(education_years_approx_2017)
+        if age_2017 >= 14 & !missing(age_2017) & !missing(education_years_approx_2017)
     generate byte indigenous_language_age3_2017 = ///
         indigenous_language_2017 ///
-        if age_2017 >= 3 & !missing(indigenous_language_2017)
+        if age_2017 >= 3 & !missing(age_2017) & !missing(indigenous_language_2017)
 
     * Reconstruct both endpoints on the same cohort; linked unknowns stay missing.
     replace moved_or_not_linked_sens_2017 = ///
@@ -121,13 +121,13 @@ local primary_outcomes ///
     insurance_any_2017 disability_any_2017 wellbeing_core_2017
 
 egen byte primary_missing = rowmiss(`primary_outcomes') ///
-    if rd_bc_design & census2017_linked == 1 & age_2017 >= 14
+    if rd_bc_design & census2017_linked == 1 & age_2017 >= 14 & !missing(age_2017)
 generate byte rd_primary_sample = ///
     rd_bc_design & census2017_linked == 1 & ///
-    age_2017 >= 14 & primary_missing == 0
+    age_2017 >= 14 & !missing(age_2017) & primary_missing == 0
 * I03 needs only its own valid linked-adult migration outcome.
 generate byte rd_migration_sample = ///
-    rd_bc_design & census2017_linked == 1 & age_2017 >= 14 & ///
+    rd_bc_design & census2017_linked == 1 & age_2017 >= 14 & !missing(age_2017) & ///
     !missing(moved_ccpp_2013_2017)
 assert rd_migration_sample if rd_primary_sample
 quietly count if rd_migration_sample
@@ -1504,13 +1504,13 @@ generate byte rd_bc_design = ///
     sample_main_rd == 1 & ///
     inlist(victimization_level_source, "B", "C")
 egen byte primary_missing = rowmiss(`primary_outcomes') ///
-    if rd_bc_design & census2017_linked == 1 & age_2017 >= 14
+    if rd_bc_design & census2017_linked == 1 & age_2017 >= 14 & !missing(age_2017)
 generate byte rd_primary_sample = ///
     rd_bc_design & census2017_linked == 1 & ///
-    age_2017 >= 14 & primary_missing == 0
+    age_2017 >= 14 & !missing(age_2017) & primary_missing == 0
 keep if rd_bc_design
 generate byte rd_migration_sample = ///
-    census2017_linked == 1 & age_2017 >= 14 & ///
+    census2017_linked == 1 & age_2017 >= 14 & !missing(age_2017) & ///
     !missing(moved_ccpp_2013_2017)
 encode ruv_id, generate(cluster_ruv)
 
