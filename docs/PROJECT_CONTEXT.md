@@ -1,5 +1,27 @@
 # Victimas RD project context
 
+## 3 October 2026: held RD graphical diagnostic audit
+
+Read [the graphical audit receipt](RD_GRAPHICAL_PUBLICATION_AUDIT_2026-10-03.md)
+and `metadata/rd-graphical-review-2026-10-03.csv` before integrating the 19
+additional RD diagnostic figures. The owner approved note/unit presentation
+repairs affecting four figures; no sample, variable, estimate, bandwidth,
+formal test, or multiplicity family changed. All 19 figures were reproduced
+through Stata MCP and inspected at the live manuscript's 165.1 mm full width.
+The bottom notes are small; half-width/composite and publisher font clearance
+remain pending. Sixteen are reviewed internal candidates; G11–G13 remain held
+for election-timing note repair. None is covered by the previous approval of
+35 live exhibits. Live integration and public release
+remain unapproved for the additional figures. Density-test nonsignificance and
+the absence of multiplicity-adjusted covariate rejections do not prove no
+manipulation, balance, or RD validity. The two nominal core discrepancies and
+the geographic-source, GDP-unit/allocation, 2007 timing, and selection limits
+must remain visible. Independent review additionally found that the three
+2006-election plots include 2007 replacement returns in their effective samples.
+They are held pending explicit approval of additional note-only repairs.
+Do not drop records or silently revise
+the registered test families. No Dropbox data or live manuscript was changed.
+
 ## 3 October 2026: integrated internal reader and compression pass
 
 The authorized reader/compression pass is recorded in

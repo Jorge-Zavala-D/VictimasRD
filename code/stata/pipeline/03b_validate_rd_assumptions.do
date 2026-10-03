@@ -7,7 +7,7 @@
 |                   covariates, linkage, and specification sensitivity at B--C.  |
 |                                                                                |
 | Date created:     10 August 2026                                               |
-| Date updated:     11 August 2026                                               |
+| Date updated:     3 October 2026                                               |
 | Stata version:    19                                                           |
 *-------------------------------------------------------------------------------*/
 
@@ -1444,7 +1444,7 @@ local graph_title_17 "Urban status in 2007"
 
 local graph_ytitle_1  "Meters above sea level"
 local graph_ytitle_2  "Log(1 + km)"
-local graph_ytitle_3  "Inverse hyperbolic sine of district GDP"
+local graph_ytitle_3  "IHS district GDP (source units)"
 local graph_ytitle_4  "Annual growth rate"
 local graph_ytitle_5  "Herfindahl-Hirschman index"
 local graph_ytitle_6  "Turnout share"
@@ -1541,8 +1541,24 @@ forvalues graph_index = 1/17 {
         "The measure is pre-treatment or fixed before rollout."
     local graph_source ///
         "INEI geospatial centro-poblado records"
+    if `graph_index' == 1 {
+        local timing_note ///
+            "Altitude is a physical attribute measured in the 2017 geographic source."
+    }
+    if `graph_index' == 2 {
+        local timing_note ///
+            "Distance uses 2017 capital-code proxies; historical capital status is not independently verified."
+    }
     if inrange(`graph_index', 3, 5) {
         local graph_source "Seminario-Palomino nightlights GDP estimates"
+    }
+    if `graph_index' == 3 {
+        local timing_note ///
+            "IHS (inverse hyperbolic sine) uses GDP source units; the workbook display scale is unverified."
+    }
+    if `graph_index' == 5 {
+        local timing_note ///
+            "The source uses 2007 population shares: this is settlement concentration, not household inequality."
     }
     if inrange(`graph_index', 6, 11) {
         local graph_source "ONPE and JNE municipal-election records"
@@ -1551,6 +1567,11 @@ forvalues graph_index = 1/17 {
         local timing_note ///
             "The 2007 measure is timing-sensitive because the Census may overlap the first program year."
         local graph_source "INEI 2007 Population Census"
+    }
+
+    local graph_note `""`timing_note' Sources: RUV and `graph_source'.""'
+    if inlist(`graph_index', 1, 2, 3, 5) {
+        local graph_note `""`timing_note'" "Sources: RUV and `graph_source'.""'
     }
 
     twoway ///
@@ -1592,7 +1613,7 @@ forvalues graph_index = 1/17 {
             "Points are quantile-spaced, variance-mimicking binned means; bars are 95% confidence intervals." ///
             "Lines are triangular-kernel local-linear fits in the outcome-specific MSE bandwidth (maximum h = `graph_h_text')." ///
             "The subtitle reports robust bias-corrected rdrobust inference with district CR2, mass-point adjustment, and rounding-band exclusion." ///
-            "`timing_note' Sources: RUV and `graph_source'.", ///
+            `graph_note', ///
             size(vsmall) color(gs5) span) ///
         xsize(10) ysize(7) ///
         graphregion(color(white)) plotregion(color(white))
