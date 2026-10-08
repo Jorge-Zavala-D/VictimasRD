@@ -3,6 +3,7 @@ import csv
 import hashlib
 import importlib.util
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
 
@@ -62,6 +63,38 @@ class EnvironmentLockTests(unittest.TestCase):
     def test_rejects_unlocked_executable_file(self):
         (self.ado / 'r/extra.mo').write_bytes(b'unreviewed')
         self.assertIn('unlocked executable', '\n'.join(self.checker.verify_files(self.manifest, self.ado)))
+
+
+    def test_git_checkout_preserves_literal_lock_under_both_settings(self):
+        repo = Path(__file__).resolve().parents[2]
+        relative = 'metadata/stata-dependency-lock-2026-10-03.csv'
+        reviewed = (repo / relative).read_bytes()
+        self.assertEqual(hashlib.sha256(reviewed).hexdigest(),
+                         'd010f2891149fc6e9026b3b501ca0ff0ad1b14087b8919c669e6532ae35e7616')
+        fixture = self.root / 'git-fixture'
+        fixture.mkdir()
+
+        def git(*args, input=None):
+            return subprocess.run(['git', '-C', str(fixture), *args], input=input,
+                                  check=True, capture_output=True).stdout.strip().decode()
+
+        git('init', '-q')
+        # Reproduce the normalized LF blob already stored in the real Git index.
+        blob = git('hash-object', '-w', '--stdin', input=reviewed.replace(b'\r\n', b'\n'))
+        git('update-index', '--add', '--cacheinfo', f'100644,{blob},{relative}')
+        attributes = repo / '.gitattributes'
+        if attributes.is_file():
+            blob = git('hash-object', '-w', '--stdin', input=attributes.read_bytes())
+            git('update-index', '--add', '--cacheinfo', f'100644,{blob},.gitattributes')
+        for setting in ('false', 'true'):
+            with self.subTest(autocrlf=setting):
+                git('config', 'core.autocrlf', setting)
+                checkout = self.root / ('checkout-' + setting)
+                git('checkout-index', '--all', '--prefix=' + checkout.as_posix() + '/')
+                restored = (checkout / relative).read_bytes()
+                self.assertEqual(hashlib.sha256(restored).hexdigest(),
+                                 hashlib.sha256(reviewed).hexdigest())
+                self.assertEqual(len(restored), 2755021)
 
 
 if __name__ == '__main__':

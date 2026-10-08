@@ -47,7 +47,14 @@ Raw/Working/Coded data contract.
    [`docs/STATA_ENVIRONMENT_LOCK_2026-10-03.md`](docs/STATA_ENVIRONMENT_LOCK_2026-10-03.md)
    for the file lock, failure behavior, local restoration check, and the still
    unresolved cross-machine and redistribution requirements. Copying the path
-   template alone is not sufficient to provision a new machine.
+   template alone is not sufficient to provision a new machine. The tested
+   [collaborator-restoration contract](docs/COLLABORATOR_RESTORATION_CONTRACT_2026-10-08.md)
+   specifies exact checkout bytes, licensed software, authorized inputs and
+   failure checks; it does not certify an untested collaborator's machine.
+
+The [8 October internal production receipt](docs/ADMINISTRATIVE_SUBMISSION_PRODUCTION_AUDIT_2026-10-08.md)
+records the separate blinded manuscript/appendix bundles, author declarations,
+55 preserved exhibits, current policy checks and remaining upload/release holds.
 
 ## Initial structure
 

@@ -1,5 +1,39 @@
 # Victimas RD project context
 
+## 8 October 2026: administrative production and tested restoration contract
+
+Read [the internal production receipt](ADMINISTRATIVE_SUBMISSION_PRODUCTION_AUDIT_2026-10-08.md)
+and [the collaborator-restoration contract](COLLABORATOR_RESTORATION_CONTRACT_2026-10-08.md)
+before describing submission readiness or provisioning a new machine. The owner
+confirmed equal contributions in all CRediT roles and no funder role; the
+correspondence address uses Universidad del Pacífico's published university
+address. Legacy author order, affiliations, contacts, funding and acknowledgements
+are preserved. The draft now discloses AI-assisted research/code production as
+well as writing, without inventing historical tool versions or privacy clearance.
+
+The internal previews contain 41 main-article pages, 94 appendix pages and a
+seven-page administrative packet. All 55 generated inputs remain hash-identical
+to their reviewed canonical Git outputs. Separate blinded source bundles omit
+author-only files, research data, software and logs; their bibliography copies
+omit imported abstracts and non-rendered keywords, with identical references and
+page text in isolated rebuilds. The live shared bibliography is unchanged.
+
+A file-specific Git newline rule preserves the literal reviewed CRLF dependency
+manifest under both tested autocrlf settings. All eight Python tests pass. The
+private 417-file cache restored exactly; the native guard accepted it, rejected
+an extra executable with return code 9, and preserved caller data and regression
+results in both checks. The environment-only master passed through Stata MCP;
+no empirical module or raw-data pipeline was rerun in this production batch.
+
+This does not establish another-machine portability, historical generating
+software, actual MCP-loaded executable identity, software redistribution rights,
+or public-release authority. Upload remains held for final author attestations,
+access/exemption documentation and AI/tool-rights checks, current journal/portal
+requirements, and artifact-level public-disclosure approval. The legacy ethics
+footnote says approval was given; the owner's newer account says exemption.
+Neither account is silently converted into a formal certificate. Older pending
+CRediT/postal/sponsor items below are superseded; their other holds remain.
+
 ## 3 October 2026: observed software lock and whole-manuscript preflight
 
 Read [the observed Stata environment lock](STATA_ENVIRONMENT_LOCK_2026-10-03.md)

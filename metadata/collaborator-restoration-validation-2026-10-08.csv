@@ -1,0 +1,8 @@
+check,expected,observed,status,scope
+python_behavioral_suite,8 passing tests,8 passing tests,pass,native lock behavior and actual Git checkout
+environment_only_master,0,0,pass,Stata MCP durable receipt; caller state preserved where tested
+exact_restoration,0,0,pass,Stata MCP durable receipt; caller state preserved where tested
+extra_executable,9,9,pass,Stata MCP durable receipt; caller state preserved where tested
+private_project_cache_restoration,417,417,pass,same-machine exact restoration; no distribution clearance
+main_isolated_source_rebuild,identical text and bbl,identical text and bbl,pass,20 files; no author-only files or research data
+online_appendix_isolated_source_rebuild,identical text and bbl,identical text and bbl,pass,60 files; no author-only files or research data
