@@ -249,6 +249,17 @@ foreach treatment_var of varlist treat_07-treat_23 {
 quietly datasignature
 local input_datasignature "`r(datasignature)'"
 
+// A resumed search may combine only milestones from the same scientific inputs.
+local search_generation "data:`input_datasignature'"
+foreach identity_file in "`protocol_file'" "`candidate_registry'" ///
+    "`specification_registry'" "${pipeline_root}/03_validate_rd_design.do" ///
+    "${project_root}/code/stata/lib/00_validate_environment.do" {
+    quietly checksum "`identity_file'"
+    local identity_checksum : display %20.0f r(checksum)
+    local identity_checksum = strtrim("`identity_checksum'")
+    local search_generation "`search_generation';`identity_checksum'"
+}
+
 encode ubigeo_dist, generate(cluster_dist)
 label variable cluster_dist "District cluster identifier for RD audit"
 
@@ -1198,6 +1209,7 @@ if "`execution_mode'" == "province_chunk" {
         tie_rule ///
         support_rule ///
         specification
+    char _dta[vrd_search_generation] "`search_generation'"
     save "`chunk_output'", replace
 
     display as result ///
@@ -1220,6 +1232,8 @@ if "`execution_mode'" == "assemble" {
     capture confirm file "`base_output'"
     assert !_rc
     use "`base_output'", clear
+    local milestone_generation : char _dta[vrd_search_generation]
+    assert "`milestone_generation'" == "`search_generation'"
     assert _N == 26960
 
     forvalues chunk_index = 1/`province_chunk_count' {
@@ -1229,6 +1243,11 @@ if "`execution_mode'" == "assemble" {
             "${qa_data_root}/rd_design_first_stage_prov_chunk_`chunk_text'.dta"
         capture confirm file "`chunk_output'"
         assert !_rc
+        preserve
+        use "`chunk_output'", clear
+        local milestone_generation : char _dta[vrd_search_generation]
+        assert "`milestone_generation'" == "`search_generation'"
+        restore
         append using "`chunk_output'"
     }
 
@@ -1246,6 +1265,8 @@ if "`execution_mode'" == "assemble" {
     capture confirm file "`covariate_base'"
     assert !_rc
     use "`covariate_base'", clear
+    local milestone_generation : char _dta[vrd_search_generation]
+    assert "`milestone_generation'" == "`search_generation'"
     save "`covariate_results'", replace
 }
 
@@ -1514,10 +1535,12 @@ if "`execution_mode'" == "base" {
         tie_rule ///
         support_rule ///
         specification
+    char _dta[vrd_search_generation] "`search_generation'"
     save "`base_output'", replace
 
     use "`covariate_results'", clear
     assert _N > 0
+    char _dta[vrd_search_generation] "`search_generation'"
     save "`covariate_base'", replace
 
     display as result "RD design base audit completed."
@@ -2733,7 +2756,7 @@ forvalues output_index = 1/`output_count' {
     local output_bytes = strtrim("`output_bytes'")
 
     file write `manifest_handle' ///
-        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/03_validate_rd_design.do","08_community_registry_elections.dta","`input_datasignature'","aggregate RD first-stage specification","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","aggregate_internal_review","main_geography_selected_externally""' _n
+        `""`output_id'","`output_path'","`output_type'","code/stata/pipeline/03_validate_rd_design.do","08_community_registry_elections.dta","`search_generation'","aggregate RD first-stage specification","`output_spec'","Stata `c(stata_version)'","`c(current_date)'","`output_checksum'","`output_bytes'","aggregate_internal_review","main_geography_selected_externally""' _n
 }
 file close `manifest_handle'
 

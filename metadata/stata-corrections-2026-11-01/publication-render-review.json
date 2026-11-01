@@ -1,0 +1,28 @@
+{
+  "sha256": "4bc239a522371ccd196aaae12d81da92aa304ee6a1840618c837ff985a08b369",
+  "exhibit_pages": {
+    "A25": 41,
+    "A28": 45,
+    "A29": 46
+  },
+  "pages": 46,
+  "text_width_mm": 165.1,
+  "page_bounds": "pass",
+  "overfull_undefined_multiply_defined": 0,
+  "visual_review": {
+    "all_pages": "contact sheets",
+    "enlarged_pages": [
+      6,
+      7,
+      12,
+      13,
+      41,
+      45,
+      46
+    ],
+    "figures_inspected": 5,
+    "source_rows_checked": 287,
+    "live_overleaf_changed": false,
+    "release_approved": false
+  }
+}

@@ -1,5 +1,26 @@
 # Victimas RD project context
 
+## 1 November 2026: targeted Stata corrections and end-to-end validation
+
+Read [the corrective validation receipt](STATA_CORRECTIVE_VALIDATION_2026-11-01.md),
+[the binding correction decisions](STATA_CORRECTIVE_DECISIONS_2026-11-01.md)
+and [the new prospective environment lock](STATA_ENVIRONMENT_LOCK_2026-11-01.md)
+before changing code, interpreting regenerated results or restoring a machine.
+The 18-finding corrective workflow completed its routine full master at
+21:42:47 through Stata MCP. Stata 19, 7 October 2026, was qualified against
+preserved results without any package upgrade; the historical lock remains
+unchanged. All 11 keyed dataset comparisons passed with explicitly reconciled
+roster/NBI and four-field floating-point exceptions. All 48 primary outcomes /
+96 common-window RF/fuzzy rows retain identical shared serialized results.
+Secondary NBI adaptive fits and 30 HTE Holm cells changed for documented reasons;
+32 prescribed clustering sensitivity rows were added. The technical release
+audit has zero errors but remains BLOCKED: changed artifact bytes do not inherit
+historical approval. Secondary sensitivity LATEs remain held pending their own
+exact-sample weak-IV diagnostics. Live Overleaf files were not replaced, and
+no stage, commit, push, submission or public release was authorized. Older
+pending full-rerun and installed-build statements below are historical evidence,
+not current technical status; other scientific/access/disclosure holds remain.
+
 ## 8 October 2026: administrative production and tested restoration contract
 
 Read [the internal production receipt](ADMINISTRATIVE_SUBMISSION_PRODUCTION_AUDIT_2026-10-08.md)

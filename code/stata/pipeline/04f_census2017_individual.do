@@ -889,6 +889,12 @@ forvalues outcome_index = 1/`outcome_count' {
 
                 capture local kp_f = e(rkf)
                 capture local ar_p = e(arfp)
+                if missing(`estimate_bc', `standard_error', `pvalue', `ci_low', `ci_high') | ///
+                    `standard_error' <= 0 {
+                    local estimation_rc = 504
+                    local kp_f .
+                    local ar_p .
+                }
                 capture local underid_p = e(idp)
 
                 quietly count if e(sample) & ${rd_running} < 0
@@ -1001,33 +1007,38 @@ assert r(N) == 2
 
 generate double p_holm = .
 generate double q_bh = .
-egen long correction_group = ///
-    group(spec_id estimand multiplicity_family) ///
-    if tier != "design" & pvalue < .
-generate byte p_missing = missing(pvalue)
-
-sort correction_group p_missing pvalue outcome_id
-by correction_group: egen int correction_m = total(pvalue < .) ///
+// Keep the registered family fixed when a model fails; retain missing raw p-values.
+generate double p_for_adjust = cond(estimation_rc == 0 & !missing(pvalue), pvalue, 1)
+egen long correction_group = group(spec_id estimand multiplicity_family) ///
+    if tier != "design"
+sort correction_group p_for_adjust outcome_id
+by correction_group: generate int correction_m = _N if correction_group < .
+assert correction_m == 8 if tier == "primary" & ///
+    inlist(spec_id, "common_h_reduced_form", "common_h_fuzzy")
+by correction_group: generate int correction_rank = _n if correction_group < .
+replace q_bh = min(1, p_for_adjust * correction_m / correction_rank) ///
     if correction_group < .
-by correction_group: generate int correction_rank = sum(pvalue < .) ///
-    if correction_group < . & pvalue < .
+gsort correction_group -correction_rank outcome_id
+by correction_group: replace q_bh = min(q_bh, q_bh[_n-1]) ///
+    if _n > 1 & correction_group < .
+sort correction_group correction_rank outcome_id
+replace p_holm = min(1, p_for_adjust * (correction_m - correction_rank + 1)) ///
+    if correction_group < .
+by correction_group: replace p_holm = max(p_holm, p_holm[_n-1]) ///
+    if _n > 1 & correction_group < .
+replace p_holm = . if missing(pvalue) | estimation_rc != 0
+replace q_bh = . if missing(pvalue) | estimation_rc != 0
+drop correction_group p_for_adjust correction_m correction_rank
 
-replace q_bh = min(1, pvalue * correction_m / correction_rank) ///
-    if correction_group < . & pvalue < .
-gsort correction_group p_missing -correction_rank outcome_id
-by correction_group: replace q_bh = ///
-    min(q_bh, q_bh[_n - 1]) ///
-    if _n > 1 & correction_group < . & q_bh < .
-
-sort correction_group p_missing correction_rank outcome_id
-replace p_holm = ///
-    min(1, pvalue * (correction_m - correction_rank + 1)) ///
-    if correction_group < . & pvalue < .
-by correction_group: replace p_holm = ///
-    max(p_holm, p_holm[_n - 1]) ///
-    if _n > 1 & correction_group < . & p_holm < .
-
-drop correction_group p_missing correction_m correction_rank
+// Primary IV diagnostics cannot qualify different secondary/robustness samples.
+generate str40 strength_scope = "not_a_receipt_effect"
+replace strength_scope = "exact_sample_diagnostics_required" ///
+    if inlist(estimand, "fuzzy_late", "parametric_late")
+replace strength_scope = "primary_iv_analogue_reported" ///
+    if tier == "primary" & spec_id == "common_h_fuzzy"
+replace strength_scope = "model_iv_diagnostics_reported" ///
+    if estimator == "ivreg2" & estimation_rc == 0 & ///
+    !missing(first_stage_f, weak_robust_p)
 sort paper_order spec_id estimand
 save "`rd_results_final'", replace
 
@@ -1042,10 +1053,10 @@ export delimited using ///
 
 tempname contract_file
 local kp_f_text : display %5.2f `kp_f_main'
-local kp_status = cond(`kp_f_main' > ${rd_weak_f_gate}, ///
+local kp_status = cond(!missing(`kp_f_main') & `kp_f_main' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 local kp_f_migration_text : display %5.2f `kp_f_migration'
-local kp_migration_status = cond(`kp_f_migration' > ${rd_weak_f_gate}, ///
+local kp_migration_status = cond(!missing(`kp_f_migration') & `kp_f_migration' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 
 file open `contract_file' using ///
@@ -1142,7 +1153,7 @@ forvalues outcome_index = 1/`outcome_count' {
 
 file write `registry_table' "\bottomrule" _n
 file write `registry_table' "\end{longtable}" _n
-file write `registry_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The unit is a de-identified linked Census person. The eight primary outcomes use one complete sample of persons age 14 or older; secondary outcomes use the age, sex, labor-force, or item-valid universe declared in the final column. Binary outcomes are displayed in percentage points and counts remain in natural units. The INEI-assisted file follows a defined SISFOH source cohort into the 2017 Census; it is not the public national Census microdata and has no analysis weight. Estimates therefore describe the linked cohort rather than the full Peruvian population. Source: INEI-assisted Census 2017.\end{minipage}" _n
+file write `registry_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} The unit is a de-identified linked Census person. The primary migration outcome uses linked adults age 14 or older with valid canonical CCPP movement; the other seven primary outcomes use the registered eight-outcome complete-case adult sample; secondary outcomes use the age, sex, labor-force, or item-valid universe declared in the final column. Binary outcomes are displayed in percentage points and counts remain in natural units. The INEI-assisted file follows a defined SISFOH source cohort into the 2017 Census; it is not the public national Census microdata and has no analysis weight. Estimates therefore describe the linked cohort rather than the full Peruvian population. Source: INEI-assisted Census 2017.\end{minipage}" _n
 file write `registry_table' "\endgroup" _n
 file close `registry_table'
 
@@ -1388,7 +1399,7 @@ restore
 
 file write `secondary_table' "\bottomrule" _n
 file write `secondary_table' "\end{longtable}" _n
-file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with CCPP-equal weights, local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference. Weights are recomputed after applying the outcome-specific eligibility and missing-data rule, so each represented RUV community contributes total weight one. BH values control the false discovery rate within each declared outcome family. Denominators and eligibility rules are reported in Table~\ref{tab:rd_outcome_registry_2017_individual}. The schooling measure is an attainment-based proxy and not observed current enrollment. The first-stage strength safeguard and person-linkage diagnostics apply to every LATE. Source: RUV, CMAN, and INEI-assisted Census 2017.\end{minipage}" _n
+file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with CCPP-equal weights, local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference. Weights are recomputed after applying the outcome-specific eligibility and missing-data rule, so each represented RUV community contributes total weight one. BH values control the false discovery rate within each declared outcome family. Denominators and eligibility rules are reported in Table~\ref{tab:rd_outcome_registry_2017_individual}. The schooling measure records current attendance for its declared age-eligible population; it is not an attainment proxy. The primary common-window IV diagnostics do not certify these outcome-specific samples. These secondary LATEs remain sensitivity diagnostics, not qualified receipt effects, until exact-sample weak-instrument diagnostics are reported. Source: RUV, CMAN, and INEI-assisted Census 2017.\end{minipage}" _n
 file write `secondary_table' "\endgroup" _n
 file close `secondary_table'
 

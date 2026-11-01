@@ -1,0 +1,18 @@
+review_id,table_rows,check
+C08,16,Holm cells match current model CSV
+C09,48,48 estimate/SE/SW/KP/gate rows match current model CSV
+C10,16,Holm cells match current model CSV
+C11,23,Holm cells match current model CSV
+C12,16,Holm cells match current model CSV
+C13,16,Holm cells match current model CSV
+C14,16,Holm cells match current model CSV
+C15,23,Holm cells match current model CSV
+C16,23,Holm cells match current model CSV
+C28,43,all body cells unchanged; note-only correction
+C29,45,all body cells unchanged; note-only correction
+C30,55,all body cells unchanged; note-only correction
+C31,31,all body cells unchanged; note-only correction
+C32,28,all body cells unchanged; note-only correction
+C33,51,all body cells unchanged; note-only correction
+C34,43,all body cells unchanged; note-only correction
+C36,6,all body cells unchanged; note-only correction

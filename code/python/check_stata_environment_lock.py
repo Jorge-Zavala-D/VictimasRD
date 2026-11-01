@@ -93,7 +93,7 @@ def verify_files(manifest, ado_root, stata_root=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--manifest', type=Path, default=Path(__file__).resolve().parents[2] /
-                        'metadata/stata-dependency-lock-2026-10-03.csv')
+                        'metadata/stata-dependency-lock-2026-11-01.csv')
     parser.add_argument('--ado-root', type=Path, required=True)
     parser.add_argument('--stata-root', type=Path, required=True)
     args = parser.parse_args(argv)

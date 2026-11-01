@@ -1,0 +1,52 @@
+{
+  "lock_id": "qualified-2026-11-01",
+  "reported_runtime": {
+    "stata_version": 19,
+    "flavor": "IC",
+    "os": "Windows",
+    "bit": 64,
+    "born_date": "07 Oct 2026"
+  },
+  "manifest": "metadata/stata-dependency-lock-2026-11-01.csv",
+  "manifest_sha256": "d15827937408ccb47bdeeb1130d2e24eeb3b2c41aac03183658cacaf9a1ddd28",
+  "manifest_stata_checksum": 4040754943,
+  "manifest_bytes": 2770842,
+  "file_counts": {
+    "project_ado": 267,
+    "official_base": 12966,
+    "stata_install": 2,
+    "total": 13235
+  },
+  "installation_scope": "Installed StataMP-64.exe and mp-64.dll plus official BASE files; not independent attestation of MCP-host executable identity",
+  "root_resolution": "Logical roles only; project_ado from configured build root, official_base and stata_install from Stata sysdir values",
+  "installer_source_semantics": "Licensed local installation; no software redistribution or automatic package update",
+  "historical_generation_identity_certified": false,
+  "other_machine_validated": false,
+  "redistribution_approved": false,
+  "unchanged_analysis_compatibility": {
+    "baseline_commit": "2efea548f0c55ea15444c0558d8e3b88bd06dad8",
+    "modules": [
+      "04",
+      "05",
+      "06"
+    ],
+    "aggregate_csv_files": 36,
+    "aggregate_rows": 4598,
+    "noninvariant_cells": 0,
+    "absolute_tolerance": 1e-8,
+    "relative_tolerance": 1e-7,
+    "master_log": "logs/master_1nov2026_181942.smcl",
+    "completed_local": "2026-11-01 19:25:12"
+  },
+  "corrected_full_master_validated": true,
+  "corrected_full_master": {
+    "started_local": "2026-11-01 19:50:57",
+    "completed_local": "2026-11-01 21:42:47",
+    "log": "logs/master_1nov2026_195057.smcl",
+    "historical_search_executed": false,
+    "post_master_contract_tests": 12,
+    "release_status": "BLOCKED",
+    "release_technical_errors": 0,
+    "validation_receipt": "docs/STATA_CORRECTIVE_VALIDATION_2026-11-01.md"
+  }
+}

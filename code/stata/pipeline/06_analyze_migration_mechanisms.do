@@ -669,7 +669,7 @@ forvalues row = 1/`=_N' {
 }
 file write `association_table' "\bottomrule\end{tabular}" _n
 file write `association_table' ///
-    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Coefficients are changes in the 2017 CCPP migration share (zero-to-one units) associated with a one-standard-deviation difference in each 2013 predictor. They are noncausal associations, not indirect effects. Both models use the same complete-case selected B--C Census-covered CCPP sample within \(|running\_bc|\leq0.0075\), district-clustered standard errors, and separate local-linear score slopes. Adjusted models include 2007 altitude, log population, and core wellbeing; BH correction covers the three adjusted associations. Sources: RUV, CMAN, SISFOH 2012--2013, and INEI-assisted Census 2017 linkage.}" _n
+    "\parbox{0.97\linewidth}{\footnotesize \textit{Notes:} Coefficients are changes in the 2017 CCPP migration share (zero-to-one units) associated with a one-standard-deviation difference in each 2013 predictor. They are noncausal associations, not indirect effects. Both models use the same complete-case selected B--C Census-covered CCPP sample within \(|running\_bc|\leq0.0075\), district-clustered standard errors, and separate local-linear score slopes. Adjusted models include 2017-geographic-source altitude, 2007 log population, and 2007 core wellbeing; BH correction covers the three adjusted associations. Sources: RUV, CMAN, SISFOH 2012--2013, INEI-derived 2017 geography, and INEI-assisted Census 2017 linkage.}" _n
 file write `association_table' "\end{table}" _n
 file close `association_table'
 

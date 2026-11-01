@@ -59,6 +59,11 @@ import delimited using "`inventory'", clear varnames(1) ///
     bindquote(strict) encoding(utf8)
 isid path
 assert _N == 261
+assert inlist(owner_approved, 0, 1)
+assert inlist(review_matches_current, 0, 1)
+assert review_matches_current == ///
+    (checksum == reviewed_checksum & !missing(checksum, reviewed_checksum))
+assert inlist(disposition, "main_text", "appendix", "internal_only", "exclude")
 capture confirm string variable overleaf_destination
 if _rc {
     assert missing(overleaf_destination)
@@ -116,7 +121,7 @@ if r(N) > 0 {
 }
 
 generate byte review_resolved = ///
-    scientific_review_status == "preliminary_reviewed" & ///
+    scientific_review_status == "preliminary_reviewed" & review_matches_current & ///
     inlist(disposition, ///
         "main_text", "appendix", "internal_only", "exclude") & ///
     !missing(review_note)
@@ -127,7 +132,7 @@ generate byte release_eligible = ///
     destination_present & destination_safe & !technical_error
 
 generate str80 block_reason = ""
-replace block_reason = "review unresolved" if !review_resolved
+replace block_reason = "review unresolved" if selected_for_release & !review_resolved
 replace block_reason = ///
     "awaiting owner approval and Overleaf destination" ///
     if selected_for_release & owner_approved == 0 & !destination_present
@@ -135,6 +140,11 @@ replace block_reason = "awaiting owner approval" ///
     if selected_for_release & owner_approved == 0 & destination_present
 replace block_reason = "missing Overleaf destination" ///
     if selected_for_release & owner_approved == 1 & !destination_present
+replace block_reason = "current artifact lacks byte-bound review" if ///
+    selected_for_release & !review_matches_current
+replace block_reason = "selected artifact is not release eligible" if ///
+    selected_for_release & !release_eligible & missing(block_reason)
+assert release_eligible | !missing(block_reason) if selected_for_release
 
 quietly count if !missing(block_reason)
 local overall_status "PASS"

@@ -1,0 +1,12 @@
+dataset,key,rows,variables,exact_other_fields_rc,exact_other_cells,election_roundoff_cells,max_election_difference
+04_foundational_community_registry,ruv_id,5712,79,0,0,0,
+05_community_registry_census2007,ruv_id,5712,180,0,0,0,
+06_community_registry_geospatial,ruv_id,5712,207,0,0,0,
+07_community_registry_gdp,ruv_id,5712,231,0,0,0,
+08_community_registry_elections,ruv_id,5712,283,0,0,8555,5.32907051820e-15
+09_sisfoh_2013_individual_analysis,sisfoh_pid,1425575,347,0,0,2152695,5.32907051820e-15
+10_sisfoh_2013_household_analysis,sisfoh_hhid,415007,398,0,0,617148,5.32907051820e-15
+11_community_registry_sisfoh_2013,ruv_id,5712,403,0,0,8555,5.32907051820e-15
+12_census_2017_individual_analysis,census2017_cohort_pid,193342,584,9,65,268932,1.77635683940e-15
+13_census_2017_household_analysis,census2017_baseline_hhid,58015,567,9,2,79831,1.77635683940e-15
+14_community_registry_census_2017,ruv_id,5712,466,9,3,8555,5.32907051820e-15

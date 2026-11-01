@@ -222,79 +222,8 @@ under Coded. Git-local build is only a package/cache area, while reviewed
 non-sensitive tables and figures belong under output.
 */
 
-local project_lower          = lower(subinstr("${project_root}", "\", "/", .))
-local data_lower             = lower(subinstr("${data_root}", "\", "/", .))
-local raw_lower              = lower(subinstr("${raw_root}", "\", "/", .))
-local working_lower          = lower(subinstr("${working_root}", "\", "/", .))
-local coded_lower            = lower(subinstr("${coded_root}", "\", "/", .))
-local pipeline_working_lower = lower(subinstr("${pipeline_working_root}", "\", "/", .))
-local intermediate_lower     = lower(subinstr("${intermediate_root}", "\", "/", .))
-local staging_lower          = lower(subinstr("${staging_root}", "\", "/", .))
-local qa_data_lower          = lower(subinstr("${qa_data_root}", "\", "/", .))
-local external_derived_lower = lower(subinstr("${external_derived_root}", "\", "/", .))
-local analysis_data_lower    = lower(subinstr("${analysis_data_root}", "\", "/", .))
-local external_raw_lower     = lower(subinstr("${external_raw_root}", "\", "/", .))
-local legacy_working_lower   = lower(subinstr("${legacy_working_root}", "\", "/", .))
-local legacy_coded_lower     = lower(subinstr("${legacy_coded_root}", "\", "/", .))
-local build_lower            = lower(subinstr("${build_root}", "\", "/", .))
-local output_lower           = lower(subinstr("${output_root}", "\", "/", .))
-
-if strpos("`build_lower'", "`project_lower'/") != 1 {
-    display as error "Unsafe build_root: it must be inside project_root."
-    display as error "  project_root = ${project_root}"
-    display as error "  build_root   = ${build_root}"
-    exit 198
-}
-
-if strpos("`output_lower'", "`project_lower'/") != 1 {
-    display as error "Unsafe output_root: it must be inside project_root."
-    display as error "  project_root = ${project_root}"
-    display as error "  output_root  = ${output_root}"
-    exit 198
-}
-
-if strpos("`build_lower'", "`data_lower'/") == 1 {
-    display as error "Unsafe build_root: the local dependency cache cannot be under Dropbox data."
-    exit 198
-}
-
-if strpos("`raw_lower'", "`data_lower'/") != 1 | ///
-   strpos("`working_lower'", "`data_lower'/") != 1 | ///
-   strpos("`coded_lower'", "`data_lower'/") != 1 {
-    display as error "Unsafe Dropbox data contract: Raw, Working, and Coded must be under data_root."
-    exit 198
-}
-
-if strpos("`working_lower'", "`raw_lower'/") == 1 | ///
-   strpos("`coded_lower'", "`raw_lower'/") == 1 {
-    display as error "Unsafe Dropbox data contract: Working and Coded cannot be inside Raw."
-    exit 198
-}
-
-if strpos("`pipeline_working_lower'", "`working_lower'/") != 1 | ///
-   strpos("`intermediate_lower'", "`pipeline_working_lower'/") != 1 | ///
-   strpos("`staging_lower'", "`pipeline_working_lower'/") != 1 | ///
-   strpos("`qa_data_lower'", "`pipeline_working_lower'/") != 1 | ///
-   strpos("`external_derived_lower'", "`pipeline_working_lower'/") != 1 {
-    display as error "Unsafe Working path contract: current pipeline products must remain under Working."
-    exit 198
-}
-
-if strpos("`analysis_data_lower'", "`coded_lower'/") != 1 {
-    display as error "Unsafe Coded path contract: analysis datasets must remain under Coded."
-    exit 198
-}
-
-if strpos("`external_raw_lower'", "`raw_lower'/") != 1 {
-    display as error "Unsafe external_raw_root: external sources must remain under Raw."
-    exit 198
-}
-
-if strpos("`legacy_working_lower'", "`working_lower'/") != 1 | ///
-   strpos("`legacy_coded_lower'", "`coded_lower'/") != 1 {
-    display as error "Unsafe archive path contract: legacy data must remain under Working or Coded."
-    exit 198
-}
+do "${code_root}/lib/00_validate_storage.do"
+victimasrd_validate_storage
 
 local required_read_globals ///
     project_root ///

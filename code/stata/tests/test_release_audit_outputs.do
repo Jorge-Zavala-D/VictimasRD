@@ -33,12 +33,16 @@ assert checksum_match == 1
 assert safe_path == 1
 assert safe_extension == 1
 assert technical_error == 0
-assert review_resolved == 1
+assert review_resolved == review_matches_current
+assert review_matches_current == ///
+    (checksum == reviewed_checksum & !missing(checksum, reviewed_checksum))
 assert owner_approved == 0
 quietly count if selected_for_release == 1
 assert r(N) > 0
 quietly count if release_eligible == 1
 assert r(N) == 0
+
+assert release_eligible | !missing(block_reason) if selected_for_release
 quietly count if selected_for_release == 0 & !missing(block_reason)
 assert r(N) == 0
 quietly count if selected_for_release == 1 & missing(block_reason)

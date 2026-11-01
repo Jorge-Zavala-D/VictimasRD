@@ -1,0 +1,15 @@
+review_id,artifact,baseline_rows,current_rows,added_rows,removed_rows,added_columns,removed_columns,changed_cells_beyond_tolerance,within_tolerance_serialization_cells,maximum_absolute_within_tolerance_difference,changed_fields
+C01,output/tables/rd_heterogeneity/rd_hte_2013_ccpp_project_composition.csv,4,4,0,0,,,0,1,7.105427357601002e-15,{}
+C02,output/tables/rd_heterogeneity/rd_hte_2013_ccpp_results.csv,176,208,32,0,,,4,0,0.0,"{""p_holm"": 4}"
+C03,output/tables/rd_heterogeneity/rd_hte_2013_household_results.csv,224,224,0,0,,,4,0,0.0,"{""p_holm"": 4}"
+C04,output/tables/rd_heterogeneity/rd_hte_2013_individual_results.csv,312,312,0,0,,,4,0,0.0,"{""p_holm"": 4}"
+C05,output/tables/rd_heterogeneity/rd_hte_2017_ccpp_results.csv,208,208,0,0,,,13,0,0.0,"{""p_holm"": 13}"
+C06,output/tables/rd_heterogeneity/rd_hte_2017_household_results.csv,224,224,0,0,,,1,0,0.0,"{""p_holm"": 1}"
+C07,output/tables/rd_heterogeneity/rd_hte_2017_individual_results.csv,312,312,0,0,,,4,0,0.0,"{""p_holm"": 4}"
+C22,output/tables/rd_outcomes/rd_2013_ccpp_results.csv,319,319,0,0,strength_scope,,0,3,2.220446049250313e-16,{}
+C23,output/tables/rd_outcomes/rd_2013_household_results.csv,352,352,0,0,strength_scope,,0,385,8.630962611277937e-11,{}
+C24,output/tables/rd_outcomes/rd_2013_individual_results.csv,392,392,0,0,strength_scope,,0,495,6.09512440519211e-11,{}
+C25,output/tables/rd_outcomes/rd_2017_ccpp_results.csv,273,273,0,0,strength_scope,,34,1,9.8879238130678e-17,"{""b_left"": 2, ""b_right"": 2, ""ci_high"": 2, ""ci_low"": 2, ""estimate_bc"": 2, ""estimate_cl"": 2, ""first_stage_bc"": 2, ""first_stage_cl"": 2, ""first_stage_f"": 2, ""first_stage_se"": 2, ""h_left"": 2, ""h_right"": 2, ""pvalue"": 2, ""standard_error"": 2, ""standardized_ci_high"": 2, ""standardized_ci_low"": 2, ""standardized_estimate"": 2}"
+C26,output/tables/rd_outcomes/rd_2017_household_results.csv,286,286,0,0,strength_scope,,38,336,6.955858111723501e-11,"{""b_left"": 2, ""b_right"": 2, ""ci_high"": 2, ""ci_low"": 2, ""estimate_bc"": 2, ""estimate_cl"": 2, ""first_stage_bc"": 2, ""first_stage_cl"": 2, ""first_stage_f"": 2, ""first_stage_se"": 2, ""h_left"": 2, ""h_right"": 2, ""n_input"": 4, ""pvalue"": 2, ""standard_error"": 2, ""standardized_ci_high"": 2, ""standardized_ci_low"": 2, ""standardized_estimate"": 2}"
+C27,output/tables/rd_outcomes/rd_2017_individual_results.csv,348,348,0,0,strength_scope,,79,364,9.999999999940612e-09,"{""b_left"": 4, ""b_right"": 4, ""ci_high"": 4, ""ci_low"": 4, ""estimate_bc"": 4, ""estimate_cl"": 4, ""first_stage_bc"": 4, ""first_stage_cl"": 4, ""first_stage_f"": 4, ""first_stage_se"": 4, ""h_left"": 3, ""h_right"": 2, ""n_input"": 8, ""pvalue"": 4, ""q_bh"": 6, ""standard_error"": 4, ""standardized_ci_high"": 4, ""standardized_ci_low"": 4, ""standardized_estimate"": 4}"
+C35,output/tables/rd_mechanisms/rd_census2017_selection_overlap.csv,3,3,0,0,,,0,5,6.994405055138486e-15,{}

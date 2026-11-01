@@ -2,6 +2,9 @@
 * Copy this file to config/paths.local.do and edit the copy locally.
 * Never commit config/paths.local.do.
 * Use forward slashes so paths work consistently in Stata on Windows.
+* Use canonical absolute directory names, not dot/parent components, Windows
+* dot/space suffixes, 8.3 short names, junctions or symbolic-link aliases.
+* Qualify storage separation on each machine; lexical guards cannot resolve links.
 
 global project_root "C:/Users/USERNAME/Documents/GitHub/VictimasRD"
 global dropbox_root "C:/Users/USERNAME/Dropbox (Personal)/VictimasRD"

@@ -266,6 +266,15 @@ def main() -> None:
     if not paths:
         raise ValueError("No ReporteCCPP*.xls files were found")
 
+    output = args.output.resolve()
+    manifest = args.manifest.resolve()
+    sources = {path.resolve() for path in paths}
+    if output == manifest or output in sources or manifest in sources:
+        raise ValueError("Inputs, output and manifest must resolve to distinct paths")
+    # This national intake certifies the complete 01-25 department set only.
+    if args.expected_departments != 25:
+        raise ValueError("Only the complete set of 25 departments is supported")
+
     file_records: list[dict[str, object]] = []
     digest_to_canonical: dict[str, str] = {}
     extracted: list[dict[str, object]] = []
@@ -310,7 +319,7 @@ def main() -> None:
 
     departments = sorted({str(row["ubigeo_dpto"]) for row in extracted})
     expected_departments = [f"{value:02d}" for value in range(1, 26)]
-    if args.expected_departments == 25 and departments != expected_departments:
+    if departments != expected_departments:
         raise ValueError(
             f"Expected department codes 01-25; found {departments}"
         )
@@ -319,8 +328,6 @@ def main() -> None:
     if len(codes) != len(set(codes)):
         raise ValueError("Combined ReporteCCPP codes are not unique")
 
-    output = args.output.resolve()
-    manifest = args.manifest.resolve()
     atomic_csv_write(output, extracted)
     output_digest = sha256(output)
 

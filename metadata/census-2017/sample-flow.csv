@@ -23,7 +23,7 @@ census2017_sisfoh_sex_disagreements,3,diagnostic,Recovered SISFOH person keys wh
 census2017_baseline_households,58021,validated,De-identified 2013 source households in the INEI-assisted cohort
 census2017_sisfoh_households_recovered,57734,validated,Source households recovered in the canonical SISFOH household file
 census2017_destination_households,66427,validated,Distinct 2017 destination households represented by linked people
-census2017_destination_roster_complete,27274,validated,Destination households whose full Census roster is present in the delivery
+census2017_destination_roster_complete,27271,validated,Destination households whose full Census roster is present in the delivery
 census2017_destination_roster_partial,37926,restricted,Destination households represented by only part of their Census roster
 census2017_destination_roster_missing,1223,restricted,Destination household IDs without a reported Census household size
 census2017_destination_roster_overfull,4,quarantined,Destination households with delivery rows exceeding the reported roster

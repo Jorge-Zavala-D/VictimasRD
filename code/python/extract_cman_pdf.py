@@ -143,6 +143,10 @@ def atomic_json_write(path: Path, payload: dict[str, object]) -> None:
 def main() -> None:
     args = parse_args()
     source = args.input.resolve(strict=True)
+    output = args.output.resolve()
+    manifest = args.manifest.resolve()
+    if len({source, output, manifest}) != 3:
+        raise ValueError("Input, output and manifest must resolve to distinct paths")
     source_stat = source.stat()
     source_digest = sha256(source)
     extracted: list[dict[str, object]] = []
@@ -267,8 +271,6 @@ def main() -> None:
             f"{args.expected_rows}"
         )
 
-    output = args.output.resolve()
-    manifest = args.manifest.resolve()
     atomic_csv_write(output, extracted)
     output_digest = sha256(output)
 

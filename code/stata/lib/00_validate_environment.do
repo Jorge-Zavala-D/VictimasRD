@@ -11,11 +11,11 @@ program define _vrd_check_environment
 
     * Reject edited/incomplete locks before trusting any paths or fingerprints.
     quietly checksum "`manifest'"
-    if r(checksum) != 598622890 | r(filelen) != 2755021 {
+    if r(checksum) != 4040754943 | r(filelen) != 2770842 {
         display as error "Environment manifest differs from the reviewed lock."
         exit 9
     }
-    if c(stata_version) != 19 | "`c(born_date)'" != "12 Aug 2026" | ///
+    if c(stata_version) != 19 | "`c(born_date)'" != "07 Oct 2026" | ///
         "`c(os)'" != "Windows" | c(bit) != 64 {
         display as error "Stata runtime differs from the audited Windows-64 Stata-19 build."
         exit 9
@@ -29,10 +29,10 @@ program define _vrd_check_environment
 
     quietly import delimited using "`manifest'", varnames(1) ///
         stringcols(_all) encoding("utf-8") clear
-    assert _N == 13223
+    assert _N == 13235
     isid root_role relative_path
     assert inlist(root_role, "project_ado", "stata_install", "official_base")
-    assert lock_id == "observed-2026-10-03"
+    assert lock_id == "qualified-2026-11-01"
     assert !missing(relative_path, sha256, bytes, stata_checksum)
     assert !strpos(relative_path, "..") & !strpos(relative_path, ":") & ///
         substr(relative_path, 1, 1) != "/"
@@ -75,7 +75,7 @@ program define _vrd_check_environment
                 exit 9
             }
         }
-        if mod(`i', 3000) == 0 display as text "Checked `i' of 13223 locked files."
+        if mod(`i', 3000) == 0 display as text "Checked `i' of 13235 locked files."
     }
 
     * Detect additions to the executable cache; omission cannot silently expand it.
@@ -110,7 +110,7 @@ program define victimasrd_validate_environment, rclass
     version 19
     syntax [, MANifest(string) ADORoot(string)]
     if `"`manifest'"' == "" ///
-        local manifest "${project_root}/metadata/stata-dependency-lock-2026-10-03.csv"
+        local manifest "${project_root}/metadata/stata-dependency-lock-2026-11-01.csv"
     if `"`adoroot'"' == "" local adoroot "${build_root}/ado"
 
     * A disposable frame keeps the caller's observations, sort order and e() intact,
@@ -122,7 +122,7 @@ program define victimasrd_validate_environment, rclass
     local check_rc = _rc
     frame drop `lock_frame'
     if `check_rc' exit `check_rc'
-    return scalar files = 13223
-    return local lock_id "observed-2026-10-03"
-    display as result "Victimas RD environment lock passed (13223 file identities)."
+    return scalar files = 13235
+    return local lock_id "qualified-2026-11-01"
+    display as result "Victimas RD environment lock passed (13235 file identities)."
 end

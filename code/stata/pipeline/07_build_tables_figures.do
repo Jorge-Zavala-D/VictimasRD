@@ -52,6 +52,7 @@ forvalues source_index = 1/3 {
     quietly checksum "`manifest_absolute'"
     local manifest_checksum : display %20.0f r(checksum)
     local manifest_checksum = strtrim("`manifest_checksum'")
+    if `source_index' == 1 local module04_checksum "`manifest_checksum'"
     local source_signatures ///
         "`source_signatures'`source_pipeline':`manifest_checksum';"
 
@@ -59,6 +60,9 @@ forvalues source_index = 1/3 {
         bindquote(strict) encoding(utf8)
     assert _N == `expected_count'
     isid path
+    if "`source_pipeline'" == "mechanisms" {
+        assert strpos(input_datasignature, "module04:`module04_checksum';") == 1
+    }
     assert review_status == "generated_unreviewed"
     rename review_status generation_status
     generate str24 source_pipeline = "`source_pipeline'"
@@ -83,7 +87,9 @@ import delimited "`review_registry'", clear varnames(1) ///
     bindquote(strict) encoding(utf8) stringcols(_all)
 isid path
 assert _N == 261
-destring owner_approved, replace
+destring owner_approved reviewed_checksum, replace
+assert !missing(reviewed_checksum, baseline_git_sha256, reviewed_baseline)
+assert strlen(baseline_git_sha256) == 64
 assert inlist(disposition, ///
     "main_text", "appendix", "internal_only", "exclude")
 assert inlist(evidence_class, ///
@@ -132,8 +138,12 @@ forvalues row = 1/`=_N' {
 }
 assert checksum_verified == 1
 
-generate str24 publication_status = "preliminary_reviewed"
-replace publication_status = "owner_approved" if owner_approved == 1
+generate byte review_matches_current = ///
+    checksum == reviewed_checksum & !missing(checksum, reviewed_checksum)
+generate str24 publication_status = "review_required"
+replace publication_status = "preliminary_reviewed" if review_matches_current
+replace publication_status = "owner_approved" if ///
+    owner_approved == 1 & review_matches_current
 drop safe_path safe_extension extension
 sort source_pipeline artifact_type path
 order source_pipeline path artifact_type disposition evidence_class ///

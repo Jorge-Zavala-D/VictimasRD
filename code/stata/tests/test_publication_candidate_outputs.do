@@ -43,6 +43,11 @@ assert !missing(review_note)
 assert owner_approved == 0
 assert missing(overleaf_destination)
 assert checksum_verified == 1
+assert review_matches_current == ///
+    (checksum == reviewed_checksum & !missing(checksum, reviewed_checksum))
+assert publication_status == "review_required" if !review_matches_current
+assert publication_status == "preliminary_reviewed" if review_matches_current
+assert strlen(baseline_git_sha256) == 64
 assert strpos(path, "..") == 0
 assert strpos(lower(path), ".dta") == 0
 assert strpos(lower(path), ".smcl") == 0

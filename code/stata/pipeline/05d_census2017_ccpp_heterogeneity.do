@@ -178,7 +178,7 @@ confirm variable ruv_id record_number recorded_project_year ///
 isid record_number
 
 keep if !missing(ruv_id) & recorded_project_year <= 2016
-assert prc_total_financing_soles > 0
+assert prc_total_financing_soles > 0 & !missing(prc_total_financing_soles)
 assert inrange(prc_project_group, 1, 4)
 
 forvalues project_group = 1/4 {
@@ -228,7 +228,9 @@ generate byte hte_assignment = ${hte_running} >= 0 ///
 generate double hte_running_right = ///
     ${hte_running} * hte_assignment
 
-merge 1:1 ruv_id using `project_ccpp', keep(master match) nogen
+merge 1:1 ruv_id using `project_ccpp', keep(master match) generate(hte_project_merge)
+assert hte_project_merge == 3 if ${hte_treatment_2017} == 1
+assert hte_project_merge == 1 if ${hte_treatment_2017} == 0
 replace hte_total_financing_2016 = 0 if ${hte_treatment_2017} == 0
 replace hte_project_records_2016 = 0 if ${hte_treatment_2017} == 0
 forvalues project_group = 1/4 {
@@ -236,14 +238,15 @@ forvalues project_group = 1/4 {
         if ${hte_treatment_2017} == 0
 }
 
-assert hte_total_financing_2016 > 0 if ///
+assert hte_total_financing_2016 > 0 & !missing(hte_total_financing_2016) if ///
     hte_primary_sample & ${hte_treatment_2017} == 1
-assert hte_project_records_2016 >= 1 if ///
+assert hte_project_records_2016 >= 1 & !missing(hte_project_records_2016) if ///
     hte_primary_sample & ${hte_treatment_2017} == 1
+drop hte_project_merge
 
 generate double hte_financing_pc_2016 = ///
     hte_total_financing_2016 / population_2007 ///
-    if population_2007 > 0
+    if population_2007 > 0 & !missing(population_2007)
 generate double hte_financing_pc_1000 = ///
     hte_financing_pc_2016 / 1000
 label variable hte_financing_pc_1000 ///
@@ -378,7 +381,8 @@ if !`financing_stage_rc' {
     local financing_stage_f = ///
         (`financing_stage_estimate' / `financing_stage_se')^2
     local financing_stage_status = cond( ///
-        `financing_stage_f' > ${hte_weak_f_gate}, ///
+        !missing(`financing_stage_f', `financing_stage_estimate', `financing_stage_se') & ///
+        `financing_stage_se' > 0 & `financing_stage_f' > ${hte_weak_f_gate}, ///
         "passes_f_gate", "weak_first_stage")
 }
 
@@ -483,11 +487,14 @@ forvalues outcome_index = 1/8 {
             local dose_std_high = `dose_high' / `dose_control_sd'
         }
 
+        if missing(`dose_estimate', `dose_se', `dose_p', `dose_low', `dose_high') | ///
+            `dose_se' <= 0 local dose_rc = 504
         local dose_gate = ///
-            `dose_kp' > ${hte_weak_f_gate} & ///
+            !`dose_rc' & !missing(`dose_kp') & `dose_kp' > ${hte_weak_f_gate} & ///
             `dose_underid' < .05 & `dose_underid' < .
         local dose_status = cond(`dose_gate', ///
             "exploratory_gate_pass", "exploratory_gate_fail")
+        if `dose_rc' local dose_status "estimation_failed"
     }
 
     post `dose_post' ///

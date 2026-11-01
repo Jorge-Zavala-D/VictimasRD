@@ -1,0 +1,13 @@
+dataset,variable,changed_cells,to_missing,from_missing,changed_observed
+12_census_2017_individual_analysis,nbi_child_not_school_2017,15,15,0,0
+12_census_2017_individual_analysis,nbi_high_dependency_2017,5,5,0,0
+12_census_2017_individual_analysis,nbi_count_2017,5,5,0,0
+12_census_2017_individual_analysis,nbi_components_valid_2017,15,0,0,15
+12_census_2017_individual_analysis,nbi_any_2017,5,5,0,0
+12_census_2017_individual_analysis,nbi_two_plus_2017,5,5,0,0
+12_census_2017_individual_analysis,cpv2017_roster_complete,15,0,0,15
+13_census_2017_household_analysis,hh_nbi_observed_2017,1,0,0,1
+13_census_2017_household_analysis,hh_member_share_nbi_2017,1,1,0,0
+14_community_registry_census_2017,cpv2017_nbi_observed,1,0,0,1
+14_community_registry_census_2017,cpv2017_share_nbi_any,1,0,0,1
+14_community_registry_census_2017,cpv2017_hh_share_nbi,1,0,0,1

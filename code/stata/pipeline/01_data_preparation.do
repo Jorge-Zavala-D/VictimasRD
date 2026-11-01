@@ -54,25 +54,8 @@ foreach global_name of local required_globals {
     }
 }
 
-local raw_lower              = lower(subinstr("${raw_root}", "\", "/", .))
-local pipeline_working_lower = lower(subinstr("${pipeline_working_root}", "\", "/", .))
-local intermediate_lower     = lower(subinstr("${intermediate_root}", "\", "/", .))
-local staging_lower          = lower(subinstr("${staging_root}", "\", "/", .))
-local qa_data_lower          = lower(subinstr("${qa_data_root}", "\", "/", .))
-local analysis_data_lower    = lower(subinstr("${analysis_data_root}", "\", "/", .))
-
-if strpos("`intermediate_lower'", "`pipeline_working_lower'/") != 1 | ///
-   strpos("`staging_lower'", "`pipeline_working_lower'/") != 1 | ///
-   strpos("`qa_data_lower'", "`pipeline_working_lower'/") != 1 {
-    display as error "Unsafe path contract: intermediate, staging, and QA data must remain under Dropbox Working."
-    exit 198
-}
-
-if strpos("`analysis_data_lower'", "`raw_lower'/") == 1 | ///
-   strpos("`pipeline_working_lower'", "`raw_lower'/") == 1 {
-    display as error "Unsafe path contract: no derived dataset may be written under Dropbox Raw."
-    exit 198
-}
+do "${project_root}/code/stata/lib/00_validate_storage.do"
+victimasrd_validate_storage
 
 foreach data_directory in ///
     "${pipeline_working_root}" ///
@@ -8062,15 +8045,6 @@ foreach election_year in 2002 2006 {
                 drop fb_`release_variable'_`election_year'
             }
         }
-        replace elect_link_method_`election_year' = ///
-            fb_elect_link_method_`election_year' if ///
-            _merge_election_recovery == 3
-        replace elect_predecessor_`election_year' = ///
-            fb_elect_predecessor_`election_year' if ///
-            _merge_election_recovery == 3
-        drop ///
-            fb_elect_link_method_`election_year' ///
-            fb_elect_predecessor_`election_year'
         replace elect_linked_`election_year' = 1 if ///
             _merge_election_recovery == 3
         drop _merge_election_recovery
@@ -8505,10 +8479,10 @@ label values relation_head_2013 PTES01
 
 generate byte pregnant_2013 = .
 replace pregnant_2013 = GESTA01 == 1 ///
-    if female_2013 & age_2013 >= 12 & inlist(GESTA01, 1, 2)
+    if female_2013 & age_2013 >= 12 & !missing(age_2013) & inlist(GESTA01, 1, 2)
 
 generate byte marital_status_2013 = ESTA01 ///
-    if age_2013 >= 12 & inrange(ESTA01, 1, 6)
+    if age_2013 >= 12 & !missing(age_2013) & inrange(ESTA01, 1, 6)
 label values marital_status_2013 ESTA01
 
 egen byte insurance_selected = ///
@@ -8525,7 +8499,7 @@ generate byte insurance_sis_2013 = SEGU01_4 == 4
 generate byte insurance_other_2013 = SEGU01_5 == 5
 
 generate byte language_childhood_2013 = IDIOMA01 ///
-    if age_2013 >= 3 & inrange(IDIOMA01, 1, 7)
+    if age_2013 >= 3 & !missing(age_2013) & inrange(IDIOMA01, 1, 7)
 capture label drop sisfoh_language_2013
 label define sisfoh_language_2013 ///
     1 "Quechua" ///
@@ -8547,15 +8521,15 @@ generate byte nonspanish_language_2013 = ///
     language_childhood_2013 != 4 ///
     if !missing(language_childhood_2013)
 
-count if age_2013 >= 3
+count if age_2013 >= 3 & !missing(age_2013)
 local sisfoh2013_language_eligible = r(N)
-count if age_2013 >= 3 & !missing(language_childhood_2013)
+count if age_2013 >= 3 & !missing(age_2013) & !missing(language_childhood_2013)
 local sisfoh2013_language_valid = r(N)
 
 generate byte literate_2013 = LEE01 == 1 ///
-    if age_2013 >= 3 & inlist(LEE01, 1, 2)
+    if age_2013 >= 3 & !missing(age_2013) & inlist(LEE01, 1, 2)
 generate byte education_level_2013 = NIV01 ///
-    if age_2013 >= 3 & inrange(NIV01, 1, 7)
+    if age_2013 >= 3 & !missing(age_2013) & inrange(NIV01, 1, 7)
 label values education_level_2013 NIV01
 generate byte last_grade_2013 = ULT01 ///
     if inrange(education_level_2013, 3, 7) & ///
@@ -8586,7 +8560,7 @@ replace education_years_approx_2013 = 16 + last_grade_2013 ///
     if education_level_2013 == 7
 
 generate byte labor_status_2013 = ERA01 ///
-    if age_2013 >= 6 & inrange(ERA01, 1, 10)
+    if age_2013 >= 6 & !missing(age_2013) & inrange(ERA01, 1, 10)
 label values labor_status_2013 ERA01
 generate byte employed_2013 = ///
     inrange(labor_status_2013, 1, 5) ///
@@ -8811,7 +8785,7 @@ generate byte nbi_school_unknown_aux = ///
 
 generate byte nbi_employed_aux = .
 replace nbi_employed_aux = 0 if inrange(age_2013, 0, 5)
-replace nbi_employed_aux = employed_2013 if age_2013 >= 6
+replace nbi_employed_aux = employed_2013 if age_2013 >= 6 & !missing(age_2013)
 generate byte employment_valid_aux = !missing(nbi_employed_aux)
 
 generate int head_age_aux = age_2013 if household_head_2013
@@ -10178,7 +10152,7 @@ replace census2017_person_link_method = ///
 drop _merge sisfoh_pid_candidate sisfoh_hhid_candidate
 
 generate str6 ubigeo_district_sisfoh = substr(source_ccpp_inei, 1, 6)
-generate byte sisfoh_age_key = edad01
+generate int sisfoh_age_key = edad01
 generate byte sisfoh_sex_key = sexo01
 merge m:1 ///
     ubigeo_district_sisfoh ///
@@ -10268,7 +10242,7 @@ replace relation_head_2013 = ptes01 ///
     if missing(relation_head_2013) & inrange(ptes01, 1, 14)
 replace language_childhood_2013 = idioma01 ///
     if missing(language_childhood_2013) & ///
-       age_2013 >= 3 & inrange(idioma01, 1, 7)
+       age_2013 >= 3 & !missing(age_2013) & inrange(idioma01, 1, 7)
 replace spanish_childhood_2013 = language_childhood_2013 == 4 ///
     if missing(spanish_childhood_2013) & ///
        !missing(language_childhood_2013)
@@ -10280,10 +10254,10 @@ replace nonspanish_language_2013 = language_childhood_2013 != 4 ///
     if missing(nonspanish_language_2013) & ///
        !missing(language_childhood_2013)
 replace literate_2013 = lee01 == 1 ///
-    if missing(literate_2013) & age_2013 >= 3 & inlist(lee01, 1, 2)
+    if missing(literate_2013) & age_2013 >= 3 & !missing(age_2013) & inlist(lee01, 1, 2)
 replace education_level_2013 = niv01 ///
     if missing(education_level_2013) & ///
-       age_2013 >= 3 & inrange(niv01, 1, 7)
+       age_2013 >= 3 & !missing(age_2013) & inrange(niv01, 1, 7)
 replace last_grade_2013 = ult01 ///
     if missing(last_grade_2013) & ///
        inrange(education_level_2013, 3, 7) & ///
@@ -10301,7 +10275,7 @@ replace primary_complete_2013 = 1 ///
        inrange(education_level_2013, 4, 7)
 replace labor_status_2013 = era01 ///
     if missing(labor_status_2013) & ///
-       age_2013 >= 6 & inrange(era01, 1, 10)
+       age_2013 >= 6 & !missing(age_2013) & inrange(era01, 1, 10)
 replace employed_2013 = inrange(labor_status_2013, 1, 5) ///
     if missing(employed_2013) & !missing(labor_status_2013)
 replace labor_force_2013 = inrange(labor_status_2013, 1, 6) ///
@@ -10372,7 +10346,7 @@ generate byte relation_head_2017 = c5_p1 ///
 generate byte permanent_district_2017 = c5_p5 == 1 ///
     if census2017_linked & inlist(c5_p5, 1, 2)
 generate byte moved_district_2012_2017 = c5_p6 == 3 ///
-    if age_2017 >= 5 & inlist(c5_p6, 2, 3)
+    if age_2017 >= 5 & !missing(age_2017) & inlist(c5_p6, 2, 3)
 
 egen byte insurance_count_2017_aux = ///
     rowtotal(c5_p8_1-c5_p8_5)
@@ -10411,16 +10385,16 @@ generate byte disability_social_2017 = c5_p9_6 == 1 ///
     if census2017_linked & inlist(c5_p9_6, 0, 1)
 
 generate byte language_childhood_2017 = c5_p11 ///
-    if age_2017 >= 3 & inrange(c5_p11, 1, 46)
+    if age_2017 >= 3 & !missing(age_2017) & inrange(c5_p11, 1, 46)
 generate byte spanish_childhood_2017 = c5_p11 == 10 ///
-    if age_2017 >= 3 & inrange(c5_p11, 1, 45)
+    if age_2017 >= 3 & !missing(age_2017) & inrange(c5_p11, 1, 45)
 generate byte indigenous_language_2017 = ///
     (inrange(c5_p11, 1, 9) | inrange(c5_p11, 15, 45)) ///
-    if age_2017 >= 3 & inrange(c5_p11, 1, 45)
+    if age_2017 >= 3 & !missing(age_2017) & inrange(c5_p11, 1, 45)
 generate byte literate_2017 = c5_p12 == 1 ///
-    if age_2017 >= 3 & inlist(c5_p12, 1, 2)
+    if age_2017 >= 3 & !missing(age_2017) & inlist(c5_p12, 1, 2)
 generate byte education_level_2017 = c5_p13_niv ///
-    if age_2017 >= 3 & inrange(c5_p13_niv, 1, 10)
+    if age_2017 >= 3 & !missing(age_2017) & inrange(c5_p13_niv, 1, 10)
 generate byte primary_grade_2017 = c5_p13_gra ///
     if education_level_2017 == 3 & inrange(c5_p13_gra, 1, 6)
 replace primary_grade_2017 = c5_p13_anio_pri ///
@@ -10437,13 +10411,13 @@ generate byte secondaryplus_2017 = ///
     inlist(education_level_2017, 4, 6, 7, 8, 9, 10) ///
     if !missing(education_level_2017)
 generate byte attending_education_2017 = c5_p14 == 1 ///
-    if age_2017 >= 3 & inlist(c5_p14, 1, 2)
+    if age_2017 >= 3 & !missing(age_2017) & inlist(c5_p14, 1, 2)
 generate byte literate_age14_2017 = literate_2017 ///
-    if age_2017 >= 14
+    if age_2017 >= 14 & !missing(age_2017)
 generate byte primary_complete_age14_2017 = primary_complete_2017 ///
-    if age_2017 >= 14
+    if age_2017 >= 14 & !missing(age_2017)
 generate byte secondaryplus_age14_2017 = secondaryplus_2017 ///
-    if age_2017 >= 14
+    if age_2017 >= 14 & !missing(age_2017)
 generate byte attending_age6_17_2017 = attending_education_2017 ///
     if inrange(age_2017, 6, 17)
 
@@ -10465,10 +10439,10 @@ replace education_years_approx_2017 = 18 ///
 
 generate byte employed_2017 = .
 replace employed_2017 = 1 ///
-    if age_2017 >= 5 & ///
+    if age_2017 >= 5 & !missing(age_2017) & ///
        (c5_p16 == 1 | inrange(c5_p17, 1, 5))
 replace employed_2017 = 0 ///
-    if age_2017 >= 5 & c5_p16 == 2 & inlist(c5_p17, 6, 7)
+    if age_2017 >= 5 & !missing(age_2017) & c5_p16 == 2 & inlist(c5_p17, 6, 7)
 generate byte unemployed_2017 = .
 replace unemployed_2017 = 0 if employed_2017 == 1
 replace unemployed_2017 = c5_p18 == 1 ///
@@ -10477,11 +10451,11 @@ generate byte labor_force_2017 = ///
     employed_2017 == 1 | unemployed_2017 == 1 ///
     if !missing(employed_2017, unemployed_2017)
 generate byte employed_age14_2017 = employed_2017 ///
-    if age_2017 >= 14
+    if age_2017 >= 14 & !missing(age_2017)
 generate byte labor_force_age14_2017 = labor_force_2017 ///
-    if age_2017 >= 14
+    if age_2017 >= 14 & !missing(age_2017)
 generate byte unemployed_laborforce_2017 = unemployed_2017 ///
-    if age_2017 >= 14 & labor_force_2017 == 1
+    if age_2017 >= 14 & !missing(age_2017) & labor_force_2017 == 1
 generate byte employment_position_2017 = c5_p21 ///
     if employed_2017 == 1 & inrange(c5_p21, 1, 7)
 generate str4 occupation_code_2017 = c5_p19_cod ///
@@ -10489,10 +10463,10 @@ generate str4 occupation_code_2017 = c5_p19_cod ///
 generate str4 industry_code_2017 = c5_p20_cod ///
     if employed_2017 == 1 & c5_p20_cod != ""
 generate byte marital_status_2017 = c5_p24 ///
-    if age_2017 >= 12 & inrange(c5_p24, 1, 6)
+    if age_2017 >= 12 & !missing(age_2017) & inrange(c5_p24, 1, 6)
 generate byte indigenous_selfid_2017 = ///
     inlist(c5_p25_i_mc, 1, 2, 3, 4, 11, 12, 13) ///
-    if age_2017 >= 12 & inrange(c5_p25_i_mc, 1, 16) & ///
+    if age_2017 >= 12 & !missing(age_2017) & inrange(c5_p25_i_mc, 1, 16) & ///
        c5_p25_i_mc != 9
 
 generate byte moved_ccpp_2013_2017 = ///
@@ -10621,12 +10595,23 @@ foreach household_var of local census2017_hh_constant_vars {
     drop `household_var'_min_aux `household_var'_max_aux
 }
 
+// Row counts alone cannot certify a roster containing duplicate people.
+bysort id_pob_imp_f: generate long cpv2017_person_matches_aux = _N ///
+    if !missing(id_pob_imp_f)
+generate byte cpv2017_person_invalid_aux = ///
+    missing(id_pob_imp_f) | cpv2017_person_matches_aux != 1 ///
+    if !missing(cpv2017_destination_hhid)
+bysort cpv2017_destination_hhid: egen byte cpv2017_roster_invalid_aux = ///
+    max(cpv2017_person_invalid_aux)
 bysort cpv2017_destination_hhid: ///
     generate int cpv2017_delivery_members = _N ///
     if !missing(cpv2017_destination_hhid)
 generate byte cpv2017_roster_complete = ///
-    cpv2017_delivery_members == c4_p1 ///
+    cpv2017_delivery_members == c4_p1 & cpv2017_roster_invalid_aux == 0 ///
     if !missing(cpv2017_destination_hhid, c4_p1)
+
+drop cpv2017_person_matches_aux cpv2017_person_invalid_aux ///
+    cpv2017_roster_invalid_aux
 
 egen byte cpv2017_dest_hh_tag_aux = ///
     tag(cpv2017_destination_hhid)
@@ -10646,7 +10631,7 @@ assert `cpv2017_dest_hh_partial' == 37926
 count if ///
     cpv2017_dest_hh_tag_aux & cpv2017_roster_complete == 1
 local cpv2017_dest_hh_complete = r(N)
-assert `cpv2017_dest_hh_complete' == 27274
+assert `cpv2017_dest_hh_complete' == 27271
 count if ///
     cpv2017_dest_hh_tag_aux & ///
     cpv2017_delivery_members > c4_p1 & !missing(c4_p1)
@@ -10780,7 +10765,7 @@ generate double wellbeing_connectivity_2017 = ///
 
 generate double wellbeing_humancapital_2017 = ///
     (literate_2017 + secondaryplus_2017) / 2 ///
-    if age_2017 >= 14 & !missing(literate_2017, secondaryplus_2017)
+    if age_2017 >= 14 & !missing(age_2017) & !missing(literate_2017, secondaryplus_2017)
 generate double wellbeing_core_2017 = ///
     (wellbeing_housing_2017 + wellbeing_services_2017 + ///
      wellbeing_energy_2017 + wellbeing_humancapital_2017) / 4 ///

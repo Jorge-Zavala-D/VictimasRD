@@ -1,0 +1,12 @@
+dataset,variables,metadata_differences
+04_foundational_community_registry,79,0
+05_community_registry_census2007,180,0
+06_community_registry_geospatial,207,0
+07_community_registry_gdp,231,0
+08_community_registry_elections,283,0
+09_sisfoh_2013_individual_analysis,347,0
+10_sisfoh_2013_household_analysis,398,0
+11_community_registry_sisfoh_2013,403,0
+12_census_2017_individual_analysis,584,0
+13_census_2017_household_analysis,567,0
+14_community_registry_census_2017,466,0

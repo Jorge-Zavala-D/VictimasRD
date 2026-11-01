@@ -1,0 +1,32 @@
+{
+  "status": "proposal_only_verified_no_live_writes",
+  "head": "2efea548f0c55ea15444c0558d8e3b88bd06dad8",
+  "live_files_preserved": 117,
+  "preexisting_dirty_files_preserved": 118,
+  "generated_live_inputs_exact": 55,
+  "changed_artifacts_reviewed": 36,
+  "proposed_source_files": 7,
+  "generated_replacements": 0,
+  "table_body_rows_checked": 499,
+  "release_candidate_rows": 261,
+  "release_eligible_rows": 0,
+  "patch_sha256": "a6871dabeb974c224ea9c3159cfcc1721e5791c999150c4e16454beff114151b",
+  "patch_roundtrip": "exact_seven_proposed_source_hashes",
+  "staged_changes": 0,
+  "new_review_batch_files": [
+    "docs/PUBLICATION_CHANGED_ARTIFACT_REVIEW_2026-11-01.md",
+    "docs/proposals/2026-11-01-overleaf-source-updates.patch",
+    "metadata/publication-change-review-2026-11-01/aggregate-csv-changed-cells.csv",
+    "metadata/publication-change-review-2026-11-01/aggregate-csv-comparison.csv",
+    "metadata/publication-change-review-2026-11-01/assignment-family-audit.csv",
+    "metadata/publication-change-review-2026-11-01/assignment-signals.csv",
+    "metadata/publication-change-review-2026-11-01/changed-artifact-review.csv",
+    "metadata/publication-change-review-2026-11-01/final-verification.json",
+    "metadata/publication-change-review-2026-11-01/historical-gallery-holds.csv",
+    "metadata/publication-change-review-2026-11-01/live-input-verification.csv",
+    "metadata/publication-change-review-2026-11-01/pdf-validation.csv",
+    "metadata/publication-change-review-2026-11-01/primary-hte-holm-audit.csv",
+    "metadata/publication-change-review-2026-11-01/proposed-overleaf-source-updates.csv",
+    "metadata/publication-change-review-2026-11-01/table-cell-validation.csv"
+  ]
+}

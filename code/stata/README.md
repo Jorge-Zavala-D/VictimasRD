@@ -37,15 +37,20 @@ The master:
   Working without launching Python, PowerShell, or an external console;
 - rejects any derived-data destination inside Dropbox Raw or Git;
 - creates approved current-pipeline destinations in Dropbox Working/Coded;
-- installs missing anticipated user-written commands into `build/ado` and
-  cold-session tests the official `rdrobust` ado/Mata installation;
+- verifies the recorded Stata/BASE and project-local `build/ado` identities,
+  rejects dependency drift without installing or updating packages, and
+  cold-session tests the locked RD, density and IV stack;
 - selects a verified academic graph scheme with a built-in fallback; and
 - calls the ordered modules documented in
   [`pipeline/README.md`](pipeline/README.md).
 
 The implemented `pipeline/01_data_preparation.do` and
-`pipeline/02_describe_data.do` modules are enabled for push-button
-reproduction. The first is the single authoritative preparation program; the
+`pipeline/02_describe_data.do` modules are available for push-button
+reproduction through the explicit master switches. The checked-in master
+defaults to environment verification only (`run_all = 0`, individual switches
+off); set `run_all = 1` for the complete routine pipeline, or enable an explicit
+individual module. The historical design search stays disabled even with
+`run_all = 1`. The first is the single authoritative preparation program; the
 second produces full-RUV, selected-main-sample, and full-CMAN-project
 descriptive tables and figures without reselecting the geography or estimating
 treatment effects.
@@ -58,16 +63,17 @@ bracketed out of the master, including `run_all`.
 
 `pipeline/03b_validate_rd_assumptions.do` and
 `pipeline/04_estimate_main_effects.do` are implemented as bounded routine
-modules. The outcome orchestrator calls `pipeline/04a_sisfoh2013_ccpp.do`,
-`pipeline/04b_sisfoh2013_household.do`, and
-`pipeline/04c_sisfoh2013_individual.do`. All inherit adjacent B/C support,
-`treat_12`, a common treatment-design bandwidth, weak-first-stage safeguards,
+modules. The outcome orchestrator calls all six wave/level modules: `04a`--`04c`
+for SISFOH 2013 and `04d`--`04f` for Census 2017. All inherit adjacent B/C support,
+`treat_12`/`treat_16`, a common treatment-design bandwidth, weak-first-stage safeguards,
 and versioned outcome registries. The CCPP module uses district-aware
 inference; the household and individual modules give each assignment community
 equal total weight, cluster by complete RUV community ID, and report
 observation-equal, district, and score-mass-point sensitivities. These modules
-remain switch-controlled; later 2017, dedicated robustness, and mechanism
-modules are not yet implemented.
+remain switch-controlled. Module `05` implements wave/level heterogeneity,
+`06` migration/mechanism and selection analyses, `07` publication-review
+production, and `08` technical and release-governance checks. A technical pass
+does not authorize manuscript synchronization or public release.
 
 The CMAN PDF table and ReporteCCPP HTML tables are one-time source-ingestion
 products shared through Dropbox Working. Their CSVs and extraction manifests

@@ -1,0 +1,7 @@
+artifact,registered_primary_outcomes,primary_rf_and_fuzzy_rows,shared_cells_changed,status
+output/tables/rd_outcomes/rd_2013_ccpp_results.csv,8,16,0,exact_serialized_values_match
+output/tables/rd_outcomes/rd_2013_household_results.csv,8,16,0,exact_serialized_values_match
+output/tables/rd_outcomes/rd_2013_individual_results.csv,8,16,0,exact_serialized_values_match
+output/tables/rd_outcomes/rd_2017_ccpp_results.csv,8,16,0,exact_serialized_values_match
+output/tables/rd_outcomes/rd_2017_household_results.csv,8,16,0,exact_serialized_values_match
+output/tables/rd_outcomes/rd_2017_individual_results.csv,8,16,0,exact_serialized_values_match

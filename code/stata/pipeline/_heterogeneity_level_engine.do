@@ -597,7 +597,7 @@ program define _vrd_post_level_hte_iv
         local estimate = _b[`treatment_m']
         local standard_error = _se[`treatment_m']
 
-        if missing(`estimate') | missing(`standard_error') {
+        if missing(`estimate', `standard_error') | `standard_error' <= 0 {
             local estimation_rc = 504
         }
         else {
@@ -634,8 +634,14 @@ program define _vrd_post_level_hte_iv
             }
         }
 
+        if !`estimation_rc' & ///
+            (missing(`estimate', `standard_error', `pvalue', `ci_low', `ci_high') | ///
+            `standard_error' <= 0) local estimation_rc = 504
+
         local gate_pass = ///
-            `support_pass' & ///
+            !`estimation_rc' & ///
+            !missing(`estimate', `standard_error', `pvalue', `ci_low', `ci_high') & ///
+            `standard_error' > 0 & `support_pass' & ///
             `min_sw_f' < . & ///
             `min_sw_f' > ${hte_weak_f_gate} & ///
             `underid_p' < . & `underid_p' < .05
@@ -702,6 +708,7 @@ program define _vrd_post_level_hte_iv
             capture quietly lincom ///
                 ${hte_treatment} + ///
                 `eval_value' * `treatment_m'
+            local conditional_rc = _rc
 
             local conditional_estimate .
             local conditional_se .
@@ -712,7 +719,7 @@ program define _vrd_post_level_hte_iv
             local conditional_standardized_low .
             local conditional_standardized_high .
 
-            if !_rc {
+            if !`conditional_rc' {
                 local conditional_estimate = r(estimate)
                 local conditional_se = r(se)
                 local conditional_p = r(p)
@@ -729,6 +736,13 @@ program define _vrd_post_level_hte_iv
                 }
             }
 
+            local conditional_valid = !`conditional_rc' & ///
+                !missing(`conditional_estimate', `conditional_se', `conditional_p', ///
+                    `conditional_low', `conditional_high') & `conditional_se' > 0
+            local conditional_gate_pass = `gate_pass' & `conditional_valid'
+            local conditional_gate_status "`gate_status'"
+            if !`conditional_valid' local conditional_gate_status "conditional_inference_failed"
+
             post `condhandle' ///
                 ("`outcomeid'") ("`outlabel'") (`paperorder') ///
                 ("`modid'") ("`modlabel'") (`modorder') ///
@@ -740,7 +754,7 @@ program define _vrd_post_level_hte_iv
                 (`conditional_standardized') ///
                 (`conditional_standardized_low') ///
                 (`conditional_standardized_high') ///
-                (`gate_pass') ("`gate_status'")
+                (`conditional_gate_pass') ("`conditional_gate_status'")
         }
     }
 end
@@ -886,7 +900,7 @@ program define _vrd_post_level_hte_rdhte
             }
         }
 
-        if missing(`estimate') | missing(`standard_error') {
+        if missing(`estimate', `standard_error') | `standard_error' <= 0 {
             local estimation_rc = 504
         }
         else {
@@ -1156,39 +1170,34 @@ assert gate_pass == 0 if gate_status == "not_applicable_identity"
 
 generate double p_holm = .
 generate double q_bh = .
-
+// Failed fits keep their registered slot, but never receive an inferential p-value.
+generate double hte_adjust_p = cond(estimation_rc == 0 & !missing(pvalue), pvalue, 1)
 egen long hte_adjust_group = group(estimator moderator_tier) ///
     if inlist(spec_id, "common_h_iv", "common_h_rdhte") & ///
-    estimation_rc == 0 & pvalue < .
-
-sort hte_adjust_group pvalue
-by hte_adjust_group: generate int hte_rank = _n ///
-    if hte_adjust_group < .
-by hte_adjust_group: generate int hte_family_n = _N ///
-    if hte_adjust_group < .
-
+    gate_status != "not_applicable_identity"
+sort hte_adjust_group hte_adjust_p outcome_id moderator_id
+by hte_adjust_group: generate int hte_rank = _n if hte_adjust_group < .
+by hte_adjust_group: generate int hte_family_n = _N if hte_adjust_group < .
 generate double hte_holm_step = ///
-    pvalue * (hte_family_n - hte_rank + 1) ///
+    hte_adjust_p * (hte_family_n - hte_rank + 1) ///
     if moderator_tier == "primary" & hte_adjust_group < .
 by hte_adjust_group: replace hte_holm_step = ///
     max(hte_holm_step, hte_holm_step[_n-1]) ///
-    if moderator_tier == "primary" & _n > 1 & ///
-    hte_adjust_group < .
+    if moderator_tier == "primary" & _n > 1 & hte_adjust_group < .
 replace p_holm = min(hte_holm_step, 1) ///
-    if moderator_tier == "primary" & hte_holm_step < .
-
+    if moderator_tier == "primary" & hte_holm_step < . & ///
+    estimation_rc == 0 & !missing(pvalue)
 generate double hte_bh_step = ///
-    pvalue * hte_family_n / hte_rank ///
+    hte_adjust_p * hte_family_n / hte_rank ///
     if moderator_tier == "secondary" & hte_adjust_group < .
 gsort hte_adjust_group -hte_rank
 by hte_adjust_group: replace hte_bh_step = ///
     min(hte_bh_step, hte_bh_step[_n-1]) ///
-    if moderator_tier == "secondary" & _n > 1 & ///
-    hte_adjust_group < .
+    if moderator_tier == "secondary" & _n > 1 & hte_adjust_group < .
 replace q_bh = min(hte_bh_step, 1) ///
-    if moderator_tier == "secondary" & hte_bh_step < .
-
-drop hte_adjust_group hte_rank hte_family_n ///
+    if moderator_tier == "secondary" & hte_bh_step < . & ///
+    estimation_rc == 0 & !missing(pvalue)
+drop hte_adjust_p hte_adjust_group hte_rank hte_family_n ///
     hte_holm_step hte_bh_step
 sort moderator_order paper_order estimator spec_id
 save `hte_results_final'

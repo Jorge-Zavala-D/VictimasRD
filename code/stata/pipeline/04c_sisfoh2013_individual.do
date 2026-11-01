@@ -45,7 +45,7 @@ program define _vrd_prepare_individual_outcomes
         if female_2013 == 1 & inrange(age_2013, 12, 49)
     generate byte partnered_2013 = ///
         inlist(marital_status_2013, 2, 3) ///
-        if age_2013 >= 12 & !missing(marital_status_2013)
+        if age_2013 >= 12 & !missing(age_2013, marital_status_2013)
 
     * Human-capital outcomes follow the age universes used in preparation.
     generate byte school_deprivation_proxy_2013 = ///
@@ -53,19 +53,19 @@ program define _vrd_prepare_individual_outcomes
         if inrange(age_2013, 7, 12) & ///
            !missing(education_level_2013)
     generate byte literate_age14_2013 = literate_2013 ///
-        if age_2013 >= 14 & !missing(literate_2013)
+        if age_2013 >= 14 & !missing(age_2013, literate_2013)
     generate byte primary_complete_age14_2013 = ///
         primary_complete_2013 ///
-        if age_2013 >= 14 & !missing(primary_complete_2013)
+        if age_2013 >= 14 & !missing(age_2013, primary_complete_2013)
     generate byte education_years_age14_2013 = ///
         education_years_approx_2013 ///
-        if age_2013 >= 14 & !missing(education_years_approx_2013)
+        if age_2013 >= 14 & !missing(age_2013, education_years_approx_2013)
     generate byte indigenous_language_age3_2013 = ///
         named_indigenous_language_2013 ///
-        if age_2013 >= 3 & !missing(named_indigenous_language_2013)
+        if age_2013 >= 3 & !missing(age_2013, named_indigenous_language_2013)
     generate byte nonspanish_language_age3_2013 = ///
         nonspanish_language_2013 ///
-        if age_2013 >= 3 & !missing(nonspanish_language_2013)
+        if age_2013 >= 3 & !missing(age_2013, nonspanish_language_2013)
 
     * Program counts preserve multiple responses; narrow programs use age rules.
     egen byte program_count_2013 = rowtotal( ///
@@ -81,9 +81,9 @@ program define _vrd_prepare_individual_outcomes
 
     * Labor outcomes are coded only for their defensible analysis universes.
     generate byte labor_force_age14_2013 = labor_force_2013 ///
-        if age_2013 >= 14 & !missing(labor_status_2013)
+        if age_2013 >= 14 & !missing(age_2013, labor_status_2013)
     generate byte unemployed_lf_2013 = unemployed_2013 ///
-        if age_2013 >= 14 & labor_force_2013 == 1
+        if age_2013 >= 14 & !missing(age_2013) & labor_force_2013 == 1
 
     local labor_status_outcomes ///
         dependent 1 ///
@@ -101,7 +101,7 @@ program define _vrd_prepare_individual_outcomes
         local status_code : word `code_index' of `labor_status_outcomes'
         generate byte worker_`status_name'_2013 = ///
             labor_status_2013 == `status_code' ///
-            if age_2013 >= 14 & !missing(labor_status_2013)
+            if age_2013 >= 14 & !missing(age_2013, labor_status_2013)
     }
     rename worker_home_duties_2013 home_duties_2013
     rename worker_student_2013 student_age14_2013
@@ -125,7 +125,7 @@ program define _vrd_prepare_individual_outcomes
         local sector_code : word `code_index' of `sector_outcomes'
         generate byte sector_`sector_name'_age14_2013 = ///
             employment_sector_2013 == `sector_code' ///
-            if age_2013 >= 14 & !missing(labor_status_2013)
+            if age_2013 >= 14 & !missing(age_2013, labor_status_2013)
     }
 end
 
@@ -307,7 +307,8 @@ local main_first_stage_se = e(se_tau_rb)
 local main_first_stage_f = ///
     (`main_first_stage_bc' / `main_first_stage_se')^2
 local main_first_stage_n = e(N_h_l) + e(N_h_r)
-local first_stage_gate = `main_first_stage_f' > ${rd_weak_f_gate}
+local first_stage_gate = !missing(`main_first_stage_f') & ///
+    `main_first_stage_f' > ${rd_weak_f_gate}
 
 if !`first_stage_gate' {
     display as error ///
@@ -905,6 +906,12 @@ forvalues outcome_index = 1/`outcome_count' {
 
                 capture local kp_f = e(rkf)
                 capture local ar_p = e(arfp)
+                if missing(`estimate_bc', `standard_error', `pvalue', `ci_low', `ci_high') | ///
+                    `standard_error' <= 0 {
+                    local estimation_rc = 504
+                    local kp_f .
+                    local ar_p .
+                }
                 capture local underid_p = e(idp)
 
                 quietly count if e(sample) & ${rd_running} < 0
@@ -989,33 +996,38 @@ assert r(N) == 16
 
 generate double p_holm = .
 generate double q_bh = .
-egen long correction_group = ///
-    group(spec_id estimand multiplicity_family) ///
-    if tier != "design" & pvalue < .
-generate byte p_missing = missing(pvalue)
-
-sort correction_group p_missing pvalue outcome_id
-by correction_group: egen int correction_m = total(pvalue < .) ///
+// Keep the registered family fixed when a model fails; retain missing raw p-values.
+generate double p_for_adjust = cond(estimation_rc == 0 & !missing(pvalue), pvalue, 1)
+egen long correction_group = group(spec_id estimand multiplicity_family) ///
+    if tier != "design"
+sort correction_group p_for_adjust outcome_id
+by correction_group: generate int correction_m = _N if correction_group < .
+assert correction_m == 8 if tier == "primary" & ///
+    inlist(spec_id, "common_h_reduced_form", "common_h_fuzzy")
+by correction_group: generate int correction_rank = _n if correction_group < .
+replace q_bh = min(1, p_for_adjust * correction_m / correction_rank) ///
     if correction_group < .
-by correction_group: generate int correction_rank = sum(pvalue < .) ///
-    if correction_group < . & pvalue < .
+gsort correction_group -correction_rank outcome_id
+by correction_group: replace q_bh = min(q_bh, q_bh[_n-1]) ///
+    if _n > 1 & correction_group < .
+sort correction_group correction_rank outcome_id
+replace p_holm = min(1, p_for_adjust * (correction_m - correction_rank + 1)) ///
+    if correction_group < .
+by correction_group: replace p_holm = max(p_holm, p_holm[_n-1]) ///
+    if _n > 1 & correction_group < .
+replace p_holm = . if missing(pvalue) | estimation_rc != 0
+replace q_bh = . if missing(pvalue) | estimation_rc != 0
+drop correction_group p_for_adjust correction_m correction_rank
 
-replace q_bh = min(1, pvalue * correction_m / correction_rank) ///
-    if correction_group < . & pvalue < .
-gsort correction_group p_missing -correction_rank outcome_id
-by correction_group: replace q_bh = ///
-    min(q_bh, q_bh[_n - 1]) ///
-    if _n > 1 & correction_group < . & q_bh < .
-
-sort correction_group p_missing correction_rank outcome_id
-replace p_holm = ///
-    min(1, pvalue * (correction_m - correction_rank + 1)) ///
-    if correction_group < . & pvalue < .
-by correction_group: replace p_holm = ///
-    max(p_holm, p_holm[_n - 1]) ///
-    if _n > 1 & correction_group < . & p_holm < .
-
-drop correction_group p_missing correction_m correction_rank
+// Primary IV diagnostics cannot qualify different secondary/robustness samples.
+generate str40 strength_scope = "not_a_receipt_effect"
+replace strength_scope = "exact_sample_diagnostics_required" ///
+    if inlist(estimand, "fuzzy_late", "parametric_late")
+replace strength_scope = "primary_iv_analogue_reported" ///
+    if tier == "primary" & spec_id == "common_h_fuzzy"
+replace strength_scope = "model_iv_diagnostics_reported" ///
+    if estimator == "ivreg2" & estimation_rc == 0 & ///
+    !missing(first_stage_f, weak_robust_p)
 sort paper_order spec_id estimand
 save "`rd_results_final'", replace
 
@@ -1031,7 +1043,7 @@ export delimited using ///
 tempname contract_file
 local first_stage_status = cond(`first_stage_gate', "pass", "warning")
 local kp_f_text : display %5.2f `kp_f_main'
-local kp_status = cond(`kp_f_main' > ${rd_weak_f_gate}, ///
+local kp_status = cond(!missing(`kp_f_main') & `kp_f_main' > ${rd_weak_f_gate}, ///
     "pass", "warning")
 
 file open `contract_file' using ///
@@ -1313,7 +1325,7 @@ restore
 
 file write `secondary_table' "\bottomrule" _n
 file write `secondary_table' "\end{longtable}" _n
-file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with CCPP-equal weights, local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference. Weights are recomputed after applying the outcome-specific eligibility and missing-data rule, so each represented RUV community contributes total weight one. BH values control the false discovery rate within each declared outcome family. Denominators and eligibility rules are reported in Table~\ref{tab:rd_outcome_registry_2013_individual}. The schooling measure is an attainment-based proxy and not observed current enrollment. The weak-first-stage warning applies to every LATE. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}" _n
+file write `secondary_table' "\begin{minipage}{0.98\linewidth}\footnotesize\textit{Notes:} Each row is a separate fuzzy-RD estimate in the common \(h=0.0075\), \(b=0.0135\) window with CCPP-equal weights, local-linear triangular kernels, mass-point adjustment, and CCPP CR2 inference. Weights are recomputed after applying the outcome-specific eligibility and missing-data rule, so each represented RUV community contributes total weight one. BH values control the false discovery rate within each declared outcome family. Denominators and eligibility rules are reported in Table~\ref{tab:rd_outcome_registry_2013_individual}. The schooling measure is an attainment-based proxy and not observed current enrollment. The primary common-window IV diagnostics do not certify these outcome-specific samples. These secondary LATEs remain sensitivity diagnostics, not qualified receipt effects, until exact-sample weak-instrument diagnostics are reported. Source: RUV, CMAN, and SISFOH 2012--2013.\end{minipage}" _n
 file write `secondary_table' "\endgroup" _n
 file close `secondary_table'
 
@@ -1686,7 +1698,7 @@ twoway ///
         "Notes: Unit is a linked SISFOH person in the selected B/C geography; each RUV community receives total weight one." ///
         "Effects are scaled by the weighted below-cutoff outcome SD and estimated with local-linear triangular-kernel fuzzy RD." ///
         "Intervals use robust bias correction, mass-point adjustment, and CCPP CR2 inference." ///
-        "The first stage exceeds the prespecified strict F > 10 gate; LATEs remain paired with reduced forms and Anderson-Rubin inference." ///
+        "Primary common-window IV strength status: `kp_status' (strict F > 10); see reduced forms and Anderson-Rubin inference." ///
         "Sources: RUV, CMAN, and SISFOH 2012--2013.", ///
         size(tiny) color(gs5) span) ///
     xsize(10) ysize(7) ///

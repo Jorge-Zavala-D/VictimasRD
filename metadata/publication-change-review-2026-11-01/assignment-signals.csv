@@ -1,0 +1,16 @@
+outcome_id,outcome_label,moderator_id,moderator_label,moderator_tier,estimate,standard_error,pvalue,ci_low,ci_high,p_holm,q_bh,family_n,wave_level
+I05,Employed in the reference week,S02,Distance to corresponding district capital,secondary,30.100857,6.2549858,1.49204520000e-06,17.841311,42.360405,,.0000596818063059,40,2017_individual
+H03,Members living in another CCPP,S02,Distance to corresponding district capital,secondary,52.642658,11.603131,5.70775680000e-06,29.90094,75.384377,,.0001826482184697,32,2017_household
+H05,Employed household members,S02,Distance to corresponding district capital,secondary,33.484665,7.6311936,.00001144676,18.5278,48.441532,,.0001831481640693,32,2017_household
+H01,Female household members,S02,Distance to corresponding district capital,secondary,-11.565738,2.6937971,.000017590195,-16.845482,-6.2859921,,.0001876287472745,32,2017_household
+H03,Members living in another CCPP,S05,CCPP altitude,secondary,-28.979406,9.5147753,.0023211851,-47.628025,-10.330791,,.0185694806277752,32,2017_household
+H06,Members with health insurance,S02,Distance to corresponding district capital,secondary,-18.501875,6.5722289,.0048752972,-31.383205,-5.620543,,.0312019020318985,32,2017_household
+H08,Core household wellbeing proxy,S02,Distance to corresponding district capital,secondary,22.764038,8.3965368,.0067055915,6.3071275,39.220947,,.0357631544272105,32,2017_household
+P01,Log 2017 CCPP population,M01,Log baseline CCPP population,primary,-1.260615,.41918153,.00263558,-2.0821958,-.43903431,.0421692803502083,,16,2017_ccpp
+P07,Residents with health insurance,S02,Distance to corresponding district capital,secondary,-13.133436,3.3592565,.000092439172,-19.717459,-6.5494146,,.002958053490147,32,2017_ccpp
+I02,Age 15-29,M01,Log baseline CCPP population,primary,29.020678,8.961646099999999,.0012023583,11.456175,46.585182,.0276542404899374,,23,2013_individual
+I08,Juntos participation,S02,Distance to corresponding district capital,secondary,-18.84552,5.0817294,.00020850246,-28.805527,-8.8855133,,.0083400984294713,40,2013_individual
+I07,Any listed social program,S02,Distance to corresponding district capital,secondary,-28.014257,9.155885700000001,.0022155917,-45.959465,-10.069053,,.0443118344992399,40,2013_individual
+H05,Core wellbeing proxy,S02,Distance to corresponding district capital,secondary,31.209051,5.6651878,3.61047410000e-08,20.105488,42.312614,,1.15535169698e-06,32,2013_household
+P03,Residents age 15-29,M01,Log baseline CCPP population,primary,28.208231,8.705618899999999,.001194322,11.145532,45.270931,.0191091522574425,,16,2013_ccpp
+P05,Core wellbeing proxy,S02,Distance to corresponding district capital,secondary,30.641684,5.9879513,3.10066410000e-07,18.905514,42.37785,,9.92212517303e-06,32,2013_ccpp

@@ -1,0 +1,330 @@
+--- a/World Development Manuscript/sections/03_data_measurement.tex
++++ b/World Development Manuscript/sections/03_data_measurement.tex
+@@ -130,9 +130,10 @@
+ eight-outcome complete-case population. Nonlinkage or an invalid destination is missing movement,
+ not nonmigration. The Census question on district residence five years earlier
+ is a separate measure. Household movement aggregates preserve the original
+-source household even when members have different destinations. Destination
+-household composition is a different object; deprivation measures requiring a
+-complete roster are not computed from incomplete destination rosters.
++source household even when members have different destinations. Destination household composition is a different object. Roster-dependent
++deprivation components require unique nonmissing destination-person identifiers
++and a roster matching the reported household size; repeated linked records do
++not count as additional household members.
+ 
+ \subsection{Measurement comparability and missingness}
+ 
+--- a/World Development Manuscript/sections/07_robustness.tex
++++ b/World Development Manuscript/sections/07_robustness.tex
+@@ -44,6 +44,10 @@
+ evidence. Thousands of person records do not create thousands of
+ assignments. Spatial spillovers beyond those clusters are not ruled out.
+ 
++Primary-sample diagnostics do not qualify secondary outcomes or sensitivities
++estimated on different samples. Those ratios remain diagnostic until their own
++exact-sample weak-instrument diagnostics are available.
++
+ \paragraph{Selective observation and measurement.}
+ Source coverage, person linkage, valid movement and complete outcomes
+ are distinct. The household availability discontinuity cannot be
+@@ -64,7 +68,9 @@
+ 
+ \paragraph{Multiplicity and substantive reach.}
+ All six eight-outcome primary families remain visible with intervals
+-and within-family corrections. Non-rejection is not proof of no effect;
++and within-family corrections. Failed applicable fits retain their registered
++multiplicity slots without acquiring reported inferential probabilities.
++Non-rejection is not proof of no effect;
+ isolated sensitivity, assignment or association signals do not establish
+ a national welfare gain or causal migration mechanism. Post-treatment
+ project type, financing, internet and employment cannot solve these
+--- a/World Development Manuscript/appendix/B_data_construction_linkage.tex
++++ b/World Development Manuscript/appendix/B_data_construction_linkage.tex
+@@ -112,12 +112,18 @@
+ represents an independently verified residential move.
+ 
+ There are 66,427 distinct destination households represented by linked
+-analytical people: 27,274 have complete internally consistent rosters, 37,926
+-are partial, 1,223 have unknown household size, and four are overfull.
+-Full-roster deprivation components are constructed only when the required
+-roster conditions hold. A source household can disperse across destinations,
+-and a destination household can contain people outside the source cohort.
+-Neither household object can silently replace the other.
++analytical people: 27,271 have complete internally consistent rosters, 37,926
++are partial, 1,223 have unknown household size, four are overfull, and three
++additional households are held from full-roster construction because their
++linked records repeat a destination-person identifier. These categories sum
++to 66,427. The three additional identity holds contain 15 source rows; those
++people remain in the analytical cohort. Twelve destination households in total
++contain repeated destination-person identifiers, but nine already fall in the
++other incomplete-roster categories and are not counted twice.
++Full-roster deprivation components require unique nonmissing person identifiers
++and a roster matching reported household size. A source household can disperse
++across destinations, and a destination household can contain people outside
++the source cohort. Neither household object can silently replace the other.
+ 
+ \subsection{Coverage, linkage, observation, and analysis populations}
+ 
+--- a/World Development Manuscript/appendix/D_additional_results.tex
++++ b/World Development Manuscript/appendix/D_additional_results.tex
+@@ -72,6 +72,13 @@
+ income or independent local growth. None of the 229 has raw $p<0.05$
+ or survives its within-domain BH correction. This is not one global
+ correction over all secondary outcomes and specifications.
++
++These secondary and unmatched sensitivity ratios remain diagnostic rather than
++qualified receipt effects until their own exact-sample weak-instrument
++diagnostics are reported. The primary family's first stage cannot certify
++an outcome-specific eligibility or missing-data sample. Multiplicity
++adjustments retain failed applicable hypotheses in their registered families;
++unavailable fits do not acquire reported inferential probabilities.
+ 
+ Two adjusted parametric primary-outcome sensitivities survive their own
+ eight-test Holm corrections: 2017 community employment, $-17.71$ points
+--- a/World Development Manuscript/appendix/E_mechanisms_heterogeneity.tex
++++ b/World Development Manuscript/appendix/E_mechanisms_heterogeneity.tex
+@@ -59,6 +59,13 @@
+ to secondary moderators within wave, level, estimator and moderator tier.
+ Conditional-effect displays and joint AR diagnostics do not substitute
+ for those interaction tests.
++A failed but applicable fit retains its registered family slot, with a value
++of one used only in the adjustment calculation; its reported inference stays
++unavailable. Structural identity cells are excluded. Primary-moderator
++families therefore contain 16 applicable interactions at the community and
++household levels and 23 at the individual level. Additional 2013 community
++CCPP- and exact-score-cluster sensitivities also fail the reporting screen;
++they do not restore unavailable receipt-effect inference.
+ 
+ \subsection{Receipt and assignment findings}
+ 
+@@ -93,7 +100,7 @@
+ % BEGIN FROZEN ASSIGNMENT SIGNALS
+ \begingroup\raggedright
+ \subsubsection*{2013 community assignment contrasts}
+-Residents age 15-29, by log 2007 population: $28.21\,[11.15,45.27]$; Holm $p=0.010$.
++Residents age 15-29, by log 2007 population: $28.21\,[11.15,45.27]$; Holm $p=0.019$.
+ 
+ Core wellbeing proxy, by distance to the corresponding district capital: $30.64\,[18.91,42.38]$; BH $q<0.001$.
+ 
+@@ -101,14 +108,14 @@
+ Core wellbeing proxy, by distance to the corresponding district capital: $31.21\,[20.11,42.31]$; BH $q<0.001$.
+ 
+ \subsubsection*{2013 individual assignment contrasts}
+-Age 15-29, by log 2007 population: $29.02\,[11.46,46.59]$; Holm $p=0.018$.
++Age 15-29, by log 2007 population: $29.02\,[11.46,46.59]$; Holm $p=0.028$.
+ 
+ Any listed social program, by distance to the corresponding district capital: $-28.01\,[-45.96,-10.07]$; BH $q=0.044$.
+ 
+ Juntos participation, by distance to the corresponding district capital: $-18.85\,[-28.81,-8.89]$; BH $q=0.008$.
+ 
+ \subsubsection*{2017 community assignment contrasts}
+-Log 2017 CCPP population, by log 2007 population: $-1.26\,[-2.08,-0.44]$; Holm $p=0.021$.
++Log 2017 CCPP population, by log 2007 population: $-1.26\,[-2.08,-0.44]$; Holm $p=0.042$.
+ 
+ Residents with health insurance, by distance to the corresponding district capital: $-13.13\,[-19.72,-6.55]$; BH $q=0.003$.
+ 
+@@ -187,8 +194,8 @@
+ use the same sample; equal counts do not prove identical communities
+ across predictors. These are unweighted OLS associations in the window
+ with assignment-side intercept and side-specific score slopes, not
+-triangular-weighted RD effects. Adjustment uses log 2007 population,
+-2007 core wellbeing and altitude.
++triangular-weighted RD effects. Adjustment uses log 2007 population and
++2007 core wellbeing, plus altitude from the 2017 geographic source.
+ 
+ The table reports coefficients in zero-to-one movement-share units
+ per predictor standard deviation. Multiplying by 100 gives percentage
+--- a/World Development Manuscript/appendix/F_replication_transparency.tex
++++ b/World Development Manuscript/appendix/F_replication_transparency.tex
+@@ -66,41 +66,39 @@
+ team; the MCP interface is not itself a statistical method or a data input.
+ 
+ \subsection{Software and portability}
+-
+ The pipeline targets Stata 19 and uses a project-local, ignored package
+-cache. On 3 October 2026, the production preflight recorded the reported
+-Stata 19 Windows 64-bit runtime, built on 12 August 2026, and locked file
+-identities for 267 project dependency and supporting-code files, 12,954
+-official installed base files, and two installed engine components.
+-Supporting files include Mata libraries, compiled objects, plugins, graph
+-schemes and their styles. Installed-file fingerprints are not an independent
+-attestation of the executable hosting the MCP session.
+-
+-The versioned manifest records byte lengths, native Stata checksums and
+-SHA-256 hashes. The master checks the recorded runtime build, native file
++cache. The historical 3 October 2026 lock records the then-observed
++12 August 2026 build. On 1 November 2026, the installed 7 October 2026
++Windows 64-bit build was qualified against preserved results before a new
++prospective lock was adopted. No package was upgraded or replaced.
++The new lock covers 267 unchanged project dependency/support files,
++12,966 official BASE files and two installed engine components: 13,235
++identities. Supporting files include Mata libraries, compiled objects,
++plugins, schemes and styles. Installed-file fingerprints do not independently
++attest the executable hosting the MCP session.
++
++The versioned manifests record byte lengths, native Stata checksums and
++SHA-256 hashes. The master checks the recorded build, native file
+ fingerprints and code resolution before analysis; it stops on missing or
+-changed dependencies and does not download replacements. Only official base
+-files and the locked project cache are permitted on the code-search path.
+-A separate read-only verifier checks SHA-256 identities and file inventories;
+-the routine master does not invoke it or any external process. The exact
+-already installed mapping commands and graph-scheme files were copied into
+-the ignored cache without upgrades or changes to their shared installations.
+-
+-Table~\ref{tab:software-preflight} summarizes observed release markers, not
+-the complete file manifest. This prospective lock does not prove that every
+-historical estimate was generated in this environment. The environment-only
+-master and synthetic compatibility checks passed; research estimates and
+-data were not regenerated. Restoration on another machine, licensing and
+-redistribution permissions, and a fresh full raw-data replication remain
+-separate requirements before certifying a public package.
+-
+-The 8 October 2026 restoration contract fixes the manifest's Git checkout
+-line endings without changing its reviewed fingerprints. A private cache
+-can be restored and checked locally without redistributing licensed Stata
+-files, source data or credentials. The contract requires authorized source
+-access, a licensed compatible installation and exact file verification
+-before running the master; another-machine validation remains a separate
+-test, not a conclusion from this local exercise.
++changed dependencies without downloading replacements. Only official BASE
++and the locked project cache may resolve code. A separate read-only verifier
++checks SHA-256 identities and inventories; the routine master does not invoke
++it or any external process.
++
++Unchanged modules 04--06 were first regenerated under the candidate build:
++36 aggregate CSVs containing 4,598 rows agreed with preserved outputs.
++Numeric serialization comparisons used absolute tolerance $10^{-8}$ plus
++relative tolerance $10^{-7}$; missingness and nonnumeric identities agreed.
++This qualifies the observed build for the existing analysis, not historical
++generation or causal identification. The subsequent corrected routine master
++and its dataset/output comparisons are described below.
++
++Table~\ref{tab:software-preflight} reports release markers, not the complete
++file manifest. The 8 October restoration contract's literal-line-ending rule
++also applies to the new lock. A private dependency-cache restoration does not
++redistribute licensed Stata files, source data or credentials. Another-machine
++execution, authorized source access, licensing and redistribution rights remain
++separate requirements; the local run does not certify them.
+ 
+ \begin{table}[htbp]
+ \centering
+@@ -111,7 +109,7 @@
+ \toprule
+ Component & Observed release \\
+ \midrule
+-Stata & 19 (IC audit session) \\
++Stata & 19 (7 October 2026; IC audit session) \\
+ \texttt{rdrobust}, \texttt{rdplot} & 11.1.0 (22 May 2026) \\
+ \texttt{rddensity} & 3.0 (27 May 2026) \\
+ \texttt{rdhte} & 0.2.1 (18 June 2026) \\
+@@ -123,11 +121,11 @@
+ \end{tabular}
+ \begin{tablenotes}[flushleft]\footnotesize
+ \item \textit{Note:} Technical metadata, not an estimation sample; uncertainty
+-measures do not apply. Releases were read from Stata's configured project
+-cache during the 2--3 October 2026 preflight. The reviewed file-level lock
+-now also covers supporting dependencies and official installed files.
+-Release markers alone do not establish file identity. This table does not
+-certify historical generation, a different machine, or redistribution rights.
++measures do not apply. Package release markers read during the 2--3 October
++2026 preflight are unchanged in the 1 November qualification. The new runtime
++and complete file-level lock are recorded separately. Release markers alone
++do not establish file identity or certify historical generation, another
++machine, or redistribution rights.
+ \end{tablenotes}
+ \end{threeparttable}
+ \end{table}
+@@ -153,16 +151,42 @@
+ automatic promotion of future outputs. Submission and public-release
+ eligibility remain blocked.
+ 
+-The preflight rechecked frozen aggregate cells, manifests and existing
+-assertion tests and inspected the assembled exhibits. It did not
+-independently rerun the entire raw-data pipeline or certify every historical
+-transformation. Corrected units, the covariate-year note and the
+-selection-flow note were repaired in their producers before integration;
+-no generated input was edited in Overleaf. The separate density and
+-covariate-continuity supplement is now present in Appendix C under its own
+-integration record. Its graphical uncertainty is distinguished from formal
+-tests, and source-timing and selection qualifications remain explicit. The
+-production receipts record the actual coverage and remaining limitations.
++The corrected routine master completed locally on 1 November 2026 in about
++112 minutes, including preparation, descriptives, fixed design validation,
++all main and heterogeneity modules, mechanisms, publication assembly and
++release checks. External source-conversion prerequisites and the disabled
++historical design search were not rerun. The final environment-only master
++also passed after production. Runtime is machine- and workload-dependent.
++
++All 11 analytical datasets were compared by validated keys, dimensions and
++values against preserved baselines. The destination-roster correction changes
++the NBI cells described in Appendix~\ref{app:data}, not the retained cohort.
++Four electoral concentration fields and their downstream copies differ only
++at floating-point scale: the maximum absolute difference is
++$5.33\times10^{-15}$. A narrowly documented absolute bound of $10^{-13}$
++was applied only to those four fields after investigating the initial exact
++comparison; all non-exempt field comparisons remained exact, and no research values
++were rounded or replaced.
++
++All 48 primary outcomes' common-window reduced-form and fuzzy rows retain
++identical shared serialized results. Thirty heterogeneity Holm cells change
++because failed applicable hypotheses retain their family slots; raw estimates
++and uncertainty are unchanged. Thirty-two prescribed clustering sensitivity
++rows were added without changing the primary model. Secondary NBI
++outcome-selected fits and related family adjustments change where their
++construction changes; those sensitivity ratios are not promoted to qualified
++causal effects.
++
++Twenty-one Python unit tests, focused Stata guard tests and twelve post-master
++output/contract tests pass. All 261 candidate artifacts match their generation
++checksums, with zero technical release errors. Thirty-six artifact fingerprints
++differ from their historical review identities and are documented in a
++separate dated review; no owner or public-release approval is inherited. The 55 live
++publication inputs themselves remain byte-identical to their approved
++canonical copies. Technical execution and review do not certify every
++historical transformation, scientific assumption, another machine or public
++disclosure. The separate Appendix C diagnostics retain their source-timing,
++graphical/formal-inference and selection qualifications.
+ 
+ \subsection{AI assistance and accountable verification}
+ 
+--- a/World Development Manuscript/submission_checklist.tex
++++ b/World Development Manuscript/submission_checklist.tex
+@@ -46,6 +46,24 @@
+ packet counts.
+ \end{itemize}
+ 
++\subsection*{1 November 2026 technical-review addendum}
++The preceding completed-production bullets describe the 8 October packet.
++The qualified Stata 19 build is now 7 October 2026; the new prospective lock
++covers 13,235 identities without package upgrades. The corrected routine
++master and all eleven keyed dataset comparisons pass locally. All 96
++primary common-window reduced-form/fuzzy rows retain identical shared
++serialized results. Documented roster/NBI corrections, thirty heterogeneity
++Holm cells and thirty-two added clustering sensitivities do not change the
++headline primary findings.
++All 55 live input copies remain byte-identical to their approved canonical
++outputs; none requires replacement for this correction. The proposed
++manuscript update changes construction/multiplicity explanations, three
++Appendix E Holm values and software/validation disclosure. It does not add
++an exhibit, redefine a sample, upgrade software, authorize submission or
++clear public release. Secondary sensitivity ratios remain diagnostic pending
++their own exact-sample weak-instrument diagnostics. Historical review ledgers
++are preserved rather than rewritten as approval of new artifact bytes.
++
+ \subsection*{Upload and publication holds: do not infer completion}
+ \begin{itemize}[leftmargin=2em]
+ \checkitem Confirm final review, authorship/contribution agreement,
+@@ -68,9 +86,9 @@
+ \checkitem Decide final journal-font/length production, including dense appendix
+ tables and small figure notes. Internal full-width review is not publisher
+ font clearance. Preserve every outcome family when compressing.
+-\checkitem Obtain actual collaborator-machine acceptance and authorized source
+-access before claiming portable or fresh raw-data replication. Local restoration
+-is not another-machine validation or historical engine attestation.
++\checkitem Obtain actual collaborator-machine acceptance and confirm authorized
++source access before claiming portability. The 1 November local current-pipeline
++run does not establish another-machine execution or historical engine attestation.
+ \checkitem Clear public aggregate disclosure, code licensing and third-party
+ rights separately. Do not deposit microdata, linkage records, software cache,
+ licensed Stata files, literature PDFs, private records, logs or credentials.

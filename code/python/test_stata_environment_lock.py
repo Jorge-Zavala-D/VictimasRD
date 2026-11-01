@@ -2,6 +2,8 @@
 import csv
 import hashlib
 import importlib.util
+import json
+from collections import Counter
 from pathlib import Path
 import subprocess
 import tempfile
@@ -65,36 +67,65 @@ class EnvironmentLockTests(unittest.TestCase):
         self.assertIn('unlocked executable', '\n'.join(self.checker.verify_files(self.manifest, self.ado)))
 
 
+    def test_prospective_lock_preserves_project_metadata(self):
+        repo = Path(__file__).resolve().parents[2]
+        records = []
+        for date in ('2026-10-03', '2026-11-01'):
+            with (repo / f'metadata/stata-dependency-lock-{date}.csv').open(
+                    encoding='utf-8-sig', newline='') as stream:
+                records.append({row['relative_path']: {k: v for k, v in row.items() if k != 'lock_id'}
+                                for row in csv.DictReader(stream) if row['root_role'] == 'project_ado'})
+        self.assertEqual(len(records[0]), 267)
+        self.assertEqual(records[0], records[1])
+
+    def test_runtime_record_matches_active_manifest_and_guard(self):
+        repo = Path(__file__).resolve().parents[2]
+        runtime = json.loads((repo / 'metadata/stata-runtime-lock-2026-11-01.json').read_text())
+        manifest = repo / runtime['manifest']
+        content = manifest.read_bytes()
+        self.assertEqual(hashlib.sha256(content).hexdigest(), runtime['manifest_sha256'])
+        self.assertEqual(len(content), runtime['manifest_bytes'])
+        with manifest.open(encoding='utf-8-sig', newline='') as stream:
+            rows = list(csv.DictReader(stream))
+        self.assertEqual(len(rows), runtime['file_counts']['total'])
+        for role, count in Counter(row['root_role'] for row in rows).items():
+            self.assertEqual(count, runtime['file_counts'][role])
+        guard = (repo / 'code/stata/lib/00_validate_environment.do').read_text()
+        self.assertIn(f"r(checksum) != {runtime['manifest_stata_checksum']}", guard)
+        self.assertIn(f"r(filelen) != {runtime['manifest_bytes']}", guard)
+        self.assertIn(runtime['manifest'], guard)
+        self.assertIn(runtime['lock_id'], guard)
+
     def test_git_checkout_preserves_literal_lock_under_both_settings(self):
         repo = Path(__file__).resolve().parents[2]
-        relative = 'metadata/stata-dependency-lock-2026-10-03.csv'
-        reviewed = (repo / relative).read_bytes()
-        self.assertEqual(hashlib.sha256(reviewed).hexdigest(),
-                         'd010f2891149fc6e9026b3b501ca0ff0ad1b14087b8919c669e6532ae35e7616')
-        fixture = self.root / 'git-fixture'
-        fixture.mkdir()
+        locks = [
+            ('2026-10-03', 'd010f2891149fc6e9026b3b501ca0ff0ad1b14087b8919c669e6532ae35e7616', 2755021),
+            ('2026-11-01', 'd15827937408ccb47bdeeb1130d2e24eeb3b2c41aac03183658cacaf9a1ddd28', 2770842),
+        ]
+        for date, digest, size in locks:
+            relative = f'metadata/stata-dependency-lock-{date}.csv'
+            reviewed = (repo / relative).read_bytes()
+            self.assertEqual(hashlib.sha256(reviewed).hexdigest(), digest)
+            fixture = self.root / ('git-fixture-' + date)
+            fixture.mkdir()
 
-        def git(*args, input=None):
-            return subprocess.run(['git', '-C', str(fixture), *args], input=input,
-                                  check=True, capture_output=True).stdout.strip().decode()
+            def git(*args, input=None):
+                return subprocess.run(['git', '-C', str(fixture), *args], input=input,
+                                      check=True, capture_output=True).stdout.strip().decode()
 
-        git('init', '-q')
-        # Reproduce the normalized LF blob already stored in the real Git index.
-        blob = git('hash-object', '-w', '--stdin', input=reviewed.replace(b'\r\n', b'\n'))
-        git('update-index', '--add', '--cacheinfo', f'100644,{blob},{relative}')
-        attributes = repo / '.gitattributes'
-        if attributes.is_file():
-            blob = git('hash-object', '-w', '--stdin', input=attributes.read_bytes())
+            git('init', '-q')
+            blob = git('hash-object', '-w', '--stdin', input=reviewed.replace(b'\r\n', b'\n'))
+            git('update-index', '--add', '--cacheinfo', f'100644,{blob},{relative}')
+            blob = git('hash-object', '-w', '--stdin', input=(repo / '.gitattributes').read_bytes())
             git('update-index', '--add', '--cacheinfo', f'100644,{blob},.gitattributes')
-        for setting in ('false', 'true'):
-            with self.subTest(autocrlf=setting):
-                git('config', 'core.autocrlf', setting)
-                checkout = self.root / ('checkout-' + setting)
-                git('checkout-index', '--all', '--prefix=' + checkout.as_posix() + '/')
-                restored = (checkout / relative).read_bytes()
-                self.assertEqual(hashlib.sha256(restored).hexdigest(),
-                                 hashlib.sha256(reviewed).hexdigest())
-                self.assertEqual(len(restored), 2755021)
+            for setting in ('false', 'true'):
+                with self.subTest(lock=date, autocrlf=setting):
+                    git('config', 'core.autocrlf', setting)
+                    checkout = self.root / ('checkout-' + date + '-' + setting)
+                    git('checkout-index', '--all', '--prefix=' + checkout.as_posix() + '/')
+                    restored = (checkout / relative).read_bytes()
+                    self.assertEqual(hashlib.sha256(restored).hexdigest(), digest)
+                    self.assertEqual(len(restored), size)
 
 
 if __name__ == '__main__':

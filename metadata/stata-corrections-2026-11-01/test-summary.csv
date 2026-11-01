@@ -1,0 +1,14 @@
+check,scope,count,status,evidence
+environment_inventory,software_identities,13235,pass,metadata/stata-dependency-lock-2026-11-01.csv
+unchanged_engine_qualification,aggregate_rows,4598,pass,metadata/stata-corrections-2026-11-01/environment-qualification-results.csv
+python_tests,unit_tests,21,pass,code/python/test_stata_environment_lock.py;code/python/test_capture_stata_environment.py;code/python/test_extractor_boundaries.py
+post_master_stata_suite,output_contract_tests,12,pass,code/stata/tests
+storage_guard,path_cases,15,pass,code/stata/tests/test_storage_paths.do
+dataset_comparison,keyed_datasets,11,pass_with_documented_corrections,metadata/stata-corrections-2026-11-01/dataset-comparison.csv
+variable_metadata,datasets,11,pass,metadata/stata-corrections-2026-11-01/variable-metadata-comparison.csv
+primary_invariance,common_window_rf_fuzzy_rows,96,exact_match,metadata/stata-corrections-2026-11-01/primary-fixed-window-invariance.csv
+corrected_aggregates,files,36,reconciled_181_changed_cells_and_32_added_rows,metadata/stata-corrections-2026-11-01/corrected-all-aggregate-summary.csv
+publication_pack,exhibits,35,pass,metadata/stata-corrections-2026-11-01/publication-render-review.json
+release_audit,artifacts,261,zero_technical_errors_RELEASE_BLOCKED,output/tables/release/release_audit.csv
+full_master,routine_modules,1,completed_2026-11-01_214247,logs/master_1nov2026_195057.smcl
+final_master_preflight,environment_only,1,completed_2026-11-01_220000,logs/master_1nov2026_215714.smcl

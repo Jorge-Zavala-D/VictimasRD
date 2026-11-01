@@ -78,6 +78,8 @@ quietly count if hte_primary_sample
 assert r(N) == 487
 
 encode ubigeo_dist, generate(hte_cluster_dist)
+egen long hte_cluster_ruv = group(ruv_id)
+egen long hte_cluster_score = group(${hte_running})
 generate byte hte_assignment = ${hte_running} >= 0 ///
     if !missing(${hte_running})
 
@@ -192,7 +194,7 @@ confirm variable ruv_id recorded_project_year prc_project_group ///
 isid record_number
 
 keep if !missing(ruv_id) & recorded_project_year <= 2012
-assert prc_total_financing_soles > 0
+assert prc_total_financing_soles > 0 & !missing(prc_total_financing_soles)
 assert inrange(prc_project_group, 1, 4)
 
 forvalues project_group = 1/4 {
@@ -214,7 +216,9 @@ save `hte_project_ccpp'
 
 use `hte_analysis_base', clear
 merge 1:1 ruv_id using `hte_project_ccpp', ///
-    keep(master match) nogen
+    keep(master match) generate(hte_project_merge)
+assert hte_project_merge == 3 if ${hte_treatment_2013} == 1
+assert hte_project_merge == 1 if ${hte_treatment_2013} == 0
 
 replace hte_total_financing_2012 = 0 if ${hte_treatment_2013} == 0
 replace hte_project_records_2012 = 0 if ${hte_treatment_2013} == 0
@@ -223,12 +227,15 @@ forvalues project_group = 1/4 {
         if ${hte_treatment_2013} == 0
 }
 
-assert hte_total_financing_2012 > 0 if ${hte_treatment_2013} == 1
-assert hte_project_records_2012 >= 1 if ${hte_treatment_2013} == 1
+assert hte_total_financing_2012 > 0 & !missing(hte_total_financing_2012) ///
+    if ${hte_treatment_2013} == 1
+assert hte_project_records_2012 >= 1 & !missing(hte_project_records_2012) ///
+    if ${hte_treatment_2013} == 1
+drop hte_project_merge
 
 generate double hte_financing_pc_2012 = ///
     hte_total_financing_2012 / population_2007 ///
-    if population_2007 > 0
+    if population_2007 > 0 & !missing(population_2007)
 generate double hte_financing_pc_1000 = ///
     hte_financing_pc_2012 / 1000
 
@@ -257,7 +264,9 @@ program define _vrd_post_hte_iv
         SPECID(string) HValue(real) USEVAR(name) ///
         EVAL1(real) EVAL2(real) EVAL3(real) ///
         RAW1(real) RAW2(real) RAW3(real) ///
-        [COVariates(varlist)]
+        [COVariates(varlist) CLUSTERVAR(name)]
+
+    if "`clustervar'" == "" local clustervar "hte_cluster_dist"
 
     tempvar y_scaled kernel_weight running_right ///
         assignment_m treatment_m running_m running_right_m ///
@@ -279,7 +288,7 @@ program define _vrd_post_hte_iv
         ${hte_running} * hte_assignment * `modvar'
 
     local estimator_sample ///
-        "`usevar' & `kernel_weight' < . & `kernel_weight' > 0 & !missing(`y_scaled', `modvar', hte_cluster_dist)"
+        "`usevar' & `kernel_weight' < . & `kernel_weight' > 0 & !missing(`y_scaled', `modvar', `clustervar')"
 
     if "`covariates'" != "" {
         quietly egen byte `covariate_missing' = rowmiss(`covariates')
@@ -311,7 +320,7 @@ program define _vrd_post_hte_iv
 
     local support_pass = `min_cell' >= ${hte_min_cell}
 
-    quietly egen byte `cluster_tag' = tag(hte_cluster_dist) ///
+    quietly egen byte `cluster_tag' = tag(`clustervar') ///
         if `estimator_sample'
     quietly count if `cluster_tag'
     local clusters = r(N)
@@ -328,7 +337,7 @@ program define _vrd_post_hte_iv
             (${hte_treatment_2013} `treatment_m' = ///
                 hte_assignment `assignment_m') ///
             [aw=`kernel_weight'] if `estimator_sample', ///
-            cluster(hte_cluster_dist) first
+            cluster(`clustervar') first
         local estimation_rc = _rc
     }
 
@@ -354,7 +363,7 @@ program define _vrd_post_hte_iv
         local estimate = _b[`treatment_m']
         local standard_error = _se[`treatment_m']
 
-        if missing(`estimate') | missing(`standard_error') {
+        if missing(`estimate', `standard_error') | `standard_error' <= 0 {
             local estimation_rc = 504
         }
         else {
@@ -389,8 +398,14 @@ program define _vrd_post_hte_iv
             }
         }
 
+        if !`estimation_rc' & ///
+            (missing(`estimate', `standard_error', `pvalue', `ci_low', `ci_high') | ///
+            `standard_error' <= 0) local estimation_rc = 504
+
         local gate_pass = ///
-            `support_pass' & ///
+            !`estimation_rc' & ///
+            !missing(`estimate', `standard_error', `pvalue', `ci_low', `ci_high') & ///
+            `standard_error' > 0 & `support_pass' & ///
             `min_sw_f' < . & ///
             `min_sw_f' > ${hte_weak_f_gate} & ///
             `underid_p' < . & ///
@@ -428,8 +443,10 @@ program define _vrd_post_hte_iv
         if "`modtype'" == "binary" local value_count = 2
 
         forvalues value_index = 1/`value_count' {
-            local eval_value = `eval`value_index''
-            local raw_value = `raw`value_index''
+            local eval_index = cond("`modtype'" == "binary" & `value_index' == 2, ///
+                3, `value_index')
+            local eval_value = `eval`eval_index''
+            local raw_value = `raw`eval_index''
             local value_label "P`=25*`value_index''"
             if `value_index' == 2 local value_label "P50"
             if `value_index' == 3 local value_label "P75"
@@ -440,19 +457,27 @@ program define _vrd_post_hte_iv
             capture quietly lincom ///
                 ${hte_treatment_2013} + ///
                 `eval_value' * `treatment_m'
+            local conditional_rc = _rc
 
             local conditional_estimate .
             local conditional_se .
             local conditional_p .
             local conditional_low .
             local conditional_high .
-            if !_rc {
+            if !`conditional_rc' {
                 local conditional_estimate = r(estimate)
                 local conditional_se = r(se)
                 local conditional_p = r(p)
                 local conditional_low = r(lb)
                 local conditional_high = r(ub)
             }
+
+            local conditional_valid = !`conditional_rc' & ///
+                !missing(`conditional_estimate', `conditional_se', `conditional_p', ///
+                    `conditional_low', `conditional_high') & `conditional_se' > 0
+            local conditional_gate_pass = `gate_pass' & `conditional_valid'
+            local conditional_gate_status "`gate_status'"
+            if !`conditional_valid' local conditional_gate_status "conditional_inference_failed"
 
             post `condhandle' ///
                 ("`outcomeid'") ("`outlabel'") (`paperorder') ///
@@ -461,7 +486,7 @@ program define _vrd_post_hte_iv
                 (`raw_value') (`eval_value') ///
                 (`conditional_estimate') (`conditional_se') ///
                 (`conditional_p') (`conditional_low') (`conditional_high') ///
-                (`gate_pass') ("`gate_status'")
+                (`conditional_gate_pass') ("`conditional_gate_status'")
         }
     }
 end
@@ -717,6 +742,26 @@ forvalues moderator_index = 1/`moderator_count' {
             raw3(`m_raw75_`moderator_index'')
 
         if "`moderator_tier'" == "primary" {
+            foreach cluster_type in ccpp score {
+                local cluster_variable "hte_cluster_ruv"
+                if "`cluster_type'" == "score" local cluster_variable "hte_cluster_score"
+                _vrd_post_hte_iv, ///
+                    posthandle(`hte_post') condhandle(`hte_cond_post') ///
+                    outvar(`outcome_var') outcomeid("`outcome_id'") ///
+                    outlabel("`outcome_label'") paperorder(`outcome_order') ///
+                    scale(`outcome_scale') modvar(`moderator_var') ///
+                    modid("`moderator_id'") modlabel("`moderator_label'") ///
+                    modtier("`moderator_tier'") modtype("`moderator_type'") ///
+                    specid("common_h_`cluster_type'_cluster") ///
+                    hvalue(${hte_common_h}) usevar(hte_primary_sample) ///
+                    clustervar(`cluster_variable') ///
+                    eval1(`m_eval25_`moderator_index'') ///
+                    eval2(`m_eval50_`moderator_index'') ///
+                    eval3(`m_eval75_`moderator_index'') ///
+                    raw1(`m_raw25_`moderator_index'') ///
+                    raw2(`m_raw50_`moderator_index'') ///
+                    raw3(`m_raw75_`moderator_index'')
+            }
             foreach bandwidth_name in small large {
                 local bandwidth = cond("`bandwidth_name'" == "small", ///
                     ${hte_small_h}, ${hte_large_h})
@@ -752,7 +797,9 @@ postclose `hte_cond_post'
 *-----------------------------------*
 
 use `hte_results_raw', clear
-assert _N == 176
+assert _N == 208
+quietly count if inlist(spec_id, "common_h_ccpp_cluster", "common_h_score_cluster")
+assert r(N) == 32
 assert estimation_rc >= 0 & estimation_rc < .
 assert missing(min_sw_f) if estimator == "ivreg2" & ///
     missing(sw_f_treat, sw_f_interaction)
@@ -761,35 +808,35 @@ assert gate_pass == 0 if estimator == "ivreg2" & ///
 
 generate double p_holm = .
 generate double q_bh = .
-
+// Failed fits keep their registered slot, but never receive an inferential p-value.
+generate double hte_adjust_p = cond(estimation_rc == 0 & !missing(pvalue), pvalue, 1)
 egen long hte_adjust_group = group(estimator moderator_tier) ///
     if inlist(spec_id, "common_h_iv", "common_h_rdhte") & ///
-    estimation_rc == 0 & pvalue < .
-
-sort hte_adjust_group pvalue
+    gate_status != "not_applicable_identity"
+sort hte_adjust_group hte_adjust_p outcome_id moderator_id
 by hte_adjust_group: generate int hte_rank = _n if hte_adjust_group < .
 by hte_adjust_group: generate int hte_family_n = _N if hte_adjust_group < .
-
 generate double hte_holm_step = ///
-    pvalue * (hte_family_n - hte_rank + 1) ///
+    hte_adjust_p * (hte_family_n - hte_rank + 1) ///
     if moderator_tier == "primary" & hte_adjust_group < .
 by hte_adjust_group: replace hte_holm_step = ///
     max(hte_holm_step, hte_holm_step[_n-1]) ///
     if moderator_tier == "primary" & _n > 1 & hte_adjust_group < .
 replace p_holm = min(hte_holm_step, 1) ///
-    if moderator_tier == "primary" & hte_holm_step < .
-
+    if moderator_tier == "primary" & hte_holm_step < . & ///
+    estimation_rc == 0 & !missing(pvalue)
 generate double hte_bh_step = ///
-    pvalue * hte_family_n / hte_rank ///
+    hte_adjust_p * hte_family_n / hte_rank ///
     if moderator_tier == "secondary" & hte_adjust_group < .
 gsort hte_adjust_group -hte_rank
 by hte_adjust_group: replace hte_bh_step = ///
     min(hte_bh_step, hte_bh_step[_n-1]) ///
     if moderator_tier == "secondary" & _n > 1 & hte_adjust_group < .
 replace q_bh = min(hte_bh_step, 1) ///
-    if moderator_tier == "secondary" & hte_bh_step < .
-
-drop hte_adjust_group hte_rank hte_family_n hte_holm_step hte_bh_step
+    if moderator_tier == "secondary" & hte_bh_step < . & ///
+    estimation_rc == 0 & !missing(pvalue)
+drop hte_adjust_p hte_adjust_group hte_rank hte_family_n ///
+    hte_holm_step hte_bh_step
 sort moderator_id paper_order estimator spec_id
 save `hte_results_final'
 
@@ -902,7 +949,8 @@ if !`financing_stage_rc' {
     local financing_stage_f = ///
         (`financing_stage_estimate' / `financing_stage_se')^2
     local financing_stage_status = cond( ///
-        `financing_stage_f' > ${hte_weak_f_gate}, ///
+        !missing(`financing_stage_f', `financing_stage_estimate', `financing_stage_se') & ///
+        `financing_stage_se' > 0 & `financing_stage_f' > ${hte_weak_f_gate}, ///
         "passes_f_gate", "weak_first_stage")
 }
 
@@ -1043,8 +1091,10 @@ forvalues outcome_index = 1/`outcome_count' {
             local dose_standardized_high = `dose_high' / `dose_control_sd'
         }
 
+        if missing(`dose_estimate', `dose_se', `dose_p', `dose_low', `dose_high') | ///
+            `dose_se' <= 0 local dose_rc = 504
         local dose_gate_pass = ///
-            `dose_kp_f' < . & `dose_kp_f' > ${hte_weak_f_gate} & ///
+            !`dose_rc' & `dose_kp_f' < . & `dose_kp_f' > ${hte_weak_f_gate} & ///
             `dose_underid_p' < . & `dose_underid_p' < .05
         local dose_gate_status "pass"
         if missing(`dose_underid_p') | `dose_underid_p' >= .05 ///
@@ -1052,6 +1102,7 @@ forvalues outcome_index = 1/`outcome_count' {
         else if missing(`dose_kp_f') | ///
             `dose_kp_f' <= ${hte_weak_f_gate} ///
             local dose_gate_status "weak_first_stage"
+        if `dose_rc' local dose_gate_status "estimation_failed"
     }
 
     post `dose_post' ///
@@ -1285,13 +1336,15 @@ file close `conditional_tex'
 use `hte_results_final', clear
 keep if moderator_id == "M01" & estimator == "ivreg2" & ///
     inlist(spec_id, "common_h_iv", "common_h_covariates", ///
-        "small_h_iv", "large_h_iv")
+        "small_h_iv", "large_h_iv", "common_h_ccpp_cluster", "common_h_score_cluster")
 sort paper_order spec_id
 generate str24 spec_label = spec_id
 replace spec_label = "Common bandwidth" if spec_id == "common_h_iv"
 replace spec_label = "Predetermined covariates" if spec_id == "common_h_covariates"
 replace spec_label = "Narrow bandwidth" if spec_id == "small_h_iv"
 replace spec_label = "Wide bandwidth" if spec_id == "large_h_iv"
+replace spec_label = "CCPP clustered" if spec_id == "common_h_ccpp_cluster"
+replace spec_label = "Score-mass clustered" if spec_id == "common_h_score_cluster"
 
 tempname robustness_tex
 file open `robustness_tex' using ///
@@ -1322,7 +1375,7 @@ forvalues row = 1/`=_N' {
 }
 file write `robustness_tex' "\bottomrule" _n
 file write `robustness_tex' "\end{tabular}}" _n
-file write `robustness_tex' "\parbox{0.97\linewidth}{\scriptsize \textit{Notes:} The common specification is primary. Sensitivities add predetermined covariates or use fixed windows \(h=0.0050\) and \(h=0.0100\); no bandwidth is selected because it strengthens the instrument. The same pooled interaction model and district-clustered inference are used throughout. Failed rank or \(F>10\) gates preclude causal interpretation even when point estimates appear stable. Sources: RUV, CMAN, SISFOH 2012--2013, and registered baseline data.}" _n
+file write `robustness_tex' "\parbox{0.97\linewidth}{\scriptsize \textit{Notes:} The common specification is primary. Sensitivities add predetermined covariates or use fixed windows \(h=0.0050\) and \(h=0.0100\); no bandwidth is selected because it strengthens the instrument. The pooled interaction model is unchanged; the common, covariate and bandwidth rows cluster by district, and two additional rows cluster by CCPP or exact score mass point. Failed rank or \(F>10\) gates preclude causal interpretation even when point estimates appear stable. Sources: RUV, CMAN, SISFOH 2012--2013, and registered baseline data.}" _n
 file write `robustness_tex' "\end{table}" _n
 file close `robustness_tex'
 

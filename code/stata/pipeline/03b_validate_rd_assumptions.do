@@ -655,7 +655,7 @@ foreach fixed_h in .010 .020 .030 {
             ("first_stage") ("parametric") ("local_linear_h_`h_tag'") ///
             ("`treatment_var'") ("Treated by `treatment_year'") ///
             ("drop_rounding_band") (0) (1) (.) ///
-            ("fixed") ("triangular") ("cr1 cluster_dist") ///
+            ("fixed") ("uniform") ("cr1 cluster_dist") ///
             (`fixed_h') (`n_input') ///
             (`estimate') (`estimate') ///
             (`standard_error') (`pvalue') ///

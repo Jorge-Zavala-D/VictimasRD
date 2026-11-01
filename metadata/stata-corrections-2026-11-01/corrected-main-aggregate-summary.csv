@@ -1,0 +1,7 @@
+artifact,baseline_rows,current_rows,removed_rows,added_rows,added_columns,removed_columns,changed_cells
+output/tables/rd_outcomes/rd_2013_ccpp_results.csv,319,319,0,0,strength_scope,,0
+output/tables/rd_outcomes/rd_2013_household_results.csv,352,352,0,0,strength_scope,,0
+output/tables/rd_outcomes/rd_2013_individual_results.csv,392,392,0,0,strength_scope,,0
+output/tables/rd_outcomes/rd_2017_ccpp_results.csv,273,273,0,0,strength_scope,,34
+output/tables/rd_outcomes/rd_2017_household_results.csv,286,286,0,0,strength_scope,,38
+output/tables/rd_outcomes/rd_2017_individual_results.csv,348,348,0,0,strength_scope,,79
