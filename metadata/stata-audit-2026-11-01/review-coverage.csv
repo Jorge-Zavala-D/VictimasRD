@@ -1,0 +1,193 @@
+path,role,review_mode,ranges,reference,limitation
+code/python/check_identification_publication_review.py,active,sequential_source_read,1-220,,No empirical execution; source inspection
+code/python/check_rd_diagnostic_integration.py,active,sequential_source_read,1-110,,No empirical execution; source inspection
+code/python/check_stata_environment_lock.py,active,sequential_source_read,1-112,,No empirical execution; source inspection
+code/python/extract_cman_pdf.py,active,sequential_source_read,1-322,,No empirical execution; source inspection
+code/python/extract_reporte_ccpp_html.py,active,sequential_source_read,1-368,,No empirical execution; source inspection
+code/python/test_stata_environment_lock.py,tests,sequential_source_read,1-101,,Source read; eight fixture tests executed and passed
+code/stata/00_master.do,active,sequential_source_read,1-696,,No empirical execution; source inspection
+code/stata/legacy-current/0h. clean_censo2017.do,legacy_research,R,1-221,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/0i. clean_testimonios.do,legacy_research,R,1-251,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,T,1-456,code/stata/legacy-current/1 HVC - APU/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/4a. RD estimations - Sisfoh 2013 - CCPP level - Population cut.do,legacy_research,T,1-802,code/stata/legacy-current/1 HVC - APU/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty 2007.do,legacy_research,T,1-799,code/stata/legacy-current/1 HVC - APU/4a. RD estimations - Sisfoh 2013 - CCPP level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,T,1-477,code/stata/legacy-current/1 HVC - APU/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,legacy_research,T,1-776,code/stata/legacy-current/1 HVC - APU/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/5b. RD estimations - Sisfoh 2013 - Household level - Poverty 2007.do,legacy_research,T,1-773,code/stata/legacy-current/1 HVC - APU/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,T,1-421,code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/6a. RD estimations - Sisfoh 2013 - Individual level - Sex.do,legacy_research,T,1-651,code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,legacy_research,T,1-727,code/stata/legacy-current/2 HVC - APU - LC - HCY/6b. RD estimations - Sisfoh 2013 - Individual level - Population.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/1 HVC - APU/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty 2007.do,legacy_research,T,1-726,code/stata/legacy-current/1 HVC - APU/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/3. RD estimations - District level.do,legacy_research,R,1-334,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,R,1-693,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/4a. RD estimations - Sisfoh 2013 - CCPP level - Population.do,legacy_research,T,1-607,code/stata/legacy-current/2 HVC - APU - LC - HCY/5a. RD estimations - Sisfoh 2013 - Household level - Population.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty.do,legacy_research,T,1-613,code/stata/legacy-current/2 HVC - APU - LC - HCY/4a. RD estimations - Sisfoh 2013 - CCPP level - Population.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,T,1-358,code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/5a. RD estimations - Sisfoh 2013 - Household level - Population.do,legacy_research,T,1-568,code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/5b. RD estimations - Sisfoh 2013 - Household level - Poverty.do,legacy_research,T,1-571,code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,R,1-345,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,legacy_research,R,1-528,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6b. RD estimations - Sisfoh 2013 - Individual level - Population.do,legacy_research,T,1-532,code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty.do,legacy_research,T,1-532,code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6d. RD estimations - Sisfoh 2013 - Individual level - No Caps.do,legacy_research,T,1-348,code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/7. RD estimations - Censo 2017 - CCPP level.do,legacy_research,T,1-740,code/stata/legacy-current/2 HVC - APU - LC - HCY/4. RD estimations - Sisfoh 2013 - CCPP level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/7a. RD estimations - Censo 2017 - CCPP level - Population.do,legacy_research,M,"R:1-350,1083-1412; internal T:309-563,564-823,824-1082 vs55-308",code/stata/legacy-current/2 HVC - APU - LC - HCY/7a. RD estimations - Censo 2017 - CCPP level - Population.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/8. RD estimations - Censo 2017 - Household level.do,legacy_research,T,1-404,code/stata/legacy-current/2 HVC - APU - LC - HCY/9. RD estimations - Censo 2017 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/9. RD estimations - Censo 2017 - Individual level.do,legacy_research,R,1-381,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,T,1-732,code/stata/legacy-current/2 HVC - APU - LC - HCY/4. RD estimations - Sisfoh 2013 - CCPP level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,T,1-363,code/stata/legacy-current/2 HVC - APU - LC - HCY/5. RD estimations - Sisfoh 2013 - Household level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,T,1-350,code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/7. RD estimations - Censo 2017 - CCPP level.do,legacy_research,T,1-751,code/stata/legacy-current/2 HVC - APU - LC - HCY/7. RD estimations - Censo 2017 - CCPP level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/8. RD estimations - Censo 2017 - Household level.do,legacy_research,T,1-408,code/stata/legacy-current/2 HVC - APU - LC - HCY/8. RD estimations - Censo 2017 - Household level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/9. RD estimations - Censo 2017 - Individual level.do,legacy_research,T,1-387,code/stata/legacy-current/2 HVC - APU - LC - HCY/9. RD estimations - Censo 2017 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/X. Attrition Analysis - 2007 - 2013 - 2017.do,legacy_research,D,1-173,code/stata/legacy-current/2 HVC - APU - LC - HCY/X. Attrition Analysis - 2007 - 2013 - 2017.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/XXXXXXX - check 9. RD estimations - Censo 2017 - Individual level.do,legacy_research,D,1-387,code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/9. RD estimations - Censo 2017 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/2 HVC - APU - LC - HCY/X. Attrition Analysis - 2007 - 2013 - 2017.do,legacy_research,R,1-173,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,T,1-422,code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4a. RD estimations - Sisfoh 2013 - CCPP level - Population cut.do,legacy_research,D,1-802,code/stata/legacy-current/1 HVC - APU/4a. RD estimations - Sisfoh 2013 - CCPP level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty 2007.do,legacy_research,D,1-799,code/stata/legacy-current/1 HVC - APU/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty 2007.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,T,1-413,code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,legacy_research,D,1-776,code/stata/legacy-current/1 HVC - APU/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5b. RD estimations - Sisfoh 2013 - Household level - Poverty 2007.do,legacy_research,D,1-773,code/stata/legacy-current/1 HVC - APU/5b. RD estimations - Sisfoh 2013 - Household level - Poverty 2007.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,T,1-386,code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6a. RD estimations - Sisfoh 2013 - Individual level - Sex.do,legacy_research,D,1-651,code/stata/legacy-current/1 HVC - APU/6a. RD estimations - Sisfoh 2013 - Individual level - Sex.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,legacy_research,D,1-727,code/stata/legacy-current/1 HVC - APU/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty 2007.do,legacy_research,D,1-726,code/stata/legacy-current/1 HVC - APU/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty 2007.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/SAT/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,T,1-427,code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4. RD estimations - Sisfoh 2013 - CCPP level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/SAT/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,T,1-418,code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5. RD estimations - Sisfoh 2013 - Household level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/SAT/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,T,1-391,code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6. RD estimations - Sisfoh 2013 - Individual level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0 RD Victimas - Master.do,legacy_research,R,1-74,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0a. clean_censo2007.do,legacy_research,R,1-574,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0b. clean_sisfoh2013.do,legacy_research,P,1-2108,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0c. clean_endes2017.do,legacy_research,R,1-303,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0d. clean_minedu.do,legacy_research,P,1-1137,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0e. clean_cenagro2012.do,legacy_research,P,1-2135,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0f. clean_minsa.do,legacy_research,R,1-235,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0g. clean_onpe.do,legacy_research,R,1-46,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/0j. clean_INEI.do,legacy_research,P,1-933,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/1 RD Victimas - Data Preparation.do,legacy_research,P,1-1191,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/2 RD Victimas - Descriptive.do,legacy_research,P,1-824,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/3 RD Victimas - RD tests.do,legacy_research,P,1-994,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/4 RD Victimas - RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,P,1-2730,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/5 RD Victimas - RD estimations - Sisfoh 2013 - Household level.do,legacy_research,P,1-1638,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/6 RD Victimas - RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,P,1-787,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/7 RD Victimas - RD estimations - Censo 2017 - CCPP level.do,legacy_research,D,1-740,code/stata/legacy-current/2 HVC - APU - LC - HCY/7. RD estimations - Censo 2017 - CCPP level.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/4 Working paper/ado/_/_eststo.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/c/colorcheck.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/c/colorpalette.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/c/colorpalette9.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/e/estadd.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/e/estout.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/e/estpost.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/e/eststo.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/e/esttab.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/g/grc1leg2.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/g/grc1leg2_examples.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg2.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg210.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg210_p.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg28.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg28_cue.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg28_p.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg29.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg29_cue.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg29_p.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/i/ivreg2_p.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lcolrspace.mlib,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/linepalette.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/livreg2.mlib,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpbwdensity.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwimse.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwirot.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwmse.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwrot.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_cgen.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_fn.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_ggen.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_normdgp.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_optfunc.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_quantile.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_rep.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_sgen.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_tgen.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_unique.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_whichmin.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/ranktest.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/ranktest11.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/ranktest9.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdbwdensity.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdbwselect.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdbwselect_2014.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdbwselect_2014_kconst.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rddensity.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_fv.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_h.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_quantile.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_rep.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_unique.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdplot.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_bw.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_collapse.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_groupid.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_kweight.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_median.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_res.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_vce.mo,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plotplain.scheme,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plotplainblind.scheme,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plottig.scheme,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plottigblind.scheme,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/s/sumstats.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/4 Working paper/ado/s/symbolpalette.ado,vendor_legacy,inventory_only,,,Third-party legacy vendor/support internals not fully audited
+code/stata/legacy-current/do_file_exploratory_BE.do,legacy_research,R,1-206,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/do_file_exploratory_JZ.do,legacy_research,P,1-1573,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/do_file_exploratory_JZ2.do,legacy_research,R,1-179,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/mayersen_graphs.do,legacy_research,R,1-370,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/Modificacion base cpv2017ind.do,legacy_research,R,1-20,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/power_calculations_BE.do,legacy_research,R,1-203,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/power_calculations_JZ.do,legacy_research,R,1-331,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/rd_poblacion.do,legacy_research,R,1-177,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/SAT/0b. clean_sisfoh2013.do,legacy_research,L+P,1-2104; ordered-normalized626label catalogue; functional projection/comment-boundary checks,code/stata/legacy-current/4 Working paper/0b. clean_sisfoh2013.do,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/SAT/1. data_prep_JZ.do,legacy_research,P,1-1094,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/legacy-current/SAT/ccpp_pbi_contraloria.do,legacy_research,R,1-141,,Preserved historical source only; not executed; see legacy audit for comment/porting limits
+code/stata/lib/00_validate_environment.do,active,sequential_source_read,1-128,,No empirical execution; source inspection
+code/stata/pipeline/01_data_preparation.do,active,sequential_source_read,deep:1-11267; lower-intensity closeout:11268-12591,,All transformations sequentially read; aggregate export closeout viewed; not numerically reproduced
+code/stata/pipeline/02_describe_data.do,active,sequential_source_read,1-2586,,No empirical execution; source inspection
+code/stata/pipeline/03_validate_rd_design.do,active,sequential_source_read,1-2766,,No empirical execution; source inspection
+code/stata/pipeline/03b_validate_rd_assumptions.do,active,sequential_source_read,1-1939,,No empirical execution; source inspection
+code/stata/pipeline/04_estimate_main_effects.do,active,sequential_source_read,1-334,,No empirical execution; source inspection
+code/stata/pipeline/04a_sisfoh2013_ccpp.do,active,sequential_source_read,1-1481,,No empirical execution; source inspection
+code/stata/pipeline/04b_sisfoh2013_household.do,active,sequential_source_read,1-1791,,No empirical execution; source inspection
+code/stata/pipeline/04c_sisfoh2013_individual.do,active,sequential_source_read,1-1849,,No empirical execution; source inspection
+code/stata/pipeline/04d_census2017_ccpp.do,active,sequential_source_read,1-1551,,No empirical execution; source inspection
+code/stata/pipeline/04e_census2017_household.do,active,sequential_source_read,1-1804,,No empirical execution; source inspection
+code/stata/pipeline/04f_census2017_individual.do,active,sequential_source_read,1-1951,,No empirical execution; source inspection
+code/stata/pipeline/05_estimate_heterogeneity.do,active,sequential_source_read,1-329,,No empirical execution; source inspection
+code/stata/pipeline/05a_sisfoh2013_ccpp_heterogeneity.do,active,sequential_source_read,1-1856,,No empirical execution; source inspection
+code/stata/pipeline/05b_sisfoh2013_household_heterogeneity.do,active,sequential_source_read,1-175,,No empirical execution; source inspection
+code/stata/pipeline/05c_sisfoh2013_individual_heterogeneity.do,active,sequential_source_read,1-173,,No empirical execution; source inspection
+code/stata/pipeline/05d_census2017_ccpp_heterogeneity.do,active,sequential_source_read,1-791,,No empirical execution; source inspection
+code/stata/pipeline/05e_census2017_household_heterogeneity.do,active,sequential_source_read,1-168,,No empirical execution; source inspection
+code/stata/pipeline/05f_census2017_individual_heterogeneity.do,active,sequential_source_read,1-194,,No empirical execution; source inspection
+code/stata/pipeline/06_analyze_migration_mechanisms.do,active,sequential_source_read,1-948,,No empirical execution; source inspection
+code/stata/pipeline/07_build_tables_figures.do,active,sequential_source_read,1-233,,No empirical execution; source inspection
+code/stata/pipeline/08_run_release_checks.do,active,sequential_source_read,1-238,,No empirical execution; source inspection
+code/stata/pipeline/_heterogeneity_level_engine.do,active,sequential_source_read,1-2174,,No empirical execution; source inspection
+code/stata/pipeline/_migration_selection_audit.do,active,sequential_source_read,1-356,,No empirical execution; source inspection
+code/stata/pipeline/_publication_review_pack.do,active,sequential_source_read,1-612,,No empirical execution; source inspection
+code/stata/tests/test_census2017_ccpp_heterogeneity_contract.do,tests,sequential_source_read,1-91,,Test source read; Stata tests not executed
+code/stata/tests/test_census2017_household_heterogeneity_outputs.do,tests,sequential_source_read,1-88,,Test source read; Stata tests not executed
+code/stata/tests/test_census2017_individual_heterogeneity_outputs.do,tests,sequential_source_read,1-107,,Test source read; Stata tests not executed
+code/stata/tests/test_census2017_migration_population.do,tests,sequential_source_read,1-76,,Test source read; Stata tests not executed
+code/stata/tests/test_census2017_selection_feasibility.do,tests,sequential_source_read,1-88,,Test source read; Stata tests not executed
+code/stata/tests/test_heterogeneity_engine_wave_contract.do,tests,sequential_source_read,1-78,,Test source read; Stata tests not executed
+code/stata/tests/test_migration_mechanism_outputs.do,tests,sequential_source_read,1-117,,Test source read; Stata tests not executed
+code/stata/tests/test_migration_mechanism_registry.do,tests,sequential_source_read,1-49,,Test source read; Stata tests not executed
+code/stata/tests/test_publication_candidate_outputs.do,tests,sequential_source_read,1-83,,Test source read; Stata tests not executed
+code/stata/tests/test_publication_defensive_guards.do,tests,sequential_source_read,1-77,,Test source read; Stata tests not executed
+code/stata/tests/test_publication_repairs.do,tests,sequential_source_read,1-69,,Test source read; Stata tests not executed
+code/stata/tests/test_publication_review_pack.do,tests,sequential_source_read,1-64,,Test source read; Stata tests not executed
+code/stata/tests/test_release_audit_outputs.do,tests,sequential_source_read,1-64,,Test source read; Stata tests not executed
+

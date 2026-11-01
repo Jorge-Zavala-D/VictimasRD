@@ -2,6 +2,11 @@
 
 These instructions apply to the entire repository.
 
+For Stata programming, review, refactoring, and replication-package preparation,
+also read `docs/STATA_RESEARCH_CODE_STANDARDS.md`. These standing owner-approved
+standards prioritize explicit research logic, baseline-preserving changes, and
+verified comparisons with actual replication code over cosmetic rewrites.
+
 ## Required first step
 
 Before inspecting, changing, or running analysis code, read

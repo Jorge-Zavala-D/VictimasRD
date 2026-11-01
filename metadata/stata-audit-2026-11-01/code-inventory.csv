@@ -1,0 +1,193 @@
+path,role,bytes,lines,sha256
+code/python/check_identification_publication_review.py,active,14338,220,b7d6f7de30b6eb298c43a965e014e990d6c102d8d6b2904bcbf78d9dd767e101
+code/python/check_rd_diagnostic_integration.py,active,6454,110,b4cbbd4ebc965669cbd4c0ecfaf3f643cab855b2fece9c44522d792c381be93a
+code/python/check_stata_environment_lock.py,active,5112,112,1001f0b650b9781d5d86371d9813f66de9bd05c45ef928b1f46ef2ee363bd3e2
+code/python/extract_cman_pdf.py,active,10792,322,b95b634c88b6c8d4e6bbc6fbe81cde83ba1fc64b422560eebfdce4aaea59c4c4
+code/python/extract_reporte_ccpp_html.py,active,12495,368,dff1e81d588a0319318b3f6daa308f9aea49acbde0b6875cbceb79f33b36c6a4
+code/python/test_stata_environment_lock.py,tests,4809,101,e5889457c0eeea2ea00868c16f51b914ffb8e22aab4f3abb05cff7db596ea981
+code/stata/00_master.do,active,22330,696,73d5366b372aacf6390079ea261772f96f58f2981bd8f09f74b24c8c2d8b4a83
+code/stata/legacy-current/0h. clean_censo2017.do,legacy_research,7607,221,43fc66f717a0747a031127fc69a635976a5b06da44241815c5e41d054ad43b24
+code/stata/legacy-current/0i. clean_testimonios.do,legacy_research,12841,251,35808f036b5582909a0d688f3dbe41f00a177608ada48242861d6b07a8da1335
+code/stata/legacy-current/1 HVC - APU/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,17437,456,20ff0a2e4e1fb1e1eb7b427a575a87a1898ac45f097b718d856e4fa433f34daa
+code/stata/legacy-current/1 HVC - APU/4a. RD estimations - Sisfoh 2013 - CCPP level - Population cut.do,legacy_research,30535,802,2d18e70c8d0a50bf842ee584429618deac8f49c9e240b698dc55640db9077e16
+code/stata/legacy-current/1 HVC - APU/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty 2007.do,legacy_research,30221,799,b1f06abc9ceed730074923c0c56076fdc48475640d48c15dc9b4b75aa6d85c41
+code/stata/legacy-current/1 HVC - APU/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,17749,477,4707de9de26371600f063a6daf14765ec2bdd52d48369921c2e672f46bb8253f
+code/stata/legacy-current/1 HVC - APU/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,legacy_research,29105,776,7046255205d5cd0568fadab092a145de7b57ab85e1174bfc8e1b3f367e77710a
+code/stata/legacy-current/1 HVC - APU/5b. RD estimations - Sisfoh 2013 - Household level - Poverty 2007.do,legacy_research,29079,773,5537db5e1cc8d144e2b1ca00e9cfb30e212e0d07813fd43c47280f36e788e279
+code/stata/legacy-current/1 HVC - APU/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,15024,421,fcd6ba14389729652920b936d6a2c710fb4a1d9f68b0a1a3a29be67ca3781a32
+code/stata/legacy-current/1 HVC - APU/6a. RD estimations - Sisfoh 2013 - Individual level - Sex.do,legacy_research,23039,651,c9be249906755e4f2754f59b9f958890d2aaea31204766cc99d3ce5c601ef780
+code/stata/legacy-current/1 HVC - APU/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,legacy_research,25971,727,37e62988716823e6c788671ccb9793f516f5420e0bfe4c74223a192a96806920
+code/stata/legacy-current/1 HVC - APU/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty 2007.do,legacy_research,25944,726,97ade957a3409fa0daa68fd232f69ad97ecd12f7518245852d7e3edfa3ff337a
+code/stata/legacy-current/2 HVC - APU - LC - HCY/3. RD estimations - District level.do,legacy_research,13044,334,989a274775381b5453a5b198b8c481692de2f6542163514773574f3fa723d309
+code/stata/legacy-current/2 HVC - APU - LC - HCY/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,27761,693,1ede0f66b3363f6f298aadd8c6c0ba3fb8f7c19328f08acef55a187e1b7c0ee4
+code/stata/legacy-current/2 HVC - APU - LC - HCY/4a. RD estimations - Sisfoh 2013 - CCPP level - Population.do,legacy_research,25023,607,ac3d458714023a463120d3da7741d71601492f7a3b45b9f6ccb4255280cc5915
+code/stata/legacy-current/2 HVC - APU - LC - HCY/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty.do,legacy_research,25233,613,c4a0da3fb58fb859361c3a67a74dfd7904f3c1c1f96635b16462d7b14f6e038d
+code/stata/legacy-current/2 HVC - APU - LC - HCY/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,13724,358,c4a52e642ae58e8e4c89d286f360997375b3f421adc5c78554a7e40b899b42f3
+code/stata/legacy-current/2 HVC - APU - LC - HCY/5a. RD estimations - Sisfoh 2013 - Household level - Population.do,legacy_research,22002,568,1d4375a3c20a9c2d96fc5ee889f866406be3be40f1b5c4bda89f2e01b60abada
+code/stata/legacy-current/2 HVC - APU - LC - HCY/5b. RD estimations - Sisfoh 2013 - Household level - Poverty.do,legacy_research,22265,571,494fc27974bc19d3496d6782c12c7c4a8d03a476f5d9407ffcafbd38ebb93914
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,12702,345,2091e5a5e582ccdde05f0172a49442175f06a40c72448767ec51b041282001cf
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6a. RD estimations - Sisfoh 2013 - Individual level - Sex interaction.do,legacy_research,19318,528,dc3afe81715a9b64e5ec5cf5ce0cb71a93342cca70188691e09341d555b4774e
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6b. RD estimations - Sisfoh 2013 - Individual level - Population.do,legacy_research,19589,532,9b340f7b1812b10ac215efa164848957bf781193eb29530cae34160e73c3185d
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty.do,legacy_research,19577,532,60c4d6810645cf357828301167ca9e076bacc3fe0b8fda89f0cbd49aa8772924
+code/stata/legacy-current/2 HVC - APU - LC - HCY/6d. RD estimations - Sisfoh 2013 - Individual level - No Caps.do,legacy_research,12965,348,91f20c2902113b7468d1dbe62ddae5617ff97750f494be9f3b6e129b6c14f82e
+code/stata/legacy-current/2 HVC - APU - LC - HCY/7. RD estimations - Censo 2017 - CCPP level.do,legacy_research,31317,740,c3683cce4961bbe923c97c9991ce15821841a2423cd59ef626421e6ffd0c62bb
+code/stata/legacy-current/2 HVC - APU - LC - HCY/7a. RD estimations - Censo 2017 - CCPP level - Population.do,legacy_research,59867,1412,d93f543fff5a410464c81ee1e0b1e123fa71fd95394c4c4d04fcfa0243bdb88f
+code/stata/legacy-current/2 HVC - APU - LC - HCY/8. RD estimations - Censo 2017 - Household level.do,legacy_research,16154,404,d5c3613465c234f3fa6076e14d9989b9af2a5b8be2678d1ca4df19a1e44d60ca
+code/stata/legacy-current/2 HVC - APU - LC - HCY/9. RD estimations - Censo 2017 - Individual level.do,legacy_research,14759,381,23d9156a83606161d95304fee1a1654cc3e460b420b7b299bfd96349e1aed49e
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,29432,732,1bec2759a19d635835734c76bf9fa9ab93230c90eb1019606877e016dfebc78c
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,13909,363,22851ecc8acbfb88d371a9dbc943b989a21b3d7f2558a61a910557d0ce55c543
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,12889,350,0a6fa5091c3541654cebc2e99d60651bcc7828beb1b099c34b57c691a6fc051a
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/7. RD estimations - Censo 2017 - CCPP level.do,legacy_research,32034,751,d834c6252a5ab4e42b98c8cddfecf92eadac1e1443c694e06e3f1b4c5958d13f
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/8. RD estimations - Censo 2017 - Household level.do,legacy_research,16663,408,46ec5773af72606f2fb8b8508ad70e2d45adff7afc9c33d0dde55347130cd322
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/9. RD estimations - Censo 2017 - Individual level.do,legacy_research,14987,387,a0e0fde5198ecb240565d1e098afafb56afe3090e0960b19ea385f3ad911f969
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/X. Attrition Analysis - 2007 - 2013 - 2017.do,legacy_research,10785,173,3be9ea1ae005bbe27df206467debb92c8ee0b5ebde8c87cd0665c57e250827fa
+code/stata/legacy-current/2 HVC - APU - LC - HCY/SAT/XXXXXXX - check 9. RD estimations - Censo 2017 - Individual level.do,legacy_research,14987,387,a0e0fde5198ecb240565d1e098afafb56afe3090e0960b19ea385f3ad911f969
+code/stata/legacy-current/2 HVC - APU - LC - HCY/X. Attrition Analysis - 2007 - 2013 - 2017.do,legacy_research,10785,173,3be9ea1ae005bbe27df206467debb92c8ee0b5ebde8c87cd0665c57e250827fa
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,16676,422,065b84968383d32ad300b665d2fecf972b6e1b1102a1b1071ef2e2d96daab8ba
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4a. RD estimations - Sisfoh 2013 - CCPP level - Population cut.do,legacy_research,30535,802,2d18e70c8d0a50bf842ee584429618deac8f49c9e240b698dc55640db9077e16
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/4b. RD estimations - Sisfoh 2013 - CCPP level - Poverty 2007.do,legacy_research,30221,799,b1f06abc9ceed730074923c0c56076fdc48475640d48c15dc9b4b75aa6d85c41
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,15836,413,1938ef14e39702b903950c21690a73615ead0836980e70c48acbe9f6120ecfb8
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5a. RD estimations - Sisfoh 2013 - Household level - Population cut.do,legacy_research,29105,776,7046255205d5cd0568fadab092a145de7b57ab85e1174bfc8e1b3f367e77710a
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/5b. RD estimations - Sisfoh 2013 - Household level - Poverty 2007.do,legacy_research,29079,773,5537db5e1cc8d144e2b1ca00e9cfb30e212e0d07813fd43c47280f36e788e279
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,14265,386,e8baeb0753c7f4a6bd204529f6d0a61b2de00273d69deebe4ebc059d8d016c5b
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6a. RD estimations - Sisfoh 2013 - Individual level - Sex.do,legacy_research,23039,651,c9be249906755e4f2754f59b9f958890d2aaea31204766cc99d3ce5c601ef780
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6b. RD estimations - Sisfoh 2013 - Individual level - Population cut.do,legacy_research,25971,727,37e62988716823e6c788671ccb9793f516f5420e0bfe4c74223a192a96806920
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/6c. RD estimations - Sisfoh 2013 - Individual level - Poverty 2007.do,legacy_research,25944,726,97ade957a3409fa0daa68fd232f69ad97ecd12f7518245852d7e3edfa3ff337a
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/SAT/4. RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,16859,427,f6a54363b6553169be0bfaba6ab727314b9e67ee10dbdbb2b04835d2dccb87bb
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/SAT/5. RD estimations - Sisfoh 2013 - Household level.do,legacy_research,16019,418,e6c2c70c2fb5a33b87cd7aa5926891c4ac78852a462201cb5a253f646ab6fd90
+code/stata/legacy-current/3 HVC - APU - LC - HCY - SM/SAT/6. RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,14447,391,597928b4834ecef11c359bc19ab14fb51a69444d944c93061539be7a7ae19de2
+code/stata/legacy-current/4 Working paper/0 RD Victimas - Master.do,legacy_research,2424,74,6853587b79f81c0ea1ee1666aa10bc8eacc425f5f8e4a0542c972b0430e10b10
+code/stata/legacy-current/4 Working paper/0a. clean_censo2007.do,legacy_research,24255,574,f7aef153f57182d9258bf50709e8375a55a7426cbd65db6fad1a1a4178d04874
+code/stata/legacy-current/4 Working paper/0b. clean_sisfoh2013.do,legacy_research,113774,2108,e762f421609fb781a169c7ddba7946dcac50d71451fb30254915a7a828e1052c
+code/stata/legacy-current/4 Working paper/0c. clean_endes2017.do,legacy_research,11873,303,f2892c73eb76af70c750d02c531002757fb9171303c9d4ec1d75a82ac561d905
+code/stata/legacy-current/4 Working paper/0d. clean_minedu.do,legacy_research,46888,1137,fc14d7eae8b43035a7e1031f42440c387a61008aefa55d11607b48571f690b6e
+code/stata/legacy-current/4 Working paper/0e. clean_cenagro2012.do,legacy_research,87689,2135,962e6732ff350c0884098da3dc96c47494bcd1b3e8ff91b3f34115eda06672aa
+code/stata/legacy-current/4 Working paper/0f. clean_minsa.do,legacy_research,8803,235,b79c261736eb010e24ffab6fe9de68b430d16a25f3c0936e751fa6fd577cbf20
+code/stata/legacy-current/4 Working paper/0g. clean_onpe.do,legacy_research,1400,46,c85c22a995ae35d620821825b6dbf92012c85dacb32955465d179a4feed0c135
+code/stata/legacy-current/4 Working paper/0j. clean_INEI.do,legacy_research,38844,933,4e9379bbb941a44167ce6620de4e2626c1dfd658b536d48e415fced454fd2a57
+code/stata/legacy-current/4 Working paper/1 RD Victimas - Data Preparation.do,legacy_research,45708,1191,6059be2e97f35f903d7d77161ec06a39e9bcec0f6c2e0ecf5b9e270fbb286794
+code/stata/legacy-current/4 Working paper/2 RD Victimas - Descriptive.do,legacy_research,29284,824,8fb53f382994e87651a7ae8077694f946dcd56f3a5f431e3ad50a34ad9f36172
+code/stata/legacy-current/4 Working paper/3 RD Victimas - RD tests.do,legacy_research,39874,994,254b1dfef93b677ce3b42e05fdaca83b3ec2ae9e62c4a9de1ea6fb2587abffbe
+code/stata/legacy-current/4 Working paper/4 RD Victimas - RD estimations - Sisfoh 2013 - CCPP level.do,legacy_research,89836,2730,4fca0a3072bb9e9efef023d9fc78faefeeef67a2eed8d9ae538564b161a3427d
+code/stata/legacy-current/4 Working paper/5 RD Victimas - RD estimations - Sisfoh 2013 - Household level.do,legacy_research,54012,1638,8462dcce0765450e2da4c68dff15ccef5cca22a4f050ccc07b025099aa1064f9
+code/stata/legacy-current/4 Working paper/6 RD Victimas - RD estimations - Sisfoh 2013 - Individual level.do,legacy_research,26485,787,f085c6dba2718ff31bc3492b995911a52e10172c9f23f431a4b150d29b65bb57
+code/stata/legacy-current/4 Working paper/7 RD Victimas - RD estimations - Censo 2017 - CCPP level.do,legacy_research,31317,740,c3683cce4961bbe923c97c9991ce15821841a2423cd59ef626421e6ffd0c62bb
+code/stata/legacy-current/4 Working paper/ado/_/_eststo.ado,vendor_legacy,841,28,7b86cc151206d19afb94c963cc7b8bb4c70cf74712094bf49a10e6928bcfd72a
+code/stata/legacy-current/4 Working paper/ado/c/colorcheck.ado,vendor_legacy,10754,310,f5b315b4ede24f63a9965f8be0a6290e2ac47214c5f9d180a57104584015afd8
+code/stata/legacy-current/4 Working paper/ado/c/colorpalette.ado,vendor_legacy,42763,1261,27d8b61bf5d7d6db29d809f0e56d37e0f7521e2113550da2aee26e2ec98bd746
+code/stata/legacy-current/4 Working paper/ado/c/colorpalette9.ado,vendor_legacy,114235,2585,53727c9239b276e5735cc42fa043a609ea58d3a04f1f7287f1fe19399dbbeceb
+code/stata/legacy-current/4 Working paper/ado/e/estadd.ado,vendor_legacy,80656,2465,95248496573a22af468f12379d1edf5411fd937c392206587e41168d610669b2
+code/stata/legacy-current/4 Working paper/ado/e/estout.ado,vendor_legacy,179348,4959,5d75620953127cb9ca4b475ae38c89a5f87aee946241a5a66f1484776d91c626
+code/stata/legacy-current/4 Working paper/ado/e/estpost.ado,vendor_legacy,69927,2124,381ffb4b169f57011f75cd83d33f21937a5a75a897bcba1a1e9f86dd7ed49f5f
+code/stata/legacy-current/4 Working paper/ado/e/eststo.ado,vendor_legacy,10223,343,bb840b34354d6989cac64c83d78e50c31e261f695cdca2cea305092a1b365168
+code/stata/legacy-current/4 Working paper/ado/e/esttab.ado,vendor_legacy,53405,1337,2adfdb1d5a943c8fc678c70a2aeca16cc11ae4a8e5a619054aa12dddfb1be4c3
+code/stata/legacy-current/4 Working paper/ado/g/grc1leg2.ado,vendor_legacy,50407,1273,031cb8f67941a5c2ee35c5192c71b7af7c04f17ccde5a8bb55ce6c5edb94c7a5
+code/stata/legacy-current/4 Working paper/ado/g/grc1leg2_examples.ado,vendor_legacy,28177,790,98fd2edc75001f0ef50a7f1d5292b9ac54b418a9469e1cedd44fb89ade203c49
+code/stata/legacy-current/4 Working paper/ado/i/ivreg2.ado,vendor_legacy,228650,6815,218a4066a075f4a33d2b476c96dad87b554d9b02319181b0f8f3faf1ca6629df
+code/stata/legacy-current/4 Working paper/ado/i/ivreg210.ado,vendor_legacy,269367,6951,2ac0d12c88783c437e0d9d4ace219dc66f86dd5534ebd1e1a0242754ea40028d
+code/stata/legacy-current/4 Working paper/ado/i/ivreg210_p.ado,vendor_legacy,3276,112,7587a3d7f1d6a78fcd9ea6cb64293be2a345717385974e7c8a3de1f123feab7a
+code/stata/legacy-current/4 Working paper/ado/i/ivreg28.ado,vendor_legacy,174509,5652,2782596cf8e4c95eb5b3cb0e147db92c0269aa2d1ea4188c23703d0917b3970a
+code/stata/legacy-current/4 Working paper/ado/i/ivreg28_cue.ado,vendor_legacy,750,24,7dad1a4feb3d065f4237595c02da29468100a44d4e8c2ddceb17a52fc21c1099
+code/stata/legacy-current/4 Working paper/ado/i/ivreg28_p.ado,vendor_legacy,2495,97,b0f61fe020773e7b1bf9a9e5394b7026f3e034486f1a50ae27145a1f2032d3e1
+code/stata/legacy-current/4 Working paper/ado/i/ivreg29.ado,vendor_legacy,242763,7576,899781e7a6e7f861ee54e42d1553ee2e5e2281e3b18358687e17729f20ed43f2
+code/stata/legacy-current/4 Working paper/ado/i/ivreg29_cue.ado,vendor_legacy,891,26,5f5e07171741edccf55ac9923f8d28461cbe63dee7890e3822b35aa1abfd6c7e
+code/stata/legacy-current/4 Working paper/ado/i/ivreg29_p.ado,vendor_legacy,2797,100,29f0bc6c62435592902c2f55e0fa011f16eec1a9b7cc70c41eb81e68ed0d4466
+code/stata/legacy-current/4 Working paper/ado/i/ivreg2_p.ado,vendor_legacy,4314,148,73cb136d0dc5c908fd0e2f4d3ece112f71277c417fda6df89b90a25f3a3bbb11
+code/stata/legacy-current/4 Working paper/ado/l/lcolrspace.mlib,vendor_legacy,932176,0,eb6a3bc4c5e2a95ca56f23515f046cbae2433edaab4f0aedfeaf24fdc7e62e5a
+code/stata/legacy-current/4 Working paper/ado/l/linepalette.ado,vendor_legacy,12100,375,aed7f875032afbea0d07f42d48e1cbb4db50b079c1e0e9ceac980a49a95d428f
+code/stata/legacy-current/4 Working paper/ado/l/livreg2.mlib,vendor_legacy,262968,0,a2e917496f21c00c428b43ff77f6036f9e5b9889c867bcff33fbf2a494d84161
+code/stata/legacy-current/4 Working paper/ado/l/lpbwdensity.ado,vendor_legacy,11132,392,9c73a55aa535bc6ce93781699caed17bfa386964a39c9c406f5fe74357c9cbf6
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity.ado,vendor_legacy,20692,678,b0fc877853492391b84d1c70def84280d44d3b0e91af5bc5fac9ce25b8f05d5b
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwimse.mo,vendor_legacy,22868,0,1b34dff3a455c451f311634f204dc77955b8a39669939c95fc3b5d47779bd776
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwirot.mo,vendor_legacy,11508,0,88d294882cdc11f5a211cf940a3336c72af111e4a6f1922033cc41f6411c8f53
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwmse.mo,vendor_legacy,22844,0,2985101cf80da253cd106edbf6749f6b2422c694286bedc19387da13ffbeecb1
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_bwrot.mo,vendor_legacy,11628,0,86b47967c957b7a1631486b68a1c9efe08e47550a9f25ada0cadc216050450de
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_cgen.mo,vendor_legacy,13244,0,fdcb7fcbbcacd05ed72da717b2e062fdff00246d4a62842f8f149d28a3a7507b
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_fn.mo,vendor_legacy,19644,0,526637e8dd1724c753934e7b1209e8c9a0d934f75e902acbc5a274f875f286d4
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_ggen.mo,vendor_legacy,14604,0,e34df4b64869615291180a21709979b4f0ab6a3942e2355d2c4b9072dbafb1f9
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_normdgp.mo,vendor_legacy,3212,0,ffad3f1bb8e06662e504bc50b51915b9ae008c792f6d37779f208ff261535421
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_optfunc.mo,vendor_legacy,6420,0,e0e7344919f460791d829b74c16ab77001efb64be16a66d70a2bb52393efebdd
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_quantile.mo,vendor_legacy,2204,0,71064b6f73f0d689182e058b2a16972f6594dd748e8b84b611cf51b1707d4a05
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_rep.mo,vendor_legacy,2940,0,8801b892639401019508be304210b07ad24cb5e0188d370d8c5d6febc496caed
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_sgen.mo,vendor_legacy,9836,0,46bbbb71a3758853325b8308a7970f443e9effb674ab6167161e9c7a5629599a
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_tgen.mo,vendor_legacy,9948,0,e041d586787b10d3ee64d239f94013a637b4cc49ff1826a4f29723b9a7fc60de
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_unique.mo,vendor_legacy,2956,0,840ce11d848f617a8d1a423f429eb84a25444dfedc9eedef1d5c263b71cf5fe9
+code/stata/legacy-current/4 Working paper/ado/l/lpdensity_whichmin.mo,vendor_legacy,1804,0,1f2b8eb17e4de25559586fa070003e84e017a875a67e86fc0ee3e621ea32d4c5
+code/stata/legacy-current/4 Working paper/ado/r/ranktest.ado,vendor_legacy,80676,2676,197ad146f8937e562c2e04b55a2f78d43f293ea90c5886a6d08069c8c77e6657
+code/stata/legacy-current/4 Working paper/ado/r/ranktest11.ado,vendor_legacy,31280,981,fa75c3dcb817da094e7415aea2039a542f71ddb33012232a7d29c587385b6720
+code/stata/legacy-current/4 Working paper/ado/r/ranktest9.ado,vendor_legacy,47028,1387,d88a927179a8dc8748c96987594271b000d33f5a52b0d869e90178297d0fc6d0
+code/stata/legacy-current/4 Working paper/ado/r/rdbwdensity.ado,vendor_legacy,23522,342,c2bc630a7e9fa8e5f0f68aff1164ced85cab46be748b6a1d4907317ec9b9f88e
+code/stata/legacy-current/4 Working paper/ado/r/rdbwselect.ado,vendor_legacy,33804,724,b8f8f5a758886a15d9f01213ed91ed066546e2fb58f9120182a6446b4cdffe39
+code/stata/legacy-current/4 Working paper/ado/r/rdbwselect_2014.ado,vendor_legacy,22843,596,9795655dbfaf06ff9eb48a60b1746c7fd86235c4c470a1be2aa610c49d1cc901
+code/stata/legacy-current/4 Working paper/ado/r/rdbwselect_2014_kconst.ado,vendor_legacy,16396,885,83e9bbf416e3b653fd1cfcaa0e91504429b9a8805a2f144e7fffc8370940dcb7
+code/stata/legacy-current/4 Working paper/ado/r/rddensity.ado,vendor_legacy,45827,1407,51541433e12ca2284cb1b9b40166262e247c5c17c6148315c288728570da72fc
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_fv.mo,vendor_legacy,39388,0,d1d85728e12aa4ed122d78df8937f791c473669e6a73610678d5d2629b7e1ffa
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_h.mo,vendor_legacy,4732,0,05c57a2b6962b0c29e023e9a359e5dc905fdb850c847509a62841dd6b7678298
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_quantile.mo,vendor_legacy,2204,0,ab4b56bc0f8f004ce81a0bb09e27a52aef90a0b75cadb46d5c6adcff1d3391d0
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_rep.mo,vendor_legacy,2940,0,1a6a114d024ffc828b7587d7e42e79becd95f65f426d4adb627cfda05b0dc0a2
+code/stata/legacy-current/4 Working paper/ado/r/rddensity_unique.mo,vendor_legacy,2988,0,f84a6073a4af1f203655b23ee891088dbd6200bd7e2b3e78149181f90c79af15
+code/stata/legacy-current/4 Working paper/ado/r/rdplot.ado,vendor_legacy,30616,860,9d78f546208ef624860a0adffe9d65272faeb25863456ad50f7c8fc09551d216
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust.ado,vendor_legacy,51792,1108,c741b0df54aaceb878d240d300fd89b32d5408a07f46a6eac0f4a79a8a336f3d
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_bw.mo,vendor_legacy,19084,0,0fa1baf0f45e2d48902ed862fcfe51328329740857dc2a71ac732d595c0852cb
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_collapse.mo,vendor_legacy,6828,0,5e290acc84af5803313ada1b28923a5642679799b7275e8a2c67a794f49fe6f8
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_groupid.mo,vendor_legacy,6300,0,6d9954910de05c76afe852dbcd2e752cec1c9866f026397e8655fa2527994915
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_kweight.mo,vendor_legacy,6636,0,ead8404aafa4891a461ba7d8d1d5b02e275f17e56efdb970e8a3d2470de835cf
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_median.mo,vendor_legacy,6348,0,23a41bab64b14b68251c3036e4c80be162f06ae59df5591cdf35b9388872e92c
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_res.mo,vendor_legacy,11788,0,4a4b2e6787ea4e7d419c61626951c1155bece4cf141b2219fc8112c626588996
+code/stata/legacy-current/4 Working paper/ado/r/rdrobust_vce.mo,vendor_legacy,9164,0,f18d5546144aa736d5afe402dfd38ff9b674b463b1055e0231c5088b899d6113
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plotplain.scheme,vendor_legacy,9521,346,f38a3177f83363a5dea515791baee49e8a7a26ff88b15c8d977371e3abb9433d
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plotplainblind.scheme,vendor_legacy,10652,370,a61eab0287542cb4a269c653c68755247ab2738182ca63f24b5a2e0e0dd54f55
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plottig.scheme,vendor_legacy,60362,2110,27964204ab51f46db35f371da0fe4468aa10a18aef082de7f087a62a38094691
+code/stata/legacy-current/4 Working paper/ado/s/scheme-plottigblind.scheme,vendor_legacy,60643,2114,4a023e13578740810e2caf9c90271a086260ad01dac6ad730b6e528815070627
+code/stata/legacy-current/4 Working paper/ado/s/sumstats.ado,vendor_legacy,3238,132,1365f676f2144000c2de5f4c4ffbadb94b3a255a841e5a9b221ccc4d6c926b35
+code/stata/legacy-current/4 Working paper/ado/s/symbolpalette.ado,vendor_legacy,13558,415,1f93ddec1192831f2d2558b7f57a25d81549b0e31d502c628d9079fd8febe1ba
+code/stata/legacy-current/do_file_exploratory_BE.do,legacy_research,8277,206,e215c3e275bebe53c743593b21bd7d7ee1013c42fdf3a291e9b9aff510cc7f17
+code/stata/legacy-current/do_file_exploratory_JZ.do,legacy_research,66454,1573,bf50c0029b49ad076435d2250ff83186b26655a638c77d2aa1da61479f939fa7
+code/stata/legacy-current/do_file_exploratory_JZ2.do,legacy_research,7199,179,202ca4b9a71d8194f63c9cb5615f4bf96589ff793ce73132699ef01848e05997
+code/stata/legacy-current/mayersen_graphs.do,legacy_research,14604,370,0c2db6d0f78df2288131c8cd8f64d66d9067811c48203bcba189d96f7e3f5c23
+code/stata/legacy-current/Modificacion base cpv2017ind.do,legacy_research,775,20,dea656ac29b3d7d9fe5904bd5064b62913fed1a36804d8ebfa800f251a6367c6
+code/stata/legacy-current/power_calculations_BE.do,legacy_research,6279,203,24b11d09cf95bdae8267822c549efc1003ddd3fca98569a4d26a1bf1d45b63d7
+code/stata/legacy-current/power_calculations_JZ.do,legacy_research,16375,331,0cfb45d31a7c1a767e9668b79ae1819d8d1ad04cd11de47e6f7c906c2eadef76
+code/stata/legacy-current/rd_poblacion.do,legacy_research,9409,177,eb9d719869a2e4a4e01e9b369b385b1b70d61cf04611297ab48d00c27b809722
+code/stata/legacy-current/SAT/0b. clean_sisfoh2013.do,legacy_research,112553,2104,7beb9cf28bedcb69e326281a7ed698f99f665c3bca33b4787e1723358599b858
+code/stata/legacy-current/SAT/1. data_prep_JZ.do,legacy_research,43686,1094,94a471fda4a1e4537c9d8cff56166ca1f71ac8b3f8626ee28d56c74b33cbcad9
+code/stata/legacy-current/SAT/ccpp_pbi_contraloria.do,legacy_research,3515,141,b01d30ce26524fc4fd9018a37b8393d823370be3c74b0323d8ab4bfb7c294b94
+code/stata/lib/00_validate_environment.do,active,5520,128,a9cd3e9f54318dea0115dbd23156398f8adac6c9af5221132d870c5b555424ad
+code/stata/pipeline/01_data_preparation.do,active,421060,12591,b1b78c5111998699ea5a78e3b44867cfb9241d0519adbf0a0d5db24619ec83dc
+code/stata/pipeline/02_describe_data.do,active,108215,2586,4de679bc2ba0b5866353fa5117d41a6917b183affd299548adb958c5313b771a
+code/stata/pipeline/03_validate_rd_design.do,active,95428,2766,7dff62f0e7225ee7c7596c51282d0917b3b729581ae4bfc1034274d4cbe55e75
+code/stata/pipeline/03b_validate_rd_assumptions.do,active,79490,1939,31ff0d249a77052acc006cfe95f66e7c759cbc445e1277ab2ee9a09c93849b93
+code/stata/pipeline/04_estimate_main_effects.do,active,12743,334,dedce9b1e6e3ed1be145082a045c22f0151a94d149cdc76b4ae786ad9cac0cf1
+code/stata/pipeline/04a_sisfoh2013_ccpp.do,active,64937,1481,ef18f41fab7ab5548659ae00bd18e0b40c38d3d1980a853d3621408131fc5e85
+code/stata/pipeline/04b_sisfoh2013_household.do,active,80632,1791,8ef632a4a6f4a1239c149d579484d0d5591942f28dc149d6c4810d960a35d772
+code/stata/pipeline/04c_sisfoh2013_individual.do,active,83411,1849,3423fb9306bb34e7efed723bea996675226523ae8879bbfc27ae099ac3b57317
+code/stata/pipeline/04d_census2017_ccpp.do,active,68740,1551,18022deb0ccdd8f0fd91bd023f30bc40c7509e47dad382c892829130ccb2caba
+code/stata/pipeline/04e_census2017_household.do,active,81869,1804,4700d162dc4b41e1d206c6f50d15344eb5bc359588724a78c513f1d9f0045202
+code/stata/pipeline/04f_census2017_individual.do,active,89862,1951,09af807042e0cb51db26619ca6674790f2c0b7ee9370f75ba9b7f8512c1772b1
+code/stata/pipeline/05_estimate_heterogeneity.do,active,11106,329,dd9768a8f0258f404de0c1a6677d896c0ef78bda7250636f54cd47334c0d1fde
+code/stata/pipeline/05a_sisfoh2013_ccpp_heterogeneity.do,active,82318,1856,d40f45af83392504a47771982b5c61cdaa110d86255c34a23fd84a83442d5999
+code/stata/pipeline/05b_sisfoh2013_household_heterogeneity.do,active,6740,175,7945eb91707f85e474eb893f74e09caebf2b0455a809daaccbe866b46cc5fa6f
+code/stata/pipeline/05c_sisfoh2013_individual_heterogeneity.do,active,6672,173,a1a3c129fdd7db558fa05a9b56cdc122e6f233728832c726c6b81ada2c20fbff
+code/stata/pipeline/05d_census2017_ccpp_heterogeneity.do,active,33014,791,22c9edbaabdfb6aac55e9a3b8362de971b1d2160a95a287e16924a6efbe342ef
+code/stata/pipeline/05e_census2017_household_heterogeneity.do,active,6637,168,f1731f2a8b719ee2ba7262d3d4341ec7ef4ba2da3271d47abb24075874b32a84
+code/stata/pipeline/05f_census2017_individual_heterogeneity.do,active,7889,194,c504eb1a0934e7c574de7c2446330c086e4244dbc53c86c6b6ffa87a96b3bca6
+code/stata/pipeline/06_analyze_migration_mechanisms.do,active,43435,948,ad07287662f541f5a45a517615d393bc1947228027342942ae2d067c800e41e5
+code/stata/pipeline/07_build_tables_figures.do,active,9163,233,c0e7e2c9ba21d3c3bf192f3d249c1c821c380f64bbaab0636f0dd07dbc9995c0
+code/stata/pipeline/08_run_release_checks.do,active,9722,238,4c0ace90a6cd34cd7e1898098063c1ddc2b4ca20795cf3acdc647def08c06f77
+code/stata/pipeline/_heterogeneity_level_engine.do,active,93548,2174,0331a285d2ea7aa7e8ee19fffc492c8dc9a345219ac121699ec8b04e193fc44f
+code/stata/pipeline/_migration_selection_audit.do,active,20648,356,a9c340b222a64b8f90ddfcce8bb611bd2b00186fc3a16b92df9d104bf23cb7c0
+code/stata/pipeline/_publication_review_pack.do,active,36962,612,00699ae49f42c4b5b34841fed05a6e1c43d4bc39d2b4a30b393a017792db354f
+code/stata/tests/test_census2017_ccpp_heterogeneity_contract.do,tests,2927,91,2362fc6c49a6d744979a8f3f07f92f47d12ea33ec1d29d1888cc5ff594639814
+code/stata/tests/test_census2017_household_heterogeneity_outputs.do,tests,2807,88,f6f896c7d92d9cdb0df869c0c1c8073f536998d106b1befb94c0240ff36640cd
+code/stata/tests/test_census2017_individual_heterogeneity_outputs.do,tests,3642,107,2d41b524fe77b863ff7ef3fed39305d2d10a12c6d5376edcdec59c7eb7a31b20
+code/stata/tests/test_census2017_migration_population.do,tests,2815,76,8ee93890baa085267d9b3a62747a3e4dd833421e8a53f8fc6f217200f8480417
+code/stata/tests/test_census2017_selection_feasibility.do,tests,4624,88,0aeba0acfc3201688c0ac48bcdbfcda439ea39d13b5f5020f98c343cbb1901f7
+code/stata/tests/test_heterogeneity_engine_wave_contract.do,tests,2388,78,31c09545831dd4cc3d4677da34623bc9bde9251f2a0b767d54633f1356be61ca
+code/stata/tests/test_migration_mechanism_outputs.do,tests,3850,117,eddbe1e8af71dffa1bd15dd4269dcbe65a3d94987daf3f3b37f4ad04451e718f
+code/stata/tests/test_migration_mechanism_registry.do,tests,1529,49,2be2ce3a829a1ba8a5ddb7c05c7521e4a1b5ee5934124fe7eed0916aa95c3e41
+code/stata/tests/test_publication_candidate_outputs.do,tests,2569,83,fdf6d1c14c0c265c30f3ad8a9f33a7923cc9feff2be30d20dae6acf3d36b1b57
+code/stata/tests/test_publication_defensive_guards.do,tests,2917,77,3e9ff9df49627ea34c57a6a82d5b2ccdc8290f8fb72c5d8428173b8a4fad450a
+code/stata/tests/test_publication_repairs.do,tests,3027,69,515358ccba952a6d7e344a9c6fb5eedd71a33a0e6085e0d4f7acb37873a0aa57
+code/stata/tests/test_publication_review_pack.do,tests,2261,64,59fd4359fed58c97757f6a5809bc153d67172fdc5ea92f3470212f179e2e5147
+code/stata/tests/test_release_audit_outputs.do,tests,1707,64,d7695d115ba3a71aef0dc42d9b03c97ed650d763cc2f79e978686eb0f5bde9cd
+
