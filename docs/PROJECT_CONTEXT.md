@@ -1,5 +1,25 @@
 # Victimas RD project context
 
+## 2 November 2026: approved identification/precision Overleaf integration
+
+Read [the five-file integration receipt](OVERLEAF_IDENTIFICATION_INTEGRATION_2026-11-02.md)
+before further publication work. The owner approved three additive live source
+updates and two exact canonical table copies. All 55 prior generated inputs
+remain byte-identical; in total 194 original live files are unchanged. The tree contains
+199 files, with no deletion. Online Appendix D now presents Table A20 (page 70)
+and Table A21 (pages 71–73). The article uses descriptive appendix pointers
+because its separate build has no external-label support; a caller-level page
+break prevents a lone final table row without altering a generated artifact.
+Fresh isolated builds contain 42 main, 100 appendix and two checklist pages;
+all 57 generated inputs are consumed, all 41 citation keys resolve, and final
+logs/layout checks pass. This is local validation, not a cloud-sync certificate.
+Original estimates, samples, inference, multiplicity and scientific boundaries
+remain unchanged. Conventional IV AR sets do not certify bias-corrected RD or
+ignorable linkage. No new causal claim, Stata/data rerun, public-release flag,
+commit, push or submission was authorized. Older pending-integration language
+in the dated proposal and audit describes the preceding batch, not current
+internal-copy approval; wider scientific/disclosure/release holds still apply.
+
 ## 1 November 2026: approved seven-source Overleaf integration
 
 Read [the live-source integration receipt](OVERLEAF_SOURCE_INTEGRATION_2026-11-01.md)

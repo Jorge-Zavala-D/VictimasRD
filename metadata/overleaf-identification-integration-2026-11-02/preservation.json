@@ -1,0 +1,19 @@
+{
+  "status": "exact_five_file_update_verified",
+  "baseline_head": "ed8748b447e1f2fa535eba770fe516708f4f2ce3",
+  "before_live_files": 197,
+  "after_live_files": 199,
+  "changed_existing_files": 3,
+  "added_files": 2,
+  "deleted_files": 0,
+  "preserved_existing_files": 194,
+  "original_inputs_preserved": 55,
+  "new_exact_canonical_tables": 2,
+  "protected_tracked_files": 900,
+  "no_estimation_rerun": true,
+  "no_data_changed": true,
+  "live_build_products_written": false,
+  "cloud_build_or_sync_verified": false,
+  "submission_approved": false,
+  "public_release_approved": false
+}

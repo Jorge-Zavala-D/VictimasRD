@@ -1,0 +1,149 @@
+{
+  "status": "exact_five_file_update_verified",
+  "baseline_head": "ed8748b447e1f2fa535eba770fe516708f4f2ce3",
+  "before_live_files": 197,
+  "after_live_files": 199,
+  "changed_existing_files": 3,
+  "added_files": 2,
+  "deleted_files": 0,
+  "preserved_existing_files": 194,
+  "original_inputs_preserved": 55,
+  "new_exact_canonical_tables": 2,
+  "protected_tracked_files": 900,
+  "no_estimation_rerun": true,
+  "no_data_changed": true,
+  "live_build_products_written": false,
+  "cloud_build_or_sync_verified": false,
+  "submission_approved": false,
+  "public_release_approved": false,
+  "verified_at_utc": "2026-11-02 21:45:26 UTC",
+  "approval_scope": "Owner-approved five-file internal-draft integration; no commit, push, submission or public release",
+  "approved_proposal": "docs/proposals/2026-11-02-identification-precision-overleaf-updates.md",
+  "proposal_sha256": "0b645032c0aa7b0c6486354dd53dd640d9af7692f8a64f10168eadc69cc426d4",
+  "applied_source_patch": "metadata/overleaf-identification-integration-2026-11-02/source-update.patch",
+  "applied_source_patch_sha256": "bf0df2843145fb42d2723d111a5668bf224590796a6fac0592b2252b7e32a671",
+  "presentation_rulings": [
+    "Use descriptive article pointers to Online Appendix D because the separately compiled documents do not share labels; automatic appendix references retained.",
+    "Add exactly one caller-level clearpage before the primary longtable; generated table bytes unchanged."
+  ],
+  "protected_repository_scope": "All 900 pre-existing tracked files other than PROJECT_CONTEXT unchanged; context has only the dated current-status addition.",
+  "new_input_record": "metadata/overleaf-identification-integration-2026-11-02/generated-inputs.csv",
+  "source_changes_record": "metadata/overleaf-identification-integration-2026-11-02/live-changes.csv",
+  "copied_sources_sha256_verified": true,
+  "documents": [
+    {
+      "document": "main",
+      "pdf_cache_path": "build/overleaf-identification-integration-2026-11-02/live-build/World Development Manuscript/main.pdf",
+      "pdf_sha256": "025ab9e3ea17fbb0a85a40e35fb064c62ddc9a6ce49ae3f4b6091dd8a2986073",
+      "pages": 42,
+      "minimum_font_points": 5.978,
+      "audit_text_pages": [
+        19,
+        33
+      ],
+      "overfull": 0,
+      "undefined": 0,
+      "multiply_defined": 0,
+      "duplicate_destinations": 0,
+      "errors": 0,
+      "page_bound_violations": 0
+    },
+    {
+      "document": "online_appendix",
+      "pdf_cache_path": "build/overleaf-identification-integration-2026-11-02/live-build/World Development Manuscript/online_appendix.pdf",
+      "pdf_sha256": "11540ef5034ce0466f6f2716ad96187edfaf6bf66f48e38466a611994f48dcc4",
+      "pages": 100,
+      "minimum_font_points": 5.978,
+      "audit_text_pages": [
+        67,
+        70,
+        71
+      ],
+      "overfull": 0,
+      "undefined": 0,
+      "multiply_defined": 0,
+      "duplicate_destinations": 0,
+      "errors": 0,
+      "page_bound_violations": 0
+    },
+    {
+      "document": "submission_checklist",
+      "pdf_cache_path": "build/overleaf-identification-integration-2026-11-02/live-build/World Development Manuscript/submission_checklist.pdf",
+      "pdf_sha256": "c37a872c10df80515597c8260b6df874dd8732de0a84dc3727a157e96eea7965",
+      "pages": 2,
+      "minimum_font_points": 10.909,
+      "audit_text_pages": [],
+      "overfull": 0,
+      "undefined": 0,
+      "multiply_defined": 0,
+      "duplicate_destinations": 0,
+      "errors": 0,
+      "page_bound_violations": 0
+    }
+  ],
+  "cited_keys_resolved": 41,
+  "cited_key_set_unchanged": true,
+  "existing_generated_inputs_consumed": 55,
+  "new_generated_inputs_consumed": 2,
+  "table_body_rows": [
+    6,
+    48
+  ],
+  "table_labels": {
+    "tab:exact_sample_audit": {
+      "number": "A20",
+      "page": "70"
+    },
+    "tab:primary_identification_precision": {
+      "number": "A21",
+      "page": "71"
+    }
+  },
+  "all_pages_rendered": 144,
+  "scope": "Local build of checksum-identical live sources; not a cloud-build or sync certificate",
+  "visual_review": "passed_parent_contact_sheets_and_enlarged_updated_pages",
+  "visual_review_scope": "All 144 pages screened via contact sheets; changed main passages and appendix tables/notes inspected at 130 dpi; 63 unchanged appendix pages pixel-identical to previously inspected renderings.",
+  "primary_table_rows_by_page": [
+    [
+      71,
+      20
+    ],
+    [
+      72,
+      22
+    ],
+    [
+      73,
+      6
+    ]
+  ],
+  "primary_table_minimum_ci_to_kp_clearance_points": 36.633,
+  "private_recoverable_before_copy": "build/overleaf-identification-integration-2026-11-02/before",
+  "acceptance_test": "Expected exact-five-file check failed before live application and passed after application and final layout repair.",
+  "layout_regression": "Failed with one final row before page break; passes with 20,22,6 rows on pages71,72,73.",
+  "existing_python_tests": {
+    "tests": 21,
+    "failures": 0
+  },
+  "scientific_estimation_rerun": false,
+  "analysis_code_and_generated_artifacts_unchanged": true,
+  "original_citation_set_and_bibliography_unchanged": true,
+  "release_records_unchanged": true,
+  "fresh_context_review": {
+    "status": "passed_scoped_read_only_review",
+    "critical": 0,
+    "important": 0,
+    "actionable_minor": 0,
+    "scope": "Independent live/before/canonical/Git hashes, exact additive source differences, three registered AR claims, 57 actual recorder inputs, final logs/PDF identities; parent separately performed visual sign-off.",
+    "not_certified": "Causal validity, exhaustive page-by-page independent visual review, data rights, cloud synchronization or release."
+  },
+  "literature_access": {
+    "zotero": "No exposed tool; read-only local API probe connection-refused.",
+    "notebooklm": "Explicit Peru URL queried; only searching placeholder returned, no source-bearing synthesis.",
+    "new_literature_claims_or_citations": 0,
+    "library_or_authentication_changes": false
+  },
+  "staged": false,
+  "committed": false,
+  "pushed": false
+}

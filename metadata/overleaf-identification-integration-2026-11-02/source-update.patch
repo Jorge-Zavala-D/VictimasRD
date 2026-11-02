@@ -1,0 +1,76 @@
+--- a/World Development Manuscript/sections/04_empirical_strategy.tex
++++ b/World Development Manuscript/sections/04_empirical_strategy.tex
+@@ -146,6 +146,20 @@
+ bias-corrected intervals are not automatically weak-IV-robust confidence sets;
+ the local-IV Anderson--Rubin tests are separately identified as diagnostics.
+ 
++An additional exact-sample audit links every registered specification to its
++eligible population and positive-kernel-weight estimation and bias windows.
++It reports observations, represented communities, districts, and distinct
++scores separately, rather than borrowing support or first-stage clearance
++from a primary model. Matching conventional local-IV analogues additionally
++report clustered Anderson--Rubin confidence sets, including nonbounded or
++unavailable sets. Calculations for outcome-adaptive windows are recorded-window
++diagnostics, not established post-selection RD coverage. These sets concern
++the stated local-IV model, not the
++bias-corrected RD estimator, and do not remove smoothing bias or establish
++valid selection, exclusion, or monotonicity. The operational Kleibergen--Paap screen and
++the primary RD reporting hierarchy remain unchanged.
++The exact-sample audit and primary-outcome uncertainty tables appear in Online Appendix~D.
++
+ \subsection{Computational production and AI assistance}
+ OpenAI Codex and ChatGPT (OpenAI) assisted programming, code review and
+ manuscript production; NotebookLM (Google) supported literature discovery
+--- a/World Development Manuscript/sections/07_robustness.tex
++++ b/World Development Manuscript/sections/07_robustness.tex
+@@ -48,6 +48,15 @@
+ estimated on different samples. Those ratios remain diagnostic until their own
+ exact-sample weak-instrument diagnostics are available.
+ 
++The added own-sample diagnostics do not promote a secondary receipt estimate
++solely because its local-IV first stage passes the operational screen. The
++ordinary RD intervals and the separate local-IV confidence sets address
++different finite-sample inferential problems. Their joint presentation makes
++weak identification and limited information visible but does not turn
++nonsignificance into evidence of no effect. The selected design, coarse-score
++support, historical search, and treatment-dependent observation qualifications
++therefore continue to limit interpretation.
++
+ \paragraph{Selective observation and measurement.}
+ Source coverage, person linkage, valid movement and complete outcomes
+ are distinct. The household availability discontinuity cannot be
+--- a/World Development Manuscript/appendix/D_additional_results.tex
++++ b/World Development Manuscript/appendix/D_additional_results.tex
+@@ -163,3 +163,32 @@
+ \includegraphics[width=\textwidth]{figures/publication_review_2026-10-03/A02_fig_rd_outcomes_44_bandwidth_sensitivity_2017_ccpp.png}
+ \caption{Bandwidth sensitivity for Census 2017 community outcomes. Observation and linkage boundaries remain in force across these specifications.}\label{fig:pub_A02}
+ \end{figure}
++
++\subsection{Exact-sample identification and precision}
++
++The accompanying registry retains all registered model rows;
++Tables~\ref{tab:exact_sample_audit} and
++\ref{tab:primary_identification_precision} summarize that audit and display
++all six primary outcome families. Counts of specification rows are not
++counts of independent tests or populations. The first table summarizes the
++own-sample diagnostic screen; the second places the original primary RD
++intervals beside confidence sets for separately labeled conventional local-IV
++analogues. Passing the operational screen does not certify bias-corrected
++RD inference or resolve the observation and instrument-validity assumptions.
++The complete machine-readable registry retains support, failures, original
++multiplicity adjustments and the full confidence-set endpoints.
++
++Three marginal conventional local-IV Anderson--Rubin sets exclude zero
++(2017 community employment, household female share, and household share
++living in another community). These are not multiplicity-adjusted,
++bias-corrected RD intervals: all three registered primary RD intervals
++include zero and their Holm-adjusted probabilities exceed 0.05. We retain
++the primary reporting hierarchy rather than select the more favorable
++inference procedure after inspecting the results.
++
++\begingroup\singlespacing\setlength{\parindent}{0pt}
++\input{tables/identification_precision_2026-11-02/tab_identification_summary.tex}
++\clearpage
++\small
++\input{tables/identification_precision_2026-11-02/tab_identification_primary.tex}
++\par\endgroup
