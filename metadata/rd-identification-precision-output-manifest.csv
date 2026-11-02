@@ -1,0 +1,8 @@
+path,artifact_type,generator,run_id,checksum,review_status
+"output/tables/rd_outcomes/rd_exact_sample_diagnostics.csv","review_table","code/stata/pipeline/04_estimate_main_effects.do","2nov2026_161137","2576266858","generated_unreviewed"
+"output/tables/rd_outcomes/rd_identification_precision_registry.csv","review_table","code/stata/pipeline/04g_audit_identification_precision.do","2nov2026_161137","856716186","generated_unreviewed"
+"output/tables/rd_outcomes/rd_identification_summary.csv","review_table","code/stata/pipeline/04g_audit_identification_precision.do","2nov2026_161137","2994478144","generated_unreviewed"
+"output/tables/rd_outcomes/rd_primary_precision.csv","review_table","code/stata/pipeline/04g_audit_identification_precision.do","2nov2026_161137","903955549","generated_unreviewed"
+"output/tables/rd_outcomes/tab_identification_summary.tex","review_table","code/stata/pipeline/04g_audit_identification_precision.do","2nov2026_161137","1016898162","generated_unreviewed"
+"output/tables/rd_outcomes/tab_identification_primary.tex","review_table","code/stata/pipeline/04g_audit_identification_precision.do","2nov2026_161137","4206231892","generated_unreviewed"
+"output/tables/rd_outcomes/tab_precision_benchmarks.tex","review_table","code/stata/pipeline/04g_audit_identification_precision.do","2nov2026_161137","3009272348","generated_unreviewed"

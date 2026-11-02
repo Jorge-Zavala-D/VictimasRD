@@ -14,7 +14,7 @@ set more off
 *-----------------------------------*
 
 foreach required_global in ///
-    project_root pipeline_root analysis_data_root ///
+    project_root code_root pipeline_root analysis_data_root ///
     figures_root tables_root metadata_root logs_root {
 
     if `"${`required_global'}"' == "" {
@@ -178,6 +178,25 @@ foreach output_directory in "${rd_figure_dir}" "${rd_table_dir}" {
 **# 3. Ordered outcome modules
 *-----------------------------------*
 
+do "${code_root}/lib/04_exact_sample_audit.do"
+tempfile exact_sample_audit
+tempname audit_post
+postfile `audit_post' ///
+    int wave str12 level str12 outcome_id str40 spec_id str24 estimand ///
+    str40 diagnostic_status str32 diagnostic_cluster ///
+    long eligible_n eligible_n_left eligible_n_right ///
+    eligible_ccpp_left eligible_ccpp_right eligible_dist_left eligible_dist_right ///
+    eligible_scores_left eligible_scores_right ///
+    n_left n_right ccpp_left ccpp_right dist_left dist_right scores_left scores_right ///
+    bias_n_left bias_n_right bias_ccpp_left bias_ccpp_right bias_dist_left bias_dist_right ///
+    bias_scores_left bias_scores_right ///
+    long iv_n iv_clusters ///
+    double kp_f iv_effect iv_se fs_effect fs_se rf_effect rf_se ar_p ///
+    str20 ar_type byte ar_components ///
+    double ar_low1 ar_high1 ar_low2 ar_high2 coefficient_gap ///
+    int original_rc audit_rc ar_rc using "`exact_sample_audit'", replace
+global rd_audit_post "`audit_post'"
+
 display as result "Starting SISFOH 2013 CCPP outcome analysis."
 do "`outcome_module_ccpp'"
 
@@ -225,6 +244,14 @@ if _rc {
     display as error "Census 2017 individual outcome module failed."
     exit _rc
 }
+
+postclose `audit_post'
+global rd_audit_post ""
+use "`exact_sample_audit'", clear
+isid wave level outcome_id spec_id estimand
+sort wave level outcome_id spec_id estimand
+export delimited using "${rd_table_dir}/rd_exact_sample_diagnostics.csv", replace
+do "${pipeline_root}/04g_audit_identification_precision.do"
 
 tempfile ccpp_output_manifest
 import delimited using "${rd_manifest}", ///
@@ -327,6 +354,14 @@ foreach required_output in ///
         exit 603
     }
 }
+
+do "${code_root}/tests/test_exact_sample_identification_outputs.do"
+tempname audit_receipt
+file open `audit_receipt' using ///
+    "${metadata_root}/rd-identification-precision-run-check.csv", write replace text
+file write `audit_receipt' "run_id,models,primary_outcomes,status,scope" _n ///
+    "${rd_run_id},1970,48,passed,technical_only_not_scientific_or_release_approval" _n
+file close `audit_receipt'
 
 display as result "Completed SISFOH 2013 and Census 2017 outcome analysis at all three levels."
 display as text "Tables:  ${rd_table_dir}"

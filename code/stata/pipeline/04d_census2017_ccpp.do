@@ -318,6 +318,21 @@ program define _vrd_post_outcome_rd
         }
     }
 
+    local audit_cluster "cluster_dist"
+    local audit_vce : word 1 of `vcetype'
+    if inlist("`audit_vce'", "cr1", "cr2", "cr3") {
+        local audit_cluster : word 2 of `vcetype'
+    }
+    _vrd_audit_exact_sample if `estimator_sample', ///
+        outcome(`outvar') running(${rd_running}) treatment(${rd_treatment_2017}) ///
+        community(ruv_id) district(ubigeo_dist) cluster(`audit_cluster') ///
+        hleft(`h_left') hright(`h_right') bleft(`b_left') bright(`b_right') ///
+        poly(`polyorder') kernel(`kernel') scale(`scale') ///
+        covariates(`covariates') `fuzzy' ///
+        original(`estimate_cl') origrc(`estimation_rc') ///
+        posthandle(${rd_audit_post}) wave(2017) level(ccpp) ///
+        outcomeid("`outcomeid'") specid("`specid'") estimand("`estimand'")
+
     post `posthandle' ///
         ("`outcomeid'") ("`outvar'") ("`outlabel'") ///
         ("`family'") ("`tier'") ("`multiplicity'") ///
@@ -687,6 +702,19 @@ forvalues outcome_index = 1/`outcome_count' {
                     local kp_f_main = `kp_f'
                 }
             }
+
+            _vrd_audit_exact_sample if rd_primary_sample & abs(${rd_running}) <= ${rd_common_h}, ///
+                outcome(`outcome_var') running(${rd_running}) ///
+                treatment(${rd_treatment_2017}) community(ruv_id) ///
+                district(ubigeo_dist) cluster(cluster_dist) ///
+                hleft(${rd_common_h}) hright(${rd_common_h}) ///
+                bleft(${rd_common_b}) bright(${rd_common_b}) ///
+                poly(1) kernel(triangular) scale(`outcome_scale') ///
+                covariates(`parametric_covariates') finalweight(triangular_weight) fuzzy ///
+                original(`estimate_cl') origrc(`estimation_rc') ///
+                posthandle(${rd_audit_post}) wave(2017) level(ccpp) ///
+                outcomeid("`outcome_id'") specid("`parametric_spec'") ///
+                estimand("parametric_late")
 
             post `rd_post' ///
                 ("`outcome_id'") ("`outcome_var'") ///

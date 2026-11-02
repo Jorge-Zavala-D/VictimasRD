@@ -12,6 +12,20 @@ All other design, population, and inference contracts remain unchanged.
 
 ## Status and scope
 
+### 2 November 2026: exact-sample identification and precision audit
+
+The approved additional audit is specified in
+`IDENTIFICATION_PRECISION_AUDIT_2026-11-02.md`. Module 04 collects support and
+conventional local-IV diagnostics inside each existing estimation routine;
+`04g_audit_identification_precision.do` builds a separate complete registry.
+Its own-sample KP statistics and official Anderson--Rubin confidence sets
+do not certify bias-corrected RD inference or change the primary estimator,
+families, sample, weights, cutoff or bandwidth rules. Historical `strength_scope`
+labels remain unchanged in the original result CSVs for baseline comparison;
+the new registry supplies the added diagnostic evidence, not automatic promotion.
+Illustrative precision benchmarks are explicitly post-results and are not
+formal equivalence tests. Live manuscript replacement remains a separate task.
+
 This protocol records the research-team decisions governing the canonical
 2013 SISFOH and 2017 Census CCPP, household, and individual outcome modules.
 It does not change the geography selected in data preparation and does not
@@ -64,8 +78,8 @@ rule, treatment date, bandwidth, weighting, clustering, or F>10 gate.
 
 Every registered outcome reports three linked quantities:
 
-1. the discontinuity in `treat_12` on the outcome analysis sample (first
-   stage);
+1. the discontinuity in wave-specific receipt (`treat_12` for 2013 or
+   `treat_16` for 2017) on the outcome analysis sample (first stage);
 2. the discontinuity in the outcome by assignment (reduced form or assignment
    ITT); and
 3. the fuzzy-RD ratio estimand for treatment receipt (local average treatment

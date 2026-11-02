@@ -15,6 +15,26 @@ The expected modules are:
 8. `07_build_tables_figures.do`
 9. `08_run_release_checks.do`
 
+Module 04 also collects exact-sample identification diagnostics inside its
+six existing estimators. `04g_audit_identification_precision.do` joins all
+1,970 registered models to these diagnostics and displays all 48 primary
+outcomes with their original RD intervals, separate conventional local-IV
+Anderson--Rubin sets and illustrative precision benchmarks. Its seven new
+review-only artifacts have a separate manifest; no automatic publication
+promotion or Overleaf synchronization occurs. See
+[`docs/IDENTIFICATION_PRECISION_AUDIT_2026-11-02.md`](../../../docs/IDENTIFICATION_PRECISION_AUDIT_2026-11-02.md).
+Run module 04 through `04_estimate_main_effects.do` after the master environment,
+not a level-specific file in isolation: the orchestrator owns the diagnostic
+postfile. Existing registered numerical results and multiplicity families
+remain the reference; an operational KP gate pass does not certify RBC inference.
+
+The completed assessment and exact validation boundary are in
+[`docs/IDENTIFICATION_PRECISION_RESULTS_2026-11-02.md`](../../../docs/IDENTIFICATION_PRECISION_RESULTS_2026-11-02.md).
+`tests/reproduce_unweighted_ar_sets.do` is a focused, explicitly regenerating
+check of the 32 unweighted 2013 primary sensitivity fits. It corrected the
+new audit's disjoint-set export after independently reconciling the fits;
+it is not a routine master dependency or a fallback for failed models.
+
 Module 06 calls `_migration_selection_audit.do` for separate coverage/linkage/
 measurement/completeness denominators, baseline selection-model feasibility,
 and finite-source-cohort descriptive intervals. It does not apply causal

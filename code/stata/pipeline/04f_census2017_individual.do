@@ -430,6 +430,16 @@ program define _vrd_post_individual_rd
         }
     }
 
+    _vrd_audit_exact_sample if `estimator_sample', ///
+        outcome(`outvar') running(${rd_running}) treatment(${rd_treatment_2017}) ///
+        community(ruv_id) district(ubigeo_dist) cluster(`clustervar') ///
+        hleft(`h_left') hright(`h_right') bleft(`b_left') bright(`b_right') ///
+        poly(`polyorder') kernel(`kernel') scale(`scale') ///
+        covariates(`covariates') baseweight(`analysis_weight') `fuzzy' ///
+        original(`estimate_cl') origrc(`estimation_rc') ///
+        posthandle(${rd_audit_post}) wave(2017) level(individual) ///
+        outcomeid("`outcomeid'") specid("`specid'") estimand("`estimand'")
+
     post `posthandle' ///
         ("`outcomeid'") ("`outvar'") ("`outlabel'") ///
         ("`family'") ("`tier'") ("`multiplicity'") ///
@@ -940,6 +950,19 @@ forvalues outcome_index = 1/`outcome_count' {
                     local kp_f_migration = `kp_f'
                 }
             }
+
+            _vrd_audit_exact_sample if `parametric_eligible', ///
+                outcome(`outcome_var') running(${rd_running}) ///
+                treatment(${rd_treatment_2017}) community(ruv_id) ///
+                district(ubigeo_dist) cluster(`parametric_cluster') ///
+                hleft(${rd_common_h}) hright(${rd_common_h}) ///
+                bleft(${rd_common_b}) bright(${rd_common_b}) ///
+                poly(1) kernel(triangular) scale(`outcome_scale') ///
+                covariates(`parametric_covariates') finalweight(`parametric_weight') fuzzy ///
+                original(`estimate_cl') origrc(`estimation_rc') ///
+                posthandle(${rd_audit_post}) wave(2017) level(individual) ///
+                outcomeid("`outcome_id'") specid("`parametric_spec'") ///
+                estimand("parametric_late")
 
             post `rd_post' ///
                 ("`outcome_id'") ("`outcome_var'") ///

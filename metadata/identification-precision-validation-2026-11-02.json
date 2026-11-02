@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-11-02",
+  "verified_at_utc": "2026-11-02 20:51:50 UTC",
+  "baseline_head": "72ef0e3edd4b094d00e9ac47667ba24b85695ca1",
+  "production_run_id": "2nov2026_161137",
+  "execution_scope": "Documented master environment and all six module-04 analyses, followed by focused 32-fit AR export reproduction and tests; not a new 01-08 end-to-end run.",
+  "stata_execution": "stata_run_selection only",
+  "locked_build": "Stata 19, 7 October 2026",
+  "locked_file_identities": 13235,
+  "registered_rows": 1970,
+  "receipt_model_rows": 1648,
+  "operational_kp_gate": "finite KP F strictly greater than 10; not a strong-identification theorem",
+  "kp_passed": 1158,
+  "receipt_interpretation_held": 490,
+  "ar_sets": {
+    "bounded": 1616,
+    "disjoint_two_ray": 20,
+    "all_real": 12,
+    "failed": 0,
+    "scope": "Conventional clustered local-IV analogues, not bias-corrected RD confidence sets"
+  },
+  "primary_outcomes": 48,
+  "primary_kp_passed": 48,
+  "primary_intervals_including_zero": 48,
+  "primary_conventional_ar_sets_excluding_zero_unadjusted": 3,
+  "primary_holm_greater_than_005": 48,
+  "larger_illustration_both_signs_compatible": 34,
+  "inside_larger_illustration": 2,
+  "inside_smaller_illustration": 0,
+  "benchmark_limit": "Post-results illustrations, not preregistered minimum important effects, formal equivalence, or observed-effect power.",
+  "baseline_comparison": {
+    "model_keys_strings_integer_counts_missingness": "exact",
+    "continuous_absolute_tolerance": 1e-10,
+    "continuous_relative_tolerance": 1e-12,
+    "non_bitwise_cells": 1664,
+    "maximum_absolute_difference": 6.95585811172e-11,
+    "original_primary_rbc_estimates_inference_and_multiplicity": "unchanged"
+  },
+  "late_export_fix": {
+    "cause": "Official disjoint AR matrix is 2x2; initial new-audit parser expected 1x4 and omitted the second ray",
+    "regression_fixture": "Fails before correction and passes after correction",
+    "focused_native_reproduction": "code/stata/tests/reproduce_unweighted_ar_sets.do",
+    "fits": 32,
+    "affected_disjoint_rows": 20,
+    "all_real_rows_reconciled": 12,
+    "original_model_results_changed": false
+  },
+  "validation": {
+    "synthetic_tests": "passed",
+    "output_contract_and_seven_checksums": "passed",
+    "original_117_artifact_manifest_checksums": "passed",
+    "original_numerical_baseline": "passed",
+    "existing_defensive_guards": "passed from clean data state",
+    "storage_paths": "passed",
+    "fresh_master_environment_after_tool_reconnection": "passed",
+    "original_six_analysis_contracts": "unchanged",
+    "original_figures": "unchanged",
+    "git_diff_check": "passed"
+  },
+  "render_review": {
+    "pdf": "build/identification-precision-20261102/print-scale/identification_precision_review.pdf",
+    "sha256": "a1fcc078b07b79f6c4c6a3fece0a0d9b44270fc257767cade954e58ad82fc8a7",
+    "pages": 6,
+    "text_width_mm": 165.1,
+    "minimum_font_points": 9.963,
+    "body_rows": [
+      6,
+      48,
+      48
+    ],
+    "tex_errors": 0,
+    "overfull_boxes": 0,
+    "undefined_references": 0,
+    "multiply_defined_labels": 0,
+    "out_of_page_characters": 0,
+    "visual_review": "passed; group-heading and final-note checks completed"
+  },
+  "preserved_live_artifacts": {
+    "generated_inputs": 55,
+    "previously_approved_sources": 7,
+    "sha256_checks": "all unchanged",
+    "live_writes_this_task": false
+  },
+  "scientific_status": "Internal scientific assessment complete under stated assumptions; no new causal-claim promotion.",
+  "review_status": "Internal technical and visual review complete; owner live-integration approval pending",
+  "submission_approved": false,
+  "public_release_approved": false,
+  "committed": false,
+  "pushed": false,
+  "sources_and_outputs": [
+    {
+      "path": "code/stata/pipeline/04_estimate_main_effects.do",
+      "sha256": "64773c2651fa57db25627c70c1b4b14d954f66d278e6a8ccc71e3deeeaa2311b",
+      "bytes": 14466
+    },
+    {
+      "path": "code/stata/pipeline/04a_sisfoh2013_ccpp.do",
+      "sha256": "3e18b174d973554e44d04b6f87e717d4fb071a84bcbdadf1691f03a9f6e5152e",
+      "bytes": 67786
+    },
+    {
+      "path": "code/stata/pipeline/04b_sisfoh2013_household.do",
+      "sha256": "ae902f77ba20e147357f9e06ad233cea9321097f9c65859dfc2fa3b6b1bf2e77",
+      "bytes": 83335
+    },
+    {
+      "path": "code/stata/pipeline/04c_sisfoh2013_individual.do",
+      "sha256": "8fc92e6ec6c52214564c8bce6140a8f5c02f9d741ebb9b4bfb042824b165008b",
+      "bytes": 86229
+    },
+    {
+      "path": "code/stata/pipeline/04d_census2017_ccpp.do",
+      "sha256": "f500f538e3ad2985678cf1d45a5034d4c95ff9244639bc0a20fe7fc1682bbbcb",
+      "bytes": 71578
+    },
+    {
+      "path": "code/stata/pipeline/04e_census2017_household.do",
+      "sha256": "379c6726316a9dcbb7ae5c7a655ae5993b2ee6caea1222aebfc188abf1e97fd1",
+      "bytes": 84546
+    },
+    {
+      "path": "code/stata/pipeline/04f_census2017_individual.do",
+      "sha256": "edf3fb32a2230d4d27306803bdec188631eb978bdb18a92fafa4209f13d8d433",
+      "bytes": 92683
+    },
+    {
+      "path": "code/stata/lib/04_exact_sample_audit.do",
+      "sha256": "1e2f81000bc6c147ad4795a28652a50a1ca83680f4502bbe6b9b43b8b62afdc2",
+      "bytes": 13392
+    },
+    {
+      "path": "code/stata/pipeline/04g_audit_identification_precision.do",
+      "sha256": "3b66762001d8501281832517147bc6ffa36dcaafcaa897ee7c2b129d6fe4fb99",
+      "bytes": 15899
+    },
+    {
+      "path": "code/stata/tests/test_exact_sample_identification.do",
+      "sha256": "129456d2394043128d6bfb08bad0ee4e1300b75e48564350868a4fbb1c0d5109",
+      "bytes": 9131
+    },
+    {
+      "path": "code/stata/tests/test_exact_sample_identification_outputs.do",
+      "sha256": "1e7d020be403f62a35a3fb02c3ce8cfcc0e0d01bfad2e50196abe1f928dc8226",
+      "bytes": 3209
+    },
+    {
+      "path": "code/stata/tests/test_identification_numerical_baseline.do",
+      "sha256": "becbaf4fb45adfaa32dc5d5870a1a75d94d7fdb4e619fa3665bac6c5194f8de9",
+      "bytes": 3216
+    },
+    {
+      "path": "code/stata/tests/reproduce_unweighted_ar_sets.do",
+      "sha256": "37490077fdeba55eb1189b187e7a3f04600848027df6c89264aa4fbb814e0642",
+      "bytes": 6194
+    },
+    {
+      "path": "metadata/identification-precision-numerical-comparison-2026-11-02.csv",
+      "sha256": "0dfa66377991fd6a47334ee30540cbc6c3e602793f4fdedb8c9f3d91177638e7",
+      "bytes": 14382
+    },
+    {
+      "path": "metadata/rd-identification-precision-output-manifest.csv",
+      "sha256": "43821dbde18309b89d9232ee542ccd3934e2e60c7152e275f92c90fda76da63f",
+      "bytes": 1365
+    },
+    {
+      "path": "output/tables/rd_outcomes/rd_exact_sample_diagnostics.csv",
+      "sha256": "d0cff88b2d54f40cbfd8924c8ec4f46ecfbe36d7637b43f75ee307a67dcadffa",
+      "bytes": 630152
+    },
+    {
+      "path": "output/tables/rd_outcomes/rd_identification_precision_registry.csv",
+      "sha256": "d96d3316876b5e3b6847bbd410f66c975d3c6838ff4c817f139f51d8934c9fc0",
+      "bytes": 1915558
+    },
+    {
+      "path": "output/tables/rd_outcomes/rd_identification_summary.csv",
+      "sha256": "6b9ac7436d03a83dca690ef6d5f94c4adcba9da900f6d75a34b69a872f5a2c7e",
+      "bytes": 298
+    },
+    {
+      "path": "output/tables/rd_outcomes/rd_primary_precision.csv",
+      "sha256": "964e45a11447379ca1586f86fa0b22d308b5573f44b3c1ab529d87b075441332",
+      "bytes": 59128
+    },
+    {
+      "path": "output/tables/rd_outcomes/tab_identification_summary.tex",
+      "sha256": "fd2e31feac95ac35257a2c7eaeba26e17d867e6de010067a6de11bf74531c2f4",
+      "bytes": 1564
+    },
+    {
+      "path": "output/tables/rd_outcomes/tab_identification_primary.tex",
+      "sha256": "fa22b9e7c7ad96ec8c480555d4dd5b63f2b1dd8417943ccec1f7afe4229eb2d3",
+      "bytes": 7256
+    },
+    {
+      "path": "output/tables/rd_outcomes/tab_precision_benchmarks.tex",
+      "sha256": "5b4f54be60817c5f23e2e81266bda0c4f1daf14eac138506be9e1c3ecd5b6618",
+      "bytes": 4490
+    }
+  ]
+}
