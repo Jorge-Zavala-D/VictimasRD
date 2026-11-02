@@ -1,5 +1,21 @@
 # Victimas RD project context
 
+## 1 November 2026: approved seven-source Overleaf integration
+
+Read [the live-source integration receipt](OVERLEAF_SOURCE_INTEGRATION_2026-11-01.md)
+before further publication work. The owner approved the exact seven-file
+patch from the changed-artifact review, and those seven handwritten live TeX
+sources now match the approved hashes. All 55 generated inputs remain
+byte-identical; 190 other files in the 197-file Overleaf root are unchanged.
+Fresh local builds from an exact copy of the updated live tree contain
+41 main, 96 appendix and two checklist pages. All 139 pages match the approved
+previews in text, text geometry and 85-dpi rendered pixels, with clean final
+compile logs. This is not an Overleaf-cloud synchronization/build certificate.
+No analysis, data, canonical generated output, historical review/release flag,
+commit, push, submission or public release changed in this integration task.
+Earlier proposal-only and frozen-live statements below describe their dated
+batches; the remaining scientific, disclosure and publication holds still apply.
+
 ## 1 November 2026: targeted Stata corrections and end-to-end validation
 
 Read [the corrective validation receipt](STATA_CORRECTIVE_VALIDATION_2026-11-01.md),

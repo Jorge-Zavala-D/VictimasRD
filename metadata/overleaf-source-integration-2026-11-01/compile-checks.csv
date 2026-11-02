@@ -1,0 +1,4 @@
+document,pdf_cache_path,pdf_sha256,pages,approved_page_text_matches,approved_page_geometry_matches,approved_rendered_page_matches,overfull,undefined,multiply_defined,duplicate_destinations,page_bound_violations
+main,build/overleaf-approved-integration-2026-11-01/live-build/World Development Manuscript/main.pdf,034b25da19848ed59fa9ca453eb98cd3e9a5cadf3c55d62c9e2885af38a92a9a,41,41,41,41,0,0,0,0,0
+online_appendix,build/overleaf-approved-integration-2026-11-01/live-build/World Development Manuscript/online_appendix.pdf,6bfda0e27256e663f2379e7179c5dfe7404165a2ccb267d38555c38dbce8835a,96,96,96,96,0,0,0,0,0
+submission_checklist,build/overleaf-approved-integration-2026-11-01/live-build/World Development Manuscript/submission_checklist.pdf,c0636a0abd821551d6d5c411788ec31fccaff2e9ef36eb409bfe554c620cd9cd,2,2,2,2,0,0,0,0,0
